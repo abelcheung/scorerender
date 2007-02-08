@@ -1,5 +1,11 @@
 2007-02-08  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-figurerender.php:
+	Raise the content filtering to a higher priority to make sure
+	it won't be preceded by wptexturize() or smiley conversion.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.figurerender.inc.php, class.muprender.inc.php:
 	Implement convertimg().
 

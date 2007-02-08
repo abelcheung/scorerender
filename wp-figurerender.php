@@ -61,8 +61,8 @@ add_option('figurerender_show_input', 1);
 
 add_option('figurerender_latex_markup_start', '[math]');
 add_option('figurerender_latex_markup_end', '[/math]');
-add_option('figurerender_lilypond_markup_start', '[music]');
-add_option('figurerender_lilypond_markup_end', '[/music]');
+add_option('figurerender_lilypond_markup_start', '[lilypond]');
+add_option('figurerender_lilypond_markup_end', '[/lilypond]');
 add_option('figurerender_mup_markup_start', '[mup]');
 add_option('figurerender_mup_markup_end', '[/mup]');
 
@@ -79,14 +79,15 @@ add_option('figurerender_mup_bin', '/usr/local/bin/mup');
 add_option('figurerender_mup_magic_file', '');
 
 // Remove trailing forward slashes
-update_option('figurerender_temp_dir', preg_replace('/\/$/', '', get_option('figurerender_temp_dir')));
-update_option('figurerender_cache_dir', preg_replace('/\/$/', '', get_option('figurerender_cache_dir')));
-update_option('figurerender_cache_url', preg_replace('/\/$/', '', get_option('figurerender_cache_url')));
+update_option('figurerender_temp_dir', preg_replace('#/+$#', '', get_option('figurerender_temp_dir')));
+update_option('figurerender_cache_dir', preg_replace('#/+$#', '', get_option('figurerender_cache_dir')));
+update_option('figurerender_cache_url', preg_replace('#/+$#', '', get_option('figurerender_cache_url')));
 
 
 function parse_input($input) {
 	$input = html_entity_decode($input);
 	
+	/*
 	$input = strtr(
 		$input,
 		array(
@@ -101,6 +102,7 @@ function parse_input($input) {
 			'&#8230;'	=> '...'
 		)
 	);
+	 */
 	
 	$input = trim($input);
 	
@@ -148,13 +150,13 @@ function figurerender_latex($matches) {
 	$render = new LatexRender(
 		$input,
 		array(
-			'TEMP_DIR' => get_option('figurerender_temp_dir'),
-			'CONVERT_BIN' => get_option('figurerender_convert_bin'),
-			'CACHE_DIR' => get_option('figurerender_cache_dir'),
-			'LATEX_BIN' => get_option('figurerender_latex_bin'),
-			'DVIPS_BIN' => get_option('figurerender_dvips_bin'),
+			'TEMP_DIR'     => get_option('figurerender_temp_dir'),
+			'CONVERT_BIN'  => get_option('figurerender_convert_bin'),
+			'CACHE_DIR'    => get_option('figurerender_cache_dir'),
+			'LATEX_BIN'    => get_option('figurerender_latex_bin'),
+			'DVIPS_BIN'    => get_option('figurerender_dvips_bin'),
 			'INVERT_IMAGE' => get_option('figurerender_invert_image'),
-			'TRANSPARENT' => get_option('figurerender_transparent_image')
+			'TRANSPARENT'  => get_option('figurerender_transparent_image')
 		)
 	);
 	
@@ -170,12 +172,12 @@ function figurerender_lilypond($matches) {
 	$render = new LilypondRender(
 		$input,
 		array(
-			'TEMP_DIR' => get_option('figurerender_temp_dir'),
-			'CONVERT_BIN' => get_option('figurerender_convert_bin'),
-			'CACHE_DIR' => get_option('figurerender_cache_dir'),
+			'TEMP_DIR'     => get_option('figurerender_temp_dir'),
+			'CONVERT_BIN'  => get_option('figurerender_convert_bin'),
+			'CACHE_DIR'    => get_option('figurerender_cache_dir'),
 			'LILYPOND_BIN' => get_option('figurerender_lilypond_bin'),
 			'INVERT_IMAGE' => get_option('figurerender_invert_image'),
-			'TRANSPARENT' => get_option('figurerender_transparent_image')
+			'TRANSPARENT'  => get_option('figurerender_transparent_image')
 		)
 	);
 	
@@ -190,13 +192,13 @@ function figurerender_mup($matches) {
 	$render = new MupRender(
 		$input,
 		array(
-			'TEMP_DIR' => get_option('figurerender_temp_dir'),
-			'CONVERT_BIN' => get_option('figurerender_convert_bin'),
-			'CACHE_DIR' => get_option('figurerender_cache_dir'),
-			'MUP_BIN' => get_option('figurerender_mup_bin'),
+			'TEMP_DIR'       => get_option('figurerender_temp_dir'),
+			'CONVERT_BIN'    => get_option('figurerender_convert_bin'),
+			'CACHE_DIR'      => get_option('figurerender_cache_dir'),
+			'MUP_BIN'        => get_option('figurerender_mup_bin'),
 			'MUP_MAGIC_FILE' => get_option('figurerender_mup_magic_file'),
-			'INVERT_IMAGE' => get_option('figurerender_invert_image'),
-			'TRANSPARENT' => get_option('figurerender_transparent_image')
+			'INVERT_IMAGE'   => get_option('figurerender_invert_image'),
+			'TRANSPARENT'    => get_option('figurerender_transparent_image')
 		)
 	);
 	
@@ -213,17 +215,23 @@ function figurerender_content($content) {
 	);
 	
 	if (get_option('figurerender_latex_content')) {
-		$search = '/' . strtr(get_option('figurerender_latex_markup_start'), $a) . '([[:print:]|[:space:]]*?)' . strtr(get_option('figurerender_latex_markup_end'), $a) .'/i';
+		$search = '/' . strtr(get_option('figurerender_latex_markup_start'), $a) .
+			'([[:print:]|[:space:]]*?)' .
+			strtr(get_option('figurerender_latex_markup_end'), $a) .'/i';
 		$content = preg_replace_callback($search, 'figurerender_latex', $content);
 	}
 	
 	if (get_option('figurerender_lilypond_content')) {
-		$search = '/' . strtr(get_option('figurerender_lilypond_markup_start'), $a) . '([[:print:]|[:space:]]*?)' . strtr(get_option('figurerender_lilypond_markup_end'), $a) .'/i';
+		$search = '/' . strtr(get_option('figurerender_lilypond_markup_start'), $a) .
+			'([[:print:]|[:space:]]*?)' .
+			strtr(get_option('figurerender_lilypond_markup_end'), $a) .'/i';
 		$content = preg_replace_callback($search, 'figurerender_lilypond', $content);
 	}
 	
 	if (get_option('figurerender_mup_content')) {
-		$search = '/' . strtr(get_option('figurerender_mup_markup_start'), $a) . '([[:print:]|[:space:]]*?)' . strtr(get_option('figurerender_mup_markup_end'), $a) .'/i';
+		$search = '/' . strtr(get_option('figurerender_mup_markup_start'), $a) .
+			'([[:print:]|[:space:]]*?)' .
+			strtr(get_option('figurerender_mup_markup_end'), $a) .'/i';
 		$content = preg_replace_callback($search, 'figurerender_mup', $content);
 	}
 	
@@ -238,52 +246,62 @@ function figurerender_comment($content) {
 	);
 	
 	if (get_option('figurerender_latex_comment')) {
-		$search = '/' . strtr(get_option('figurerender_latex_markup_start'), $a) . '([[:print:]|[:space:]]*?)' . strtr(get_option('figurerender_latex_markup_end'), $a) .'/i';
+		$search = '/' . strtr(get_option('figurerender_latex_markup_start'), $a) .
+			'([[:print:]|[:space:]]*?)' .
+			strtr(get_option('figurerender_latex_markup_end'), $a) .'/i';
 		$content = preg_replace_callback($search, 'figurerender_latex', $content);
 	}
 	
 	if (get_option('figurerender_lilypond_comment')) {
-		$search = '/' . strtr(get_option('figurerender_lilypond_markup_start'), $a) . '([[:print:]|[:space:]]*?)' . strtr(get_option('figurerender_lilypond_markup_end'), $a) .'/i';
+		$search = '/' . strtr(get_option('figurerender_lilypond_markup_start'), $a) .
+			'([[:print:]|[:space:]]*?)' .
+			strtr(get_option('figurerender_lilypond_markup_end'), $a) .'/i';
 		$content = preg_replace_callback($search, 'figurerender_lilypond', $content);
 	}
 	
 	if (get_option('figurerender_mup_comment')) {
-		$search = '/' . strtr(get_option('figurerender_mup_markup_start'), $a) . '([[:print:]|[:space:]]*?)' . strtr(get_option('figurerender_mup_markup_end'), $a) .'/i';
+		$search = '/' . strtr(get_option('figurerender_mup_markup_start'), $a) .
+			'([[:print:]|[:space:]]*?)' .
+			strtr(get_option('figurerender_mup_markup_end'), $a) .'/i';
 		$content = preg_replace_callback($search, 'figurerender_mup', $content);
 	}
-	
+
 	return $content;
 }
 
 function figurerender_admin_options() {
 	?>
-	<form method="POST" action="options.php">
+
+	<form method="POST" action="<?php echo $_SERVER['PHP_SELF'] . '?page=' . __FILE__ ?>">
 	
 	<div class="wrap">
-	<h2><?php _e('FigureRender Configuration') ?></h2>
+	<h2><?php _e('FigureRender options') ?></h2>
 	
 	<p><?php _e('FigureRender renders inline <a target="_new" href="http://www.latex.org/">LaTeX</a>, <a target="_new" href="http://www.lilypond.org/">Lilypond</a> and <a target="_new" href="http://www.arkkra.com/">Mup</a> figures in posts and comments.</p>') ?></p>
 	
 	<fieldset class="options">
-		<legend><?php _e('General configuration') ?></legend>
+		<legend><?php _e('General options') ?></legend>
 		
 		<table width="100%" cellspacing="2" cellpadding="5" class="editform">
 		<tr valign="top">
 			<th scope="row"><?php _e('Temporary directory:') ?></th>
 			<td>
-				<input name="figurerender_temp_dir" class="code" type="text" id="figurerender_temp_dir" value="<?php form_option('figurerender_temp_dir'); ?>" size="60" /><br />				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
+				<input name="figurerender_temp_dir" class="code" type="text" id="figurerender_temp_dir" value="<?php form_option('figurerender_temp_dir'); ?>" size="60" /><br />
+				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Cache directory:') ?></th>
 			<td>
-				<input name="figurerender_cache_dir" class="code" type="text" id="figurerender_cache_dir" value="<?php form_option('figurerender_cache_dir'); ?>" size="60" /><br />				<?php _e('Must be writable and located inside the web-accessible area.') ?>
+				<input name="figurerender_cache_dir" class="code" type="text" id="figurerender_cache_dir" value="<?php form_option('figurerender_cache_dir'); ?>" size="60" /><br />
+				<?php _e('Must be writable and located inside the web-accessible area.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Cache URL:') ?></th>
 			<td>
-				<input name="figurerender_cache_url" class="code" type="text" id="figurerender_cache_url" value="<?php form_option('figurerender_cache_url'); ?>" size="60" /><br />				<?php _e('Must correspond with the specified cache directory.') ?>
+				<input name="figurerender_cache_url" class="code" type="text" id="figurerender_cache_url" value="<?php form_option('figurerender_cache_url'); ?>" size="60" /><br />
+				<?php _e('Must correspond with the specified cache directory.') ?>
 			</td>
 		</tr>
 		</table>
@@ -415,7 +433,7 @@ function figurerender_admin_options() {
 			<td>
 				<input name="figurerender_mup_magic_file" class="code" type="text" id="figurerender_mup_magic_file" value="<?php form_option('figurerender_mup_magic_file'); ?>" size="50" />
 				<br />
-				<?php _e('Leave it empty if you have not registered Mup'); ?>
+				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
 			</td>
 		</tr> 
 		</table>
@@ -446,8 +464,10 @@ remove_filter('excerpt_save_pre', 'balanceTags', 50);
 remove_filter('comment_save_pre', 'balanceTags', 50);
 remove_filter('pre_comment_content', 'balanceTags', 30);
 
-add_filter('the_content', 'figurerender_content');
-add_filter('comment_text', 'figurerender_comment');
+// earlier than default priority, since smilies conversion
+// and wptexturize() can mess up the content
+add_filter('the_content', 'figurerender_content', 6);
+add_filter('comment_text', 'figurerender_comment', 6);
 add_action('admin_menu', 'figurerender_admin');
 
 ?>
