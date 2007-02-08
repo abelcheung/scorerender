@@ -1,0 +1,45 @@
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.figurerender.inc.php, class.muprender.inc.php:
+	Implement convertimg().
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.figurerender.inc.php, wp-figurerender.php:
+	Implement transparency option.
+	Catch error if input/output file not creatable.
+	Lower privilege to level 9, instead of level 10 (admin).
+
+	* class.muprender.inc.php:
+	Change default binary location to /usr/local/bin/mup.
+
+	* class.lilypondrender.inc.php:
+	Add --safe option to ghostscript.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* README.txt: New file.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-figurerender.php:
+	Add mup configuration options.
+
+	* class.muprender.inc.php:
+	New file.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.latexrenderer.inc.php, class.lilypondrenderer.inc.php:
+	Variable name fix, use UTF-8 encoding instead of latin1.
+
+	* wp-figurerender.php:
+	Add more entities to be converted, some HTML conformance.
+
+	* class.figurerender.inc.php:
+	Use tempnam() instead of generating file name with random number.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.figurerender.inc.php, wp-figurerender.php:
+	Avoid class constants, i.e. PHP4 compatibility.
