@@ -1,3 +1,28 @@
+2007-02-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	_exec() now just returns the exit status of previous command.
+	Command output is already stored in object variable.
+
+	* class.lilypondrender.inc.php:
+	Drop implicit header added to music fragment that caused
+	rendering error.
+
+2007-02-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.muprender.inc.php:
+	Also sets $HOME. Mup mandates it. Grrrrr.
+
+	* class.figurerender.inc.php, class.muprender.inc.php:
+	Use touch instead of opening and closing file.
+
+	* wp-figurerender.php:
+	Change latex tag to [tex] and [/tex] (same as LatexRender).
+	Change lilypond tag to [lilypond] and [/lilypond].
+	figurerender_options_updated() - save options properly
+	instead of calling ugly option.php page, and shows warning
+	messages on top if something is wrong.
+
 2007-02-08  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-figurerender.php:
@@ -36,7 +61,7 @@
 
 2007-02-08  Abel Cheung  <abelcheung@gmail.com>
 
-	* class.latexrenderer.inc.php, class.lilypondrenderer.inc.php:
+	* class.latexrender.inc.php, class.lilypondrender.inc.php:
 	Variable name fix, use UTF-8 encoding instead of latin1.
 
 	* wp-figurerender.php:
@@ -49,3 +74,8 @@
 
 	* class.figurerender.inc.php, wp-figurerender.php:
 	Avoid class constants, i.e. PHP4 compatibility.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php:
+	First import of FigureRender source.

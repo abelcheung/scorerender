@@ -3,17 +3,17 @@
  FigureRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
  Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
  http://www.chris-lamb.co.uk/code/figurerender/
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  as published by the Free Software Foundation; either version 2
  of the License, or (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -28,27 +28,32 @@
  Implements rendering of Mup figures in FigureRender.
 */
 
-class MupRender extends FigureRender {
+class MupRender extends FigureRender
+{
 	var $_uniqueID = "mup";
-	
-	function MupRender($input, $options=array()) {
-		
-		$options = array_merge(
-			array(
+
+	function MupRender ($input, $options = array())
+	{
+
+		$options = array_merge
+		(
+			array
+			(
 				'MUP_BIN' => '/usr/local/bin/mup'
 			),
 			$options
 		);
-		
+
 		parent::FigureRender($input, $options);
 	}
-	
-	function getInputFileContents($input) {
+
+	function getInputFileContents ($input)
+	{
 		return $input;
 	}
-	
-	function execute($input_file, $output_file) {
 
+	function execute ($input_file, $output_file)
+	{
 		/* Mup requires a file ".mup" present in $HOME or
 		   current working directory. It must be present even if
 		   not registered, otherwise mup refuse to render anything.
@@ -56,55 +61,51 @@ class MupRender extends FigureRender {
 		   _exec succeeds yet no postscript is rendered. */
 
 		$temp_magic_file = $this->_options['TEMP_DIR'] . DIRECTORY_SEPARATOR . '.mup';
-		if (!file_exists($temp_magic_file)) {
-			if (is_file    ($this->_options['MUP_MAGIC_FILE']) &&
-			    is_readable($this->_options['MUP_MAGIC_FILE'])) {
+		if (!file_exists($temp_magic_file))
+		{
+			if (is_readable($this->_options['MUP_MAGIC_FILE']))
 				copy($this->_options['MUP_MAGIC_FILE'], $temp_magic_file);
-			} else {
-				/* create an empty magic file */
-				$fh = fopen($temp_magic_file, "w");
-				fclose($fh);
-			}
+			else
+				touch ($temp_magic_file);
 		}
-		$cmd = 
-			$this->_options['MUP_BIN']
-			. ' -f ' . $output_file . ' '
-			. $input_file . ' 2>&1';
-		
-		$result = parent::_exec($cmd);
-		
-		unlink($temp_magic_file);
 
-		return ($result['return_val'] == 0);
+		/* mup forces this kind of crap */
+		putenv ("HOME=" . $this->_options['TEMP_DIR']);
+
+		$cmd = sprintf ('%s -f %s %s 2>&1',
+		                $this->_options['MUP_BIN'],
+		                $output_file, $input_file);
+		$retval = parent::_exec($cmd);
+
+		unlink ($temp_magic_file);
+
+		return (filesize ($output_file) != 0);
+		//return ($result['return_val'] == 0);
 	}
 
-	function convertimg($output_file, $cache_filename, $invert, $transparent) {
-
+	function convertimg ($output_file, $cache_filename, $invert, $transparent)
+	{
 		// Convert to specified format
 		$cmd = $this->_options['CONVERT_BIN'] . ' -density 110 -trim ';
 
-		if (!$transparent) {
-			if ($invert) {
-				$cmd .= '-negate ';
-			}
-			$cmd .= $output_file . ' ' . $cache_filename;
-		} else {
+		if (!$transparent)
+		{
+			$cmd .= (($invert) ? '-negate ' : '')
+			        . $output_file . ' ' . $cache_filename;
+		}
+		else
+		{
 			// Is it possible to execute convert only once?
 			$cmd .= ' -channel alpha -fx intensity ' .
 				$output_file . ' png:- | ' .
 				$this->_options['CONVERT_BIN'] .
-				' -channel ';
-			if ($invert) {
-				$cmd .= 'rgba ';
-			} else {
-				$cmd .= 'alpha ';
-			}
-			$cmd .= '-negate png:- ' . $cache_filename;
+				' -channel ' . (($invert)? 'rgba' : 'alpha')
+			        . ' -negate png:- ' . $cache_filename;
 		}
 
-		$out = self::_exec($cmd);
+		$retval = parent::_exec($cmd);
 
-		return ($out['return_val'] == 0);
+		return ($retval == 0);
 	}
 }
 
