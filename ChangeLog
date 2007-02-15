@@ -1,7 +1,7 @@
 2007-02-15  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.*.inc.php: Rename.
-	* wp-figurerender.php: Include renamed files.
+	* wp-figurerender.php: Rename, and include renamed files.
 
 2007-02-10  Abel Cheung  <abelcheung@gmail.com>
 
