@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: FigureRender
+Plugin Name: ScoreRender
 Plugin URI: http://chris-lamb.co.uk/code/figurerender/
 Description: Renders inline LaTeX, Lilypond and Mup figures in posts and comments.
 Author: Chris Lamb
@@ -9,7 +9,7 @@ Author URI: http://chris-lamb.co.uk/
 */
 
 /*
- FigureRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
+ ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
  Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
  http://www.chris-lamb.co.uk/code/figurerender/
 
@@ -38,7 +38,7 @@ define('ERR_IMAGE_CONVERT_FAILURE', -5);
 define('ERR_RENDERING_ERROR', -6);
 
 require_once('class.scorerender.inc.php');
-require_once('class.latexrender.inc.php');
+require_once('class.latex.inc.php');
 require_once('class.lilypond.inc.php');
 require_once('class.mup.inc.php');
 
@@ -48,8 +48,8 @@ add_option('figurerender_convert_bin', '/usr/bin/convert');
 add_option('figurerender_cache_dir', ABSPATH . get_option('upload_path'));
 add_option('figurerender_cache_url', get_option('siteurl') . '/' . get_option('upload_path'));
 add_option('figurerender_invert_image', 0);
-add_option('figurerender_transparent_image', 0);
-add_option('figurerender_show_input', 1);
+add_option('figurerender_transparent_image', 1);
+add_option('figurerender_show_input', 0);
 
 add_option('figurerender_latex_markup_start', '[tex]');
 add_option('figurerender_latex_markup_end', '[/tex]');
@@ -80,7 +80,7 @@ function parse_input($input)
 
 function figurerender_generate_html_error ($msg)
 {
-	return '<p><b><a href="http://www.chris-lamb.co.uk/code/figurerender/">FigureRender</a> Error:</b> <i>' . $msg . '</i></p>';
+	return '<p><b><a href="http://www.chris-lamb.co.uk/code/figurerender/">ScoreRender</a> Error:</b> <i>' . $msg . '</i></p>';
 }
 
 function figurerender_process_result ($result, $input, $render)
@@ -105,9 +105,9 @@ function figurerender_process_result ($result, $input, $render)
 	$html = '<img style="vertical-align: bottom" ';
 
 	if (get_option('figurerender_show_input'))
-		$html .= 'alt="Input: ' . htmlentities($input) . '" ';
+		$html .= 'alt="Input: ' . htmlentities($input, ENT_COMPAT, get_bloginfo('charset')) . '" ';
 	else
-		$html .= 'alt="Figure" ';
+		$html .= 'alt="Music fragment" ';
 
 	$html .= 'src="' . get_option ('figurerender_cache_url') . '/' . $result . '" />';
 
@@ -408,25 +408,25 @@ function figurerender_options_updated ()
 
 	/* FIXME: Didn't handle the case when various tags coincide with each other */
 
-	update_option ('figurerender_latex_markup_start', $_POST['figurerender_latex_markup_start']);
-	update_option ('figurerender_latex_markup_end', $_POST['figurerender_latex_markup_end']);
-	update_option ('figurerender_latex_bin', $_POST['figurerender_latex_bin']);
-	update_option ('figurerender_dvips_bin', $_POST['figurerender_dvips_bin']);
-	update_option ('figurerender_latex_content', $latex_content_enabled);
-	update_option ('figurerender_latex_comments', $latex_comment_enabled);
+	update_option ( 'figurerender_latex_markup_start', $_POST['figurerender_latex_markup_start'] );
+	update_option ( 'figurerender_latex_markup_end'  , $_POST['figurerender_latex_markup_end'] );
+	update_option ( 'figurerender_latex_bin',          $_POST['figurerender_latex_bin'] );
+	update_option ( 'figurerender_dvips_bin',          $_POST['figurerender_dvips_bin'] );
+	update_option ( 'figurerender_latex_content',      $latex_content_enabled );
+	update_option ( 'figurerender_latex_comments',     $latex_comment_enabled );
 
-	update_option ('figurerender_lilypond_markup_start', $_POST['figurerender_lilypond_markup_start']);
-	update_option ('figurerender_lilypond_markup_end', $_POST['figurerender_lilypond_markup_end']);
-	update_option ('figurerender_lilypond_bin', $_POST['figurerender_lilypond_bin']);
-	update_option ('figurerender_lilypond_content', $lilypond_content_enabled);
-	update_option ('figurerender_lilypond_comments', $lilypond_comment_enabled);
+	update_option ( 'figurerender_lilypond_markup_start', $_POST['figurerender_lilypond_markup_start'] );
+	update_option ( 'figurerender_lilypond_markup_end',   $_POST['figurerender_lilypond_markup_end'] );
+	update_option ( 'figurerender_lilypond_bin',          $_POST['figurerender_lilypond_bin'] );
+	update_option ( 'figurerender_lilypond_content',      $lilypond_content_enabled );
+	update_option ( 'figurerender_lilypond_comments',     $lilypond_comment_enabled );
 
-	update_option ('figurerender_mup_markup_start', $_POST['figurerender_mup_markup_start']);
-	update_option ('figurerender_mup_markup_end', $_POST['figurerender_mup_markup_end']);
-	update_option ('figurerender_mup_bin', $_POST['figurerender_mup_bin']);
-	update_option ('figurerender_mup_magic_file', $_POST['figurerender_mup_magic_file']);
-	update_option ('figurerender_mup_content', $mup_content_enabled);
-	update_option ('figurerender_mup_comments', $mup_comment_enabled);
+	update_option ( 'figurerender_mup_markup_start', $_POST['figurerender_mup_markup_start'] );
+	update_option ( 'figurerender_mup_markup_end',   $_POST['figurerender_mup_markup_end'] );
+	update_option ( 'figurerender_mup_bin',          $_POST['figurerender_mup_bin'] );
+	update_option ( 'figurerender_mup_magic_file',   $_POST['figurerender_mup_magic_file'] );
+	update_option ( 'figurerender_mup_content',      $mup_content_enabled );
+	update_option ( 'figurerender_mup_comments',     $mup_comment_enabled );
 
 	if ( !empty ($ms) )
 	{
@@ -448,9 +448,9 @@ function figurerender_admin_options() {
 
 	<div class="wrap">
 	<form method="post" action="" id="figurerender-conf">
-	<h2><?php _e('FigureRender options') ?></h2>
+	<h2><?php _e('ScoreRender options') ?></h2>
 
-	<p><?php _e('FigureRender renders inline <a target="_new" href="http://www.latex.org/">LaTeX</a>, <a target="_new" href="http://www.lilypond.org/">Lilypond</a> and <a target="_new" href="http://www.arkkra.com/">Mup</a> figures in posts and comments.</p>') ?></p>
+	<p><?php _e('ScoreRender renders inline <a target="_new" href="http://www.latex.org/">LaTeX</a>, <a target="_new" href="http://www.lilypond.org/">Lilypond</a> and <a target="_new" href="http://www.arkkra.com/">Mup</a> figures in posts and comments.</p>') ?></p>
 
 	<fieldset class="options">
 		<legend><?php _e('General options') ?></legend>
@@ -625,8 +625,8 @@ function figurerender_admin_options() {
 
 function figurerender_admin()
 {
-	add_options_page ('FigureRender options',
-	                  'FigureRender', 9, __FILE__,
+	add_options_page ('ScoreRender options',
+	                  'ScoreRender', 9, __FILE__,
 	                  'figurerender_admin_options');
 }
 
