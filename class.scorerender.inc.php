@@ -75,7 +75,7 @@ class FigureRender
 	function convertimg ($output_file, $cache_filename, $invert, $transparent)
 	{
 		// Convert to specified format
-		$cmd = $this->_options['CONVERT_BIN'] . ' -density 110 -trim ';
+		$cmd = $this->_options['CONVERT_BIN'] . ' -density 90 -trim ';
 
 		if (!$transparent)
 		{
