@@ -29,14 +29,6 @@ Author URI: http://chris-lamb.co.uk/
 */
 
 
-/*
- wp-figurerender.php
- Chris Lamb <chris@chris-lamb.co.uk>
- 10th April 2006
-
- Entry point for WordPress.
-*/
-
 // Error constants
 define('ERR_INVALID_INPUT', -1);
 define('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
@@ -45,10 +37,10 @@ define('ERR_TEMP_FILE_NOT_WRITABLE', -4);
 define('ERR_IMAGE_CONVERT_FAILURE', -5);
 define('ERR_RENDERING_ERROR', -6);
 
-require_once('class.figurerender.inc.php');
+require_once('class.scorerender.inc.php');
 require_once('class.latexrender.inc.php');
-require_once('class.lilypondrender.inc.php');
-require_once('class.muprender.inc.php');
+require_once('class.lilypond.inc.php');
+require_once('class.mup.inc.php');
 
 // Configure default options
 add_option('figurerender_temp_dir', '/tmp');
