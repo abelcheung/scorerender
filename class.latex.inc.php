@@ -1,7 +1,7 @@
 <?php
 
 /*
- FigureRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
+ ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
  Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
  http://www.chris-lamb.co.uk/code/figurerender/
 
@@ -26,10 +26,10 @@
  Chris Lamb <chris@chris-lamb.co.uk>
  10th April 2006
 
- Implements rendering of LaTeX figures in FigureRender.
+ Implements rendering of LaTeX figures in ScoreRender.
 */
 
-class LatexRender extends FigureRender {
+class LatexRender extends ScoreRender {
 	var $_uniqueID = "latex";
 
 	function LatexRender($input, $options=array()) {
@@ -42,7 +42,7 @@ class LatexRender extends FigureRender {
 			$options
 		);
 
-		parent::FigureRender($input, $options);
+		parent::ScoreRender($input, $options);
 	}
 
 	function isValidInput($input) {

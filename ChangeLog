@@ -1,5 +1,9 @@
 2007-02-15  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.*.php: Rename classes.
+
+2007-02-15  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.mup.inc.php, class.scorerender.inc.php:
 	Change density from 110 to 90.
 

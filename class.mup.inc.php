@@ -1,6 +1,6 @@
 <?php
 /*
- FigureRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
+ ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
  Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
  http://www.chris-lamb.co.uk/code/figurerender/
 
@@ -25,10 +25,10 @@
  Abel Cheung <abelcheung@gmail.com>
  3rd June 2006
 
- Implements rendering of Mup figures in FigureRender.
+ Implements rendering of Mup figures in ScoreRender.
 */
 
-class MupRender extends FigureRender
+class MupRender extends ScoreRender
 {
 	var $_uniqueID = "mup";
 
@@ -44,7 +44,7 @@ class MupRender extends FigureRender
 			$options
 		);
 
-		parent::FigureRender($input, $options);
+		parent::ScoreRender($input, $options);
 	}
 
 	function getInputFileContents ($input)

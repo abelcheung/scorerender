@@ -1,6 +1,6 @@
 <?php
 /*
- FigureRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
+ ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
  Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
  http://www.chris-lamb.co.uk/code/figurerender/
 
@@ -34,14 +34,14 @@
 */
 
 
-class FigureRender
+class ScoreRender
 {
 	var $_options;
 	var $_input;
 	var $_uniqueID;
 	var $_previousOutput;
 
-	function FigureRender ($input, $options = array())
+	function ScoreRender ($input, $options = array())
 	{
 		// fallback values
 		$this->_options['CONVERT_BIN'] = '/usr/bin/convert';
@@ -99,7 +99,7 @@ class FigureRender
 			}
 		}
 
-		$retval = FigureRender::_exec ($cmd);
+		$retval = ScoreRender::_exec ($cmd);
 
 		return ($retval === 0);
 	}
