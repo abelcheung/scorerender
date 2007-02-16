@@ -448,7 +448,13 @@ function scorerender_admin_options() {
 	<form method="post" action="" id="figurerender-conf">
 	<h2><?php _e('ScoreRender options') ?></h2>
 
-	<p><?php _e('ScoreRender renders inline <a target="_new" href="http://www.latex.org/">LaTeX</a>, <a target="_new" href="http://www.lilypond.org/">Lilypond</a> and <a target="_new" href="http://www.arkkra.com/">Mup</a> figures in posts and comments.</p>') ?></p>
+	<p><?php _e('ScoreRender renders inline music fragments inside blog post and/or comment as images. Currently it supports the following formats:'); ?></p>
+	<ul>
+		<li><a target="_new" href="http://www.lilypond.org/">Lilypond</a></li>
+		<li><?php printf ('%s, used by Mup itself and %s',
+			'<a target="_new" href="http://www.arkkra.com/">Mup</a>',
+			'<a target="_new" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></li>
+	</ul>
 
 	<fieldset class="options">
 		<legend><?php _e('General options') ?></legend>
@@ -513,7 +519,7 @@ function scorerender_admin_options() {
 	</fieldset>
 
 	<fieldset class="options">
-		<legend><?php _e('LaTeX Configuration') ?></legend>
+		<legend><?php _e('LaTeX options') ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="editform">
 		<tr valign="top">
@@ -521,7 +527,7 @@ function scorerender_admin_options() {
 			<td>
 				<label for="figurerender_latex_content">
 				<input type="checkbox" name="figurerender_latex_content" id="figurerender_latex_content" value="1" <?php checked('1', get_option('figurerender_latex_content')); ?> /> Posts and pages</label><br />
-				<label for="figurerender_latex_comments"><input type="checkbox" name="figurerender_latex_comments" value="1" <?php checked('1', get_option('figurerender_latex_comments')); ?> /> Comments</label>
+				<label for="figurerender_latex_comments"><input type="checkbox" name="figurerender_latex_comments" value="1" <?php checked('1', get_option('figurerender_latex_comments')); ?> /> Comments <strong><em>(Security Risk!)</em></strong></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -547,7 +553,7 @@ function scorerender_admin_options() {
 	</fieldset>
 
 	<fieldset class="options">
-		<legend><?php _e('Lilypond Configuration') ?></legend>
+		<legend><?php _e('Lilypond options') ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="editform">
 		<tr valign="top">
@@ -555,7 +561,7 @@ function scorerender_admin_options() {
 			<td>
 				<label for="figurerender_lilypond_content">
 				<input type="checkbox" name="figurerender_lilypond_content" id="figurerender_lilypond_content" value="1" <?php checked('1', get_option('figurerender_lilypond_content')); ?> /> Posts and pages</label><br />
-				<label for="figurerender_lilypond_comments"><input type="checkbox" name="figurerender_lilypond_comments" value="1" <?php checked('1', get_option('figurerender_lilypond_comments')); ?> /> Comments</label>
+				<label for="figurerender_lilypond_comments"><input type="checkbox" name="figurerender_lilypond_comments" value="1" <?php checked('1', get_option('figurerender_lilypond_comments')); ?> /> Comments <strong><em>(Security Risk!)</em></strong></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -575,7 +581,7 @@ function scorerender_admin_options() {
 	</fieldset>
 
 	<fieldset class="options">
-		<legend><?php _e('Mup Configuration') ?></legend>
+		<legend><?php _e('Mup options') ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="editform">
 		<tr valign="top">
@@ -583,7 +589,7 @@ function scorerender_admin_options() {
 			<td>
 				<label for="figurerender_mup_content">
 				<input type="checkbox" name="figurerender_mup_content" id="figurerender_mup_content" value="1" <?php checked('1', get_option('figurerender_mup_content')); ?> /> Posts and pages</label><br />
-				<label for="figurerender_mup_comments"><input type="checkbox" name="figurerender_mup_comments" value="1" <?php checked('1', get_option('figurerender_mup_comments')); ?> /> Comments</label>
+				<label for="figurerender_mup_comments"><input type="checkbox" name="figurerender_mup_comments" value="1" <?php checked('1', get_option('figurerender_mup_comments')); ?> /> Comments <strong><em>(Security Risk!)</em></strong></label>
 			</td>
 		</tr>
 		<tr valign="top">
