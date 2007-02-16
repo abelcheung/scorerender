@@ -78,27 +78,27 @@ function parse_input($input)
 }
 
 
-function figurerender_generate_html_error ($msg)
+function scorerender_generate_html_error ($msg)
 {
 	return '<p><b><a href="http://www.chris-lamb.co.uk/code/figurerender/">ScoreRender</a> Error:</b> <i>' . $msg . '</i></p>';
 }
 
-function figurerender_process_result ($result, $input, $render)
+function scorerender_process_result ($result, $input, $render)
 {
 	switch ($result)
 	{
 		case ERR_INVALID_INPUT:
-			return figurerender_generate_html_error (__('Invalid input')) . '<br/><pre>' . $input . '</pre>';
+			return scorerender_generate_html_error (__('Invalid input')) . '<br/><pre>' . $input . '</pre>';
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
-			return figurerender_generate_html_error (__('Cache directory not writable!'));
+			return scorerender_generate_html_error (__('Cache directory not writable!'));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-			return figurerender_generate_html_error (__('Temporary directory not writable!'));
+			return scorerender_generate_html_error (__('Temporary directory not writable!'));
 		case ERR_TEMP_FILE_NOT_WRITABLE:
-			return figurerender_generate_html_error (__('Temporary file not writable!'));
+			return scorerender_generate_html_error (__('Temporary file not writable!'));
 		case ERR_IMAGE_CONVERT_FAILURE:
-			return figurerender_generate_html_error (__('Image convert failure!'));
+			return scorerender_generate_html_error (__('Image convert failure!'));
 		case ERR_RENDERING_ERROR:
-			return figurerender_generate_html_error (__('The external rendering application did not complete successfully.') . '<br /><textarea cols=80 rows=10 READONLY>' . $render->getPreviousOutput() . '</textarea>');
+			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') . '<br /><textarea cols=80 rows=10 READONLY>' . $render->getPreviousOutput() . '</textarea>');
 	}
 
 	// No errors, so generate HTML
@@ -114,7 +114,7 @@ function figurerender_process_result ($result, $input, $render)
 	return $html;
 }
 
-function figurerender_latex ($matches)
+function scorerender_latex ($matches)
 {
 	$input = parse_input ($matches[1]);
 
@@ -135,11 +135,11 @@ function figurerender_latex ($matches)
 
 	$result = $render->render();
 
-	return figurerender_process_result ($result, $input, $render);
+	return scorerender_process_result ($result, $input, $render);
 }
 
 
-function figurerender_lilypond ($matches)
+function scorerender_lilypond ($matches)
 {
 	$input = parse_input ($matches[1]);
 
@@ -159,10 +159,10 @@ function figurerender_lilypond ($matches)
 
 	$result = $render->render();
 
-	return figurerender_process_result ($result, $input, $render);
+	return scorerender_process_result ($result, $input, $render);
 }
 
-function figurerender_mup ($matches)
+function scorerender_mup ($matches)
 {
 	$input = parse_input ($matches[1]);
 
@@ -183,10 +183,10 @@ function figurerender_mup ($matches)
 
 	$result = $render->render();
 
-	return figurerender_process_result ($result, $input, $render);
+	return scorerender_process_result ($result, $input, $render);
 }
 
-function figurerender_content ($content)
+function scorerender_content ($content)
 {
 	$a = array
 	(
@@ -200,7 +200,7 @@ function figurerender_content ($content)
 		$search = '/' . strtr (get_option ('figurerender_latex_markup_start'), $a) .
 			  '([[:print:]|[:space:]]*?)' .
 			  strtr (get_option ('figurerender_latex_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'figurerender_latex', $content);
+		$content = preg_replace_callback ($search, 'scorerender_latex', $content);
 	}
 
 	if (get_option ('figurerender_lilypond_content'))
@@ -208,7 +208,7 @@ function figurerender_content ($content)
 		$search = '/' . strtr (get_option ('figurerender_lilypond_markup_start'), $a) .
 			  '([[:print:]|[:space:]]*?)' .
 			  strtr (get_option ('figurerender_lilypond_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'figurerender_lilypond', $content);
+		$content = preg_replace_callback ($search, 'scorerender_lilypond', $content);
 	}
 
 	if (get_option ('figurerender_mup_content'))
@@ -216,13 +216,13 @@ function figurerender_content ($content)
 		$search = '/' . strtr (get_option ('figurerender_mup_markup_start'), $a) .
 			  '([[:print:]|[:space:]]*?)' .
 			  strtr (get_option ('figurerender_mup_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'figurerender_mup', $content);
+		$content = preg_replace_callback ($search, 'scorerender_mup', $content);
 	}
 
 	return $content;
 }
 
-function figurerender_comment ($content)
+function scorerender_comment ($content)
 {
 	$a = array
 	(
@@ -235,31 +235,28 @@ function figurerender_comment ($content)
 		$search = '/' . strtr (get_option ('figurerender_latex_markup_start'), $a) .
 			  '([[:print:]|[:space:]]*?)' .
 			  strtr (get_option ('figurerender_latex_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'figurerender_latex', $content);
+		$content = preg_replace_callback ($search, 'scorerender_latex', $content);
 	}
 
 	if (get_option ('figurerender_lilypond_comment')) {
 		$search = '/' . strtr(get_option('figurerender_lilypond_markup_start'), $a) .
 			  '([[:print:]|[:space:]]*?)' .
 			  strtr(get_option('figurerender_lilypond_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'figurerender_lilypond', $content);
+		$content = preg_replace_callback ($search, 'scorerender_lilypond', $content);
 	}
 
 	if (get_option ('figurerender_mup_comment')) {
 		$search = '/' . strtr (get_option ('figurerender_mup_markup_start'), $a) .
 			  '([[:print:]|[:space:]]*?)' .
 			  strtr (get_option ('figurerender_mup_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'figurerender_mup', $content);
+		$content = preg_replace_callback ($search, 'scorerender_mup', $content);
 	}
 
 	return $content;
 }
 
-function figurerender_options_updated ()
+function scorerender_options_updated ()
 {
-	if ( !isset($_POST['Submit']) )
-		return;
-
 	$messages = array
 	(
 		'temp_dir_undefined'         => __('WARNING: Temporary directory is NOT defined! Will fall back to /tmp.'),
@@ -441,9 +438,10 @@ function figurerender_options_updated ()
 	}
 }
 
-function figurerender_admin_options() {
+function scorerender_admin_options() {
 
-	figurerender_options_updated();
+	if ( isset($_POST['Submit']) )
+		scorerender_options_updated();
 ?>
 
 	<div class="wrap">
@@ -623,11 +621,11 @@ function figurerender_admin_options() {
 	<?php
 }
 
-function figurerender_admin()
+function scorerender_admin()
 {
 	add_options_page ('ScoreRender options',
 	                  'ScoreRender', 9, __FILE__,
-	                  'figurerender_admin_options');
+	                  'scorerender_admin_options');
 }
 
 
@@ -642,8 +640,8 @@ remove_filter ('pre_comment_content', 'balanceTags', 30);
 
 // earlier than default priority, since smilies conversion
 // and wptexturize() can mess up the content
-add_filter ('the_content', 'figurerender_content', 5);
-add_filter ('comment_text', 'figurerender_comment', 5);
-add_action ('admin_menu', 'figurerender_admin');
+add_filter ('the_content', 'scorerender_content', 5);
+add_filter ('comment_text', 'scorerender_comment', 5);
+add_action ('admin_menu', 'scorerender_admin');
 
 ?>
