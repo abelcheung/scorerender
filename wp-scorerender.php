@@ -80,7 +80,7 @@ function parse_input($input)
 
 function scorerender_generate_html_error ($msg)
 {
-	return '<p><b><a href="http://www.chris-lamb.co.uk/code/figurerender/">ScoreRender</a> Error:</b> <i>' . $msg . '</i></p>';
+	return '<p><b>ScoreRender Error:</b> <i>' . $msg . '</i></p>';
 }
 
 function scorerender_process_result ($result, $input, $render)
