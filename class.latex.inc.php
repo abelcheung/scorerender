@@ -32,22 +32,26 @@
 class LatexRender extends ScoreRender {
 	var $_uniqueID = "latex";
 
-	function LatexRender($input, $options=array()) {
-
-		$options = array_merge(
-			array(
+	function LatexRender($input, $options=array())
+	{
+		$options = array_merge
+		(
+			array
+			(
 				'LATEX_BIN' => '/usr/bin/latex',
 				'DVIPS_BIN' => '/usr/bin/dvips'
 			),
 			$options
 		);
 
-		parent::ScoreRender($input, $options);
+		parent::init_options ($input, $options);
 	}
 
-	function isValidInput($input) {
+	function isValidInput($input)
+	{
 		// From LatexRender source
-		$blacklist = array(
+		$blacklist = array
+		(
 			"include", "def", "command", "loop", "repeat", "open", "toks",
 			"output", "input", "catcode", "name", "^^", "\\every", "\\errhelp",
 			"\\errorstopmode", "\\scrollmode", "\\nonstopmode", "\\batchmode",
@@ -56,12 +60,9 @@ class LatexRender extends ScoreRender {
 			"\\special"
 		);
 
-		for ($i=0; $i < count(blacklist); $i++) {
-
-			if (stristr($input, $blacklist[$i])) {
+		foreach ($blacklist as $pattern)
+			if (stristr($input, $pattern))
 				return false;
-			}
-                }
 
 		return true;
 	}

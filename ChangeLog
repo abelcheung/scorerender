@@ -1,5 +1,11 @@
 2007-02-16  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.*.inc.php: Rename parent class function name.
+	* class.mup.inc.php, class.scorerender.inc.php:
+	Don't set density anymore, tune staff size instead.
+
+2007-02-16  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.mup.inc.php, class.lilypond.inc.php:
 	Tune the staff size of mup and lilypond so they both
 	output 16pt staves. Drop safe mode for lilypond,

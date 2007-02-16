@@ -43,7 +43,7 @@ class LilypondRender extends ScoreRender
 			$options
 		);
 
-		parent::ScoreRender ($input, $options);
+		parent::init_option ($input, $options);
 	}
 
 	function getInputFileContents ($input)
@@ -56,8 +56,9 @@ class LilypondRender extends ScoreRender
 \\paper {
 	ragged-right = ##t
 	indent = 0.0\\mm
+	line-width = 5\\in
 }
-#(set-global-staff-size 16)
+#(set-global-staff-size 24)
 \\layout {
 	\\context {
 		\\Score

@@ -21,7 +21,7 @@
 
 
 /*
- class.muprender.inc.php
+ class.mup.inc.php
  Abel Cheung <abelcheung@gmail.com>
  3rd June 2006
 
@@ -44,22 +44,36 @@ class MupRender extends ScoreRender
 			$options
 		);
 
-		parent::ScoreRender($input, $options);
+		parent::init_options ($input, $options);
+	}
+
+	function isValidInput ($input)
+	{
+		$blacklist = array
+		(
+			'/^\s*include/', '/^\s*fontfile/'
+		);
+
+		foreach ($blacklist as $pattern)
+			if (preg_match ($pattern, $input))
+				return false;
+
+		return true;
 	}
 
 	function getInputFileContents ($input)
 	{
 		$header = <<<EOD
+//!Mup-Arkkra-5.0
 score
 leftmargin = 0
 rightmargin = 0
 topmargin = 0
 bottommargin = 0
-pagewidth = 4
-staffscale = 0.666
+pagewidth = 5
 label = ""
 EOD;
-		return $header . $input;
+		return $header . "\n" . $input;
 	}
 
 	function execute ($input_file, $output_file)
@@ -96,7 +110,7 @@ EOD;
 	function convertimg ($output_file, $cache_filename, $invert, $transparent)
 	{
 		// Convert to specified format
-		$cmd = $this->_options['CONVERT_BIN'] . ' -density 90 -trim ';
+		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
 
 		if (!$transparent)
 		{

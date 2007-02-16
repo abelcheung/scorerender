@@ -41,7 +41,7 @@ class ScoreRender
 	var $_uniqueID;
 	var $_previousOutput;
 
-	function ScoreRender ($input, $options = array())
+	function init_options ($input, $options = array())
 	{
 		// fallback values
 		$this->_options['CONVERT_BIN'] = '/usr/bin/convert';
@@ -75,7 +75,7 @@ class ScoreRender
 	function convertimg ($output_file, $cache_filename, $invert, $transparent)
 	{
 		// Convert to specified format
-		$cmd = $this->_options['CONVERT_BIN'] . ' -density 90 -trim ';
+		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
 
 		if (!$transparent)
 		{
