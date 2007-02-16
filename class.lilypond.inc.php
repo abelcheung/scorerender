@@ -48,23 +48,30 @@ class LilypondRender extends ScoreRender
 
 	function getInputFileContents ($input)
 	{
-		return '
-			\version "2.8.1"
-			\header {
-				tagline= ""
-			}
-			\paper {
-				ragged-right = ##t
-				indent = 0.0\mm
-			}
-			' . $input . '
-		';
+		$header = <<<EOD
+\\version "2.8.1"
+\\header {
+	tagline= ""
+}
+\\paper {
+	ragged-right = ##t
+	indent = 0.0\\mm
+}
+#(set-global-staff-size 16)
+\\layout {
+	\\context {
+		\\Score
+		\\remove "Bar_number_engraver"
+	}
+}
+EOD;
+		return $header . $input;
 	}
 
 	function execute ($input_file, $output_file)
 	{
 		/* lilypond adds .ps extension by itself */
-		$cmd = sprintf ('%s --safe-mode --ps --output %s %s 2>&1',
+		$cmd = sprintf ('%s --ps --output %s %s 2>&1',
 			$this->_options['LILYPOND_BIN'],
 			dirname($output_file) . DIRECTORY_SEPARATOR . basename($output_file, ".ps"),
 			$input_file);

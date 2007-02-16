@@ -49,7 +49,17 @@ class MupRender extends ScoreRender
 
 	function getInputFileContents ($input)
 	{
-		return $input;
+		$header = <<<EOD
+score
+leftmargin = 0
+rightmargin = 0
+topmargin = 0
+bottommargin = 0
+pagewidth = 4
+staffscale = 0.666
+label = ""
+EOD;
+		return $header . $input;
 	}
 
 	function execute ($input_file, $output_file)
