@@ -43,7 +43,7 @@ class LilypondRender extends ScoreRender
 			$options
 		);
 
-		parent::init_option ($input, $options);
+		parent::init_options ($input, $options);
 	}
 
 	function getInputFileContents ($input)
