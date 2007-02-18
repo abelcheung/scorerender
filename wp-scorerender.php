@@ -1,17 +1,8 @@
 <?php
 /*
-Plugin Name: ScoreRender
-Plugin URI: http://chris-lamb.co.uk/code/figurerender/
-Description: Renders inline LaTeX, Lilypond and Mup figures in posts and comments.
-Author: Chris Lamb
-Version: 1.0
-Author URI: http://chris-lamb.co.uk/
-*/
-
-/*
- ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
- Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
- http://www.chris-lamb.co.uk/code/figurerender/
+ ScoreRender - Renders inline music score fragments in WordPress
+ Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
+ Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -28,6 +19,12 @@ Author URI: http://chris-lamb.co.uk/
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+/*
+ Mostly based on wp-figurerender.php from FigureRender
+ Chris Lamb <chris@chris-lamb.co.uk>
+ 10th April 2006
+*/
+
 
 // Error constants
 define('ERR_INVALID_INPUT', -1);
@@ -38,45 +35,55 @@ define('ERR_IMAGE_CONVERT_FAILURE', -5);
 define('ERR_RENDERING_ERROR', -6);
 
 require_once('class.scorerender.inc.php');
-require_once('class.latex.inc.php');
 require_once('class.lilypond.inc.php');
 require_once('class.mup.inc.php');
 
-// Configure default options
-add_option('figurerender_temp_dir', '/tmp');
-add_option('figurerender_convert_bin', '/usr/bin/convert');
-add_option('figurerender_cache_dir', ABSPATH . get_option('upload_path'));
-add_option('figurerender_cache_url', get_option('siteurl') . '/' . get_option('upload_path'));
-add_option('figurerender_invert_image', 0);
-add_option('figurerender_transparent_image', 1);
-add_option('figurerender_show_input', 0);
+$default_tmp_dir = '/tmp';
+$scorerender_options = array ();
 
-add_option('figurerender_latex_markup_start', '[tex]');
-add_option('figurerender_latex_markup_end', '[/tex]');
-add_option('figurerender_latex_content', '1');
-add_option('figurerender_latex_comments', '0');
-add_option('figurerender_latex_bin', '/usr/bin/latex');
-add_option('figurerender_dvips_bin', '/usr/bin/dvips');
+function scorerender_get_options ()
+{
+	global $scorerender_options, $default_tmp_dir;
 
-add_option('figurerender_lilypond_markup_start', '[lilypond]');
-add_option('figurerender_lilypond_markup_end', '[/lilypond]');
-add_option('figurerender_lilypond_content', '1');
-add_option('figurerender_lilypond_comments', '0');
-add_option('figurerender_lilypond_bin', '/usr/bin/lilypond');
+	$scorerender_options = get_option ('scorerender_options');
+	if (is_array ($scorerender_options) && array_key_exists ('DB_VERSION', $scorerender_options))
+		return;
 
-add_option('figurerender_mup_markup_start', '[mup]');
-add_option('figurerender_mup_markup_end', '[/mup]');
-add_option('figurerender_mup_content', '1');
-add_option('figurerender_mup_comments', '0');
-add_option('figurerender_mup_bin', '/usr/local/bin/mup');
-add_option('figurerender_mup_magic_file', '');
+	// default options
+	$defaults = array
+	(
+		'DB_VERSION'        => 1,
+		'TEMP_DIR'          => $default_tmp_dir,
+		'CONVERT_BIN'       => '/usr/bin/convert',
+		'CACHE_DIR'         => ABSPATH . get_option('upload_path'),
+		'CACHE_URL'         => get_option('siteurl') . '/' . get_option('upload_path'),
+		'INVERT_IMAGE'      => false,
+		'TRANSPARENT_IMAGE' => true,
+		'SHOW_SOURCE'       => false,
 
+		'LILYPOND_MARKUP_START'    => '[lilypond]',
+		'LILYPOND_MARKUP_END'      => '[/lilypond]',
+		'LILYPOND_CONTENT_ENABLED' => true,
+		'LILYPOND_COMMENT_ENABLED' => false,
+		'LILYPOND_BIN'             => '/usr/bin/lilypond',
+
+		'MUP_MARKUP_START'    => '[mup]',
+		'MUP_MARKUP_END'      => '[/mup]',
+		'MUP_CONTENT_ENABLED' => true,
+		'MUP_COMMENT_ENABLED' => false,
+		'MUP_BIN'             => '/usr/local/bin/mup',
+		'MUP_MAGIC_FILE'      => '',
+	);
+
+	$scorerender_options = $defaults;
+	update_option ('scorerender_options', $scorerender_options);
+	return;
+}
 
 function parse_input($input)
 {
 	return trim (html_entity_decode ($input));
 }
-
 
 function scorerender_generate_html_error ($msg)
 {
@@ -85,6 +92,8 @@ function scorerender_generate_html_error ($msg)
 
 function scorerender_process_result ($result, $input, $render)
 {
+	global $scorerender_options;
+
 	switch ($result)
 	{
 		case ERR_INVALID_INPUT:
@@ -104,83 +113,33 @@ function scorerender_process_result ($result, $input, $render)
 	// No errors, so generate HTML
 	$html = '<img style="vertical-align: bottom" ';
 
-	if (get_option('figurerender_show_input'))
-		$html .= 'alt="Input: ' . htmlentities($input, ENT_COMPAT, get_bloginfo('charset')) . '" ';
+	if ($scorerender_options['SHOW_SOURCE'])
+		$html .= sprintf ('alt="%s" ', htmlentities($input, ENT_COMPAT, get_bloginfo('charset')));
 	else
-		$html .= 'alt="Music fragment" ';
+		$html .= sprintf ('alt="%s" ',  __('Music fragment'));
 
-	$html .= 'src="' . get_option ('figurerender_cache_url') . '/' . $result . '" />';
+	$html .= sprintf ('src="%s/%s" />', $scorerender_options['CACHE_URL'], $result);
 
 	return $html;
 }
 
-function scorerender_latex ($matches)
+function lilypond_filter ($matches)
 {
+	global $scorerender_options;
+
 	$input = parse_input ($matches[1]);
-
-	$render = new LatexRender
-	(
-		$input,
-		array
-		(
-			'TEMP_DIR'     => get_option('figurerender_temp_dir'),
-			'CONVERT_BIN'  => get_option('figurerender_convert_bin'),
-			'CACHE_DIR'    => get_option('figurerender_cache_dir'),
-			'LATEX_BIN'    => get_option('figurerender_latex_bin'),
-			'DVIPS_BIN'    => get_option('figurerender_dvips_bin'),
-			'INVERT_IMAGE' => get_option('figurerender_invert_image'),
-			'TRANSPARENT'  => get_option('figurerender_transparent_image')
-		)
-	);
-
+	$render = new LilypondRender ($input, $scorerender_options);
 	$result = $render->render();
 
 	return scorerender_process_result ($result, $input, $render);
 }
 
-
-function scorerender_lilypond ($matches)
+function mup_filter ($matches)
 {
+	global $scorerender_options;
+
 	$input = parse_input ($matches[1]);
-
-	$render = new LilypondRender
-	(
-		$input,
-		array
-		(
-			'TEMP_DIR'     => get_option('figurerender_temp_dir'),
-			'CONVERT_BIN'  => get_option('figurerender_convert_bin'),
-			'CACHE_DIR'    => get_option('figurerender_cache_dir'),
-			'LILYPOND_BIN' => get_option('figurerender_lilypond_bin'),
-			'INVERT_IMAGE' => get_option('figurerender_invert_image'),
-			'TRANSPARENT'  => get_option('figurerender_transparent_image')
-		)
-	);
-
-	$result = $render->render();
-
-	return scorerender_process_result ($result, $input, $render);
-}
-
-function scorerender_mup ($matches)
-{
-	$input = parse_input ($matches[1]);
-
-	$render = new MupRender
-	(
-		$input,
-		array
-		(
-			'TEMP_DIR'       => get_option('figurerender_temp_dir'),
-			'CONVERT_BIN'    => get_option('figurerender_convert_bin'),
-			'CACHE_DIR'      => get_option('figurerender_cache_dir'),
-			'MUP_BIN'        => get_option('figurerender_mup_bin'),
-			'MUP_MAGIC_FILE' => get_option('figurerender_mup_magic_file'),
-			'INVERT_IMAGE'   => get_option('figurerender_invert_image'),
-			'TRANSPARENT'    => get_option('figurerender_transparent_image')
-		)
-	);
-
+	$render = new MupRender ($input, $scorerender_options);
 	$result = $render->render();
 
 	return scorerender_process_result ($result, $input, $render);
@@ -188,35 +147,22 @@ function scorerender_mup ($matches)
 
 function scorerender_content ($content)
 {
-	$a = array
-	(
-		'[' => '\[',
-		']' => '\]',
-		'/' => '\/',
-	);
+	global $scorerender_options;
 
-	if (get_option ('figurerender_latex_content'))
+	if ($scorerender_options['LILYPOND_CONTENT_ENABLED'])
 	{
-		$search = '/' . strtr (get_option ('figurerender_latex_markup_start'), $a) .
-			  '([[:print:]|[:space:]]*?)' .
-			  strtr (get_option ('figurerender_latex_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'scorerender_latex', $content);
+		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
+			$scorerender_options['LILYPOND_MARKUP_START'],
+			$scorerender_options['LILYPOND_MARKUP_END']);
+		$content = preg_replace_callback ($search, 'lilypond_filter', $content);
 	}
 
-	if (get_option ('figurerender_lilypond_content'))
+	if ($scorerender_options['MUP_CONTENT_ENABLED'])
 	{
-		$search = '/' . strtr (get_option ('figurerender_lilypond_markup_start'), $a) .
-			  '([[:print:]|[:space:]]*?)' .
-			  strtr (get_option ('figurerender_lilypond_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'scorerender_lilypond', $content);
-	}
-
-	if (get_option ('figurerender_mup_content'))
-	{
-		$search = '/' . strtr (get_option ('figurerender_mup_markup_start'), $a) .
-			  '([[:print:]|[:space:]]*?)' .
-			  strtr (get_option ('figurerender_mup_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'scorerender_mup', $content);
+		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
+			$scorerender_options['MUP_MARKUP_START'],
+			$scorerender_options['MUP_MARKUP_END']);
+		$content = preg_replace_callback ($search, 'mup_filter', $content);
 	}
 
 	return $content;
@@ -224,39 +170,30 @@ function scorerender_content ($content)
 
 function scorerender_comment ($content)
 {
-	$a = array
-	(
-		'[' => '\[',
-		']' => '\]',
-		'/' => '\/',
-	);
+	global $scorerender_options;
 
-	if (get_option ('figurerender_latex_comment')) {
-		$search = '/' . strtr (get_option ('figurerender_latex_markup_start'), $a) .
-			  '([[:print:]|[:space:]]*?)' .
-			  strtr (get_option ('figurerender_latex_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'scorerender_latex', $content);
+	if ($scorerender_options['LILYPOND_COMMENT_ENABLED']) {
+		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
+			$scorerender_options['LILYPOND_MARKUP_START'],
+			$scorerender_options['LILYPOND_MARKUP_END']);
+		$content = preg_replace_callback ($search, 'lilypond_filter', $content);
 	}
 
-	if (get_option ('figurerender_lilypond_comment')) {
-		$search = '/' . strtr(get_option('figurerender_lilypond_markup_start'), $a) .
-			  '([[:print:]|[:space:]]*?)' .
-			  strtr(get_option('figurerender_lilypond_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'scorerender_lilypond', $content);
-	}
-
-	if (get_option ('figurerender_mup_comment')) {
-		$search = '/' . strtr (get_option ('figurerender_mup_markup_start'), $a) .
-			  '([[:print:]|[:space:]]*?)' .
-			  strtr (get_option ('figurerender_mup_markup_end'), $a) .'/i';
-		$content = preg_replace_callback ($search, 'scorerender_mup', $content);
+	if ($scorerender_options['MUP_COMMENT_ENABLED']) {
+		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
+			$scorerender_options['MUP_MARKUP_START'],
+			$scorerender_options['MUP_MARKUP_END']);
+		$content = preg_replace_callback ($search, 'mup_filter', $content);
 	}
 
 	return $content;
 }
 
-function scorerender_options_updated ()
+function scorerender_update_options ()
 {
+	global $defalt_tmp_dir, $scorerender_options;
+	$newopt = (array) $_POST['ScoreRender'];
+
 	$messages = array
 	(
 		'temp_dir_undefined'         => __('WARNING: Temporary directory is NOT defined! Will fall back to /tmp.'),
@@ -266,8 +203,6 @@ function scorerender_options_updated ()
 		'cache_url_undefined'        => __('ERROR: Cache URL is NOT defined!'),
 		'convert_not_found'          => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
 		'convert_not_executable'     => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
-		'latex_tag_problem'          => __('WARNING: Start and end tag must be both present and different. Latex support DISABLED.'),
-		'latex_binary_problem'       => __('WARNING: <tt>latex</tt> and <tt>dvips</tt> not found or not an executable. Latex support DISABLED.'),
 		'lilypond_tag_problem'       => __('WARNING: Start and end tag must be both present and different. Lilypond support DISABLED.'),
 		'lilypond_binary_problem'    => __('WARNING: <tt>lilypond</tt> not found or not an executable. Lilypond support DISABLED.'),
 		'mup_tag_problem'            => __('WARNING: Start and end tag must be both present and different. Mup support DISABLED.'),
@@ -277,171 +212,119 @@ function scorerender_options_updated ()
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
 		die (__('Cheatin&#8217; uh?'));
 
-	if ( empty ($_POST['figurerender_temp_dir']) )
+	/*
+	 * general options
+	 */
+	if ( empty ($newopt['TEMP_DIR']) )
 	{
-		$ms[] = 'temp_dir_undefined';
-		update_option ('figurerender_temp_dir', '/tmp');
+		$msgs[] = 'temp_dir_undefined';
+		$newopt['TEMP_DIR'] = $default_tmp_dir;
 	}
-	else if ( !is_writable ($_POST['figurerender_temp_dir']) )
+	else if ( !is_writable ($newopt['TEMP_DIR']) )
 	{
-		$ms[] = 'temp_dir_not_writable';
-		update_option ('figurerender_temp_dir', '/tmp');
-	}
-	else
-		update_option ('figurerender_temp_dir', $_POST['figurerender_temp_dir']);
-
-	if ( empty ($_POST['figurerender_cache_dir']) )
-	{
-		$ms[] = 'cache_dir_undefined';
-		delete_option ('figurerender_cache_dir');
-	}
-	else
-	{
-		update_option ('figurerender_cache_dir', $_POST['figurerender_cache_dir']);
-		if ( !is_writable ($_POST['figurerender_cache_dir']) )
-			$ms[] = 'cache_dir_not_writable';
+		$msgs[] = 'temp_dir_not_writable';
+		$newopt['TEMP_DIR'] = $default_tmp_dir;
 	}
 
-	if ( empty ($_POST['figurerender_cache_url']) )
-	{
-		$ms[] = 'cache_url_undefined';
-		delete_option ('figurerender_cache_url');
-	}
+	if ( empty ($newopt['CACHE_DIR']) )
+		$msgs[] = 'cache_dir_undefined';
+	else if ( !is_writable ($newopt['CACHE_DIR']) )
+		$msgs[] = 'cache_dir_not_writable';
 
-	if ( empty ($_POST['figurerender_convert_bin']) )
-	{
-		$ms[] = 'convert_not_found';
-		delete_option ('figurerender_convert_bin');
-	}
-	else
-	{
-		if ( ! is_executable ($_POST['figurerender_convert_bin']) )
-			$ms[] = 'convert_not_executable';
-		update_option ( 'figurerender_convert_bin', $_POST['figurerender_convert_bin'] );
-	}
+	if ( empty ($newopt['CACHE_URL']) )
+		$msgs[] = 'cache_url_undefined';
 
-	update_option ( 'figurerender_show_input', isset ($_POST['figurerender_show_input']) );
-	update_option ( 'figurerender_invert_image', isset ($_POST['figurerender_invert_image']) );
-	update_option ( 'figurerender_transparent_image', isset ($_POST['figurerender_transparent_image']) );
+	if ( empty ($newopt['CONVERT_BIN']) )
+		$msgs[] = 'convert_not_found';
+	else if ( ! is_executable ($newopt['CONVERT_BIN']) )
+		$msgs[] = 'convert_not_executable';
 
-	$latex_content_enabled = $_POST['figurerender_latex_content'];
-	$latex_comment_enabled = $_POST['figurerender_latex_comments'];
+	$newopt['SHOW_SOURCE'] = isset ($newopt['SHOW_SOURCE'])? true : false;
+	$newopt['INVERT_IMAGE'] = isset ($newopt['INVERT_IMAGE'])? true : false;
+	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE'])? true : false;
 
-	if ( empty ($_POST['figurerender_latex_markup_start']) ||
-	     empty ($_POST['figurerender_latex_markup_end']) ||
-	     ( !strcmp ($_POST['figurerender_latex_markup_start'],
-			$_POST['figurerender_latex_markup_end']) ) )
+	/*
+	 * lilypond options
+	 */
+	$newopt['LILYPOND_CONTENT_ENABLED'] = isset ($newopt['LILYPOND_CONTENT_ENABLED'])? true : false;
+	$newopt['LILYPOND_COMMENT_ENABLED'] = isset ($newopt['LILYPOND_COMMENT_ENABLED'])? true : false;
+
+	if ( empty ($newopt['LILYPOND_MARKUP_START']) ||
+	     empty ($newopt['LILYPOND_MARKUP_END']) ||
+	     ( !strcmp ($newopt['LILYPOND_MARKUP_START'], $newopt['LILYPOND_MARKUP_END']) ) )
 	{
-		if ($latex_content_enabled || $latex_comment_enabled)
+		if ($newopt['LILYPOND_CONTENT_ENABLED'] || $newopt['LILYPOND_COMMENT_ENABLED'])
 		{
-			$ms[] = 'latex_tag_problem';
-			$latex_content_enabled = false;
-			$latex_comment_enabled = false;
+			$msgs[] = 'lilypond_tag_problem';
+			$newopt['LILYPOND_CONTENT_ENABLED'] = false;
+			$newopt['LILYPOND_COMMENT_ENABLED'] = false;
 		}
 	}
 
-	if ( !is_executable ($_POST['figurerender_latex_bin']) ||
-	     !is_executable ($_POST['figurerender_dvips_bin']) )
+	if ( !is_executable ($newopt['LILYPOND_BIN']) )
 	{
-		if ($latex_content_enabled || $latex_comment_enabled)
+		if ($newopt['LILYPOND_CONTENT_ENABLED'] || $newopt['LILYPOND_COMMENT_ENABLED'])
 		{
-			$ms[] = 'latex_binary_problem';
-			$latex_content_enabled = false;
-			$latex_comment_enabled = false;
+			$msgs[] = 'lilypond_binary_problem';
+			$newopt['LILYPOND_CONTENT_ENABLED'] = false;
+			$newopt['LILYPOND_COMMENT_ENABLED'] = false;
 		}
 	}
 
-	$lilypond_content_enabled = $_POST['figurerender_lilypond_content'];
-	$lilypond_comment_enabled = $_POST['figurerender_lilypond_comments'];
+	/*
+	 * mup options
+	 */
+	$newopt['MUP_CONTENT_ENABLED'] = isset ($newopt['MUP_CONTENT_ENABLED'])? true : false;
+	$newopt['MUP_COMMENT_ENABLED'] = isset ($newopt['MUP_COMMENT_ENABLED'])? true : false;
 
-	if ( empty ($_POST['figurerender_lilypond_markup_start']) ||
-	     empty ($_POST['figurerender_lilypond_markup_end']) ||
-	     ( !strcmp ($_POST['figurerender_lilypond_markup_start'],
-			$_POST['figurerender_lilypond_markup_end']) ) )
+	if ( empty ($newopt['MUP_MARKUP_START']) ||
+	     empty ($newopt['MUP_MARKUP_END']) ||
+	     ( !strcmp ($newopt['MUP_MARKUP_START'], $newopt['MUP_MARKUP_END']) ) )
 	{
-		if ($lilypond_content_enabled || $lilypond_comment_enabled)
+		if ($newopt['MUP_CONTENT_ENABLED'] || $newopt['MUP_COMMENT_ENABLED'])
 		{
-			$ms[] = 'lilypond_tag_problem';
-			$lilypond_content_enabled = false;
-			$lilypond_comment_enabled = false;
+			$msgs[] = 'mup_tag_problem';
+			$newopt['MUP_CONTENT_ENABLED'] = false;
+			$newopt['MUP_COMMENT_ENABLED'] = false;
 		}
 	}
 
-	if ( !is_executable ($_POST['figurerender_lilypond_bin']) )
+	if ( !is_executable ($newopt['MUP_BIN']) )
 	{
-		if ($lilypond_content_enabled || $lilypond_comment_enabled)
+		if ($newopt['MUP_CONTENT_ENABLED'] || $newopt['MUP_COMMENT_ENABLED'])
 		{
-			$ms[] = 'lilypond_binary_problem';
-			$lilypond_content_enabled = false;
-			$lilypond_comment_enabled = false;
-		}
-	}
-
-	$mup_content_enabled = $_POST['figurerender_mup_content'];
-	$mup_comment_enabled = $_POST['figurerender_mup_comments'];
-
-	if ( empty ($_POST['figurerender_mup_markup_start']) ||
-	     empty ($_POST['figurerender_mup_markup_end']) ||
-	     ( !strcmp ($_POST['figurerender_mup_markup_start'],
-			$_POST['figurerender_mup_markup_end']) ) )
-	{
-		if ($mup_content_enabled || $mup_comment_enabled)
-		{
-			$ms[] = 'mup_tag_problem';
-			$mup_content_enabled = false;
-			$mup_comment_enabled = false;
-		}
-	}
-
-	if ( !is_executable ($_POST['figurerender_mup_bin']) )
-	{
-		if ($mup_content_enabled || $mup_comment_enabled)
-		{
-			$ms[] = 'mup_binary_problem';
-			$mup_content_enabled = false;
-			$mup_comment_enabled = false;
+			$msgs[] = 'mup_binary_problem';
+			$newopt['MUP_CONTENT_ENABLED'] = false;
+			$newopt['MUP_COMMENT_ENABLED'] = false;
 		}
 	}
 
 	/* FIXME: Didn't handle the case when various tags coincide with each other */
 
-	update_option ( 'figurerender_latex_markup_start', $_POST['figurerender_latex_markup_start'] );
-	update_option ( 'figurerender_latex_markup_end'  , $_POST['figurerender_latex_markup_end'] );
-	update_option ( 'figurerender_latex_bin',          $_POST['figurerender_latex_bin'] );
-	update_option ( 'figurerender_dvips_bin',          $_POST['figurerender_dvips_bin'] );
-	update_option ( 'figurerender_latex_content',      $latex_content_enabled );
-	update_option ( 'figurerender_latex_comments',     $latex_comment_enabled );
+	$scorerender_options = array_merge ($scorerender_options, $newopt);
+	update_option ('scorerender_options', $scorerender_options);
 
-	update_option ( 'figurerender_lilypond_markup_start', $_POST['figurerender_lilypond_markup_start'] );
-	update_option ( 'figurerender_lilypond_markup_end',   $_POST['figurerender_lilypond_markup_end'] );
-	update_option ( 'figurerender_lilypond_bin',          $_POST['figurerender_lilypond_bin'] );
-	update_option ( 'figurerender_lilypond_content',      $lilypond_content_enabled );
-	update_option ( 'figurerender_lilypond_comments',     $lilypond_comment_enabled );
-
-	update_option ( 'figurerender_mup_markup_start', $_POST['figurerender_mup_markup_start'] );
-	update_option ( 'figurerender_mup_markup_end',   $_POST['figurerender_mup_markup_end'] );
-	update_option ( 'figurerender_mup_bin',          $_POST['figurerender_mup_bin'] );
-	update_option ( 'figurerender_mup_magic_file',   $_POST['figurerender_mup_magic_file'] );
-	update_option ( 'figurerender_mup_content',      $mup_content_enabled );
-	update_option ( 'figurerender_mup_comments',     $mup_comment_enabled );
-
-	if ( !empty ($ms) )
+	if ( !empty ($msgs) )
 	{
-		foreach ($ms as $key => $m)
+		foreach ($msgs as $key => $m)
 			echo '<div id="figurerender-error-' . $key . '" class="updated fade-ff0000"><p><strong>' . $messages[$m] . "</strong></p></div>\n";
 	}
 	else
 	{
 		echo '<div id="message" class="updated fade"><p><strong>' .
 			__('Options saved.') . "</strong></p></div>\n";
-		// echo '<pre>'; var_dump ($_POST); echo '</pre>';
 	}
 }
 
 function scorerender_admin_options() {
 
-	if ( isset($_POST['Submit']) )
-		scorerender_options_updated();
+	global $scorerender_options;
+
+	if ( isset($_POST['Submit']) && isset($_POST['ScoreRender']) )
+	{
+		echo '<pre>'; var_dump ($_POST); echo '</pre>';
+		scorerender_update_options();
+	}
 ?>
 
 	<div class="wrap">
@@ -463,21 +346,21 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Temporary directory:') ?></th>
 			<td>
-				<input name="figurerender_temp_dir" class="code" type="text" id="figurerender_temp_dir" value="<?php form_option('figurerender_temp_dir'); ?>" size="60" /><br />
+				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="figurerender_temp_dir" value="<?php echo attribute_escape($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
 				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache directory:') ?></th>
 			<td>
-				<input name="figurerender_cache_dir" class="code" type="text" id="figurerender_cache_dir" value="<?php form_option('figurerender_cache_dir'); ?>" size="60" /><br />
+				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="figurerender_cache_dir" value="<?php echo attribute_escape($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
 				<?php _e('Must be writable and located inside the web-accessible area.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache URL:') ?></th>
 			<td>
-				<input name="figurerender_cache_url" class="code" type="text" id="figurerender_cache_url" value="<?php form_option('figurerender_cache_url'); ?>" size="60" /><br />
+				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="figurerender_cache_url" value="<?php echo attribute_escape($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
 				<?php _e('Must correspond to the image cache directory above.') ?>
 			</td>
 		</tr>
@@ -492,61 +375,27 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Show figure source in &lt;IMG&gt; ALT tag?') ?></th>
 			<td>
 				<label for="figurerender_show_input">
-				<input type="checkbox" name="figurerender_show_input" id="figurerender_show_input" value="1" <?php checked('1', get_option('figurerender_show_input')); ?> /></label>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="figurerender_show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Invert image colours?') ?></th>
 			<td>
 				<label for="figurerender_invert_image">
-				<input type="checkbox" name="figurerender_invert_image" id="figurerender_invert_image" value="1" <?php checked('1', get_option('figurerender_invert_image')); ?> /></label>
+				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="figurerender_invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> /></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Use transparent background?') ?></th>
 			<td>
 				<label for="figurerender_transparent_image">
-				<input type="checkbox" name="figurerender_transparent_image" id="figurerender_transparent_image" value="1" <?php checked('1', get_option('figurerender_transparent_image')); ?> /> <small><?php _e('(IE6 does not support transparent PNG)'); ?></small></label>
+				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="figurerender_transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> /> <small><?php _e('(IE6 does not support transparent PNG)'); ?></small></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Location of <a target="_new" href="http://www.imagemagick.net/">ImageMagick</a>\'s <i>convert</i> binary:') ?></th>
 			<td>
-				<input name="figurerender_convert_bin" class="code" type="text" id="figurerender_convert_bin" value="<?php form_option('figurerender_convert_bin'); ?>" size="40" />
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<fieldset class="options">
-		<legend><?php _e('LaTeX options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Enable parsing for:') ?></th>
-			<td>
-				<label for="figurerender_latex_content">
-				<input type="checkbox" name="figurerender_latex_content" id="figurerender_latex_content" value="1" <?php checked('1', get_option('figurerender_latex_content')); ?> /> Posts and pages</label><br />
-				<label for="figurerender_latex_comments"><input type="checkbox" name="figurerender_latex_comments" value="1" <?php checked('1', get_option('figurerender_latex_comments')); ?> /> Comments <strong><em>(Security Risk!)</em></strong></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Tag markup:') ?></th>
-			<td>
-
-				<?php _e('Start:') ?> <input name="figurerender_latex_markup_start" class="code" type="text" id="figurerender_latex_markup_start" value="<?php form_option('figurerender_latex_markup_start'); ?>" size="14" /> <?php _e('End:') ?> <input name="figurerender_latex_markup_end" class="code" type="text" id="figurerender_latex_markup_end" value="<?php form_option('figurerender_latex_markup_end'); ?>" size="14" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Location of <i>latex</i> binary:') ?></th>
-			<td>
-				<input name="figurerender_latex_bin" class="code" type="text" id="figurerender_latex_bin" value="<?php form_option('figurerender_latex_bin'); ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Location of <i>dvips</i> binary:') ?></th>
-			<td>
-				<input name="figurerender_dvips_bin" class="code" type="text" id="figurerender_dvips_bin" value="<?php form_option('figurerender_dvips_bin'); ?>" size="50" />
+				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="figurerender_convert_bin" value="<?php echo attribute_escape($scorerender_options['CONVERT_BIN']); ?>" size="40" />
 			</td>
 		</tr>
 		</table>
@@ -560,21 +409,22 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Enable parsing for:') ?></th>
 			<td>
 				<label for="figurerender_lilypond_content">
-				<input type="checkbox" name="figurerender_lilypond_content" id="figurerender_lilypond_content" value="1" <?php checked('1', get_option('figurerender_lilypond_content')); ?> /> Posts and pages</label><br />
-				<label for="figurerender_lilypond_comments"><input type="checkbox" name="figurerender_lilypond_comments" value="1" <?php checked('1', get_option('figurerender_lilypond_comments')); ?> /> Comments <strong><em>(Security Risk!)</em></strong></label>
+				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="figurerender_lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> /> Posts and pages</label><br />
+				<label for="figurerender_lilypond_comments">
+				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="figurerender_lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php _e('Comments <strong>(Security Risk!)</strong>'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Tag markup:') ?></th>
 			<td>
-
-				<?php _e('Start:') ?> <input name="figurerender_lilypond_markup_start" class="code" type="text" id="figurerender_lilypond_markup_start" value="<?php form_option('figurerender_lilypond_markup_start'); ?>" size="14" /> <?php _e('End:') ?> <input name="figurerender_lilypond_markup_end" class="code" type="text" id="figurerender_lilypond_markup_end" value="<?php form_option('figurerender_lilypond_markup_end'); ?>" size="14" />
+				<?php _e('Start:') ?> <input name="ScoreRender[LILYPOND_MARKUP_START]" class="code" type="text" id="figurerender_lilypond_markup_start" value="<?php echo attribute_escape($scorerender_options['LILYPOND_MARKUP_START']); ?>" size="14" />
+				<?php _e('End:') ?> <input name="ScoreRender[LILYPOND_MARKUP_END]" class="code" type="text" id="figurerender_lilypond_markup_end" value="<?php echo attribute_escape($scorerender_options['LILYPOND_MARKUP_END']); ?>" size="14" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Location of <i>lilypond</i> binary:') ?></th>
 			<td>
-				<input name="figurerender_lilypond_bin" class="code" type="text" id="figurerender_lilypond_bin" value="<?php form_option('figurerender_lilypond_bin'); ?>" size="50" />
+				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="figurerender_lilypond_bin" value="<?php echo attribute_escape($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
 			</td>
 		</tr>
 		</table>
@@ -588,27 +438,29 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Enable parsing for:') ?></th>
 			<td>
 				<label for="figurerender_mup_content">
-				<input type="checkbox" name="figurerender_mup_content" id="figurerender_mup_content" value="1" <?php checked('1', get_option('figurerender_mup_content')); ?> /> Posts and pages</label><br />
-				<label for="figurerender_mup_comments"><input type="checkbox" name="figurerender_mup_comments" value="1" <?php checked('1', get_option('figurerender_mup_comments')); ?> /> Comments <strong><em>(Security Risk!)</em></strong></label>
+				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="figurerender_mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> /> <?php _e('Posts and pages'); ?></label><br />
+				<label for="figurerender_mup_comments">
+				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php _e('Comments <strong>(Security Risk!)</strong>'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Tag markup:') ?></th>
 			<td>
 
-				<?php _e('Start:') ?> <input name="figurerender_mup_markup_start" class="code" type="text" id="figurerender_mup_markup_start" value="<?php form_option('figurerender_mup_markup_start'); ?>" size="14" /> <?php _e('End:') ?> <input name="figurerender_mup_markup_end" class="code" type="text" id="figurerender_mup_markup_end" value="<?php form_option('figurerender_mup_markup_end'); ?>" size="14" />
+				<?php _e('Start:') ?> <input name="ScoreRender[MUP_MARKUP_START]" class="code" type="text" id="figurerender_mup_markup_start" value="<?php echo attribute_escape($scorerender_options['MUP_MARKUP_START']); ?>" size="14" />
+				<?php _e('End:') ?> <input name="ScoreRender[MUP_MARKUP_END]" class="code" type="text" id="figurerender_mup_markup_end" value="<?php echo attribute_escape($scorerender_options['MUP_MARKUP_END']); ?>" size="14" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Location of <i>mup</i> binary:') ?></th>
 			<td>
-				<input name="figurerender_mup_bin" class="code" type="text" id="figurerender_mup_bin" value="<?php form_option('figurerender_mup_bin'); ?>" size="50" />
+				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="figurerender_mup_bin" value="<?php echo attribute_escape($scorerender_options['MUP_BIN']); ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Location of <i>mup</i> magic file:') ?></th>
 			<td>
-				<input name="figurerender_mup_magic_file" class="code" type="text" id="figurerender_mup_magic_file" value="<?php form_option('figurerender_mup_magic_file'); ?>" size="50" />
+				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="figurerender_mup_magic_file" value="<?php echo attribute_escape($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
 				<br />
 				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
 			</td>
@@ -617,8 +469,6 @@ function scorerender_admin_options() {
 	</fieldset>
 
 	<p class="submit">
-	<input type="hidden" name="action" value="update" />
-	<input type="hidden" name="page_options" value="figurerender_temp_dir,figurerender_convert_bin,figurerender_cache_enabled,figurerender_cache_dir,figurerender_cache_url,figurerender_latex_content,figurerender_latex_comments,figurerender_latex_bin,figurerender_dvips_bin,figurerender_lilypond_content,figurerender_lilypond_comments,figurerender_lilypond_bin,figurerender_mup_content,figurerender_mup_comments,figurerender_mup_bin,figurerender_mup_magic_file,figurerender_invert_image,figurerender_transparent_image,figurerender_show_input,figurerender_latex_markup_start,figurerender_latex_markup_end,figurerender_lilypond_markup_start,figurerender_lilypond_markup_end,figurerender_mup_markup_start,figurerender_mup_markup_end" />
 	<input type="submit" name="Submit" value="<?php _e('Update Options') ?> &raquo;" />
 	</p>
 
@@ -634,6 +484,7 @@ function scorerender_admin()
 	                  'scorerender_admin_options');
 }
 
+scorerender_get_options ();
 
 // Remove tag balancing filter
 // There seems to be an bug in the balanceTags function of wp-includes/functions-formatting.php

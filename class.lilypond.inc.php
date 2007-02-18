@@ -1,8 +1,8 @@
 <?php
 /*
- ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
- Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
- http://www.chris-lamb.co.uk/code/figurerender/
+ ScoreRender - Renders inline music score fragments in WordPress
+ Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
+ Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,9 +19,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-
 /*
- class.lilypondrender.inc.php
+ Mostly based on class.lilypondrender.inc.php from FigureRender
  Chris Lamb <chris@chris-lamb.co.uk>
  10th April 2006
 
@@ -34,15 +33,6 @@ class LilypondRender extends ScoreRender
 
 	function LilypondRender ($input, $options = array())
 	{
-		$options = array_merge
-		(
-			array
-			(
-				'LILYPOND_BIN' => '/usr/bin/lilypond'
-			),
-			$options
-		);
-
 		parent::init_options ($input, $options);
 	}
 

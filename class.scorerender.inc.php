@@ -1,8 +1,8 @@
 <?php
 /*
- ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
- Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
- http://www.chris-lamb.co.uk/code/figurerender/
+ ScoreRender - Renders inline music score fragments in WordPress
+ Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
+ Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
 
 
 /*
- class.figurerender.inc.php
+ Mostly based on class.figurerender.inc.php from FigureRender
  Chris Lamb <chris@chris-lamb.co.uk>
  10th April 2006
 
@@ -30,7 +30,7 @@
  - execute($input_file, $output_file)
  optionally they can also implement:
  - isValidInput($input)
- - convertimg($output_file, $cache_filename, $invert, $transparent)
+ - convertimg($output_file, $final_image, $invert, $transparent)
 */
 
 
@@ -44,11 +44,7 @@ class ScoreRender
 	function init_options ($input, $options = array())
 	{
 		// fallback values
-		$this->_options['CONVERT_BIN'] = '/usr/bin/convert';
-		$this->_options['TEMP_DIR'] = '/tmp';
 		$this->_options['FILE_FORMAT'] = 'png';
-		$this->_options['INVERT_IMAGE'] = false;
-		$this->_options['TRANSPARENT'] = false;
 
 		$this->_options = array_merge ($this->_options, $options);
 
@@ -72,7 +68,7 @@ class ScoreRender
 		return $retval;
 	}
 
-	function convertimg ($output_file, $cache_filename, $invert, $transparent)
+	function convertimg ($output_file, $final_image, $invert, $transparent)
 	{
 		// Convert to specified format
 		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
@@ -80,13 +76,13 @@ class ScoreRender
 		if (!$transparent)
 		{
 			$cmd .= (($invert) ? '-negate ' : '')
-			        . $output_file . ' ' . $cache_filename;
+			        . $output_file . ' ' . $final_image;
 		}
 		else
 		{
 			if (!$invert)
 			{
-				$cmd .= '-channel alpha ' . $output_file . ' ' . $cache_filename;
+				$cmd .= '-channel alpha ' . $output_file . ' ' . $final_image;
 			}
 			else
 			{
@@ -95,7 +91,7 @@ class ScoreRender
 					$output_file . ' png:- | ' .
 					$this->_options['CONVERT_BIN'] .
 					' -channel rgb -negate png:- ' .
-					$cache_filename;
+					$final_image;
 			}
 		}
 
@@ -114,11 +110,11 @@ class ScoreRender
 
 		// Create unique hash
 		$hash = md5 ($this->_input . $this->_options['INVERT_IMAGE']
-			     . $this->_options['TRANSPARENT'] . $this->_uniqueID);
-		$cache_filename = $this->_options['CACHE_DIR'] . DIRECTORY_SEPARATOR
+			     . $this->_options['TRANSPARENT_IMAGE'] . $this->_uniqueID);
+		$final_image = $this->_options['CACHE_DIR'] . DIRECTORY_SEPARATOR
 		                  . $hash . '.' . $this->_options['FILE_FORMAT'];
 
-		if (!is_file ($cache_filename))
+		if (!is_file ($final_image))
 		{
 			// Check cache directory
 			if ( (!isset ($this->_options['CACHE_DIR'])) ||
@@ -168,9 +164,9 @@ class ScoreRender
 			}
 			chdir ($current_dir);
 
-			if (!$this->convertimg ($output_file, $cache_filename,
+			if (!$this->convertimg ($output_file, $final_image,
 			                        $this->_options['INVERT_IMAGE'],
-			                        $this->_options['TRANSPARENT']))
+			                        $this->_options['TRANSPARENT_IMAGE']))
 				return ERR_IMAGE_CONVERT_FAILURE;
 
 			// Cleanup
@@ -179,7 +175,7 @@ class ScoreRender
 
 		}
 
-		return basename ($cache_filename);
+		return basename ($final_image);
 	}
 }
 

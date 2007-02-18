@@ -1,8 +1,7 @@
 <?php
 /*
- ScoreRender - Renders inline LaTeX, LilyPond and Mup figures in WordPress
- Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
- http://www.chris-lamb.co.uk/code/figurerender/
+ ScoreRender - Renders inline music score fragments in WordPress
+ Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,12 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-
 /*
- class.mup.inc.php
- Abel Cheung <abelcheung@gmail.com>
- 3rd June 2006
-
  Implements rendering of Mup figures in ScoreRender.
 */
 
@@ -34,16 +28,6 @@ class MupRender extends ScoreRender
 
 	function MupRender ($input, $options = array())
 	{
-
-		$options = array_merge
-		(
-			array
-			(
-				'MUP_BIN' => '/usr/local/bin/mup'
-			),
-			$options
-		);
-
 		parent::init_options ($input, $options);
 	}
 
