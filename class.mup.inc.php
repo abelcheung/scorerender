@@ -60,7 +60,7 @@ EOD;
 		return $header . "\n" . $input;
 	}
 
-	function execute ($input_file, $output_file)
+	function execute ($input_file, $rendered_image)
 	{
 		/* Mup requires a file ".mup" present in $HOME or
 		   current working directory. It must be present even if
@@ -82,16 +82,16 @@ EOD;
 
 		$cmd = sprintf ('%s -f %s %s 2>&1',
 		                $this->_options['MUP_BIN'],
-		                $output_file, $input_file);
+		                $rendered_image, $input_file);
 		$retval = parent::_exec($cmd);
 
 		unlink ($temp_magic_file);
 
-		return (filesize ($output_file) != 0);
+		return (filesize ($rendered_image) != 0);
 		//return ($result['return_val'] == 0);
 	}
 
-	function convertimg ($output_file, $cache_filename, $invert, $transparent)
+	function convertimg ($rendered_image, $cache_filename, $invert, $transparent)
 	{
 		// Convert to specified format
 		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
@@ -99,13 +99,13 @@ EOD;
 		if (!$transparent)
 		{
 			$cmd .= (($invert) ? '-negate ' : '')
-			        . $output_file . ' ' . $cache_filename;
+			        . $rendered_image . ' ' . $cache_filename;
 		}
 		else
 		{
 			// Is it possible to execute convert only once?
 			$cmd .= ' -channel alpha -fx intensity ' .
-				$output_file . ' png:- | ' .
+				$rendered_image . ' png:- | ' .
 				$this->_options['CONVERT_BIN'] .
 				' -channel ' . (($invert)? 'rgba' : 'alpha')
 			        . ' -negate png:- ' . $cache_filename;

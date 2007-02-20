@@ -29,7 +29,8 @@
  Implements rendering of LaTeX figures in ScoreRender.
 */
 
-class LatexRender extends ScoreRender {
+class LatexRender extends ScoreRender
+{
 	var $_uniqueID = "latex";
 
 	function LatexRender($input, $options=array())
@@ -69,35 +70,41 @@ class LatexRender extends ScoreRender {
 
 	function getInputFileContents($input)
 	{
-		return '\documentclass[12pt]{article}
-			\usepackage[utf8]{inputenc}
-			\usepackage{amsmath}
-			\usepackage{amsfonts}
-			\usepackage{amssymb}
-			\pagestyle{empty}
-			\begin{document}
-			\[' . $input . '\]
-			\end{document}
-			';
+		$header = <<<EOT
+\\documentclass[12pt]{article}
+\\usepackage[utf8]{inputenc}
+\\usepackage{amsmath}
+\\usepackage{amsfonts}
+\\usepackage{amssymb}
+\\pagestyle{empty}
+\\begin{document}
+$
+EOT;
+		$footer = <<<EOT
+$
+\\end{document}
+EOT;
+		return $header . $input . $footer;
 	}
 
-	function execute($input_file, $output_file)
+	function execute($input_file, $rendered_image)
 	{
-		$cmd = sprintf ('%s --interaction=nonstopmode %s 2>&1', $this->_options['LATEX_BIN'],
-			$input_file);
+		$cmd = sprintf ('%s --interaction=nonstopmode %s 2>&1',
+				$this->_options['LATEX_BIN'], $input_file);
 		$retval = parent::_exec($cmd);
 
 		if ($retval != 0)
 			return false;
 
-		$cmd = sprintf ('%s -E -o %s %s.dvi 2>&1', $this->_options['DVIPS_BIN'],
-			$output_file, $input_file);
+		$cmd = sprintf ('%s -E -o %s %s.dvi 2>&1',
+				$this->_options['DVIPS_BIN'],
+				$rendered_image, $input_file);
 		$retval = parent::_exec($cmd);
 
 		// Cleanup
-		unlink ($input_file . '.dvi');
-		unlink ($input_file . '.aux');
-		unlink ($input_file . '.log');
+		@unlink ($input_file . '.dvi');
+		@unlink ($input_file . '.aux');
+		@unlink ($input_file . '.log');
 
 		return ($retval == 0);
 	}

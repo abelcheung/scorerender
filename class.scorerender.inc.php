@@ -27,10 +27,10 @@
 
  Follows the template method pattern. Subclasses should implement:
  - getInputFileContents($input)
- - execute($input_file, $output_file)
+ - execute($input_file, $rendered_image)
  optionally they can also implement:
  - isValidInput($input)
- - convertimg($output_file, $final_image, $invert, $transparent)
+ - convertimg($rendered_image, $final_image, $invert, $transparent)
 */
 
 
@@ -68,7 +68,7 @@ class ScoreRender
 		return $retval;
 	}
 
-	function convertimg ($output_file, $final_image, $invert, $transparent)
+	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// Convert to specified format
 		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
@@ -76,19 +76,19 @@ class ScoreRender
 		if (!$transparent)
 		{
 			$cmd .= (($invert) ? '-negate ' : '')
-			        . $output_file . ' ' . $final_image;
+			        . $rendered_image . ' ' . $final_image;
 		}
 		else
 		{
 			if (!$invert)
 			{
-				$cmd .= '-channel alpha ' . $output_file . ' ' . $final_image;
+				$cmd .= '-channel alpha ' . $rendered_image . ' ' . $final_image;
 			}
 			else
 			{
 				// Is it possible to execute convert only once?
 				$cmd .=	'-channel alpha ' .
-					$output_file . ' png:- | ' .
+					$rendered_image . ' png:- | ' .
 					$this->_options['CONVERT_BIN'] .
 					' -channel rgb -negate png:- ' .
 					$final_image;
@@ -137,13 +137,13 @@ class ScoreRender
 			{
 				return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
 			}
-			$output_file = $input_file . '.ps';
+			$rendered_image = $input_file . '.ps';
 
 			// Create empty output file first ASAP
-			if (! file_exists ($output_file))
-				touch ($output_file);
+			if (! file_exists ($rendered_image))
+				touch ($rendered_image);
 
-			if (! is_writable ($output_file))
+			if (! is_writable ($rendered_image))
 				return ERR_TEMP_FILE_NOT_WRITABLE;
 
 			// Write input file contents
@@ -157,20 +157,20 @@ class ScoreRender
 			// Render using external application
 			$current_dir = getcwd();
 			chdir ($this->_options['TEMP_DIR']);
-			if (!$this->execute($input_file, $output_file))
+			if (!$this->execute($input_file, $rendered_image))
 			{
 				//unlink($input_file);
 				return ERR_RENDERING_ERROR;
 			}
 			chdir ($current_dir);
 
-			if (!$this->convertimg ($output_file, $final_image,
+			if (!$this->convertimg ($rendered_image, $final_image,
 			                        $this->_options['INVERT_IMAGE'],
 			                        $this->_options['TRANSPARENT_IMAGE']))
 				return ERR_IMAGE_CONVERT_FAILURE;
 
 			// Cleanup
-			unlink ($output_file);
+			unlink ($rendered_image);
 			unlink ($input_file);
 
 		}

@@ -59,12 +59,12 @@ EOD;
 		return $header . $input;
 	}
 
-	function execute ($input_file, $output_file)
+	function execute ($input_file, $rendered_image)
 	{
 		/* lilypond adds .ps extension by itself */
 		$cmd = sprintf ('%s --ps --output %s %s 2>&1',
 			$this->_options['LILYPOND_BIN'],
-			dirname($output_file) . DIRECTORY_SEPARATOR . basename($output_file, ".ps"),
+			dirname($rendered_image) . DIRECTORY_SEPARATOR . basename($rendered_image, ".ps"),
 			$input_file);
 
 		$retval = parent::_exec ($cmd);
