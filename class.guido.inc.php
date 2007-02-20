@@ -26,7 +26,7 @@ class GuidoRender extends ScoreRender
 {
 	var $_uniqueID = "guido";
 
-	function MupRender ($input, $options = array())
+	function GuidoRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
 	}
