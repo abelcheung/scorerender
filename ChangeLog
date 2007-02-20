@@ -1,5 +1,9 @@
 2007-02-20  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php: Add guido support.
+
+2007-02-20  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.guido.inc.php: New file.
 
 2007-02-17  Abel Cheung  <abelcheung@gmail.com>

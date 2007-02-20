@@ -35,6 +35,7 @@ define('ERR_IMAGE_CONVERT_FAILURE', -5);
 define('ERR_RENDERING_ERROR', -6);
 
 require_once('class.scorerender.inc.php');
+require_once('class.guido.inc.php');
 require_once('class.lilypond.inc.php');
 require_once('class.mup.inc.php');
 
@@ -73,6 +74,11 @@ function scorerender_get_options ()
 		'MUP_COMMENT_ENABLED' => false,
 		'MUP_BIN'             => '/usr/local/bin/mup',
 		'MUP_MAGIC_FILE'      => '',
+
+		'GUIDO_MARKUP_START'    => '[guido]',
+		'GUIDO_MARKUP_END'      => '[/guido]',
+		'GUIDO_CONTENT_ENABLED' => true,
+		'GUIDO_COMMENT_ENABLED' => false,
 	);
 
 	$scorerender_options = $defaults;
@@ -207,6 +213,7 @@ function scorerender_update_options ()
 		'lilypond_binary_problem'    => __('WARNING: <tt>lilypond</tt> not found or not an executable. Lilypond support DISABLED.'),
 		'mup_tag_problem'            => __('WARNING: Start and end tag must be both present and different. Mup support DISABLED.'),
 		'mup_binary_problem'         => __('WARNING: <tt>mup</tt> not found or not an executable. Mup support DISABLED.'),
+		'guido_tag_problem'          => __('WARNING: Start and end tag must be both present and different. Guido noteserver support DISABLED.'),
 	);
 
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
@@ -299,6 +306,24 @@ function scorerender_update_options ()
 		}
 	}
 
+	/*
+	 * guido options
+	 */
+	$newopt['GUIDO_CONTENT_ENABLED'] = isset ($newopt['GUIDO_CONTENT_ENABLED'])? true : false;
+	$newopt['GUIDO_COMMENT_ENABLED'] = isset ($newopt['GUIDO_COMMENT_ENABLED'])? true : false;
+
+	if ( empty ($newopt['GUIDO_MARKUP_START']) ||
+	     empty ($newopt['GUIDO_MARKUP_END']) ||
+	     ( !strcmp ($newopt['GUIDO_MARKUP_START'], $newopt['GUIDO_MARKUP_END']) ) )
+	{
+		if ($newopt['GUIDO_CONTENT_ENABLED'] || $newopt['GUIDO_COMMENT_ENABLED'])
+		{
+			$msgs[] = 'guido_tag_problem';
+			$newopt['GUIDO_CONTENT_ENABLED'] = false;
+			$newopt['GUIDO_COMMENT_ENABLED'] = false;
+		}
+	}
+
 	/* FIXME: Didn't handle the case when various tags coincide with each other */
 
 	$scorerender_options = array_merge ($scorerender_options, $newopt);
@@ -339,6 +364,7 @@ function scorerender_admin_options() {
 			'<a target="_new" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></li>
 	</ul>
 
+	<!-- general options -->
 	<fieldset class="options">
 		<legend><?php _e('General options') ?></legend>
 
@@ -367,6 +393,7 @@ function scorerender_admin_options() {
 		</table>
 	</fieldset>
 
+	<!-- image options -->
 	<fieldset class="options">
 		<legend><?php _e('Image options') ?></legend>
 
@@ -401,6 +428,7 @@ function scorerender_admin_options() {
 		</table>
 	</fieldset>
 
+	<!-- lilypond options -->
 	<fieldset class="options">
 		<legend><?php _e('Lilypond options') ?></legend>
 
@@ -430,6 +458,7 @@ function scorerender_admin_options() {
 		</table>
 	</fieldset>
 
+	<!-- mup options -->
 	<fieldset class="options">
 		<legend><?php _e('Mup options') ?></legend>
 
@@ -463,6 +492,30 @@ function scorerender_admin_options() {
 				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="figurerender_mup_magic_file" value="<?php echo attribute_escape($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
 				<br />
 				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+
+	<!-- guido options -->
+	<fieldset class="options">
+		<legend><?php _e('Guido noteserver options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Enable parsing for:') ?></th>
+			<td>
+				<label for="figurerender_guido_content">
+				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="figurerender_guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> /> Posts and pages</label><br />
+				<label for="figurerender_guido_comments">
+				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="figurerender_guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> /> <?php _e('Comments <strong>(Security Risk!)</strong>'); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Tag markup:') ?></th>
+			<td>
+				<?php _e('Start:') ?> <input name="ScoreRender[GUIDO_MARKUP_START]" class="code" type="text" id="figurerender_guido_markup_start" value="<?php echo attribute_escape($scorerender_options['GUIDO_MARKUP_START']); ?>" size="14" />
+				<?php _e('End:') ?> <input name="ScoreRender[GUIDO_MARKUP_END]" class="code" type="text" id="figurerender_guido_markup_end" value="<?php echo attribute_escape($scorerender_options['GUIDO_MARKUP_END']); ?>" size="14" />
 			</td>
 		</tr>
 		</table>
