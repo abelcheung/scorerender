@@ -1,0 +1,79 @@
+<?php
+/*
+ ScoreRender - Renders inline music score fragments in WordPress
+ Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+/*
+ Implements fetching of Guido figures in ScoreRender.
+*/
+
+class GuidoRender extends ScoreRender
+{
+	var $_uniqueID = "guido";
+
+	function MupRender ($input, $options = array())
+	{
+		parent::init_options ($input, $options);
+	}
+
+	function getInputFileContents ($input)
+	{
+		return $input;
+	}
+
+	function execute ($input_file, $rendered_image)
+	{
+		$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
+				'http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl',
+				25.4, 100.0, 2,
+				rawurlencode (file_get_contents ($input_file)));
+
+		return (copy ($url, $rendered_image));
+	}
+
+	function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	{
+		list ($width, $height) = getimagesize ($rendered_image);
+
+		// Image from noteserver contains border
+		$cmd = sprintf ('%s -crop %dx%d+1+1 -trim -geometry 25% ',
+				$this->_optoins['CONVERT_BIN'],
+				$width - 2, $height - 2);
+
+		if (!$transparent)
+		{
+			$cmd .= (($invert) ? '-negate ' : '')
+			        . $rendered_image . ' ' . $final_image;
+		}
+		else
+		{
+			// Is it possible to execute convert only once?
+			$cmd .= ' -channel alpha -fx intensity ' .
+				$rendered_image . ' png:- | ' .
+				$this->_options['CONVERT_BIN'] .
+				' -channel ' . (($invert)? 'rgba' : 'alpha')
+			        . ' -negate png:- ' . $final_image;
+		}
+
+		$retval = parent::_exec($cmd);
+
+		return ($retval == 0);
+	}
+}
+
+?>
