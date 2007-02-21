@@ -1,5 +1,11 @@
 2007-02-21  Abel Cheung  <abelcheung@gmail.com>
 
+	* LICENSE: Add info.
+	* wp-scorerender.php, class.scorerender.inc.php:
+	Trivial change of variable and function names.
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.guido.inc.php:
 	Tweak ImageMagick option so need not use getimagesize().
 

@@ -125,7 +125,7 @@ function scorerender_process_result ($result, $input, $render)
 		case ERR_IMAGE_CONVERT_FAILURE:
 			return scorerender_generate_html_error (__('Image convert failure!'));
 		case ERR_RENDERING_ERROR:
-			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') . '<br /><textarea cols=80 rows=10 READONLY>' . $render->getPreviousOutput() . '</textarea>');
+			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') . '<br /><textarea cols=80 rows=10 READONLY>' . $render->getCommandOutput() . '</textarea>');
 	}
 
 	// No errors, so generate HTML

@@ -39,7 +39,7 @@ class ScoreRender
 	var $_options;
 	var $_input;
 	var $_uniqueID;
-	var $_previousOutput;
+	var $_commandOutput;
 
 	function init_options ($input, $options = array())
 	{
@@ -51,9 +51,9 @@ class ScoreRender
 		$this->_input = $input;
 	}
 
-	function getPreviousOutput()
+	function getCommandOutput()
 	{
-		return $this->_previousOutput;
+		return $this->_commandOutput;
 	}
 
 	function _exec($cmd)
@@ -63,7 +63,7 @@ class ScoreRender
 
 		exec ($cmd, $cmd_output, $retval);
 
-		$this->_previousOutput = implode ("\n", $cmd_output);
+		$this->_commandOutput = implode ("\n", $cmd_output);
 
 		return $retval;
 	}

@@ -1,6 +1,8 @@
+ScoreRender - Renders inline music score fragments in WordPress
+Copyright (C) 2007 Abel Cheung <abelcheung@gmail.com>
 
-FigureRender - Renders inline LaTeX and LilyPond figures in WordPress
-Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
+- Heavily based on FigureRender
+- Copyright (C) 2006 Chris Lamb <chris@chris-lamb.co.uk>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
