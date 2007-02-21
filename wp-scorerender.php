@@ -163,6 +163,17 @@ function mup_filter ($matches)
 	return scorerender_process_result ($result, $input, $render);
 }
 
+function guido_filter ($matches)
+{
+	global $scorerender_options;
+
+	$input = parse_input ($matches[1]);
+	$render = new GuidoRender ($input, $scorerender_options);
+	$result = $render->render();
+
+	return scorerender_process_result ($result, $input, $render);
+}
+
 function scorerender_content ($content)
 {
 	global $scorerender_options;
@@ -181,6 +192,14 @@ function scorerender_content ($content)
 			$scorerender_options['MUP_MARKUP_START'],
 			$scorerender_options['MUP_MARKUP_END']);
 		$content = preg_replace_callback ($search, 'mup_filter', $content);
+	}
+
+	if ($scorerender_options['GUIDO_CONTENT_ENABLED'])
+	{
+		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
+			$scorerender_options['GUIDO_MARKUP_START'],
+			$scorerender_options['GUIDO_MARKUP_END']);
+		$content = preg_replace_callback ($search, 'guido_filter', $content);
 	}
 
 	return $content;
@@ -202,6 +221,13 @@ function scorerender_comment ($content)
 			$scorerender_options['MUP_MARKUP_START'],
 			$scorerender_options['MUP_MARKUP_END']);
 		$content = preg_replace_callback ($search, 'mup_filter', $content);
+	}
+
+	if ($scorerender_options['GUIDO_COMMENT_ENABLED']) {
+		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
+			$scorerender_options['GUIDO_MARKUP_START'],
+			$scorerender_options['GUIDO_MARKUP_END']);
+		$content = preg_replace_callback ($search, 'guido_filter', $content);
 	}
 
 	return $content;
