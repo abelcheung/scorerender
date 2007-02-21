@@ -26,6 +26,9 @@
 */
 
 
+// Increment this number if database has new or changed config options
+define ('DATABASE_VERSION', 2);
+
 // Error constants
 define('ERR_INVALID_INPUT', -1);
 define('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
@@ -47,13 +50,21 @@ function scorerender_get_options ()
 	global $scorerender_options, $default_tmp_dir;
 
 	$scorerender_options = get_option ('scorerender_options');
-	if (is_array ($scorerender_options) && array_key_exists ('DB_VERSION', $scorerender_options))
+
+	if (!is_array ($scorerender_options))
+	{
+		$scorerender_options = array();
+	}
+	else if (array_key_exists ('DB_VERSION', $scorerender_options) &&
+		($scorerender_options['DB_VERSION'] >= DATABASE_VERSION) )
+	{
 		return;
+	}
 
 	// default options
 	$defaults = array
 	(
-		'DB_VERSION'        => 1,
+		'DB_VERSION'        => DATABASE_VERSION,
 		'TEMP_DIR'          => $default_tmp_dir,
 		'CONVERT_BIN'       => '/usr/bin/convert',
 		'CACHE_DIR'         => ABSPATH . get_option('upload_path'),
@@ -81,7 +92,8 @@ function scorerender_get_options ()
 		'GUIDO_COMMENT_ENABLED' => false,
 	);
 
-	$scorerender_options = $defaults;
+	$scorerender_options = array_merge ($defaults, $scorerender_options);
+	$scorerender_options['DB_VERSION'] = DATABASE_VERSION;
 	update_option ('scorerender_options', $scorerender_options);
 	return;
 }
