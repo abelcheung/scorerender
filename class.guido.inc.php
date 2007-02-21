@@ -51,8 +51,8 @@ class GuidoRender extends ScoreRender
 		list ($width, $height) = getimagesize ($rendered_image);
 
 		// Image from noteserver contains border
-		$cmd = sprintf ('%s -crop %dx%d+1+1 -trim -geometry 25% ',
-				$this->_optoins['CONVERT_BIN'],
+		$cmd = sprintf ('%s -crop %dx%d+1+1 -trim -geometry 30%% ',
+				$this->_options['CONVERT_BIN'],
 				$width - 2, $height - 2);
 
 		if (!$transparent)
