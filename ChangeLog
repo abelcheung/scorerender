@@ -1,6 +1,11 @@
 2007-02-21  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.guido.inc.php:
+	Tweak ImageMagick option so need not use getimagesize().
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php:
 	Fix small typo that prevent guido support from working.
 
 2007-02-21  Abel Cheung  <abelcheung@gmail.com>

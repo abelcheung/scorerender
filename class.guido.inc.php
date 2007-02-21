@@ -40,7 +40,7 @@ class GuidoRender extends ScoreRender
 	{
 		$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
 				'http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl',
-				25.4, 100.0, 2,
+				12.7, 100.0, 1,
 				rawurlencode (file_get_contents ($input_file)));
 
 		return (copy ($url, $rendered_image));
@@ -48,12 +48,8 @@ class GuidoRender extends ScoreRender
 
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
-		list ($width, $height) = getimagesize ($rendered_image);
-
 		// Image from noteserver contains border
-		$cmd = sprintf ('%s -crop %dx%d+1+1 -trim -geometry 30%% ',
-				$this->_options['CONVERT_BIN'],
-				$width - 2, $height - 2);
+		$cmd = $this->_options['CONVERT_BIN'] . ' -shave 1x1 -trim -geometry 56% ';
 
 		if (!$transparent)
 		{
