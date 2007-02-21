@@ -1,5 +1,10 @@
 2007-02-21  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	Add back mistakenly deleted plugin info.
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
 	* LICENSE: Add info.
 	* wp-scorerender.php, class.scorerender.inc.php:
 	Trivial change of variable and function names.
