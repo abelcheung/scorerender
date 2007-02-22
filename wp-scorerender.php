@@ -394,7 +394,6 @@ function scorerender_admin_options() {
 
 	if ( isset($_POST['Submit']) && isset($_POST['ScoreRender']) )
 	{
-		echo '<pre>'; var_dump ($_POST); echo '</pre>';
 		scorerender_update_options();
 	}
 ?>
