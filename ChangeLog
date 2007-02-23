@@ -1,3 +1,9 @@
+2007-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php:
+	More precaution -- also make it fail if command returns
+	succeed but didn't render any image.
+
 2007-02-21  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

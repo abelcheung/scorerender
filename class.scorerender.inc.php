@@ -157,7 +157,8 @@ class ScoreRender
 			// Render using external application
 			$current_dir = getcwd();
 			chdir ($this->_options['TEMP_DIR']);
-			if (!$this->execute($input_file, $rendered_image))
+			if (!$this->execute($input_file, $rendered_image) ||
+			    !file_exists ($rendered_image))
 			{
 				//unlink($input_file);
 				return ERR_RENDERING_ERROR;
