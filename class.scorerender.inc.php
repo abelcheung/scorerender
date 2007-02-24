@@ -75,7 +75,7 @@ class ScoreRender
 
 		if (!$transparent)
 		{
-			$cmd .= (($invert) ? '-negate ' : '')
+			$cmd .= (($invert) ? '-negate ' : ' ')
 			        . $rendered_image . ' ' . $final_image;
 		}
 		else

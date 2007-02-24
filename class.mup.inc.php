@@ -98,7 +98,7 @@ EOD;
 
 		if (!$transparent)
 		{
-			$cmd .= (($invert) ? '-negate ' : '')
+			$cmd .= (($invert) ? '-negate ' : ' ')
 			        . $rendered_image . ' ' . $cache_filename;
 		}
 		else
