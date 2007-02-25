@@ -1,3 +1,8 @@
+2007-02-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Factor out repetitive filter functions into replace_content().
+
 2007-02-23  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

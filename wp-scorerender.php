@@ -201,77 +201,43 @@ function abc_filter ($matches)
 	return scorerender_process_result ($result, $input, $render);
 }
 
-function scorerender_content ($content)
+function replace_content (&$content, $filter_function_name, $option_name, $start_tag_name, $end_tag_name)
 {
 	global $scorerender_options;
 
-	if ($scorerender_options['LILYPOND_CONTENT_ENABLED'])
+	if ($scorerender_options[$option_name])
 	{
 		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['LILYPOND_MARKUP_START'],
-			$scorerender_options['LILYPOND_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'lilypond_filter', $content);
+			$scorerender_options[$start_tag_name],
+			$scorerender_options[$end_tag_name]);
+		$content = preg_replace_callback ($search, $filter_function_name, $content);
 	}
+}
 
-	if ($scorerender_options['MUP_CONTENT_ENABLED'])
-	{
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['MUP_MARKUP_START'],
-			$scorerender_options['MUP_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'mup_filter', $content);
-	}
-
-	if ($scorerender_options['GUIDO_CONTENT_ENABLED'])
-	{
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['GUIDO_MARKUP_START'],
-			$scorerender_options['GUIDO_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'guido_filter', $content);
-	}
-
-	if ($scorerender_options['ABC_CONTENT_ENABLED'])
-	{
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['ABC_MARKUP_START'],
-			$scorerender_options['ABC_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'abc_filter', $content);
-	}
+function scorerender_content ($content)
+{
+	replace_content ($content, 'lilypond_filter', 'LILYPOND_CONTENT_ENABLED',
+			 'LILYPOND_MARKUP_START', 'LILYPOND_MARKUP_END');
+	replace_content ($content, 'mup_filter', 'MUP_CONTENT_ENABLED',
+			 'MUP_MARKUP_START', 'MUP_MARKUP_END');
+	replace_content ($content, 'guido_filter', 'GUIDO_CONTENT_ENABLED',
+			 'GUIDO_MARKUP_START', 'GUIDO_MARKUP_END');
+	replace_content ($content, 'abc_filter', 'ABC_CONTENT_ENABLED',
+			 'ABC_MARKUP_START', 'ABC_MARKUP_END');
 
 	return $content;
 }
 
 function scorerender_comment ($content)
 {
-	global $scorerender_options;
-
-	if ($scorerender_options['LILYPOND_COMMENT_ENABLED']) {
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['LILYPOND_MARKUP_START'],
-			$scorerender_options['LILYPOND_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'lilypond_filter', $content);
-	}
-
-	if ($scorerender_options['MUP_COMMENT_ENABLED']) {
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['MUP_MARKUP_START'],
-			$scorerender_options['MUP_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'mup_filter', $content);
-	}
-
-	if ($scorerender_options['GUIDO_COMMENT_ENABLED']) {
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['GUIDO_MARKUP_START'],
-			$scorerender_options['GUIDO_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'guido_filter', $content);
-	}
-
-	if ($scorerender_options['ABC_COMMENT_ENABLED'])
-	{
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options['ABC_MARKUP_START'],
-			$scorerender_options['ABC_MARKUP_END']);
-		$content = preg_replace_callback ($search, 'abc_filter', $content);
-	}
+	replace_content ($content, 'lilypond_filter', 'LILYPOND_COMMENT_ENABLED',
+			 'LILYPOND_MARKUP_START', 'LILYPOND_MARKUP_END');
+	replace_content ($content, 'mup_filter', 'MUP_COMMENT_ENABLED',
+			 'MUP_MARKUP_START', 'MUP_MARKUP_END');
+	replace_content ($content, 'guido_filter', 'GUIDO_COMMENT_ENABLED',
+			 'GUIDO_MARKUP_START', 'GUIDO_MARKUP_END');
+	replace_content ($content, 'abc_filter', 'ABC_COMMENT_ENABLED',
+			 'ABC_MARKUP_START', 'ABC_MARKUP_END');
 
 	return $content;
 }
