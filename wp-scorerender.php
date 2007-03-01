@@ -518,7 +518,7 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Enable parsing for:') ?></th>
 			<td>
 				<label for="lilypond_content">
-				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> /> Posts and pages</label><br />
+				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> /> <?php _e('Posts and pages'); ?></label><br />
 				<label for="lilypond_comments">
 				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php _e('Comments <strong>(Security Risk!)</strong>'); ?></label>
 			</td>
@@ -587,7 +587,7 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Enable parsing for:') ?></th>
 			<td>
 				<label for="guido_content">
-				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> /> Posts and pages</label><br />
+				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> /> <?php _e('Posts and pages'); ?></label><br />
 				<label for="guido_comments">
 				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> /> <?php _e('Comments <strong>(Security Risk!)</strong>'); ?></label>
 			</td>
@@ -611,7 +611,7 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Enable parsing for:') ?></th>
 			<td>
 				<label for="abc_content">
-				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> /> Posts and pages</label><br />
+				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> /> <?php _e('Posts and pages'); ?></label><br />
 				<label for="abc_comments">
 				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php _e('Comments <strong>(Security Risk!)</strong>'); ?></label>
 			</td>
