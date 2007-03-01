@@ -86,12 +86,8 @@ class ScoreRender
 			}
 			else
 			{
-				// Is it possible to execute convert only once?
-				$cmd .=	'-channel alpha ' .
-					$rendered_image . ' png:- | ' .
-					$this->_options['CONVERT_BIN'] .
-					' -channel rgb -negate png:- ' .
-					$final_image;
+				$cmd .=	'-channel alpha -fx intensity -channel rgb -negate ' .
+					$rendered_image . ' ' .  $final_image;
 			}
 		}
 

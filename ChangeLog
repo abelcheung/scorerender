@@ -1,5 +1,12 @@
 2007-03-01  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.scorerender.inc.php:
+	Invoke convert once instead of twice.
+	* wp-scorerender.php:
+	Minor changes of strings in option page.
+
+2007-03-01  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php:
 	Mark some strings as localizable.
 
