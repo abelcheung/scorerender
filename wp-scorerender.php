@@ -449,9 +449,9 @@ function scorerender_admin_options() {
 	<input type="submit" name="Submit" value="<?php _e('Update Options') ?> &raquo;" />
 	</p>
 
-	<!-- general options -->
+	<!-- path options -->
 	<fieldset class="options">
-		<legend><?php _e('General options') ?></legend>
+		<legend><?php _e('Path options') ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
@@ -475,6 +475,12 @@ function scorerender_admin_options() {
 				<?php _e('Must correspond to the image cache directory above.') ?>
 			</td>
 		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s %s binary:'), '<a target="_new" href="http://www.imagemagick.net/">ImageMagick</a>', '<code>convert</code>') ?></th>
+			<td>
+				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape($scorerender_options['CONVERT_BIN']); ?>" size="40" />
+			</td>
+		</tr>
 		</table>
 	</fieldset>
 
@@ -484,30 +490,21 @@ function scorerender_admin_options() {
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Show source in image ALT attribute') ?></th>
 			<td>
 				<label for="show_input">
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /></label>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /> <?php _e('Show source in image ALT attribute'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Invert image colours') ?></th>
 			<td>
 				<label for="invert_image">
-				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> /></label>
+				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> /> <?php _e('Invert image colours'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Use transparent background') ?></th>
 			<td>
 				<label for="transparent_image">
-				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> /> <small><?php _e('(IE6 does not support transparent PNG)'); ?></small></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Location of <a target="_new" href="http://www.imagemagick.net/">ImageMagick</a> <code>convert</code> binary:') ?></th>
-			<td>
-				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape($scorerender_options['CONVERT_BIN']); ?>" size="40" />
+				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> /> <?php _e('Use transparent background') ?> <?php _e('(IE6 does not support transparent PNG)'); ?></label>
 			</td>
 		</tr>
 		</table>
@@ -524,7 +521,7 @@ function scorerender_admin_options() {
 				<label for="lilypond_content">
 				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="lilypond_comments">
-				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments (<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)'); ?></label>
+				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -535,7 +532,7 @@ function scorerender_admin_options() {
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Location of <code>lilypond</code> binary:') ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>lilypond</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
 			</td>
@@ -554,7 +551,7 @@ function scorerender_admin_options() {
 				<label for="mup_content">
 				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="mup_comments">
-				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments (<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)'); ?></label>
+				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -566,13 +563,13 @@ function scorerender_admin_options() {
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Location of <code>mup</code> binary:') ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>mup</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape($scorerender_options['MUP_BIN']); ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Location of <code>mup</code> magic file:') ?></th>
+			<th scope="row"><?php printf (__('Location of %s magic file:'), '<code>mup</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
 				<br />
@@ -593,7 +590,7 @@ function scorerender_admin_options() {
 				<label for="guido_content">
 				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="guido_comments">
-				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments (<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)'); ?></label>
+				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -617,7 +614,7 @@ function scorerender_admin_options() {
 				<label for="abc_content">
 				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="abc_comments">
-				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments (<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)'); ?></label>
+				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -628,11 +625,11 @@ function scorerender_admin_options() {
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Location of <code>abcm2ps</code> binary:') ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>abcm2ps</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
 				<br />
-				<?php _e('abcm2ps is HIGHLY recommended. abc2ps works for simple melodies, but not for multiple voices inside single staff.'); ?>
+				<?php printf (__('%s is HIGHLY recommended. %s works for simple melodies, but not for multiple voices inside single staff.'), '<code>abcm2ps</code>', '<code>abc2ps</code>'); ?>
 			</td>
 		</tr>
 		</table>
