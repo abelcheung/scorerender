@@ -664,6 +664,8 @@ remove_filter ('pre_comment_content', 'balanceTags', 30);
 
 // earlier than default priority, since smilies conversion
 // and wptexturize() can mess up the content
+add_filter ('the_title', 'scorerender_content', 5);
+add_filter ('the_excerpt', 'scorerender_content', 5);
 add_filter ('the_content', 'scorerender_content', 5);
 add_filter ('comment_text', 'scorerender_comment', 5);
 add_action ('admin_menu', 'scorerender_admin');
