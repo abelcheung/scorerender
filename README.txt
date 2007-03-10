@@ -1,39 +1,25 @@
-Plugin Name: FigureRender
-Plugin URI: http://chris-lamb.co.uk/code/figurerender/
-Description: Renders inline LaTeX, Lilypond and Mup figures in posts and comments. 
-Author: Chris Lamb
-Version: 1.0
-Author URI: http://chris-lamb.co.uk/
-
-NOTE: This version is modified by Abel Cheung to render mup score, in addition
-to LaTeX and lilypond snipplets. Other additional features and fixes include:
-- Use tempnam() instead of creating temp file with random number
-- Add 'transparency' option, figures can have transparent background
-- Allows each type of image be converted diffrently with convertimg()
-- XHTML 1.0 Transitional compliance
-- Use safe mode for lilypond rendering
+Plugin Name: ScoreRender
+Plugin URI: http://scorerender.abelcheung.org/
+Description: Renders inline sheet music fragments in post, pages and comments.
+Author: Abel Cheung
+Version: 0.1
+Author URI: http://me.abelcheung.org/
 
 === REQUIREMENT ===
-1. Wordpress 1.5 or later
-2. PHP 5.x (doesn't work with 4.x)
+1. Wordpress 2.0.x or later (does not work with 1.5.x)
+2. PHP 4.3.x
 3. ImageMagick, specifically the 'convert' utility
-4. For rendering LaTeX, the programs 'latex' and 'dvips' must be
-   available
-5. For rendering lilypond, lilypond >= 2.8.1 must be installed. Doesn't
+
+=== OPTIONAL PROGRAM ===
+1. For rendering lilypond, lilypond >= 2.8.1 must be installed. Doesn't
    work with older versions.
-6. For rendering mup, mup must be installed. The magic file (only available
-   after paying registering fee) can be utilized if present.
+2. For rendering mup, mup must be installed. The magic file (only available
+   after paying registration fee) can be utilized if present.
+3. For rendering ABC notation, either use abcm2ps or abc2ps (can be
+   changed in program path in option page).
 
 === INSTALLATION ===
-1. extract all files and put them inside wp-content/plugins, preferably
-   under a sub-folder inside wp-content/plugins/ (a bit more tidy):
-   # mkdir wp-content/plugins/FigureRender/
-   # cp *.php wp-content/plugins/FigureRender/
-
-   You can also choose not to create a subdirectory, however.
-
-2. Login to your WordPress installation and enable the plugin on the
-   Plugin Management tab.
-
-3. Configure FigureRender under the FigureRender tab of the Options page.
+1. extract archive, and copy this folder to wp-content/plugins/.
+2. Login to WordPress and enable the plugin in admin interface.
+3. Configure ScoreRender under the ScoreRender tab of the Options page.
 
