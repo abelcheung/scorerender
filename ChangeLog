@@ -1,5 +1,10 @@
 2007-03-11  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	Make error messages more consistent, thus less translation needed.
+
+2007-03-11  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.lilypond.inc.php:
 	Turn on safe mode again, and use convert -density option instead.
 	* class.mup.inc.php:

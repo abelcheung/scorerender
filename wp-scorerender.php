@@ -281,20 +281,20 @@ function scorerender_update_options ()
 
 	$messages = array
 	(
-		'temp_dir_undefined'         => __('WARNING: Temporary directory is NOT defined! Will fall back to /tmp.'),
-		'temp_dir_not_writable'      => __('WARNING: Temporary directory is NOT writable! Will fall back to /tmp.'),
-		'cache_dir_undefined'        => __('ERROR: Cache directory is NOT defined! Image can not be placed inside appropriate directory.'),
-		'cache_dir_not_writable'     => __('ERROR: Cache directory is NOT writable! Image can not be placed inside appropriate directory.'),
-		'cache_url_undefined'        => __('ERROR: Cache URL is NOT defined!'),
-		'convert_not_found'          => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
-		'convert_not_executable'     => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
-		'lilypond_tag_problem'       => __('WARNING: Start and end tag must be both present and different. Lilypond support DISABLED.'),
-		'lilypond_binary_problem'    => __('WARNING: <tt>lilypond</tt> not found or not an executable. Lilypond support DISABLED.'),
-		'mup_tag_problem'            => __('WARNING: Start and end tag must be both present and different. Mup support DISABLED.'),
-		'mup_binary_problem'         => __('WARNING: <tt>mup</tt> not found or not an executable. Mup support DISABLED.'),
-		'guido_tag_problem'          => __('WARNING: Start and end tag must be both present and different. GUIDO noteserver support DISABLED.'),
-		'abc_tag_problem'            => __('WARNING: Start and end tag must be both present and different. ABC support DISABLED.'),
-		'abc_binary_problem'         => __('WARNING: <tt>abcm2ps</tt> not found or not an executable. ABC support DISABLED.'),
+		'temp_dir_undefined'       => sprintf (__('WARNING: Temporary directory is NOT defined! Will fall back to %s.'), $defalt_tmp_dir),
+		'temp_dir_not_writable'    => sprintf (__('WARNING: Temporary directory is NOT writable! Will fall back to %s.'), $defalt_tmp_dir),
+		'cache_dir_undefined'      => __('ERROR: Cache directory is NOT defined! Image can not be placed inside appropriate directory.'),
+		'cache_dir_not_writable'   => __('ERROR: Cache directory is NOT writable! Image can not be placed inside appropriate directory.'),
+		'cache_url_undefined'      => __('ERROR: Cache URL is NOT defined!'),
+		'convert_not_found'        => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
+		'convert_not_executable'   => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
+		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>lilypond</tt>', 'Lilypond'),
+		'mup_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>mup</tt>', 'Mup'),
+		'abc_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>abcm2ps</tt>', 'ABC'),
+		'lilypond_tag_problem'     => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'Lilypond'),
+		'mup_tag_problem'          => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'Mup'),
+		'guido_tag_problem'        => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'GUIDO NoteServer'),
+		'abc_tag_problem'          => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'ABC'),
 	);
 
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
