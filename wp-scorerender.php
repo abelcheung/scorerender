@@ -153,7 +153,7 @@ function parse_input($input)
 
 function scorerender_generate_html_error ($msg)
 {
-	return '<p><b>ScoreRender Error:</b> <i>' . $msg . '</i></p>';
+	return '<p>' . sprintf (__('ScoreRender Error: %s'), $msg) . '</p>';
 }
 
 function scorerender_process_result ($result, $input, $render)
@@ -163,7 +163,7 @@ function scorerender_process_result ($result, $input, $render)
 	switch ($result)
 	{
 		case ERR_INVALID_INPUT:
-			return scorerender_generate_html_error (__('Invalid input')) . '<br/><pre>' . $input . '</pre>';
+			return scorerender_generate_html_error (__('Invalid or dangerous input')) . '<br/><pre>' . $input . '</pre>';
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
 			return scorerender_generate_html_error (__('Cache directory not writable!'));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
