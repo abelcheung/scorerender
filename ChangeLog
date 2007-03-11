@@ -1,3 +1,13 @@
+2007-03-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* README.txt:
+	Minor changes.
+	* wp-scorerender.php:
+	Impl sys_get_temp_dir() for determining temp folder
+	automatically. Don't filter through title, because normally
+	title contains only one line, which is not quite enough for
+	melodies. Minor changes of text within option page.
+
 2007-03-10  Abel Cheung  <abelcheung@gmail.com>
 
 	* README.txt:

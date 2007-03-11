@@ -52,13 +52,45 @@ require_once('class.guido.inc.php');
 require_once('class.lilypond.inc.php');
 require_once('class.mup.inc.php');
 
-$default_tmp_dir = '/tmp';
+$default_tmp_dir = '';
 $scorerender_options = array ();
+
+if (!function_exists ('sys_get_temp_dir'))
+{
+	function sys_get_temp_dir ()
+	{
+		// Based on http://www.phpit.net/
+		// article/creating-zip-tar-archives-dynamically-php/2/
+		// Try to get from environment variable
+		if ( !empty($_ENV['TMP']) )
+			return realpath( $_ENV['TMP'] );
+		else if ( !empty($_ENV['TMPDIR']) )
+			return realpath( $_ENV['TMPDIR'] );
+		else if ( !empty($_ENV['TEMP']) )
+			return realpath( $_ENV['TEMP'] );
+		// Detect by creating a temporary file
+		else
+		{
+			// Try to use system's temporary directory
+			// as random name shouldn't exist
+			$temp_file = tempnam( md5(uniqid(rand(), TRUE)), '' );
+			if ( $temp_file )
+			{
+				$temp_dir = realpath( dirname($temp_file) );
+				unlink( $temp_file );
+				return $temp_dir;
+			}
+			else
+				return FALSE;
+		}
+	}
+}
 
 function scorerender_get_options ()
 {
 	global $scorerender_options, $default_tmp_dir;
 
+	$default_tmp_dir = sys_get_temp_dir();
 	$scorerender_options = get_option ('scorerender_options');
 
 	if (!is_array ($scorerender_options))
@@ -432,17 +464,18 @@ function scorerender_admin_options() {
 	<form method="post" action="" id="scorerender-conf">
 	<h2><?php _e('ScoreRender options') ?></h2>
 
-	<p><?php _e('ScoreRender renders inline music fragments inside blog post and/or comment as images. Currently it supports the following formats:'); ?></p>
+	<p><?php _e('ScoreRender renders inline music fragments inside blog post and/or comment as images. Currently it supports the following notations:'); ?></p>
 	<ul>
 		<li><a target="_blank" href="http://www.lilypond.org/">Lilypond</a></li>
 		<li><?php printf ('%s, used by Mup itself and %s',
 			'<a target="_blank" href="http://www.arkkra.com/">Mup</a>',
 			'<a target="_blank" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></li>
 		<li><a target="_new" href="http://www.informatik.tu-darmstadt.de/AFS/GUIDO/">GUIDO</a></li>
-		<li><?php printf ('%s, used by various programs like %s or %s',
+		<li><?php printf ('%s, used by various programs like %s, %s or %s',
 			'<a target="_blank" href="http://abcnotation.org.uk/">ABC notation</a>',
+			'<a target="_blank" href="http://www.ihp-ffo.de/~msm/">abc2ps</a>',
 			'<a target="_blank" href="http://moinejf.free.fr/">abcm2ps</a>',
-			'<a target="_blank" href="http://www.ihp-ffo.de/~msm/">abc2ps</a>'); ?></li>
+			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></li>
 	</ul>
 
 	<p class="submit">
@@ -521,7 +554,7 @@ function scorerender_admin_options() {
 				<label for="lilypond_content">
 				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="lilypond_comments">
-				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)')); ?></label>
+				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -551,7 +584,7 @@ function scorerender_admin_options() {
 				<label for="mup_content">
 				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="mup_comments">
-				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)')); ?></label>
+				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -614,7 +647,7 @@ function scorerender_admin_options() {
 				<label for="abc_content">
 				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="abc_comments">
-				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> security concern for exploiting weakness in binaries.)')); ?></label>
+				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -629,7 +662,7 @@ function scorerender_admin_options() {
 			<td>
 				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
 				<br />
-				<?php printf (__('%s is HIGHLY recommended. %s works for simple melodies, but not for multiple voices inside single staff.'), '<code>abcm2ps</code>', '<code>abc2ps</code>'); ?>
+				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.'), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
 			</td>
 		</tr>
 		</table>
@@ -664,7 +697,6 @@ remove_filter ('pre_comment_content', 'balanceTags', 30);
 
 // earlier than default priority, since smilies conversion
 // and wptexturize() can mess up the content
-add_filter ('the_title', 'scorerender_content', 5);
 add_filter ('the_excerpt', 'scorerender_content', 5);
 add_filter ('the_content', 'scorerender_content', 5);
 add_filter ('comment_text', 'scorerender_comment', 5);

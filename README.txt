@@ -7,16 +7,18 @@ Author URI: http://me.abelcheung.org/
 
 === REQUIREMENT ===
 1. Wordpress 2.0.x or later (does not work with 1.5.x)
-2. PHP 4.3.x
+2. PHP 4.x (I don't know the exact requirement yet, it works fine with
+   PHP 4.4.2 on one of the wordpress installations)
 3. ImageMagick, specifically the 'convert' utility
 
 === OPTIONAL PROGRAM ===
-1. For rendering lilypond, lilypond >= 2.8.1 must be installed. Doesn't
+1. For lilypond notation, lilypond >= 2.8.1 must be installed. Doesn't
    work with older versions.
-2. For rendering mup, mup must be installed. The magic file (only available
+2. For mup notation, mup must be installed. The magic file (only available
    after paying registration fee) can be utilized if present.
-3. For rendering ABC notation, either use abcm2ps or abc2ps (can be
-   changed in program path in option page).
+3. For ABC notation, any program compatible with abc2ps command line options
+   is fine. However abcm2ps is preferred, due to its ability to handle multiple
+   voices within single staff.
 
 === INSTALLATION ===
 1. extract archive, and copy this folder to wp-content/plugins/.
