@@ -1,5 +1,14 @@
 2007-03-11  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.lilypond.inc.php:
+	Turn on safe mode again, and use convert -density option instead.
+	* class.mup.inc.php:
+	Fix blacklist tags.
+	* class.scorerender.inc.php:
+	Simplify convert command line.
+
+2007-03-11  Abel Cheung  <abelcheung@gmail.com>
+
 	* README.txt:
 	Minor changes.
 	* wp-scorerender.php:

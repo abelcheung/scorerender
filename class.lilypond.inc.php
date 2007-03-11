@@ -48,7 +48,6 @@ class LilypondRender extends ScoreRender
 	indent = 0.0\\mm
 	line-width = 5\\in
 }
-#(set-global-staff-size 24)
 \\layout {
 	\\context {
 		\\Score
@@ -62,7 +61,7 @@ EOD;
 	function execute ($input_file, $rendered_image)
 	{
 		/* lilypond adds .ps extension by itself */
-		$cmd = sprintf ('%s --ps --output %s %s 2>&1',
+		$cmd = sprintf ('%s --safe --ps --output %s %s 2>&1',
 			$this->_options['LILYPOND_BIN'],
 			dirname($rendered_image) . DIRECTORY_SEPARATOR . basename($rendered_image, ".ps"),
 			$input_file);
@@ -70,6 +69,29 @@ EOD;
 		$retval = parent::_exec ($cmd);
 
 		return ($retval == 0);
+	}
+
+	function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	{
+		// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1
+		// and 72*1.2 = 86.4
+		$cmd = $this->_options['CONVERT_BIN'] . ' -density 86 -trim ';
+
+		if (!$transparent)
+		{
+			$cmd .= (($invert) ? '-negate ' : ' ')
+			        . $rendered_image . ' ' . $final_image;
+		}
+		else
+		{
+			$cmd .= '-channel alpha -fx intensity ' .
+				($invert ? '-channel rgb -negate ' : '') .
+				$rendered_image . ' ' . $final_image;
+		}
+
+		$retval = parent::_exec ($cmd);
+
+		return ($retval === 0);
 	}
 
 }

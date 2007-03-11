@@ -35,7 +35,7 @@ class MupRender extends ScoreRender
 	{
 		$blacklist = array
 		(
-			'/^\s*include/', '/^\s*fontfile/'
+			'/^\s*\binclude\b/', '/^\s*\bfontfile\b/'
 		);
 
 		foreach ($blacklist as $pattern)
@@ -93,7 +93,11 @@ EOD;
 
 	function convertimg ($rendered_image, $cache_filename, $invert, $transparent)
 	{
-		// Convert to specified format
+		// Mup output is Grayscale by default. When attempting to add
+		// transparency, it can only have value 0 or 1; that means notes,
+		// slurs and letters won't have smooth outline. Converting to
+		// RGB colorspace seems to fix the problem, but can't have all
+		// options in one single pass.
 		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
 
 		if (!$transparent)
@@ -103,12 +107,11 @@ EOD;
 		}
 		else
 		{
-			// Is it possible to execute convert only once?
-			$cmd .= ' -channel alpha -fx intensity ' .
-				$rendered_image . ' png:- | ' .
+			// Really need to execute convert twice this time
+			$cmd .= $rendered_image . ' png:- | ' .
 				$this->_options['CONVERT_BIN'] .
 				' -channel ' . (($invert)? 'rgba' : 'alpha')
-			        . ' -negate png:- ' . $cache_filename;
+			        . ' -fx "1-intensity" png:- ' . $cache_filename;
 		}
 
 		$retval = parent::_exec($cmd);
