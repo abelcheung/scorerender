@@ -1,0 +1,9 @@
+High priority:
+* option to cover up error messages with blank image
+* option to limit image width (not sure if height will be restricted)
+* optionally also replace post content after tag change
+
+Others:
+* implement MusiXTeX support
+* implement MusicXML support (this one can be difficult)
+* chroot support for lilypond
