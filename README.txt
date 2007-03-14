@@ -2,7 +2,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
 Description: Renders inline sheet music fragments in post, pages and comments.
 Author: Abel Cheung
-Version: 0.1
+Version: 0.1.1
 Author URI: http://me.abelcheung.org/
 
 === REQUIREMENT ===
@@ -24,4 +24,10 @@ Author URI: http://me.abelcheung.org/
 1. extract archive, and copy this folder to wp-content/plugins/.
 2. Login to WordPress and enable the plugin in admin interface.
 3. Configure ScoreRender under the ScoreRender tab of the Options page.
+4. In Option -> Writing, check if this option is turned on:
 
+       "WordPress should correct invalidly nested XHTML automatically"
+
+   It must be turned off if you intent to render Lilypond and Mup fragments,
+   since this option will convert "<<" and ">>" into "< <" and "> >"
+   correspondingly, thus destroying the music content and cause render error.
