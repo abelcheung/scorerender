@@ -479,7 +479,7 @@ function scorerender_admin_options() {
 	</ul>
 
 	<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Update Options') ?> &raquo;" />
+	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
 	</p>
 
 	<!-- path options -->
@@ -669,7 +669,7 @@ function scorerender_admin_options() {
 	</fieldset>
 
 	<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Update Options') ?> &raquo;" />
+	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
 	</p>
 
 	</div>
@@ -688,12 +688,28 @@ scorerender_get_options ();
 
 // Remove tag balancing filter
 // There seems to be an bug in the balanceTags function of wp-includes/functions-formatting.php
-// which means that strings containing ">>" (part of the LilyPond syntax for parallel music)
-// are converted to "> >"  causing syntax errors.
-remove_filter ('content_save_pre', 'balanceTags', 50);
-remove_filter ('excerpt_save_pre', 'balanceTags', 50);
-remove_filter ('comment_save_pre', 'balanceTags', 50);
-remove_filter ('pre_comment_content', 'balanceTags', 30);
+// which means that ">>" are converted to "> >", and "<<" to "< <", causing syntax errors.
+// (This is part of the LilyPond syntax for parallel music, and Mup syntax for
+// attribute change within a bar)
+//
+// Since balancing filter is also used in get_the_content(), removing filter is of no use.
+//
+//remove_filter ('content_save_pre', 'balanceTags', 50);
+//remove_filter ('excerpt_save_pre', 'balanceTags', 50);
+//remove_filter ('comment_save_pre', 'balanceTags', 50);
+//remove_filter ('pre_comment_content', 'balanceTags', 30);
+//remove_filter ('comment_text', 'force_balance_tags', 25);
+
+if ( get_option('use_balanceTags') != 0 )
+{
+	function turn_off_balance_tags() {
+		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p><strong>'
+			. __('OPTION CONFLICT:') . "</strong> "
+			. sprintf (__('The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.'), "options-writing.php")
+			. "</p></div>";
+	}
+	add_action('admin_notices', 'turn_off_balance_tags');
+}
 
 // earlier than default priority, since smilies conversion
 // and wptexturize() can mess up the content

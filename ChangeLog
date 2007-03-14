@@ -1,3 +1,11 @@
+2007-03-14  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.lilypond.inc.php, class.scorerender.inc.php:
+	Fix transparency rendering of lilypond fragment.
+	* wp-scorerender.php:
+	Big fat warning about conflict with "automatical XHTML nesting fix"
+	option, instead of removing filter.
+
 === ScoreRender 0.1 ===
 
 2007-03-13  Abel Cheung  <abelcheung@gmail.com>

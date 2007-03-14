@@ -80,9 +80,15 @@ class ScoreRender
 		}
 		else
 		{
-			$cmd .= '-channel alpha -fx intensity ' .
-				($invert ? '-channel rgb -negate ' : '') .
-				$rendered_image . ' ' . $final_image;
+			if (!$invert)
+			{
+				$cmd .= '-channel alpha ' . $rendered_image . ' ' . $final_image;
+			}
+			else
+			{
+				$cmd .=	'-channel alpha -fx intensity -channel rgb -negate ' .
+					$rendered_image . ' ' .  $final_image;
+			}
 		}
 
 		$retval = ScoreRender::_exec ($cmd);
