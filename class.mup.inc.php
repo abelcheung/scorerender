@@ -98,7 +98,7 @@ EOD;
 		// slurs and letters won't have smooth outline. Converting to
 		// RGB colorspace seems to fix the problem, but can't have all
 		// options in one single pass.
-		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
+		$cmd = $this->_options['CONVERT_BIN'] . ' -trim +repage ';
 
 		if (!$transparent)
 		{

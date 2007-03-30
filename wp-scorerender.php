@@ -4,7 +4,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://me.abelcheung.org/devel/scorerender/
 Description: Renders inline music score fragments in WordPress. Heavily based on <a href="http://chris-lamb.co.uk/code/figurerender/">FigureRender</a> from Chris Lamb.
 Author: Abel Cheung
-Version: 0.1
+Version: 0.1.2
 Author URI: http://me.abelcheung.org/
 */
 
@@ -703,9 +703,8 @@ scorerender_get_options ();
 if ( get_option('use_balanceTags') != 0 )
 {
 	function turn_off_balance_tags() {
-		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p><strong>'
-			. __('OPTION CONFLICT:') . "</strong> "
-			. sprintf (__('The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.'), "options-writing.php")
+		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
+			. sprintf (__('<strong>OPTION CONFLICT</strong>: The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.'), "options-writing.php")
 			. "</p></div>";
 	}
 	add_action('admin_notices', 'turn_off_balance_tags');

@@ -71,7 +71,7 @@ class ScoreRender
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// Convert to specified format
-		$cmd = $this->_options['CONVERT_BIN'] . ' -trim ';
+		$cmd = $this->_options['CONVERT_BIN'] . ' -trim +repage ';
 
 		if (!$transparent)
 		{

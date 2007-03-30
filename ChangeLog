@@ -1,3 +1,10 @@
+=== ScoreRender 0.1.2 ===
+
+2007-03-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.php: Add +repage option to imagemagick.
+	* wp-scorerender.php: Minor string change.
+
 === ScoreRender 0.1.1 ===
 
 2007-03-14  Abel Cheung  <abelcheung@gmail.com>

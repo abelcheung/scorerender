@@ -49,7 +49,7 @@ class GuidoRender extends ScoreRender
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// Image from noteserver contains border
-		$cmd = $this->_options['CONVERT_BIN'] . ' -shave 1x1 -trim -geometry 56% ';
+		$cmd = $this->_options['CONVERT_BIN'] . ' -shave 1x1 -trim -geometry 56% +repage ';
 
 		if (!$transparent)
 		{
