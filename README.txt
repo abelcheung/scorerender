@@ -2,7 +2,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
 Description: Renders inline sheet music fragments in post, pages and comments.
 Author: Abel Cheung
-Version: 0.1.1
+Version: 0.1.2
 Author URI: http://me.abelcheung.org/
 
 === REQUIREMENT ===

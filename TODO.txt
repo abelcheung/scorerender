@@ -1,9 +1,14 @@
 High priority:
 * option to cover up error messages with blank image
 * option to limit image width (not sure if height will be restricted)
-* optionally also replace post content after tag change
+* either replace post content after tag change, or just eliminate
+  tag setting and hardcode to some value
+* limit number of fragment in comment
+* limit length of content per fragment
 
 Others:
 * implement MusiXTeX support
 * implement MusicXML support (this one can be difficult)
+* implement PMW support
+* implement lilypond-book syntax support
 * chroot support for lilypond
