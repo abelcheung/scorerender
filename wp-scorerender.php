@@ -4,7 +4,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
 Description: Renders inline music score fragments in WordPress. Heavily based on <a href="http://chris-lamb.co.uk/code/figurerender/">FigureRender</a> from Chris Lamb.
 Author: Abel Cheung
-Version: 0.1.2
+Version: 0.2.0
 Author URI: http://me.abelcheung.org/
 */
 
@@ -36,7 +36,7 @@ Author URI: http://me.abelcheung.org/
 
 
 // Increment this number if database has new or changed config options
-define ('DATABASE_VERSION', 4);
+define ('DATABASE_VERSION', 5);
 
 // Error constants
 define('ERR_INVALID_INPUT', -1);
@@ -45,6 +45,7 @@ define('ERR_TEMP_DIRECTORY_NOT_WRITABLE', -3);
 define('ERR_TEMP_FILE_NOT_WRITABLE', -4);
 define('ERR_IMAGE_CONVERT_FAILURE', -5);
 define('ERR_RENDERING_ERROR', -6);
+define('ERR_LENGTH_EXCEEDED', -7);
 
 require_once('class.scorerender.inc.php');
 require_once('class.abc.inc.php');
@@ -114,6 +115,7 @@ function scorerender_get_options ()
 		'INVERT_IMAGE'      => false,
 		'TRANSPARENT_IMAGE' => true,
 		'SHOW_SOURCE'       => false,
+		'CONTENT_MAX_LENGTH' => 4096,
 
 		'LILYPOND_CONTENT_ENABLED' => true,
 		'LILYPOND_COMMENT_ENABLED' => false,
@@ -147,7 +149,7 @@ function parse_input($input)
 
 function scorerender_generate_html_error ($msg)
 {
-	return '<p>' . sprintf (__('ScoreRender Error: %s'), $msg) . '</p>';
+	return sprintf (__('[ScoreRender Error: %s]'), $msg);
 }
 
 function scorerender_process_result ($result, $input, $render)
@@ -157,7 +159,7 @@ function scorerender_process_result ($result, $input, $render)
 	switch ($result)
 	{
 		case ERR_INVALID_INPUT:
-			return scorerender_generate_html_error (__('Invalid or dangerous input'));
+			return scorerender_generate_html_error (__('Invalid or dangerous input!'));
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
 			return scorerender_generate_html_error (__('Cache directory not writable!'));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
@@ -168,6 +170,8 @@ function scorerender_process_result ($result, $input, $render)
 			return scorerender_generate_html_error (__('Image convert failure!'));
 		case ERR_RENDERING_ERROR:
 			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') . '<br /><textarea cols=80 rows=10 READONLY>' . $render->getCommandOutput() . '</textarea>');
+		case ERR_LENGTH_EXCEEDED:
+			return scorerender_generate_html_error (__('Content length exceeds configured maximum length!'));
 	}
 
 	// No errors, so generate HTML
@@ -277,6 +281,7 @@ function scorerender_update_options ()
 		'cache_dir_undefined'      => __('ERROR: Cache directory is NOT defined! Image can not be placed inside appropriate directory.'),
 		'cache_dir_not_writable'   => __('ERROR: Cache directory is NOT writable! Image can not be placed inside appropriate directory.'),
 		'cache_url_undefined'      => __('ERROR: Cache URL is NOT defined!'),
+		'wrong_content_length'     => __('ERROR: Content length is not a non-negative integer. Value discarded.'),
 		'convert_not_found'        => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
 		'convert_not_executable'   => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
 		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>lilypond</tt>', 'Lilypond'),
@@ -317,6 +322,11 @@ function scorerender_update_options ()
 	$newopt['SHOW_SOURCE'] = isset ($newopt['SHOW_SOURCE']);
 	$newopt['INVERT_IMAGE'] = isset ($newopt['INVERT_IMAGE']);
 	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE']);
+
+	if (!ctype_digit ($newopt['CONTENT_MAX_LENGTH'])) {
+		$msgs[] = 'wrong_content_length';
+		unset ($newopt['CONTENT_MAX_LENGTH']);
+	}
 
 	/*
 	 * lilypond options
@@ -475,6 +485,21 @@ function scorerender_admin_options() {
 			<td>
 				<label for="transparent_image">
 				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> /> <?php _e('Use transparent background') ?> <?php _e('(IE6 does not support transparent PNG)'); ?></label>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+
+	<!-- content options -->
+	<fieldset class="options">
+		<legend><?php _e('Content options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
+			<td>
+				<label for="content_max_length">
+				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" /> <?php _e('(0 means no limit)') ?></label>
 			</td>
 		</tr>
 		</table>

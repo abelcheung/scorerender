@@ -104,6 +104,12 @@ class ScoreRender
 		     !$this->isValidInput($this->_input)))
 			return ERR_INVALID_INPUT;
 
+		// Check for content length
+		if (isset ($this->_options['CONTENT_MAX_LENGTH']) &&
+		    ($this->_options['CONTENT_MAX_LENGTH'] > 0) &&
+		    (strlen ($this->_input) > $this->_options['CONTENT_MAX_LENGTH']))
+			return ERR_LENGTH_EXCEEDED;
+
 		// Create unique hash
 		$hash = md5 ($this->_input . $this->_options['INVERT_IMAGE']
 			     . $this->_options['TRANSPARENT_IMAGE'] . $this->_uniqueID);
