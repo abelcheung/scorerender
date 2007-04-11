@@ -36,7 +36,7 @@ Author URI: http://me.abelcheung.org/
 
 
 // Increment this number if database has new or changed config options
-define ('DATABASE_VERSION', 3);
+define ('DATABASE_VERSION', 4);
 
 // Error constants
 define('ERR_INVALID_INPUT', -1);
@@ -115,31 +115,25 @@ function scorerender_get_options ()
 		'TRANSPARENT_IMAGE' => true,
 		'SHOW_SOURCE'       => false,
 
-		'LILYPOND_MARKUP_START'    => '[lilypond]',
-		'LILYPOND_MARKUP_END'      => '[/lilypond]',
 		'LILYPOND_CONTENT_ENABLED' => true,
 		'LILYPOND_COMMENT_ENABLED' => false,
 		'LILYPOND_BIN'             => '/usr/bin/lilypond',
 
-		'MUP_MARKUP_START'    => '[mup]',
-		'MUP_MARKUP_END'      => '[/mup]',
 		'MUP_CONTENT_ENABLED' => true,
 		'MUP_COMMENT_ENABLED' => false,
 		'MUP_BIN'             => '/usr/local/bin/mup',
 		'MUP_MAGIC_FILE'      => '',
 
-		'GUIDO_MARKUP_START'    => '[guido]',
-		'GUIDO_MARKUP_END'      => '[/guido]',
 		'GUIDO_CONTENT_ENABLED' => true,
 		'GUIDO_COMMENT_ENABLED' => false,
 
-		'ABC_MARKUP_START'    => '[abc]',
-		'ABC_MARKUP_END'      => '[/abc]',
 		'ABC_CONTENT_ENABLED' => true,
 		'ABC_COMMENT_ENABLED' => false,
 		'ABCM2PS_BIN'         => '/usr/bin/abcm2ps',
 	);
 
+	// remove current settings not present in newest schema, then merge default values
+	$scorerender_options = array_intersect_key ($scorerender_options, $defaults);
 	$scorerender_options = array_merge ($defaults, $scorerender_options);
 	$scorerender_options['DB_VERSION'] = DATABASE_VERSION;
 	update_option ('scorerender_options', $scorerender_options);
@@ -163,7 +157,7 @@ function scorerender_process_result ($result, $input, $render)
 	switch ($result)
 	{
 		case ERR_INVALID_INPUT:
-			return scorerender_generate_html_error (__('Invalid or dangerous input')) . '<br/><pre>' . $input . '</pre>';
+			return scorerender_generate_html_error (__('Invalid or dangerous input'));
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
 			return scorerender_generate_html_error (__('Cache directory not writable!'));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
@@ -233,29 +227,26 @@ function abc_filter ($matches)
 	return scorerender_process_result ($result, $input, $render);
 }
 
-function replace_content (&$content, $filter_function_name, $option_name, $start_tag_name, $end_tag_name)
+function replace_content (&$content, $filter_function_name, $option_name, $regex)
 {
 	global $scorerender_options;
 
 	if ($scorerender_options[$option_name])
 	{
-		$search = sprintf ('~\Q%s\E(.*?)\Q%s\E~s',
-			$scorerender_options[$start_tag_name],
-			$scorerender_options[$end_tag_name]);
-		$content = preg_replace_callback ($search, $filter_function_name, $content);
+		$content = preg_replace_callback ($regex, $filter_function_name, $content);
 	}
 }
 
 function scorerender_content ($content)
 {
 	replace_content ($content, 'lilypond_filter', 'LILYPOND_CONTENT_ENABLED',
-			 'LILYPOND_MARKUP_START', 'LILYPOND_MARKUP_END');
+			 '~\[lilypond\](.*?)\[/lilypond\]~si');
 	replace_content ($content, 'mup_filter', 'MUP_CONTENT_ENABLED',
-			 'MUP_MARKUP_START', 'MUP_MARKUP_END');
+			 '~\[mup\](.*?)\[/mup\]~si');
 	replace_content ($content, 'guido_filter', 'GUIDO_CONTENT_ENABLED',
-			 'GUIDO_MARKUP_START', 'GUIDO_MARKUP_END');
+			 '~\[guido\](.*?)\[/guido\]~si');
 	replace_content ($content, 'abc_filter', 'ABC_CONTENT_ENABLED',
-			 'ABC_MARKUP_START', 'ABC_MARKUP_END');
+			 '~\[abc\](.*?)\[/abc\]~si');
 
 	return $content;
 }
@@ -263,13 +254,13 @@ function scorerender_content ($content)
 function scorerender_comment ($content)
 {
 	replace_content ($content, 'lilypond_filter', 'LILYPOND_COMMENT_ENABLED',
-			 'LILYPOND_MARKUP_START', 'LILYPOND_MARKUP_END');
+			 '~\[lilypond\](.*?)\[/lilypond\]~si');
 	replace_content ($content, 'mup_filter', 'MUP_COMMENT_ENABLED',
-			 'MUP_MARKUP_START', 'MUP_MARKUP_END');
+			 '~\[mup\](.*?)\[/mup\]~si');
 	replace_content ($content, 'guido_filter', 'GUIDO_COMMENT_ENABLED',
-			 'GUIDO_MARKUP_START', 'GUIDO_MARKUP_END');
+			 '~\[guido\](.*?)\[/guido\]~si');
 	replace_content ($content, 'abc_filter', 'ABC_COMMENT_ENABLED',
-			 'ABC_MARKUP_START', 'ABC_MARKUP_END');
+			 '~\[abc\](.*?)\[/abc\]~si');
 
 	return $content;
 }
@@ -291,10 +282,6 @@ function scorerender_update_options ()
 		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>lilypond</tt>', 'Lilypond'),
 		'mup_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>mup</tt>', 'Mup'),
 		'abc_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>abcm2ps</tt>', 'ABC'),
-		'lilypond_tag_problem'     => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'Lilypond'),
-		'mup_tag_problem'          => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'Mup'),
-		'guido_tag_problem'        => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'GUIDO NoteServer'),
-		'abc_tag_problem'          => sprintf (__('WARNING: Start and end tag must be both present and different. %s support DISABLED.'), 'ABC'),
 	);
 
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
@@ -327,27 +314,15 @@ function scorerender_update_options ()
 	else if ( ! is_executable ($newopt['CONVERT_BIN']) )
 		$msgs[] = 'convert_not_executable';
 
-	$newopt['SHOW_SOURCE'] = isset ($newopt['SHOW_SOURCE'])? true : false;
-	$newopt['INVERT_IMAGE'] = isset ($newopt['INVERT_IMAGE'])? true : false;
-	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE'])? true : false;
+	$newopt['SHOW_SOURCE'] = isset ($newopt['SHOW_SOURCE']);
+	$newopt['INVERT_IMAGE'] = isset ($newopt['INVERT_IMAGE']);
+	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE']);
 
 	/*
 	 * lilypond options
 	 */
-	$newopt['LILYPOND_CONTENT_ENABLED'] = isset ($newopt['LILYPOND_CONTENT_ENABLED'])? true : false;
-	$newopt['LILYPOND_COMMENT_ENABLED'] = isset ($newopt['LILYPOND_COMMENT_ENABLED'])? true : false;
-
-	if ( empty ($newopt['LILYPOND_MARKUP_START']) ||
-	     empty ($newopt['LILYPOND_MARKUP_END']) ||
-	     ( !strcmp ($newopt['LILYPOND_MARKUP_START'], $newopt['LILYPOND_MARKUP_END']) ) )
-	{
-		if ($newopt['LILYPOND_CONTENT_ENABLED'] || $newopt['LILYPOND_COMMENT_ENABLED'])
-		{
-			$msgs[] = 'lilypond_tag_problem';
-			$newopt['LILYPOND_CONTENT_ENABLED'] = false;
-			$newopt['LILYPOND_COMMENT_ENABLED'] = false;
-		}
-	}
+	$newopt['LILYPOND_CONTENT_ENABLED'] = isset ($newopt['LILYPOND_CONTENT_ENABLED']);
+	$newopt['LILYPOND_COMMENT_ENABLED'] = isset ($newopt['LILYPOND_COMMENT_ENABLED']);
 
 	if ( !is_executable ($newopt['LILYPOND_BIN']) )
 	{
@@ -362,20 +337,8 @@ function scorerender_update_options ()
 	/*
 	 * mup options
 	 */
-	$newopt['MUP_CONTENT_ENABLED'] = isset ($newopt['MUP_CONTENT_ENABLED'])? true : false;
-	$newopt['MUP_COMMENT_ENABLED'] = isset ($newopt['MUP_COMMENT_ENABLED'])? true : false;
-
-	if ( empty ($newopt['MUP_MARKUP_START']) ||
-	     empty ($newopt['MUP_MARKUP_END']) ||
-	     ( !strcmp ($newopt['MUP_MARKUP_START'], $newopt['MUP_MARKUP_END']) ) )
-	{
-		if ($newopt['MUP_CONTENT_ENABLED'] || $newopt['MUP_COMMENT_ENABLED'])
-		{
-			$msgs[] = 'mup_tag_problem';
-			$newopt['MUP_CONTENT_ENABLED'] = false;
-			$newopt['MUP_COMMENT_ENABLED'] = false;
-		}
-	}
+	$newopt['MUP_CONTENT_ENABLED'] = isset ($newopt['MUP_CONTENT_ENABLED']);
+	$newopt['MUP_COMMENT_ENABLED'] = isset ($newopt['MUP_COMMENT_ENABLED']);
 
 	if ( !is_executable ($newopt['MUP_BIN']) )
 	{
@@ -390,38 +353,14 @@ function scorerender_update_options ()
 	/*
 	 * guido options
 	 */
-	$newopt['GUIDO_CONTENT_ENABLED'] = isset ($newopt['GUIDO_CONTENT_ENABLED'])? true : false;
-	$newopt['GUIDO_COMMENT_ENABLED'] = isset ($newopt['GUIDO_COMMENT_ENABLED'])? true : false;
-
-	if ( empty ($newopt['GUIDO_MARKUP_START']) ||
-	     empty ($newopt['GUIDO_MARKUP_END']) ||
-	     ( !strcmp ($newopt['GUIDO_MARKUP_START'], $newopt['GUIDO_MARKUP_END']) ) )
-	{
-		if ($newopt['GUIDO_CONTENT_ENABLED'] || $newopt['GUIDO_COMMENT_ENABLED'])
-		{
-			$msgs[] = 'guido_tag_problem';
-			$newopt['GUIDO_CONTENT_ENABLED'] = false;
-			$newopt['GUIDO_COMMENT_ENABLED'] = false;
-		}
-	}
+	$newopt['GUIDO_CONTENT_ENABLED'] = isset ($newopt['GUIDO_CONTENT_ENABLED']);
+	$newopt['GUIDO_COMMENT_ENABLED'] = isset ($newopt['GUIDO_COMMENT_ENABLED']);
 
 	/*
 	 * abcm2ps options
 	 */
-	$newopt['ABC_CONTENT_ENABLED'] = isset ($newopt['ABC_CONTENT_ENABLED'])? true : false;
-	$newopt['ABC_COMMENT_ENABLED'] = isset ($newopt['ABC_COMMENT_ENABLED'])? true : false;
-
-	if ( empty ($newopt['ABC_MARKUP_START']) ||
-	     empty ($newopt['ABC_MARKUP_END']) ||
-	     ( !strcmp ($newopt['ABC_MARKUP_START'], $newopt['ABC_MARKUP_END']) ) )
-	{
-		if ($newopt['ABC_CONTENT_ENABLED'] || $newopt['ABC_COMMENT_ENABLED'])
-		{
-			$msgs[] = 'abc_tag_problem';
-			$newopt['ABC_CONTENT_ENABLED'] = false;
-			$newopt['ABC_COMMENT_ENABLED'] = false;
-		}
-	}
+	$newopt['ABC_CONTENT_ENABLED'] = isset ($newopt['ABC_CONTENT_ENABLED']);
+	$newopt['ABC_COMMENT_ENABLED'] = isset ($newopt['ABC_COMMENT_ENABLED']);
 
 	if ( !is_executable ($newopt['ABCM2PS_BIN']) )
 	{
@@ -432,8 +371,6 @@ function scorerender_update_options ()
 			$newopt['ABC_COMMENT_ENABLED'] = false;
 		}
 	}
-
-	/* FIXME: Didn't handle the case when various tags coincide with each other */
 
 	$scorerender_options = array_merge ($scorerender_options, $newopt);
 	update_option ('scorerender_options', $scorerender_options);
@@ -471,8 +408,8 @@ function scorerender_admin_options() {
 			'<a target="_blank" href="http://www.arkkra.com/">Mup</a>',
 			'<a target="_blank" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></li>
 		<li><a target="_new" href="http://www.informatik.tu-darmstadt.de/AFS/GUIDO/">GUIDO</a></li>
-		<li><?php printf ('%s, used by various programs like %s, %s or %s',
-			'<a target="_blank" href="http://abcnotation.org.uk/">ABC notation</a>',
+		<li><?php printf ('<a target="_blank" href="%s">ABC notation</a>, used by various programs like %s, %s or %s',
+			'http://abcnotation.org.uk/',
 			'<a target="_blank" href="http://www.ihp-ffo.de/~msm/">abc2ps</a>',
 			'<a target="_blank" href="http://moinejf.free.fr/">abcm2ps</a>',
 			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></li>
@@ -558,13 +495,6 @@ function scorerender_admin_options() {
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Tag markup:') ?></th>
-			<td>
-				<?php _e('Start:') ?> <input name="ScoreRender[LILYPOND_MARKUP_START]" class="code" type="text" id="lilypond_markup_start" value="<?php echo attribute_escape($scorerender_options['LILYPOND_MARKUP_START']); ?>" size="14" />
-				<?php _e('End:') ?> <input name="ScoreRender[LILYPOND_MARKUP_END]" class="code" type="text" id="lilypond_markup_end" value="<?php echo attribute_escape($scorerender_options['LILYPOND_MARKUP_END']); ?>" size="14" />
-			</td>
-		</tr>
-		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>lilypond</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
@@ -585,14 +515,6 @@ function scorerender_admin_options() {
 				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="mup_comments">
 				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Tag markup:') ?></th>
-			<td>
-
-				<?php _e('Start:') ?> <input name="ScoreRender[MUP_MARKUP_START]" class="code" type="text" id="mup_markup_start" value="<?php echo attribute_escape($scorerender_options['MUP_MARKUP_START']); ?>" size="14" />
-				<?php _e('End:') ?> <input name="ScoreRender[MUP_MARKUP_END]" class="code" type="text" id="mup_markup_end" value="<?php echo attribute_escape($scorerender_options['MUP_MARKUP_END']); ?>" size="14" />
 			</td>
 		</tr>
 		<tr valign="top">
@@ -626,13 +548,6 @@ function scorerender_admin_options() {
 				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments'); ?></label>
 			</td>
 		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Tag markup:') ?></th>
-			<td>
-				<?php _e('Start:') ?> <input name="ScoreRender[GUIDO_MARKUP_START]" class="code" type="text" id="guido_markup_start" value="<?php echo attribute_escape($scorerender_options['GUIDO_MARKUP_START']); ?>" size="14" />
-				<?php _e('End:') ?> <input name="ScoreRender[GUIDO_MARKUP_END]" class="code" type="text" id="guido_markup_end" value="<?php echo attribute_escape($scorerender_options['GUIDO_MARKUP_END']); ?>" size="14" />
-			</td>
-		</tr>
 		</table>
 	</fieldset>
 
@@ -648,13 +563,6 @@ function scorerender_admin_options() {
 				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
 				<label for="abc_comments">
 				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Tag markup:') ?></th>
-			<td>
-				<?php _e('Start:') ?> <input name="ScoreRender[ABC_MARKUP_START]" class="code" type="text" id="abc_markup_start" value="<?php echo attribute_escape($scorerender_options['ABC_MARKUP_START']); ?>" size="14" />
-				<?php _e('End:') ?> <input name="ScoreRender[ABC_MARKUP_END]" class="code" type="text" id="abc_markup_end" value="<?php echo attribute_escape($scorerender_options['ABC_MARKUP_END']); ?>" size="14" />
 			</td>
 		</tr>
 		<tr valign="top">
