@@ -36,16 +36,16 @@ Author URI: http://me.abelcheung.org/
 
 
 // Increment this number if database has new or changed config options
-define ('DATABASE_VERSION', 5);
+define ('DATABASE_VERSION', 6);
 
 // Error constants
-define('ERR_INVALID_INPUT', -1);
+define('ERR_INVALID_INPUT'               , -1);
 define('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
-define('ERR_TEMP_DIRECTORY_NOT_WRITABLE', -3);
-define('ERR_TEMP_FILE_NOT_WRITABLE', -4);
-define('ERR_IMAGE_CONVERT_FAILURE', -5);
-define('ERR_RENDERING_ERROR', -6);
-define('ERR_LENGTH_EXCEEDED', -7);
+define('ERR_TEMP_DIRECTORY_NOT_WRITABLE' , -3);
+define('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
+define('ERR_IMAGE_CONVERT_FAILURE'       , -5);
+define('ERR_RENDERING_ERROR'             , -6);
+define('ERR_LENGTH_EXCEEDED'             , -7);
 
 require_once('class.scorerender.inc.php');
 require_once('class.abc.inc.php');
@@ -55,6 +55,11 @@ require_once('class.mup.inc.php');
 
 $default_tmp_dir = '';
 $scorerender_options = array ();
+
+define ('REGEX_MATCH_ABC'     , '~\[abc\](.*?)\[/abc\]~si');
+define ('REGEX_MATCH_GUIDO'   , '~\[guido\](.*?)\[/guido\]~si');
+define ('REGEX_MATCH_LILYPOND', '~\[lilypond\](.*?)\[/lilypond\]~si');
+define ('REGEX_MATCH_MUP'     , '~\[mup\](.*?)\[/mup\]~si');
 
 if (!function_exists ('sys_get_temp_dir'))
 {
@@ -107,15 +112,16 @@ function scorerender_get_options ()
 	// default options
 	$defaults = array
 	(
-		'DB_VERSION'        => DATABASE_VERSION,
-		'TEMP_DIR'          => $default_tmp_dir,
-		'CONVERT_BIN'       => '/usr/bin/convert',
-		'CACHE_DIR'         => ABSPATH . get_option('upload_path'),
-		'CACHE_URL'         => get_option('siteurl') . '/' . get_option('upload_path'),
-		'INVERT_IMAGE'      => false,
-		'TRANSPARENT_IMAGE' => true,
-		'SHOW_SOURCE'       => false,
-		'CONTENT_MAX_LENGTH' => 4096,
+		'DB_VERSION'           => DATABASE_VERSION,
+		'TEMP_DIR'             => $default_tmp_dir,
+		'CONVERT_BIN'          => '/usr/bin/convert',
+		'CACHE_DIR'            => ABSPATH . get_option('upload_path'),
+		'CACHE_URL'            => get_option('siteurl') . '/' . get_option('upload_path'),
+		'INVERT_IMAGE'         => false,
+		'TRANSPARENT_IMAGE'    => true,
+		'SHOW_SOURCE'          => false,
+		'CONTENT_MAX_LENGTH'   => 4096,
+		'FRAGMENT_PER_COMMENT' => 1,
 
 		'LILYPOND_CONTENT_ENABLED' => true,
 		'LILYPOND_COMMENT_ENABLED' => false,
@@ -187,86 +193,64 @@ function scorerender_process_result ($result, $input, $render)
 	return $html;
 }
 
-function lilypond_filter ($matches)
+function scorerender_filter ($matches)
 {
 	global $scorerender_options;
 
 	$input = parse_input ($matches[1]);
-	$render = new LilypondRender ($input, $scorerender_options);
+
+	// since preg_replace_callback only accepts single function,
+	// we have to check which regex is matched here and create
+	// corresponding object
+	if (preg_match (REGEX_MATCH_ABC, $matches[0]))
+		$render = new ABCRender ($input, $scorerender_options);
+	elseif (preg_match (REGEX_MATCH_GUIDO, $matches[0]))
+		$render = new GuidoRender ($input, $scorerender_options);
+	elseif (preg_match (REGEX_MATCH_LILYPOND, $matches[0]))
+		$render = new LilypondRender ($input, $scorerender_options);
+	elseif (preg_match (REGEX_MATCH_MUP, $matches[0]))
+		$render = new MupRender ($input, $scorerender_options);
+	else
+		return $input;
+
 	$result = $render->render();
 
 	return scorerender_process_result ($result, $input, $render);
-}
-
-function mup_filter ($matches)
-{
-	global $scorerender_options;
-
-	$input = parse_input ($matches[1]);
-	$render = new MupRender ($input, $scorerender_options);
-	$result = $render->render();
-
-	return scorerender_process_result ($result, $input, $render);
-}
-
-function guido_filter ($matches)
-{
-	global $scorerender_options;
-
-	$input = parse_input ($matches[1]);
-	$render = new GuidoRender ($input, $scorerender_options);
-	$result = $render->render();
-
-	return scorerender_process_result ($result, $input, $render);
-}
-
-function abc_filter ($matches)
-{
-	global $scorerender_options;
-
-	$input = parse_input ($matches[1]);
-	$render = new ABCRender ($input, $scorerender_options);
-	$result = $render->render();
-
-	return scorerender_process_result ($result, $input, $render);
-}
-
-function replace_content (&$content, $filter_function_name, $option_name, $regex)
-{
-	global $scorerender_options;
-
-	if ($scorerender_options[$option_name])
-	{
-		$content = preg_replace_callback ($regex, $filter_function_name, $content);
-	}
 }
 
 function scorerender_content ($content)
 {
-	replace_content ($content, 'lilypond_filter', 'LILYPOND_CONTENT_ENABLED',
-			 '~\[lilypond\](.*?)\[/lilypond\]~si');
-	replace_content ($content, 'mup_filter', 'MUP_CONTENT_ENABLED',
-			 '~\[mup\](.*?)\[/mup\]~si');
-	replace_content ($content, 'guido_filter', 'GUIDO_CONTENT_ENABLED',
-			 '~\[guido\](.*?)\[/guido\]~si');
-	replace_content ($content, 'abc_filter', 'ABC_CONTENT_ENABLED',
-			 '~\[abc\](.*?)\[/abc\]~si');
+	global $scorerender_options;
 
-	return $content;
+	$regex_list = array();
+	if ($scorerender_options['ABC_CONTENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_ABC;
+	if ($scorerender_options['GUIDO_CONTENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_GUIDO;
+	if ($scorerender_options['LILYPOND_CONTENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_LILYPOND;
+	if ($scorerender_options['MUP_CONTENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_MUP;
+
+	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, -1);
 }
 
 function scorerender_comment ($content)
 {
-	replace_content ($content, 'lilypond_filter', 'LILYPOND_COMMENT_ENABLED',
-			 '~\[lilypond\](.*?)\[/lilypond\]~si');
-	replace_content ($content, 'mup_filter', 'MUP_COMMENT_ENABLED',
-			 '~\[mup\](.*?)\[/mup\]~si');
-	replace_content ($content, 'guido_filter', 'GUIDO_COMMENT_ENABLED',
-			 '~\[guido\](.*?)\[/guido\]~si');
-	replace_content ($content, 'abc_filter', 'ABC_COMMENT_ENABLED',
-			 '~\[abc\](.*?)\[/abc\]~si');
+	global $scorerender_options;
 
-	return $content;
+	$regex_list = array();
+	if ($scorerender_options['ABC_COMMENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_ABC;
+	if ($scorerender_options['GUIDO_COMMENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_GUIDO;
+	if ($scorerender_options['LILYPOND_COMMENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_LILYPOND;
+	if ($scorerender_options['MUP_COMMENT_ENABLED'])
+		$regex_list[] = REGEX_MATCH_MUP;
+
+	$limit = ($scorerender_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : $scorerender_options['FRAGMENT_PER_COMMENT'];
+	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
 }
 
 function scorerender_update_options ()
@@ -282,6 +266,7 @@ function scorerender_update_options ()
 		'cache_dir_not_writable'   => __('ERROR: Cache directory is NOT writable! Image can not be placed inside appropriate directory.'),
 		'cache_url_undefined'      => __('ERROR: Cache URL is NOT defined!'),
 		'wrong_content_length'     => __('ERROR: Content length is not a non-negative integer. Value discarded.'),
+		'wrong_frag_per_comment'   => __('ERROR: Fragment per comment is not a non-negative integer. Value discarded.'),
 		'convert_not_found'        => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
 		'convert_not_executable'   => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
 		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>lilypond</tt>', 'Lilypond'),
@@ -326,6 +311,11 @@ function scorerender_update_options ()
 	if (!ctype_digit ($newopt['CONTENT_MAX_LENGTH'])) {
 		$msgs[] = 'wrong_content_length';
 		unset ($newopt['CONTENT_MAX_LENGTH']);
+	}
+
+	if (!ctype_digit ($newopt['FRAGMENT_PER_COMMENT'])) {
+		$msgs[] = 'wrong_frag_per_comment';
+		unset ($newopt['FRAGMENT_PER_COMMENT']);
 	}
 
 	/*
@@ -499,7 +489,14 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
 			<td>
 				<label for="content_max_length">
-				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" /> <?php _e('(0 means no limit)') ?></label>
+				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
+			<td>
+				<label for="fragment_per_comment">
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?><br /><?php _e('If you don&#8217;t want comment rendering, turn off &#8216;<i>Enable parsing for comments</i>&#8217; checkboxes below instead. This option does not affect posts and pages.') ?></label>
 			</td>
 		</tr>
 		</table>
@@ -633,7 +630,7 @@ scorerender_get_options ();
 //remove_filter ('pre_comment_content', 'balanceTags', 30);
 //remove_filter ('comment_text', 'force_balance_tags', 25);
 
-if ( get_option('use_balanceTags') != 0 )
+if ( 0 != get_option('use_balanceTags') )
 {
 	function turn_off_balance_tags() {
 		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
