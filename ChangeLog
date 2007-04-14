@@ -1,3 +1,8 @@
+2007-04-14  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Add PHP 4 compatibility function for array_intersect_key().
+
 2007-04-13  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

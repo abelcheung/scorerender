@@ -92,6 +92,21 @@ if (!function_exists ('sys_get_temp_dir'))
 	}
 }
 
+// http://www.php.net/manual/en/function.array-intersect-key.php#68179
+if (!function_exists ('array_intersect_key'))
+{
+	function array_intersect_key ()
+	{
+		$arrs = func_get_args ();
+		$result = array_shift ($arrs);
+		foreach ($arrs as $array)
+			foreach ($result as $key => $v)
+				if (!array_key_exists ($key, $array))
+					unset ($result[$key]);
+		return $result;
+	}
+}
+
 function scorerender_get_options ()
 {
 	global $scorerender_options, $default_tmp_dir;
