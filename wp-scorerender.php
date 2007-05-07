@@ -187,7 +187,8 @@ function scorerender_remove_cache ()
 {
 	global $scorerender_options;
 
-	if (!is_dir ($scorerender_options['CACHE_DIR']) ||
+	// extra guard, doesn't hurt
+	if (!is_dir      ($scorerender_options['CACHE_DIR']) ||
 	    !is_readable ($scorerender_options['CACHE_DIR']) ||
 	    !is_writable ($scorerender_options['CACHE_DIR']))
 		return;
@@ -202,6 +203,7 @@ function scorerender_remove_cache ()
 		}
 		closedir ($handle);
 	}
+	return;
 }
 
 function scorerender_generate_html_error ($msg)
@@ -232,14 +234,15 @@ function scorerender_process_result ($result, $input, $render)
 	}
 
 	// No errors, so generate HTML
-	$html = '<img style="vertical-align: bottom" ';
+	$html .= sprintf ('<img style="vertical-align: bottom" class="scorerender-image" title="%s" alt="%s" src="%s/%s" ', __('Music fragment'), __('Music fragment'), $scorerender_options['CACHE_URL'], $result);
 
 	if ($scorerender_options['SHOW_SOURCE'])
-		$html .= sprintf ('alt="%s" ', htmlentities($input, ENT_COMPAT, get_bloginfo('charset')));
-	else
-		$html .= sprintf ('alt="%s" ',  __('Music fragment'));
+		$html .= "onclick=\"window.open('/" . PLUGINDIR . "/ScoreRender/showcode.php?code=" . urlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))) . "', 'fragmentpopup', 'toolbar=no,location=no,scrollbars=yes,resizable=yes,width=500,height=400');\" ";
 
-	$html .= sprintf ('src="%s/%s" />', $scorerender_options['CACHE_URL'], $result);
+	$html .= '/>';
+
+	if ($scorerender_options['SHOW_SOURCE'])
+		$html = '<a href="javascript:void(0)">' . $html . '</a>';
 
 	return $html;
 }
@@ -301,6 +304,20 @@ function scorerender_comment ($content)
 
 	$limit = ($scorerender_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : $scorerender_options['FRAGMENT_PER_COMMENT'];
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
+}
+
+function scorerender_activity_box ()
+{
+	$img_count = scorerender_get_num_of_images();
+	$number_of_fragments = sprintf (__ngettext ('%d music fragment', '%d music fragments', 0), 0);
+	$number_of_posts = sprintf (__ngettext ('%d post', '%d posts', 0), 0);
+	$number_of_images = sprintf (__ngettext ('%d image', '%d images', $img_count), $img_count);
+?>
+	<div>
+	<h3><?php _e('ScoreRender') ?></h3>
+	<p><?php printf ('There are %s contained in %s. Currently %s are rendered and cached.', $number_of_fragments, $number_of_posts, $number_of_images); ?></p>
+	</div>
+<?php
 }
 
 function scorerender_update_options ()
@@ -482,28 +499,28 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Temporary directory:') ?></th>
 			<td>
-				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
+				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape ($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
 				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache directory:') ?></th>
 			<td>
-				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo attribute_escape($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
+				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo attribute_escape ($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
 				<?php _e('Must be writable and located inside the web-accessible area.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache URL:') ?></th>
 			<td>
-				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo attribute_escape($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
+				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo attribute_escape ($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
 				<?php _e('Must correspond to the image cache directory above.') ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:'), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
 			<td>
-				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape($scorerender_options['CONVERT_BIN']); ?>" size="40" />
+				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape ($scorerender_options['CONVERT_BIN']); ?>" size="40" />
 			</td>
 		</tr>
 		</table>
@@ -544,14 +561,14 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
 			<td>
 				<label for="content_max_length">
-				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?></label>
+				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
 			<td>
 				<label for="fragment_per_comment">
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?><br /><?php _e('If you don&#8217;t want comment rendering, turn off &#8216;<i>Enable parsing for comments</i>&#8217; checkboxes below instead. This option does not affect posts and pages.') ?></label>
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?><br /><?php _e('If you don&#8217;t want comment rendering, turn off &#8216;<i>Enable parsing for comments</i>&#8217; checkboxes below instead. This option does not affect posts and pages.') ?></label>
 			</td>
 		</tr>
 		</table>
@@ -574,7 +591,7 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>lilypond</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
+				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape ($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
 			</td>
 		</tr>
 		</table>
@@ -597,13 +614,13 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>mup</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape($scorerender_options['MUP_BIN']); ?>" size="50" />
+				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape ($scorerender_options['MUP_BIN']); ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s magic file:'), '<code>mup</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
+				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape ($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
 				<br />
 				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
 			</td>
@@ -645,7 +662,7 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>abcm2ps</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
+				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
 				<br />
 				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.'), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
 			</td>
@@ -654,18 +671,25 @@ function scorerender_admin_options() {
 	</fieldset>
 
 	<fieldset class="options">
-		<legend><?php _e('Status') ?></legend>
+		<legend><?php _e('Caching') ?></legend>
 <?php
-		$img_count = scorerender_get_num_of_images();
-		if (-1 == $img_count) {
-			echo "Cache directory is not a readable directory.<br />\n";
-		} else {
-			printf (__ngettext("%d image is cached.\n", "%d images are cached.\n", $img_count), $img_count);
-		}
+	$img_count = scorerender_get_num_of_images();
+	if (-1 == $img_count) {
+		echo "Cache directory is not a readable directory.<br />\n";
+	} else {
+		printf (__ngettext("%d image is cached.\n", "%d images are cached.\n", $img_count), $img_count);
+	}
+
+	if (($img_count >= 1) &&
+	     is_dir      ($scorerender_options['CACHE_DIR']) &&
+	     is_readable ($scorerender_options['CACHE_DIR']) &&
+	     is_writable ($scorerender_options['CACHE_DIR'])) :
 ?>
 		<p class="submit">
-		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" <?php if (($img_count <= 0) || !is_dir ($scorerender_options['CACHE_DIR']) || !is_writable ($scorerender_options['CACHE_DIR'])) { echo 'disabled="true"'; } ?> />
+		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" />
 		</p>
+<?php	endif; ?>
+
 	</fieldset>
 
 	<p class="submit">
@@ -702,12 +726,13 @@ scorerender_get_options ();
 
 if ( 0 != get_option('use_balanceTags') )
 {
-	function turn_off_balance_tags() {
+	function turn_off_balance_tags()
+	{
 		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
 			. sprintf (__('<strong>OPTION CONFLICT</strong>: The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.'), "options-writing.php")
 			. "</p></div>";
 	}
-	add_action('admin_notices', 'turn_off_balance_tags');
+	add_filter ('admin_notices', 'turn_off_balance_tags');
 }
 
 // earlier than default priority, since smilies conversion
@@ -715,6 +740,7 @@ if ( 0 != get_option('use_balanceTags') )
 add_filter ('the_excerpt', 'scorerender_content', 5);
 add_filter ('the_content', 'scorerender_content', 5);
 add_filter ('comment_text', 'scorerender_comment', 5);
-add_action ('admin_menu', 'scorerender_admin');
+add_filter ('activity_box_end', 'scorerender_activity_box');
+add_filter ('admin_menu', 'scorerender_admin');
 
 ?>
