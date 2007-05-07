@@ -20,6 +20,7 @@
 <head>
 <title><?php _e('Music fragment') ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo get_option ('blog_charset'); ?>" />
+<link rel="stylesheet" type="text/css" href="showcode.css" />
 </head>
 
 <script type="text/javascript">
@@ -31,15 +32,18 @@ function Copy()
 	text="<?php echo addcslashes ($code, "\n\r\"\\"); ?>";
 	if (window.clipboardData) {	// IE, Opera
 		window.clipboardData.setData("Text", text);
+		document.getElementById('sr_message').innerHTML = '<?php _e('Successfully copied to clipboard.') ?>';
 	} else {
 		document.getElementById('copybutton').disabled = true;
-		document.getElementById('error_msg').innerHTML = '<?php _e('Not supported yet in Mozilla family browsers. Please select and copy the code manually.') ?>';
+		document.getElementById('sr_message').innerHTML = '<?php _e('Cut and paste not supported yet in Mozilla family browsers. Please select and copy the code below manually.') ?>';
 	}
 }
 -->
 </script>
 <body>
-<button id="copybutton" onclick="Copy();"><?php _e('Copy to Clipboard') ?></button><span id="error_msg"></span><br />
+<div id="sr_message"></div>
+<button id="copybutton" onclick="Copy();"><?php _e('Copy to Clipboard') ?></button><br />
+<h3><?php _e('Code:') ?></h3>
 <div id="code">
 <pre>
 <?php

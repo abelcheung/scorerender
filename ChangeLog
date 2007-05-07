@@ -1,5 +1,10 @@
 2007-05-07  Abel Cheung  <abelcheung@gmail.com>
 
+	* showcode.css: New file.
+	* showcode.php: Add style sheet.
+
+2007-05-07  Abel Cheung  <abelcheung@gmail.com>
+
 	* showcode.php:
 	New file for showing fragment code in popup window.
 
