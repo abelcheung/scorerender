@@ -27,11 +27,11 @@
  Implements rendering of LilyPond figures in ScoreRender.
 */
 
-class LilypondRender extends ScoreRender
+class lilypondRender extends ScoreRender
 {
 	var $_uniqueID = "lilypond";
 
-	function LilypondRender ($input, $options = array())
+	function lilypondRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
 	}

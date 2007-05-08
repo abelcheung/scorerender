@@ -22,11 +22,11 @@
  Implements rendering of ABC notation in ScoreRender, using abc2ps.
 */
 
-class ABCRender extends ScoreRender
+class abcRender extends ScoreRender
 {
 	var $_uniqueID = "abc";
 
-	function ABCRender ($input, $options = array())
+	function abcRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
 	}

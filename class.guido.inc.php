@@ -22,11 +22,11 @@
  Implements fetching of Guido figures in ScoreRender.
 */
 
-class GuidoRender extends ScoreRender
+class guidoRender extends ScoreRender
 {
 	var $_uniqueID = "guido";
 
-	function GuidoRender ($input, $options = array())
+	function guidoRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
 	}

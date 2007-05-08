@@ -1,3 +1,14 @@
+2007-05-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, showcode.css: Use CSS.
+	* class.*.inc.php: Rename to lower case class name, for easier string
+	concatenation.
+	* wp-scorerender.php:
+	- Eliminate the need of some define'd constant and hardcoded handling
+	  of various music syntax
+	- scorerender_get_fragment_count(): Impl'd.
+	- scorerender_activity_box(): Add more stat to dashboard.
+
 2007-05-07  Abel Cheung  <abelcheung@gmail.com>
 
 	* showcode.css: New file.

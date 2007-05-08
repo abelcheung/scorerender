@@ -47,19 +47,25 @@ define('ERR_IMAGE_CONVERT_FAILURE'       , -5);
 define('ERR_RENDERING_ERROR'             , -6);
 define('ERR_LENGTH_EXCEEDED'             , -7);
 
+// Supported syntax
+$syntax = array (
+	'abc'      => '',
+	'guido'    => '',
+	'lilypond' => '',
+	'mup'      => ''
+);
+
 require_once('class.scorerender.inc.php');
-require_once('class.abc.inc.php');
-require_once('class.guido.inc.php');
-require_once('class.lilypond.inc.php');
-require_once('class.mup.inc.php');
+
+foreach ($syntax as $keyword => $regex)
+{
+	$syntax[$keyword] = '~\['.$keyword.'\](.*?)\[/'.$keyword.'\]~si';
+	define ("REGEX_MATCH_" . strtoupper($keyword), '~\['.$keyword.'\](.*?)\[/'.$keyword.'\]~si');
+	require_once ('class.' . $keyword . '.inc.php');
+}
 
 $default_tmp_dir = '';
 $scorerender_options = array ();
-
-define ('REGEX_MATCH_ABC'     , '~\[abc\](.*?)\[/abc\]~si');
-define ('REGEX_MATCH_GUIDO'   , '~\[guido\](.*?)\[/guido\]~si');
-define ('REGEX_MATCH_LILYPOND', '~\[lilypond\](.*?)\[/lilypond\]~si');
-define ('REGEX_MATCH_MUP'     , '~\[mup\](.*?)\[/mup\]~si');
 
 if (!function_exists ('sys_get_temp_dir'))
 {
@@ -183,6 +189,17 @@ function scorerender_get_num_of_images ()
 	return $count;
 }
 
+function scorerender_get_fragment_count ($content)
+{
+	global $syntax;
+
+	$count = array();
+	foreach (array_values ($syntax) as $regex)
+		$count[] = preg_match_all ($regex, $content, $matches);
+
+	return $count;
+}
+
 function scorerender_remove_cache ()
 {
 	global $scorerender_options;
@@ -228,42 +245,51 @@ function scorerender_process_result ($result, $input, $render)
 		case ERR_IMAGE_CONVERT_FAILURE:
 			return scorerender_generate_html_error (__('Image convert failure!'));
 		case ERR_RENDERING_ERROR:
-			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') . '<br /><textarea cols=80 rows=10 READONLY>' . $render->getCommandOutput() . '</textarea>');
+			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') .
+			                                        '<br /><textarea cols=80 rows=10 READONLY>' .
+			                                        $render->getCommandOutput() . '</textarea>');
 		case ERR_LENGTH_EXCEEDED:
 			return scorerender_generate_html_error (__('Content length exceeds configured maximum length!'));
 	}
 
 	// No errors, so generate HTML
-	$html .= sprintf ('<img style="vertical-align: bottom" class="scorerender-image" title="%s" alt="%s" src="%s/%s" ', __('Music fragment'), __('Music fragment'), $scorerender_options['CACHE_URL'], $result);
+	// Not nice to show source in alt text or title, since music source is most likely multi-line, and some are quite long
+	$html .= sprintf ('<img style="vertical-align: bottom" class="scorerender-image" title="%s" alt="%s" src="%s/%s" ',
+	                  __('Music fragment'), __('Music fragment'),
+	                  $scorerender_options['CACHE_URL'], $result);
 
+	// This idea is taken from LatexRender demo site
 	if ($scorerender_options['SHOW_SOURCE'])
-		$html .= "onclick=\"window.open('/" . PLUGINDIR . "/ScoreRender/showcode.php?code=" . urlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))) . "', 'fragmentpopup', 'toolbar=no,location=no,scrollbars=yes,resizable=yes,width=500,height=400');\" ";
+		$html .= "onclick=\"window.open('/" . PLUGINDIR . "/ScoreRender/showcode.php?code=" .
+		         urlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))) .
+		         "', 'fragmentpopup', 'toolbar=no,location=no,scrollbars=yes,resizable=yes,width=500,height=400');\" ";
 
 	$html .= '/>';
 
 	if ($scorerender_options['SHOW_SOURCE'])
-		$html = '<a href="javascript:void(0)">' . $html . '</a>';
+		$html = '<a href="javascript:void(0)">' . $html . '</a><noscript><br />(JavaScript must be enabled in order to view source code of this music fragment.)</noscript>';
 
 	return $html;
 }
 
 function scorerender_filter ($matches)
 {
-	global $scorerender_options;
+	global $scorerender_options, $syntax;
 	$input = trim (html_entity_decode ($matches[1]));
 
 	// since preg_replace_callback only accepts single function,
 	// we have to check which regex is matched here and create
 	// corresponding object
-	if (preg_match (REGEX_MATCH_ABC, $matches[0]))
-		$render = new ABCRender ($input, $scorerender_options);
-	elseif (preg_match (REGEX_MATCH_GUIDO, $matches[0]))
-		$render = new GuidoRender ($input, $scorerender_options);
-	elseif (preg_match (REGEX_MATCH_LILYPOND, $matches[0]))
-		$render = new LilypondRender ($input, $scorerender_options);
-	elseif (preg_match (REGEX_MATCH_MUP, $matches[0]))
-		$render = new MupRender ($input, $scorerender_options);
-	else
+	foreach ($syntax as $keyword => $regex)
+	{
+		if (preg_match ($regex, $matches[0]))
+		{
+			$class = $keyword . "Render";
+			$render = new $class ($input, $scorerender_options);
+		}
+	}
+
+	if (empty ($render))
 		return $input;
 
 	$result = $render->render();
@@ -273,34 +299,30 @@ function scorerender_filter ($matches)
 
 function scorerender_content ($content)
 {
-	global $scorerender_options;
+	global $scorerender_options, $syntax;
 
 	$regex_list = array();
-	if ($scorerender_options['ABC_CONTENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_ABC;
-	if ($scorerender_options['GUIDO_CONTENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_GUIDO;
-	if ($scorerender_options['LILYPOND_CONTENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_LILYPOND;
-	if ($scorerender_options['MUP_CONTENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_MUP;
+	foreach ($syntax as $keyword => $regex)
+	{
+		$config_name = strtoupper ($keyword) . '_CONTENT_ENABLED';
+		if ($scorerender_options[$config_name])
+			$regex_list[] = $regex;
+	};
 
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, -1);
 }
 
 function scorerender_comment ($content)
 {
-	global $scorerender_options;
+	global $scorerender_options, $syntax;
 
 	$regex_list = array();
-	if ($scorerender_options['ABC_COMMENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_ABC;
-	if ($scorerender_options['GUIDO_COMMENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_GUIDO;
-	if ($scorerender_options['LILYPOND_COMMENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_LILYPOND;
-	if ($scorerender_options['MUP_COMMENT_ENABLED'])
-		$regex_list[] = REGEX_MATCH_MUP;
+	foreach ($syntax as $keyword => $regex)
+	{
+		$config_name = strtoupper ($keyword) . '_CONTENT_ENABLED';
+		if ($scorerender_options[$config_name])
+			$regex_list[] = $regex;
+	};
 
 	$limit = ($scorerender_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : $scorerender_options['FRAGMENT_PER_COMMENT'];
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
@@ -308,14 +330,47 @@ function scorerender_comment ($content)
 
 function scorerender_activity_box ()
 {
+	global $wpdb, $syntax;
+	$frag_count = 0;
+
+	$wpdb->hide_errors();
+
+	// get posts first
+	$query_substr = array();
+	foreach (array_keys ($syntax) as $keyword)
+		$query_substr[] .= "post_content LIKE '%[/$keyword]%'";
+	$query = "SELECT post_content FROM $wpdb->posts WHERE " . implode (" OR ", $query_substr);
+
+	$posts = $wpdb->get_col ($query);
+	$post_count = count ($posts);
+	$number_of_posts = sprintf (__ngettext ('%d post', '%d posts', $post_count), $post_count);
+
+	foreach ($posts as $post)
+		$frag_count += array_sum (scorerender_get_fragment_count ($post));
+
+
+	// followed by comments
+	$query_substr = array();
+	foreach (array_keys ($syntax) as $keyword)
+		$query_substr[] .= "comment_content LIKE '%[/$keyword]%'";
+	$query = sprintf ("SELECT comment_content FROM $wpdb->comments WHERE comment_approved = '1' AND (%s)",
+			  implode (" OR ", $query_substr));
+
+	$comments = $wpdb->get_col ($query);
+	$comment_count = count ($comments);
+	$number_of_comments = sprintf (__ngettext ('%d comment', '%d comments', $comment_count), $comment_count);
+
+	foreach ($comments as $comment)
+		$frag_count += array_sum (scorerender_get_fragment_count ($comment));
+
+
 	$img_count = scorerender_get_num_of_images();
-	$number_of_fragments = sprintf (__ngettext ('%d music fragment', '%d music fragments', 0), 0);
-	$number_of_posts = sprintf (__ngettext ('%d post', '%d posts', 0), 0);
+	$number_of_fragments = sprintf (__ngettext ('%d music fragment', '%d music fragments', $frag_count), $frag_count);
 	$number_of_images = sprintf (__ngettext ('%d image', '%d images', $img_count), $img_count);
 ?>
 	<div>
 	<h3><?php _e('ScoreRender') ?></h3>
-	<p><?php printf ('There are %s contained in %s. Currently %s are rendered and cached.', $number_of_fragments, $number_of_posts, $number_of_images); ?></p>
+	<p><?php printf ('There are %s contained in %s and %s. Currently %s are rendered and cached.', $number_of_fragments, $number_of_posts, $number_of_comments, $number_of_images); ?></p>
 	</div>
 <?php
 }
@@ -534,7 +589,7 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<td>
 				<label for="show_input">
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /> <?php _e('Show source in image ALT attribute'); ?></label>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /> <?php _e('Show source in new popup window'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -568,7 +623,7 @@ function scorerender_admin_options() {
 			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
 			<td>
 				<label for="fragment_per_comment">
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?><br /><?php _e('If you don&#8217;t want comment rendering, turn off &#8216;<i>Enable parsing for comments</i>&#8217; checkboxes below instead. This option does not affect posts and pages.') ?></label>
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
 			</td>
 		</tr>
 		</table>

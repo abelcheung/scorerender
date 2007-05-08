@@ -22,11 +22,11 @@
  Implements rendering of Mup figures in ScoreRender.
 */
 
-class MupRender extends ScoreRender
+class mupRender extends ScoreRender
 {
 	var $_uniqueID = "mup";
 
-	function MupRender ($input, $options = array())
+	function mupRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
 	}
