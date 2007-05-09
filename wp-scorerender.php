@@ -261,7 +261,7 @@ function scorerender_process_result ($result, $input, $render)
 	// This idea is taken from LatexRender demo site
 	if ($scorerender_options['SHOW_SOURCE'])
 		$html .= "onclick=\"window.open('/" . PLUGINDIR . "/ScoreRender/showcode.php?code=" .
-		         urlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))) .
+		         rawurlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))) .
 		         "', 'fragmentpopup', 'toolbar=no,location=no,scrollbars=yes,resizable=yes,width=500,height=400');\" ";
 
 	$html .= '/>';

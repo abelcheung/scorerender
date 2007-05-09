@@ -48,7 +48,7 @@ function Copy()
 <pre>
 <?php
 	if ( !empty ($code) ) {
-		echo strip_tags (urldecode ($code));
+		echo strip_tags (rawurldecode ($code));
 	} else {
 		_e("Nothing to see here.\n");
 	}
