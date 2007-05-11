@@ -9,8 +9,8 @@
 	elseif (file_exists ('../../wp-config.php'))
 		require_once ('../../wp-config.php');
 
-	if ( isset ($_GET['code']) )
-		$code = $_GET['code'];
+	if ( isset ($_POST['code']) )
+		$code = $_POST['code'];
 
 	if ( get_magic_quotes_gpc() )
 		$code = stripslashes ($code);

@@ -253,21 +253,22 @@ function scorerender_process_result ($result, $input, $render)
 	}
 
 	// No errors, so generate HTML
-	// Not nice to show source in alt text or title, since music source is most likely multi-line, and some are quite long
-	$html .= sprintf ('<img style="vertical-align: bottom" class="scorerender-image" title="%s" alt="%s" src="%s/%s" ',
-	                  __('Music fragment'), __('Music fragment'),
-	                  $scorerender_options['CACHE_URL'], $result);
+	// Not nice to show source in alt text or title, since music source
+	// is most likely multi-line, and some are quite long
 
 	// This idea is taken from LatexRender demo site
 	if ($scorerender_options['SHOW_SOURCE'])
-		$html .= "onclick=\"window.open('/" . PLUGINDIR . "/ScoreRender/showcode.php?code=" .
-		         rawurlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))) .
-		         "', 'fragmentpopup', 'toolbar=no,location=no,scrollbars=yes,resizable=yes,width=500,height=400');\" ";
-
-	$html .= '/>';
-
-	if ($scorerender_options['SHOW_SOURCE'])
-		$html = '<a href="javascript:void(0)">' . $html . '</a><noscript><br />(JavaScript must be enabled in order to view source code of this music fragment.)</noscript>';
+	{
+		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/ScoreRender/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR);
+		$html .= sprintf ("<input type='image' name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+	                  __('Music fragment'), __('Music fragment'),
+	                  $scorerender_options['CACHE_URL'], $result);
+		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n", rawurlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))));
+	} else {
+		$html .= sprintf ("<img name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+	                  __('Music fragment'), __('Music fragment'),
+	                  $scorerender_options['CACHE_URL'], $result);
+	}
 
 	return $html;
 }
@@ -589,13 +590,13 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<td>
 				<label for="show_input">
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /> <?php _e('Show source in new popup window'); ?></label>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /> <?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>
 				<label for="invert_image">
-				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> /> <?php _e('Invert image colours'); ?></label>
+				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> /> <?php _e('Invert image colours (becomes white on black)'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">

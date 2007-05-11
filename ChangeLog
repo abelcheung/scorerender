@@ -1,3 +1,9 @@
+2007-05-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, wp-scorerender.php: Replace popup with form
+	opened in new window in order to use $_POST instead, as IE
+	chops $_GET values at 2000 chars.
+
 2007-05-09  Abel Cheung  <abelcheung@gmail.com>
 
 	* showcode.php, wp-scorerender.php: Fix for popup window showing
