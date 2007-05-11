@@ -589,20 +589,20 @@ function scorerender_admin_options() {
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
 			<td>
-				<label for="show_input">
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> /> <?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> />
+				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>
-				<label for="invert_image">
-				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> /> <?php _e('Invert image colours (becomes white on black)'); ?></label>
+				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
+				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>
-				<label for="transparent_image">
-				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> /> <?php _e('Use transparent background') ?> <?php _e('(IE6 does not support transparent PNG)'); ?></label>
+				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> />
+				<label for="transparent_image"><?php _e('Use transparent background') ?> <?php _e('(IE6 does not support transparent PNG)'); ?></label>
 			</td>
 		</tr>
 		</table>
@@ -616,15 +616,16 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
 			<td>
-				<label for="content_max_length">
-				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?></label>
+				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" />
+				<label for="content_max_length"><?php _e('(0 means unlimited)') ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
 			<td>
-				<label for="fragment_per_comment">
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" /> <?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
+				
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" />
+				<label for="fragment_per_comment"><?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
 			</td>
 		</tr>
 		</table>
@@ -638,10 +639,10 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Content conversion:') ?></th>
 			<td>
-				<label for="lilypond_content">
-				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<label for="lilypond_comments">
-				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> />
+				<label for="lilypond_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> />
+				<label for="lilypond_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -661,10 +662,10 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Content conversion:') ?></th>
 			<td>
-				<label for="mup_content">
-				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<label for="mup_comments">
-				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> />
+				<label for="mup_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> />
+				<label for="mup_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -692,10 +693,10 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Content conversion:') ?></th>
 			<td>
-				<label for="guido_content">
-				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<label for="guido_comments">
-				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> /> <?php _e('Enable parsing for comments'); ?></label>
+				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> />
+				<label for="guido_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> />
+				<label for="guido_comments"><?php _e('Enable parsing for comments'); ?></label>
 			</td>
 		</tr>
 		</table>
@@ -709,10 +710,10 @@ function scorerender_admin_options() {
 		<tr valign="top">
 			<th scope="row"><?php _e('Content conversion:') ?></th>
 			<td>
-				<label for="abc_content">
-				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> /> <?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<label for="abc_comments">
-				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> /> <?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> />
+				<label for="abc_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> />
+				<label for="abc_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -733,7 +734,9 @@ function scorerender_admin_options() {
 	if (-1 == $img_count) {
 		echo "Cache directory is not a readable directory.<br />\n";
 	} else {
-		printf (__ngettext("%d image is cached.\n", "%d images are cached.\n", $img_count), $img_count);
+		printf (__ngettext("Cache directory contain %d image.\n",
+			           "Cache directory contain %d images.\n",
+			           $img_count), $img_count);
 	}
 
 	if (($img_count >= 1) &&
@@ -757,9 +760,9 @@ function scorerender_admin_options() {
 	<?php
 }
 
-function scorerender_admin()
+function scorerender_admin_menu ()
 {
-	add_options_page ('ScoreRender options',
+	add_options_page (__('ScoreRender options'),
 	                  'ScoreRender', 9, __FILE__,
 	                  'scorerender_admin_options');
 }
@@ -797,6 +800,6 @@ add_filter ('the_excerpt', 'scorerender_content', 5);
 add_filter ('the_content', 'scorerender_content', 5);
 add_filter ('comment_text', 'scorerender_comment', 5);
 add_filter ('activity_box_end', 'scorerender_activity_box');
-add_filter ('admin_menu', 'scorerender_admin');
+add_filter ('admin_menu', 'scorerender_admin_menu');
 
 ?>
