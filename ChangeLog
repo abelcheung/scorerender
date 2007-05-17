@@ -1,5 +1,9 @@
 2007-05-17  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php: Add nonce protection.
+
+2007-05-17  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php: Split admin page into smaller trunks.
 
 2007-05-11  Abel Cheung  <abelcheung@gmail.com>
