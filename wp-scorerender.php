@@ -510,8 +510,253 @@ function scorerender_update_options ()
 	}
 }
 
-function scorerender_admin_options() {
+function scorerender_admin_section_path ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('Path options') ?></legend>
 
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Temporary directory:') ?></th>
+			<td>
+				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape ($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
+				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Image cache directory:') ?></th>
+			<td>
+				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo attribute_escape ($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
+				<?php _e('Must be writable and located inside the web-accessible area.') ?>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Image cache URL:') ?></th>
+			<td>
+				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo attribute_escape ($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
+				<?php _e('Must correspond to the image cache directory above.') ?>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
+			<td>
+				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape ($scorerender_options['CONVERT_BIN']); ?>" size="40" />
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_image ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('Image options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<td>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> />
+				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>
+				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
+				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)'); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>
+				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> />
+				<label for="transparent_image"><?php _e('Use transparent background') ?> <?php _e('(IE &lt;= 6 does not support transparent PNG)'); ?></label>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_content ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('Content options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
+			<td>
+				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" />
+				<label for="content_max_length"><?php _e('(0 means unlimited)') ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
+			<td>
+				
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" />
+				<label for="fragment_per_comment"><?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_caching ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('Caching') ?></legend>
+<?php
+	$img_count = scorerender_get_num_of_images();
+	if (-1 == $img_count) {
+		echo "Cache directory is not a readable directory.<br />\n";
+	} else {
+		printf (__ngettext("Cache directory contain %d image.\n",
+			           "Cache directory contain %d images.\n",
+			           $img_count), $img_count);
+	}
+
+	if (($img_count >= 1) &&
+	     is_dir      ($scorerender_options['CACHE_DIR']) &&
+	     is_readable ($scorerender_options['CACHE_DIR']) &&
+	     is_writable ($scorerender_options['CACHE_DIR'])) :
+?>
+		<p class="submit">
+		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" />
+		</p>
+<?php	endif; ?>
+
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_lilypond ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('Lilypond options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<td>
+				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> />
+				<label for="lilypond_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> />
+				<label for="lilypond_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>lilypond</code>'); ?></th>
+			<td>
+				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape ($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_mup ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('Mup options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<td>
+				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> />
+				<label for="mup_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> />
+				<label for="mup_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>mup</code>'); ?></th>
+			<td>
+				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape ($scorerender_options['MUP_BIN']); ?>" size="50" />
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s magic file:'), '<code>mup</code>'); ?></th>
+			<td>
+				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape ($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
+				<br />
+				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_guido ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('GUIDO NoteServer options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<td>
+				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> />
+				<label for="guido_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> />
+				<label for="guido_comments"><?php _e('Enable parsing for comments'); ?></label>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_section_abc ()
+{
+	global $scorerender_options;
+?>
+	<fieldset class="options">
+		<legend><?php _e('ABC options') ?></legend>
+
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<tr valign="top">
+			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<td>
+				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> />
+				<label for="abc_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> />
+				<label for="abc_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>abcm2ps</code>'); ?></th>
+			<td>
+				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
+				<br />
+				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.'), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
+			</td>
+		</tr>
+		</table>
+	</fieldset>
+<?php
+}
+
+function scorerender_admin_options ()
+{
 	global $scorerender_options;
 
 	if ( isset($_POST['clear_cache']) && isset($_POST['ScoreRender']) )
@@ -546,211 +791,31 @@ function scorerender_admin_options() {
 	<p class="submit">
 	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
 	</p>
-
-	<!-- path options -->
-	<fieldset class="options">
-		<legend><?php _e('Path options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Temporary directory:') ?></th>
-			<td>
-				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape ($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
-				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Image cache directory:') ?></th>
-			<td>
-				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo attribute_escape ($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
-				<?php _e('Must be writable and located inside the web-accessible area.') ?>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Image cache URL:') ?></th>
-			<td>
-				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo attribute_escape ($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
-				<?php _e('Must correspond to the image cache directory above.') ?>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
-			<td>
-				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape ($scorerender_options['CONVERT_BIN']); ?>" size="40" />
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<!-- image options -->
-	<fieldset class="options">
-		<legend><?php _e('Image options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<td>
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> />
-				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>
-				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
-				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)'); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<td>
-				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> />
-				<label for="transparent_image"><?php _e('Use transparent background') ?> <?php _e('(IE6 does not support transparent PNG)'); ?></label>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<!-- content options -->
-	<fieldset class="options">
-		<legend><?php _e('Content options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
-			<td>
-				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" />
-				<label for="content_max_length"><?php _e('(0 means unlimited)') ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
-			<td>
-				
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" />
-				<label for="fragment_per_comment"><?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<!-- lilypond options -->
-	<fieldset class="options">
-		<legend><?php _e('Lilypond options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> />
-				<label for="lilypond_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> />
-				<label for="lilypond_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>lilypond</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape ($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<!-- mup options -->
-	<fieldset class="options">
-		<legend><?php _e('Mup options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> />
-				<label for="mup_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> />
-				<label for="mup_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>mup</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape ($scorerender_options['MUP_BIN']); ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s magic file:'), '<code>mup</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape ($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
-				<br />
-				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<!-- guido options -->
-	<fieldset class="options">
-		<legend><?php _e('GUIDO NoteServer options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> />
-				<label for="guido_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> />
-				<label for="guido_comments"><?php _e('Enable parsing for comments'); ?></label>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<!-- ABC options -->
-	<fieldset class="options">
-		<legend><?php _e('ABC options') ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> />
-				<label for="abc_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
-				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> />
-				<label for="abc_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>abcm2ps</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
-				<br />
-				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.'), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-
-	<fieldset class="options">
-		<legend><?php _e('Caching') ?></legend>
 <?php
-	$img_count = scorerender_get_num_of_images();
-	if (-1 == $img_count) {
-		echo "Cache directory is not a readable directory.<br />\n";
-	} else {
-		printf (__ngettext("Cache directory contain %d image.\n",
-			           "Cache directory contain %d images.\n",
-			           $img_count), $img_count);
-	}
+	// path options
+	scorerender_admin_section_path(); 
 
-	if (($img_count >= 1) &&
-	     is_dir      ($scorerender_options['CACHE_DIR']) &&
-	     is_readable ($scorerender_options['CACHE_DIR']) &&
-	     is_writable ($scorerender_options['CACHE_DIR'])) :
+	// image options
+	scorerender_admin_section_image(); 
+
+	// content options
+	scorerender_admin_section_content(); 
+
+	// caching options
+	scorerender_admin_section_caching(); 
+
+	// lilypond options
+	scorerender_admin_section_lilypond(); 
+
+	// mup options
+	scorerender_admin_section_mup(); 
+
+	// guido options
+	scorerender_admin_section_guido(); 
+
+	// ABC options
+	scorerender_admin_section_abc(); 
 ?>
-		<p class="submit">
-		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" />
-		</p>
-<?php	endif; ?>
-
-	</fieldset>
-
 	<p class="submit">
 	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
 	</p>
