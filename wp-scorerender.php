@@ -36,7 +36,7 @@ Author URI: http://me.abelcheung.org/
 
 
 // Increment this number if database has new or changed config options
-define ('DATABASE_VERSION', 6);
+define ('DATABASE_VERSION', 7);
 
 // Error constants
 define('ERR_INVALID_INPUT'               , -1);
@@ -143,6 +143,7 @@ function scorerender_get_options ()
 		'SHOW_SOURCE'          => false,
 		'CONTENT_MAX_LENGTH'   => 4096,
 		'FRAGMENT_PER_COMMENT' => 1,
+		'SHOW_IE_TRANSPARENCY_WARNING' => 1,
 
 		'LILYPOND_CONTENT_ENABLED' => true,
 		'LILYPOND_COMMENT_ENABLED' => false,
@@ -268,6 +269,10 @@ function scorerender_process_result ($result, $input, $render)
 		$html .= sprintf ("<img name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 	                  __('Music fragment'), __('Music fragment'),
 	                  $scorerender_options['CACHE_URL'], $result);
+	}
+	if ($scorerender_options['TRANSPARENT_IMAGE'] && $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']) 
+	{
+		$html .= '<br /><!--[if lt IE 7]>' . __('<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.') . "<![endif]-->\n";
 	}
 
 	return $html;
@@ -556,7 +561,6 @@ function scorerender_admin_section_image ()
 ?>
 	<fieldset class="options">
 		<legend><?php _e('Image options') ?></legend>
-
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
 			<td>
@@ -572,8 +576,14 @@ function scorerender_admin_section_image ()
 		</tr>
 		<tr valign="top">
 			<td>
-				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> />
+				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('show_ie_transparency_warning'); box.disabled = !box.disabled; return true;" />
 				<label for="transparent_image"><?php _e('Use transparent background') ?> <?php _e('(IE &lt;= 6 does not support transparent PNG)'); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td style="padding-left: 30px;">
+				<input type="checkbox" name="ScoreRender[SHOW_IE_TRANSPARENCY_WARNING]" id="show_ie_transparency_warning" value="1" <?php checked('1', $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']); if (1 != $scorerender_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
+				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used (Only possible if above box is checked)') ?></label>
 			</td>
 		</tr>
 		</table>

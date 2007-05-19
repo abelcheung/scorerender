@@ -1,3 +1,8 @@
+2007-05-19  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Add option to allow displaying warning about IE
+	incapable of rendering transparent PNG.
+
 2007-05-17  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php: Add nonce protection.
