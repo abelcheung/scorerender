@@ -36,7 +36,7 @@ Author URI: http://me.abelcheung.org/
 
 
 // Increment this number if database has new or changed config options
-define ('DATABASE_VERSION', 7);
+define ('DATABASE_VERSION', 8);
 
 // Error constants
 define('ERR_INVALID_INPUT'               , -1);
@@ -46,6 +46,9 @@ define('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
 define('ERR_IMAGE_CONVERT_FAILURE'       , -5);
 define('ERR_RENDERING_ERROR'             , -6);
 define('ERR_LENGTH_EXCEEDED'             , -7);
+
+// Most apps hardcode DPI value to 72
+define ('DPI', 72.0);
 
 // Supported syntax
 $syntax = array (
@@ -67,12 +70,11 @@ foreach ($syntax as $keyword => $regex)
 $default_tmp_dir = '';
 $scorerender_options = array ();
 
+// http://www.phpit.net/article/creating-zip-tar-archives-dynamically-php/2/
 if (!function_exists ('sys_get_temp_dir'))
 {
 	function sys_get_temp_dir ()
 	{
-		// Based on http://www.phpit.net/
-		// article/creating-zip-tar-archives-dynamically-php/2/
 		// Try to get from environment variable
 		if ( !empty($_ENV['TMP']) )
 			return realpath( $_ENV['TMP'] );
@@ -113,6 +115,10 @@ if (!function_exists ('array_intersect_key'))
 	}
 }
 
+/**
+ * Retrieve ScoreRender options from database and update if necessary
+ * @global string $scorerender_options, $default_tmp_dir
+ */
 function scorerender_get_options ()
 {
 	global $scorerender_options, $default_tmp_dir;
@@ -138,12 +144,15 @@ function scorerender_get_options ()
 		'CONVERT_BIN'          => '/usr/bin/convert',
 		'CACHE_DIR'            => ABSPATH . get_option('upload_path'),
 		'CACHE_URL'            => get_option('siteurl') . '/' . get_option('upload_path'),
+
+		'IMAGE_MAX_WIDTH'      => 360,
 		'INVERT_IMAGE'         => false,
 		'TRANSPARENT_IMAGE'    => true,
 		'SHOW_SOURCE'          => false,
+		'SHOW_IE_TRANSPARENCY_WARNING' => 1,
+
 		'CONTENT_MAX_LENGTH'   => 4096,
 		'FRAGMENT_PER_COMMENT' => 1,
-		'SHOW_IE_TRANSPARENCY_WARNING' => 1,
 
 		'LILYPOND_CONTENT_ENABLED' => true,
 		'LILYPOND_COMMENT_ENABLED' => false,
@@ -170,6 +179,9 @@ function scorerender_get_options ()
 	return;
 }
 
+/**
+ * @return integer
+ */
 function scorerender_get_num_of_images ()
 {
 	global $scorerender_options;
@@ -190,6 +202,11 @@ function scorerender_get_num_of_images ()
 	return $count;
 }
 
+/**
+ * Calculate numbe of fragments contained inside a blog post
+ * @param string $content the whole blog post content
+ * @return array
+ */
 function scorerender_get_fragment_count ($content)
 {
 	global $syntax;
@@ -201,6 +218,10 @@ function scorerender_get_fragment_count ($content)
 	return $count;
 }
 
+/**
+ * Remove all cached images in cache directory
+ * @global string $scorerender_options;
+ */
 function scorerender_remove_cache ()
 {
 	global $scorerender_options;
@@ -224,11 +245,6 @@ function scorerender_remove_cache ()
 	return;
 }
 
-function scorerender_generate_html_error ($msg)
-{
-	return sprintf (__('[ScoreRender Error: %s]'), $msg);
-}
-
 function scorerender_process_result ($result, $input, $render)
 {
 	global $scorerender_options;
@@ -236,21 +252,21 @@ function scorerender_process_result ($result, $input, $render)
 	switch ($result)
 	{
 		case ERR_INVALID_INPUT:
-			return scorerender_generate_html_error (__('Invalid or dangerous input!'));
+			return sprintf (__('[%s: Invalid or dangerous input!]'), __('ScoreRender Error'));
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
-			return scorerender_generate_html_error (__('Cache directory not writable!'));
+			return sprintf (__('[%s: Cache directory not writable!]'), __('ScoreRender Error'));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-			return scorerender_generate_html_error (__('Temporary directory not writable!'));
+			return sprintf (__('[%s: Temporary directory not writable!'), __('ScoreRender Error'));
 		case ERR_TEMP_FILE_NOT_WRITABLE:
-			return scorerender_generate_html_error (__('Temporary file not writable!'));
+			return sprintf (__('[%s: Temporary file not writable!'), __('ScoreRender Error'));
 		case ERR_IMAGE_CONVERT_FAILURE:
-			return scorerender_generate_html_error (__('Image convert failure!'));
+			return sprintf (__('Image convert failure!'), __('ScoreRender Error'));
 		case ERR_RENDERING_ERROR:
-			return scorerender_generate_html_error (__('The external rendering application did not complete successfully.') .
-			                                        '<br /><textarea cols=80 rows=10 READONLY>' .
-			                                        $render->getCommandOutput() . '</textarea>');
+			return sprintf (__('The external rendering application did not complete successfully!'), __('ScoreRender Error'));
+			                                        // '<br /><textarea cols=80 rows=10 READONLY>' .
+			                                        // $render->getCommandOutput() . '</textarea>');
 		case ERR_LENGTH_EXCEEDED:
-			return scorerender_generate_html_error (__('Content length exceeds configured maximum length!'));
+			return sprintf (__('Content length exceeds configured maximum length!'), __('ScoreRender Error'));
 	}
 
 	// No errors, so generate HTML
@@ -303,6 +319,12 @@ function scorerender_filter ($matches)
 	return scorerender_process_result ($result, $input, $render);
 }
 
+/**
+ * Check if content rendering should be enabled. If yes, then apply content filter.
+ * @global string $scorerender_options, $syntax
+ * @param string $content the whole content of blog post
+ * @return string
+ */
 function scorerender_content ($content)
 {
 	global $scorerender_options, $syntax;
@@ -318,6 +340,12 @@ function scorerender_content ($content)
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, -1);
 }
 
+/**
+ * Check if comment rendering should be enabled. If yes, then apply content filter.
+ * @global string $scorerender_options, $syntax
+ * @param string $content the whole content of blog comment
+ * @return string
+ */
 function scorerender_comment ($content)
 {
 	global $scorerender_options, $syntax;
@@ -334,6 +362,10 @@ function scorerender_comment ($content)
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
 }
 
+/**
+ * Display info in WordPress Dashboard
+ * @global string $wpdb, $syntax
+ */
 function scorerender_activity_box ()
 {
 	global $wpdb, $syntax;
@@ -395,6 +427,7 @@ function scorerender_update_options ()
 		'cache_url_undefined'      => __('ERROR: Cache URL is NOT defined!'),
 		'wrong_content_length'     => __('ERROR: Content length is not a non-negative integer. Value discarded.'),
 		'wrong_frag_per_comment'   => __('ERROR: Fragment per comment is not a non-negative integer. Value discarded.'),
+		'wrong_image_max_width'    => __('ERROR: Image maximum width must be positive integer >= 72. Value discarded.'),
 		'convert_not_found'        => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
 		'convert_not_executable'   => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
 		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>lilypond</tt>', 'Lilypond'),
@@ -444,6 +477,11 @@ function scorerender_update_options ()
 	if (!ctype_digit ($newopt['FRAGMENT_PER_COMMENT'])) {
 		$msgs[] = 'wrong_frag_per_comment';
 		unset ($newopt['FRAGMENT_PER_COMMENT']);
+	}
+
+	if (!ctype_digit ($newopt['IMAGE_MAX_WIDTH']) || ($newopt['IMAGE_MAX_WIDTH'] < (1 * DPI))) {
+		$msgs[] = 'wrong_image_max_width';
+		unset ($newopt['IMAGE_MAX_WIDTH']);
 	}
 
 	/*
@@ -563,25 +601,32 @@ function scorerender_admin_section_image ()
 		<legend><?php _e('Image options') ?></legend>
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
+			<th scope="row"><?php _e('Image width (pixel):') ?></th>
 			<td>
+				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo attribute_escape ($scorerender_options['IMAGE_MAX_WIDTH']); ?>" size="6" />
+				<label for="image_max_width"><?php _e('Default is 360 (5 inch)') ?></label><br /><?php _e('Note that image size conversion is hardcoded to 72 DPI for most music rendering applications. And this value is just an approximation, actual image rendered for certain applications can be a bit smaller.') ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<td colspan="2">
 				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> />
 				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<td>
+			<td colspan="2">
 				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
 				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<td>
+			<td colspan="2">
 				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('show_ie_transparency_warning'); box.disabled = !box.disabled; return true;" />
 				<label for="transparent_image"><?php _e('Use transparent background') ?> <?php _e('(IE &lt;= 6 does not support transparent PNG)'); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<td style="padding-left: 30px;">
+			<td style="padding-left: 30px;" colspan="2">
 				<input type="checkbox" name="ScoreRender[SHOW_IE_TRANSPARENCY_WARNING]" id="show_ie_transparency_warning" value="1" <?php checked('1', $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']); if (1 != $scorerender_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
 				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used (Only possible if above box is checked)') ?></label>
 			</td>
@@ -838,6 +883,9 @@ function scorerender_admin_options ()
 	<?php
 }
 
+/**
+ * Append submenu item into WordPress menu
+ */
 function scorerender_admin_menu ()
 {
 	add_options_page (__('ScoreRender options'),
@@ -853,7 +901,8 @@ scorerender_get_options ();
 // (This is part of the LilyPond syntax for parallel music, and Mup syntax for
 // attribute change within a bar)
 //
-// Since balancing filter is also used in get_the_content(), removing filter is of no use.
+// Since balancing filter is also used in get_the_content(), i.e. before any plugin is
+// activated, removing filter is of no use.
 //
 //remove_filter ('content_save_pre', 'balanceTags', 50);
 //remove_filter ('excerpt_save_pre', 'balanceTags', 50);

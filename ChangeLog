@@ -1,3 +1,13 @@
+2007-05-29  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, class.*.inc.php:
+	- Add option to limit image width.
+
+	* wp-scorerender.php:
+	- Some phpdoc stuff.
+	- Merge scorerender_generate_html_error() into
+	scorerender_process_result().
+
 2007-05-19  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php: Add option to allow displaying warning about IE

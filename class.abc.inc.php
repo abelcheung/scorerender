@@ -29,13 +29,14 @@ class abcRender extends ScoreRender
 	function abcRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
+		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
 	function getInputFileContents ($input)
 	{
 		$header = <<<EOT
 %abc
-%%staffwidth 5in
+%%staffwidth {$this->_options['IMAGE_MAX_WIDTH']}in
 %%stretchlast no
 %%leftmargin 0.2in
 %abc2mtex: yes

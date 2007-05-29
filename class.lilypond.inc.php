@@ -34,6 +34,8 @@ class lilypondRender extends ScoreRender
 	function lilypondRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
+
+		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
 	function getInputFileContents ($input)
@@ -46,7 +48,7 @@ class lilypondRender extends ScoreRender
 \\paper {
 	ragged-right = ##t
 	indent = 0.0\\mm
-	line-width = 5\\in
+	line-width = {$this->_options['IMAGE_MAX_WIDTH']}\\in
 }
 \\layout {
 	\\context {

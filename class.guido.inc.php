@@ -40,7 +40,7 @@ class guidoRender extends ScoreRender
 	{
 		$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
 				'http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl',
-				12.7, 100.0, 1,
+				$this->_options['IMAGE_MAX_WIDTH'] / DPI * 2.54, 100.0, 1,
 				rawurlencode (file_get_contents ($input_file)));
 
 		return (copy ($url, $rendered_image));

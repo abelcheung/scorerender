@@ -29,6 +29,8 @@ class mupRender extends ScoreRender
 	function mupRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
+
+		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
 	function isValidInput ($input)
@@ -54,7 +56,7 @@ leftmargin = 0
 rightmargin = 0
 topmargin = 0
 bottommargin = 0
-pagewidth = 5
+pagewidth = {$this->_options['IMAGE_MAX_WIDTH']}
 label = ""
 EOD;
 		return $header . "\n" . $input;
