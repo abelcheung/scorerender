@@ -100,7 +100,7 @@ class ScoreRender
 	/**
 	 * Executes command and stores output message
 	 *
-	 * {@internal It is basically exec() with additional stuff}
+	 * {@internal It is basically exec() with additional stuff}}
 	 *
 	 * @param string $cmd Command to be executed
 	 * @access protected
@@ -198,17 +198,17 @@ class ScoreRender
 		if (!is_file ($final_image))
 		{
 			// Check cache directory
-			if ( (!isset ($this->_options['CACHE_DIR'])) ||
-			     (!is_dir ($this->_options['CACHE_DIR'])) ||
+			if ( (!isset       ($this->_options['CACHE_DIR'])) ||
+			     (!is_dir      ($this->_options['CACHE_DIR'])) ||
 			     (!is_writable ($this->_options['CACHE_DIR'])) )
 			{
 				return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
 			}
 
 			// Check temp directory
-			if ( (!isset($this->_options['TEMP_DIR'])) ||
-			     (!is_dir($this->_options['TEMP_DIR'])) ||
-			     (!is_writable($this->_options['TEMP_DIR'])) )
+			if ( (!isset       ($this->_options['TEMP_DIR'])) ||
+			     (!is_dir      ($this->_options['TEMP_DIR'])) ||
+			     (!is_writable ($this->_options['TEMP_DIR'])) )
 			{
 				return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
 			}

@@ -18,14 +18,28 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/*
- Implements rendering of Mup figures in ScoreRender.
+/**
+ * Implements rendering of Mup figures in ScoreRender.
+ * @package ScoreRender
 */
 
+/**
+ * Inherited from ScoreRender class, for supporting Mup notation.
+ * @package ScoreRender
+*/
 class mupRender extends ScoreRender
 {
+	/**
+	 * @var string
+	 */
 	var $_uniqueID = "mup";
 
+	/**
+	 * mupRender class initialization method
+	 * @param string $input
+	 * @param array $options
+	 * @access private
+	 */
 	function mupRender ($input, $options = array())
 	{
 		parent::init_options ($input, $options);
@@ -33,6 +47,12 @@ class mupRender extends ScoreRender
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
+	/**
+	 * Checks if given content is invalid or dangerous content
+	 *
+	 * @param string $input
+	 * @return boolean True if content is deemed safe
+	 */
 	function isValidInput ($input)
 	{
 		$blacklist = array
@@ -47,6 +67,17 @@ class mupRender extends ScoreRender
 		return true;
 	}
 
+	/**
+	 * Prepend and append content to supplied music fragment
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such default rendering options to Mup notation.
+	 *
+	 * @param string $input
+	 * @return string The full music content to be rendered
+	 */
 	function getInputFileContents ($input)
 	{
 		$header = <<<EOD
@@ -62,6 +93,17 @@ EOD;
 		return $header . "\n" . $input;
 	}
 
+	/**
+	 * Execute the real command for first time rendering
+	 *
+	 * The command reads input content (after prepending and appending
+	 * necessary stuff to user supplied content), and converts it to
+	 * a PostScript file.
+	 *
+	 * @param string $input_file Content to be rendered
+	 * @param string $rendered_image PostScript file name to be rendered into
+	 * @return boolean Whether rendering is successful
+	 */
 	function execute ($input_file, $rendered_image)
 	{
 		/* Mup requires a file ".mup" present in $HOME or
@@ -95,11 +137,13 @@ EOD;
 
 	function convertimg ($rendered_image, $cache_filename, $invert, $transparent)
 	{
-		// Mup output is Grayscale by default. When attempting to add
-		// transparency, it can only have value 0 or 1; that means notes,
-		// slurs and letters won't have smooth outline. Converting to
-		// RGB colorspace seems to fix the problem, but can't have all
-		// options in one single pass.
+		/*
+		 * Mup output is Grayscale by default. When attempting to add
+		 * transparency, it can only have value 0 or 1; that means notes,
+		 * slurs and letters won't have smooth outline. Converting to
+		 * RGB colorspace seems to fix the problem, but can't have all
+		 * options in one single pass.
+		 */
 		$cmd = $this->_options['CONVERT_BIN'] . ' -trim +repage ';
 
 		if (!$transparent)
