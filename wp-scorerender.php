@@ -35,22 +35,98 @@ Author URI: http://me.abelcheung.org/
 */
 
 
-// Increment this number if database has new or changed config options
+/**
+ * ScoreRender documentation
+ * @package ScoreRender
+ * @version 0.1.99
+ * @author Abel Cheung <abelcheung@gmail.com>
+ * @copyright Copyright (C) 2007 Abel Cheung
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
+/**
+ * Database version.
+ *
+ * This number must be incremented every time when option has been changed, removed or added.
+ */
 define ('DATABASE_VERSION', 8);
 
-// Error constants
-define('ERR_INVALID_INPUT'               , -1);
-define('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
-define('ERR_TEMP_DIRECTORY_NOT_WRITABLE' , -3);
-define('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
-define('ERR_IMAGE_CONVERT_FAILURE'       , -5);
-define('ERR_RENDERING_ERROR'             , -6);
-define('ERR_LENGTH_EXCEEDED'             , -7);
-
-// Most apps hardcode DPI value to 72
+/**
+ * Most apps hardcode DPI value to 72 dot per inch
+ */
 define ('DPI', 72.0);
 
-// Supported syntax
+
+/*
+ * Error constants
+ */
+
+
+/**
+ * Error constant used when content is known to be invalid or dangerous.
+ *
+ * Dangerous content means special constructs causing
+ * inclusion of another file or command execution, etc.
+ */
+define('ERR_INVALID_INPUT'               , -1);
+
+/**
+ * Error constant used when cache directory is not writable.
+ */
+define('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
+
+/**
+ * Error constant used when temporary working directory is not writable.
+ */
+define('ERR_TEMP_DIRECTORY_NOT_WRITABLE' , -3);
+
+/**
+ * Error constant used when temporary file is not writable.
+ *
+ * This error is very rare, most usually it's the directory (not file) which is not writable.
+ */
+define('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
+
+/**
+ * Error constant used when conversion of rendered image to proper format failed.
+ */
+define('ERR_IMAGE_CONVERT_FAILURE'       , -5);
+
+/**
+ * Error constant used when any generic error occurred during rendering.
+ */
+define('ERR_RENDERING_ERROR'             , -6);
+
+/**
+ * Error constant used when length of supplied content exceeds configured limit.
+ */
+define('ERR_LENGTH_EXCEEDED'             , -7);
+
+
+/*
+ * Global Variables
+ */
+
+
+/**
+ * Stores default temporary folder determined by {@link sys_get_temp_dir sys_get_temp_dir()}.
+ * @global string $default_tmp_dir
+ */
+$default_tmp_dir = '';
+
+/**
+ * Stores all ScoreRender config options.
+ * @global array $scorerender_options
+ */
+$scorerender_options = array ();
+
+/**
+ * Array of supported music notation syntax.
+ *
+ * Array keys are names of the music notations. Values are unused for now.
+ *
+ * @global array $syntax
+ */
 $syntax = array (
 	'abc'      => '',
 	'guido'    => '',
@@ -63,16 +139,30 @@ require_once('class.scorerender.inc.php');
 foreach ($syntax as $keyword => $regex)
 {
 	$syntax[$keyword] = '~\['.$keyword.'\](.*?)\[/'.$keyword.'\]~si';
+
+	/**
+	 * @ignore
+	 */
 	define ("REGEX_MATCH_" . strtoupper($keyword), '~\['.$keyword.'\](.*?)\[/'.$keyword.'\]~si');
+
+	/**
+	 * @ignore
+	 */
 	require_once ('class.' . $keyword . '.inc.php');
 }
 
-$default_tmp_dir = '';
-$scorerender_options = array ();
+
+/*
+ * Backported functions -- sys_get_temp_dir and array_intersect_key
+ */
 
 // http://www.phpit.net/article/creating-zip-tar-archives-dynamically-php/2/
+//
 if (!function_exists ('sys_get_temp_dir'))
 {
+	/**
+	 * @ignore
+	 */
 	function sys_get_temp_dir ()
 	{
 		// Try to get from environment variable
@@ -101,8 +191,12 @@ if (!function_exists ('sys_get_temp_dir'))
 }
 
 // http://www.php.net/manual/en/function.array-intersect-key.php#68179
+//
 if (!function_exists ('array_intersect_key'))
 {
+	/**
+	 * @ignore
+	 */
 	function array_intersect_key ()
 	{
 		$arrs = func_get_args ();
@@ -115,9 +209,15 @@ if (!function_exists ('array_intersect_key'))
 	}
 }
 
+
+
 /**
- * Retrieve ScoreRender options from database and update if necessary
- * @global string $scorerender_options, $default_tmp_dir
+ * Retrieve ScoreRender options from database.
+ *
+ * If the {@link DATABASE_VERSION} constant contained inside MySQL database is
+ * small than that of PHP file (most likely occur when plugin is
+ * JUST upgraded), then it also merges old config with new default
+ * config and update the options in database.
  */
 function scorerender_get_options ()
 {
@@ -179,8 +279,13 @@ function scorerender_get_options ()
 	return;
 }
 
+
+
 /**
- * @return integer
+ * Returns number of cached images inside cache directory
+ *
+ * @since 0.2
+ * @return integer number of images inside cache directory
  */
 function scorerender_get_num_of_images ()
 {
@@ -202,10 +307,16 @@ function scorerender_get_num_of_images ()
 	return $count;
 }
 
+
+
 /**
- * Calculate numbe of fragments contained inside a blog post
+ * Calculate number of fragments contained inside a blog post
+ *
+ * The returned numbers are mainly used for showing info in WordPress Dashboard
+ *
+ * @since 0.2
  * @param string $content the whole blog post content
- * @return array
+ * @return array $count Array containing number of matched fragments for each kind of notation
  */
 function scorerender_get_fragment_count ($content)
 {
@@ -218,9 +329,12 @@ function scorerender_get_fragment_count ($content)
 	return $count;
 }
 
+
+
 /**
  * Remove all cached images in cache directory
- * @global string $scorerender_options;
+ *
+ * @since 0.2
  */
 function scorerender_remove_cache ()
 {
@@ -245,6 +359,15 @@ function scorerender_remove_cache ()
 	return;
 }
 
+
+
+/**
+ * Generate HTML content from error message or rendered image
+ * @param mixed $result Either error code or rendered image file name
+ * @param string $input Music fragment to be rendered
+ * @param object $render PHP object created for rendering relevant music fragment
+ * @return string $html The HTML content
+ */
 function scorerender_process_result ($result, $input, $render)
 {
 	global $scorerender_options;
@@ -278,13 +401,13 @@ function scorerender_process_result ($result, $input, $render)
 	{
 		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/ScoreRender/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR);
 		$html .= sprintf ("<input type='image' name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
-	                  __('Music fragment'), __('Music fragment'),
-	                  $scorerender_options['CACHE_URL'], $result);
+		          __('Music fragment'), __('Music fragment'),
+		          $scorerender_options['CACHE_URL'], $result);
 		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n", rawurlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))));
 	} else {
 		$html .= sprintf ("<img name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
-	                  __('Music fragment'), __('Music fragment'),
-	                  $scorerender_options['CACHE_URL'], $result);
+		          __('Music fragment'), __('Music fragment'),
+		          $scorerender_options['CACHE_URL'], $result);
 	}
 	if ($scorerender_options['TRANSPARENT_IMAGE'] && $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']) 
 	{
@@ -294,6 +417,19 @@ function scorerender_process_result ($result, $input, $render)
 	return $html;
 }
 
+
+
+/**
+ * Generate converted HTML fragment from music notation fragment
+ *
+ * Create PHP object for each kind of matched music notation, render fragment
+ * inside, and output the rendered result as HTML.
+ *
+ * If no PHP class exists corresponding to certain notation, then 
+ * unconverted content is returned.
+ * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
+ * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
+ */
 function scorerender_filter ($matches)
 {
 	global $scorerender_options, $syntax;
@@ -319,11 +455,16 @@ function scorerender_filter ($matches)
 	return scorerender_process_result ($result, $input, $render);
 }
 
+
+
 /**
- * Check if content rendering should be enabled. If yes, then apply content filter.
- * @global string $scorerender_options, $syntax
+ * Renders music fragments contained inside posts.
+ *
+ * Check if post rendering should be enabled.
+ * If yes, then apply {@link scorerender_filter} function on $content.
+ *
  * @param string $content the whole content of blog post
- * @return string
+ * @return string Converted blog post content.
  */
 function scorerender_content ($content)
 {
@@ -340,11 +481,16 @@ function scorerender_content ($content)
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, -1);
 }
 
+
+
 /**
- * Check if comment rendering should be enabled. If yes, then apply content filter.
- * @global string $scorerender_options, $syntax
+ * Renders music fragments contained inside comments.
+ *
+ * Check if comment rendering should be enabled.
+ * If yes, then apply {@link scorerender_filter} function on $content.
+ *
  * @param string $content the whole content of blog comment
- * @return string
+ * @return string Converted blog comment content.
  */
 function scorerender_comment ($content)
 {
@@ -362,9 +508,13 @@ function scorerender_comment ($content)
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
 }
 
+
+
 /**
  * Display info in WordPress Dashboard
- * @global string $wpdb, $syntax
+ *
+ * @since 0.2
+ * @access private
  */
 function scorerender_activity_box ()
 {
@@ -413,6 +563,15 @@ function scorerender_activity_box ()
 <?php
 }
 
+
+
+/**
+ * Update ScoreRender options in database with submitted options.
+ *
+ * A warning banner will be shown on top of admin page for each
+ * error encountered in various options. In some cases supplied
+ * config values will be discarded.
+ */
 function scorerender_update_options ()
 {
 	global $defalt_tmp_dir, $scorerender_options;
@@ -553,6 +712,14 @@ function scorerender_update_options ()
 	}
 }
 
+
+
+/**
+ * Section of admin page about path options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_path ()
 {
 	global $scorerender_options;
@@ -593,6 +760,14 @@ function scorerender_admin_section_path ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about image options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_image ()
 {
 	global $scorerender_options;
@@ -636,6 +811,14 @@ function scorerender_admin_section_image ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about content options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_content ()
 {
 	global $scorerender_options;
@@ -664,6 +847,14 @@ function scorerender_admin_section_content ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about caching options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_caching ()
 {
 	global $scorerender_options;
@@ -694,6 +885,14 @@ function scorerender_admin_section_caching ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about Lilypond notation options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_lilypond ()
 {
 	global $scorerender_options;
@@ -722,6 +921,14 @@ function scorerender_admin_section_lilypond ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about Mup notation options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_mup ()
 {
 	global $scorerender_options;
@@ -758,6 +965,14 @@ function scorerender_admin_section_mup ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about GUIDO notation options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_guido ()
 {
 	global $scorerender_options;
@@ -780,6 +995,14 @@ function scorerender_admin_section_guido ()
 <?php
 }
 
+
+
+/**
+ * Section of admin page about ABC notation options
+ *
+ * @since 0.2
+ * @access private
+ */
 function scorerender_admin_section_abc ()
 {
 	global $scorerender_options;
@@ -810,6 +1033,17 @@ function scorerender_admin_section_abc ()
 <?php
 }
 
+
+
+/**
+ * Show WordPress admin page
+ *
+ * It also checks if form button is pressed, and may call
+ * {@link scorerender_remove_cache scorerender_remove_cache()} or
+ * {@link scorerender_update_options scorerender_update_options()} correspondingly.
+ *
+ * @access private
+ */
 function scorerender_admin_options ()
 {
 	global $scorerender_options;
@@ -883,35 +1117,46 @@ function scorerender_admin_options ()
 	<?php
 }
 
+
+
 /**
  * Append submenu item into WordPress menu
+ *
+ * @access private
  */
 function scorerender_admin_menu ()
 {
-	add_options_page (__('ScoreRender options'),
-	                  'ScoreRender', 9, __FILE__,
-	                  'scorerender_admin_options');
+	add_options_page (__('ScoreRender options'), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
 }
+
+/*
+Remove tag balancing filter
+
+There seems to be an bug in the balanceTags function of wp-includes/functions-formatting.php
+which means that ">>" are converted to "> >", and "<<" to "< <", causing syntax errors.
+
+(This is part of the LilyPond syntax for parallel music, and Mup syntax for
+attribute change within a bar) -- Abel
+
+Since balancing filter is also used in get_the_content(), i.e. before any plugin is
+activated, removing filter is of no use. -- Abel
+ */
+
+/*
+remove_filter ('content_save_pre', 'balanceTags', 50);
+remove_filter ('excerpt_save_pre', 'balanceTags', 50);
+remove_filter ('comment_save_pre', 'balanceTags', 50);
+remove_filter ('pre_comment_content', 'balanceTags', 30);
+remove_filter ('comment_text', 'force_balance_tags', 25);
+ */
 
 scorerender_get_options ();
 
-// Remove tag balancing filter
-// There seems to be an bug in the balanceTags function of wp-includes/functions-formatting.php
-// which means that ">>" are converted to "> >", and "<<" to "< <", causing syntax errors.
-// (This is part of the LilyPond syntax for parallel music, and Mup syntax for
-// attribute change within a bar)
-//
-// Since balancing filter is also used in get_the_content(), i.e. before any plugin is
-// activated, removing filter is of no use.
-//
-//remove_filter ('content_save_pre', 'balanceTags', 50);
-//remove_filter ('excerpt_save_pre', 'balanceTags', 50);
-//remove_filter ('comment_save_pre', 'balanceTags', 50);
-//remove_filter ('pre_comment_content', 'balanceTags', 30);
-//remove_filter ('comment_text', 'force_balance_tags', 25);
-
 if ( 0 != get_option('use_balanceTags') )
 {
+	/**
+	 * @ignore
+	 */
 	function turn_off_balance_tags()
 	{
 		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
@@ -921,8 +1166,7 @@ if ( 0 != get_option('use_balanceTags') )
 	add_filter ('admin_notices', 'turn_off_balance_tags');
 }
 
-// earlier than default priority, since smilies conversion
-// and wptexturize() can mess up the content
+// earlier than default priority, since smilies conversion and wptexturize() can mess up the content
 add_filter ('the_excerpt', 'scorerender_content', 5);
 add_filter ('the_content', 'scorerender_content', 5);
 add_filter ('comment_text', 'scorerender_comment', 5);
