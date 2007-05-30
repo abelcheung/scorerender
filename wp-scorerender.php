@@ -553,13 +553,20 @@ function scorerender_activity_box ()
 		$frag_count += array_sum (scorerender_get_fragment_count ($comment));
 
 
-	$img_count = scorerender_get_num_of_images();
 	$number_of_fragments = sprintf (__ngettext ('%d music fragment', '%d music fragments', $frag_count), $frag_count);
-	$number_of_images = sprintf (__ngettext ('%d image', '%d images', $img_count), $img_count);
+
+	$img_count = scorerender_get_num_of_images();
+
+	if ( 0 > $img_count )
+		$number_of_images = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.'), 'options-general.php?page=' . plugin_basename (__FILE__));
+	else
+		$number_of_images = sprintf (__ngettext ('Currently %d image are rendered and cached.',
+		                                         'Currently %d images are rendered and cached.', $img_count),
+		                             $img_count);
 ?>
 	<div>
 	<h3><?php _e('ScoreRender') ?></h3>
-	<p><?php printf ('There are %s contained in %s and %s. Currently %s are rendered and cached.', $number_of_fragments, $number_of_posts, $number_of_comments, $number_of_images); ?></p>
+	<p><?php printf (__('There are %s contained in %s and %s.'), $number_of_fragments, $number_of_posts, $number_of_comments); ?> <?php echo $number_of_images; ?></p>
 	</div>
 <?php
 }
@@ -864,24 +871,24 @@ function scorerender_admin_section_caching ()
 		<legend><?php _e('Caching') ?></legend>
 <?php
 	$img_count = scorerender_get_num_of_images();
-	if (-1 == $img_count) {
+
+	if ( -1 == $img_count )
 		echo "Cache directory is not a readable directory.<br />\n";
-	} else {
+	else
+	{
 		printf (__ngettext("Cache directory contain %d image.\n",
 			           "Cache directory contain %d images.\n",
 			           $img_count), $img_count);
 	}
 
-	if (($img_count >= 1) &&
-	     is_dir      ($scorerender_options['CACHE_DIR']) &&
-	     is_readable ($scorerender_options['CACHE_DIR']) &&
-	     is_writable ($scorerender_options['CACHE_DIR'])) :
+	if ( ($img_count >= 1) && is_writable ($scorerender_options['CACHE_DIR']) ) :
 ?>
 		<p class="submit">
 		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" />
 		</p>
-<?php	endif; ?>
-
+<?php
+	endif;
+?>
 	</fieldset>
 <?php
 }
