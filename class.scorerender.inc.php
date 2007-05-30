@@ -33,14 +33,51 @@
  - convertimg($rendered_image, $final_image, $invert, $transparent)
 */
 
+/**
+ * ScoreRender documentation
+ * @package ScoreRender
+ */
 
+/**
+ * ScoreRender Class
+ * @package ScoreRender
+ * @todo Avoid sneaking configuration options and music content directly into class when creating object
+ * @abstract
+ */
 class ScoreRender
 {
+	/**
+	 * @var array ScoreRender config options.
+	 * @access private
+	 */
 	var $_options;
+
+	/**
+	 * @var string The music fragment to be rendered.
+	 * @access private
+	 */
 	var $_input;
+
+	/**
+	 * @var string A unique identifier for each kind of notation.
+	 * @abstract
+	 * @access private
+	 */
 	var $_uniqueID;
+
+	/**
+	 * @var string Stores output message of rendering command.
+	 * @access private
+	 */
 	var $_commandOutput;
 
+	/**
+	 * Initialize ScoreRender options
+	 *
+	 * @param string $input
+	 * @param array $options
+	 * @access protected
+	 */
 	function init_options ($input, $options = array())
 	{
 		// fallback values
@@ -51,12 +88,25 @@ class ScoreRender
 		$this->_input = $input;
 	}
 
-	function getCommandOutput()
+	/**
+	 * Returns output message of rendering command.
+	 * @return string
+	 */
+	function getCommandOutput ()
 	{
 		return $this->_commandOutput;
 	}
 
-	function _exec($cmd)
+	/**
+	 * Executes command and stores output message
+	 *
+	 * {@internal It is basically exec() with additional stuff}
+	 *
+	 * @param string $cmd Command to be executed
+	 * @access protected
+	 * @final
+	 */
+	function _exec ($cmd)
 	{
 		$cmd_output = array();
 		$retval = 0;
@@ -68,6 +118,21 @@ class ScoreRender
 		return $retval;
 	}
 
+	/**
+	 * Converts rendered PostScript page into PNG format.
+	 *
+	 * All rendering command would generate PostScript format as output.
+	 * In order to show the image, it must be converted to PNG format first,
+	 * and the process is done here, using ImageMagick. Various effects are also
+	 * applied here, like white edge trimming, color inversion and alpha blending.
+	 *
+	 * @param string $rendered_image The rendered PostScript file name
+	 * @param string $final_image The final PNG image file name
+	 * @param boolean $invert True if image should be white on black instead of vice versa
+	 * @param boolean $transparent True if image background should be transparent
+	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 * @access protected
+	 */
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// Convert to specified format
@@ -96,6 +161,20 @@ class ScoreRender
 		return ($retval === 0);
 	}
 
+	/**
+	 * Render music fragment into images
+	 *
+	 * First it tries to check if image is already rendered, and return
+	 * existing image file name immediately. Otherwise the music fragment is
+	 * rendered, resulting image is stored in cache folder, and the file name
+	 * is returned.
+	 *
+	 * If any error occurs during rendering process, an error code is returned
+	 * instead.
+	 *
+	 * @return mixed
+	 * @final
+	 */
 	function render()
 	{
 		// Check for valid code
