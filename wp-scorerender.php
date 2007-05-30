@@ -566,7 +566,7 @@ function scorerender_activity_box ()
 ?>
 	<div>
 	<h3><?php _e('ScoreRender') ?></h3>
-	<p><?php printf (__('There are %s contained in %s and %s.'), $number_of_fragments, $number_of_posts, $number_of_comments); ?> <?php echo $number_of_images; ?></p>
+	<p><?php printf (__('There are %s contained within %s and %s.'), $number_of_fragments, $number_of_posts, $number_of_comments); ?> <?php echo $number_of_images; ?></p>
 	</div>
 <?php
 }
