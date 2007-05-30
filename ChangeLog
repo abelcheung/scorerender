@@ -1,5 +1,11 @@
 2007-05-30  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	scorerender_process_result() --> scorerender_process_content(), and
+	drop one redundant parameter.
+
+2007-05-30  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php: More phpdoc comments.
 
 2007-05-29  Abel Cheung  <abelcheung@gmail.com>

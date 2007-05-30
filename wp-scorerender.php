@@ -123,7 +123,8 @@ $scorerender_options = array ();
 /**
  * Array of supported music notation syntax.
  *
- * Array keys are names of the music notations. Values are unused for now.
+ * Array keys are names of the music notations, in lower case.
+ * Values are unused for now.
  *
  * @global array $syntax
  */
@@ -363,14 +364,15 @@ function scorerender_remove_cache ()
 
 /**
  * Generate HTML content from error message or rendered image
- * @param mixed $result Either error code or rendered image file name
  * @param string $input Music fragment to be rendered
  * @param object $render PHP object created for rendering relevant music fragment
  * @return string $html The HTML content
  */
-function scorerender_process_result ($result, $input, $render)
+function scorerender_process_content ($input, $render)
 {
 	global $scorerender_options;
+
+	$result = $render->render();
 
 	switch ($result)
 	{
@@ -443,6 +445,7 @@ function scorerender_filter ($matches)
 		if (preg_match ($regex, $matches[0]))
 		{
 			$class = $keyword . "Render";
+			// TODO: Should do it like what a class should behave
 			$render = new $class ($input, $scorerender_options);
 		}
 	}
@@ -450,9 +453,7 @@ function scorerender_filter ($matches)
 	if (empty ($render))
 		return $input;
 
-	$result = $render->render();
-
-	return scorerender_process_result ($result, $input, $render);
+	return scorerender_process_content ($input, $render);
 }
 
 
