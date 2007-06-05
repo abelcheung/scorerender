@@ -131,9 +131,9 @@ $scorerender_options = array ();
  * Values are regular expression used for tag matching; the regex are
  * generated below.
  *
- * @global array $syntax
+ * @global array $notation
  */
-$syntax = array (
+$notation = array (
 	'abc'      => '',
 	'guido'    => '',
 	'lilypond' => '',
@@ -142,14 +142,14 @@ $syntax = array (
 
 require_once('class.scorerender.inc.php');
 
-foreach ($syntax as $notation => $regex)
+foreach ($notation as $notationname => $regex)
 {
-	$syntax[$notation] = '~\['.$notation.'\](.*?)\[/'.$notation.'\]~si';
+	$notation[$notationname] = '~\['.$notationname.'\](.*?)\[/'.$notationname.'\]~si';
 
 	/**
 	 * @ignore
 	 */
-	require_once ('class.' . $notation . '.inc.php');
+	require_once ('class.' . $notationname . '.inc.php');
 }
 
 
@@ -321,10 +321,10 @@ function scorerender_get_num_of_images ()
  */
 function scorerender_get_fragment_count ($content)
 {
-	global $syntax;
+	global $notation;
 
 	$count = array();
-	foreach (array_values ($syntax) as $regex)
+	foreach (array_values ($notation) as $regex)
 		$count[] = preg_match_all ($regex, $content, $matches);
 
 	return $count;
@@ -370,7 +370,7 @@ function scorerender_remove_cache ()
  */
 function scorerender_process_content ($input, $render)
 {
-	global $scorerender_options, $syntax;
+	global $scorerender_options, $notation;
 
 	$result = $render->render();
 
@@ -406,12 +406,12 @@ function scorerender_process_content ($input, $render)
 		          __('Music fragment'), __('Music fragment'),
 		          $scorerender_options['CACHE_URL'], $result);
 
-		foreach (array_keys ($syntax) as $notation)
+		foreach (array_keys ($notation) as $notationname)
 		{
-			$classname = $notation . CLASS_SUFFIX;
+			$classname = $notationname . CLASS_SUFFIX;
 			if ($render instanceof $classname)
 			{
-				$input = "[$notation]\n" . $input . "\n[/$notation]";
+				$input = "[$notationname]\n" . $input . "\n[/$notationname]";
 				break;
 			}
 		}
@@ -449,17 +449,17 @@ function scorerender_process_content ($input, $render)
  */
 function scorerender_filter ($matches)
 {
-	global $scorerender_options, $syntax;
+	global $scorerender_options, $notation;
 	$input = trim (html_entity_decode ($matches[1]));
 
 	// since preg_replace_callback only accepts single function,
 	// we have to check which regex is matched here and create
 	// corresponding object
-	foreach ($syntax as $notation => $regex)
+	foreach ($notation as $notationname => $regex)
 	{
 		if (preg_match ($regex, $matches[0]))
 		{
-			$class = $notation . CLASS_SUFFIX;
+			$class = $notationname . CLASS_SUFFIX;
 			// TODO: Should do it like what a class should behave
 			$render = new $class ($input, $scorerender_options);
 		}
@@ -484,12 +484,12 @@ function scorerender_filter ($matches)
  */
 function scorerender_content ($content)
 {
-	global $scorerender_options, $syntax;
+	global $scorerender_options, $notation;
 
 	$regex_list = array();
-	foreach ($syntax as $notation => $regex)
+	foreach ($notation as $notationname => $regex)
 	{
-		$config_name = strtoupper ($notation) . '_CONTENT_ENABLED';
+		$config_name = strtoupper ($notationname) . '_CONTENT_ENABLED';
 		if ($scorerender_options[$config_name])
 			$regex_list[] = $regex;
 	};
@@ -510,12 +510,12 @@ function scorerender_content ($content)
  */
 function scorerender_comment ($content)
 {
-	global $scorerender_options, $syntax;
+	global $scorerender_options, $notation;
 
 	$regex_list = array();
-	foreach ($syntax as $notation => $regex)
+	foreach ($notation as $notationname => $regex)
 	{
-		$config_name = strtoupper ($notation) . '_CONTENT_ENABLED';
+		$config_name = strtoupper ($notationname) . '_CONTENT_ENABLED';
 		if ($scorerender_options[$config_name])
 			$regex_list[] = $regex;
 	};
@@ -534,15 +534,15 @@ function scorerender_comment ($content)
  */
 function scorerender_activity_box ()
 {
-	global $wpdb, $syntax;
+	global $wpdb, $notation;
 	$frag_count = 0;
 
 	$wpdb->hide_errors();
 
 	// get posts first
 	$query_substr = array();
-	foreach (array_keys ($syntax) as $notation)
-		$query_substr[] .= "post_content LIKE '%[/$notation]%'";
+	foreach (array_keys ($notation) as $notationname)
+		$query_substr[] .= "post_content LIKE '%[/$notationname]%'";
 	$query = "SELECT post_content FROM $wpdb->posts WHERE " . implode (" OR ", $query_substr);
 
 	$posts = $wpdb->get_col ($query);
@@ -555,8 +555,8 @@ function scorerender_activity_box ()
 
 	// followed by comments
 	$query_substr = array();
-	foreach (array_keys ($syntax) as $notation)
-		$query_substr[] .= "comment_content LIKE '%[/$notation]%'";
+	foreach (array_keys ($notation) as $notationname)
+		$query_substr[] .= "comment_content LIKE '%[/$notationname]%'";
 	$query = sprintf ("SELECT comment_content FROM $wpdb->comments WHERE comment_approved = '1' AND (%s)",
 			  implode (" OR ", $query_substr));
 
