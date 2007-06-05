@@ -56,6 +56,10 @@ define ('DATABASE_VERSION', 8);
  */
 define ('DPI', 72.0);
 
+/**
+ * Suffix for classes
+ */
+define ('CLASS_SUFFIX', 'Render');
 
 /*
  * Error constants
@@ -124,7 +128,8 @@ $scorerender_options = array ();
  * Array of supported music notation syntax.
  *
  * Array keys are names of the music notations, in lower case.
- * Values are unused for now.
+ * Values are regular expression used for tag matching; the regex are
+ * generated below.
  *
  * @global array $syntax
  */
@@ -137,19 +142,14 @@ $syntax = array (
 
 require_once('class.scorerender.inc.php');
 
-foreach ($syntax as $keyword => $regex)
+foreach ($syntax as $notation => $regex)
 {
-	$syntax[$keyword] = '~\['.$keyword.'\](.*?)\[/'.$keyword.'\]~si';
+	$syntax[$notation] = '~\['.$notation.'\](.*?)\[/'.$notation.'\]~si';
 
 	/**
 	 * @ignore
 	 */
-	define ("REGEX_MATCH_" . strtoupper($keyword), '~\['.$keyword.'\](.*?)\[/'.$keyword.'\]~si');
-
-	/**
-	 * @ignore
-	 */
-	require_once ('class.' . $keyword . '.inc.php');
+	require_once ('class.' . $notation . '.inc.php');
 }
 
 
@@ -370,7 +370,7 @@ function scorerender_remove_cache ()
  */
 function scorerender_process_content ($input, $render)
 {
-	global $scorerender_options;
+	global $scorerender_options, $syntax;
 
 	$result = $render->render();
 
@@ -405,13 +405,28 @@ function scorerender_process_content ($input, $render)
 		$html .= sprintf ("<input type='image' name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 		          __('Music fragment'), __('Music fragment'),
 		          $scorerender_options['CACHE_URL'], $result);
+
+		foreach (array_keys ($syntax) as $notation)
+		{
+			$classname = $notation . CLASS_SUFFIX;
+			if ($render instanceof $classname)
+			{
+				$input = "[$notation]\n" . $input . "\n[/$notation]";
+				break;
+			}
+		}
+
 		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n", rawurlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))));
-	} else {
+	}
+	else
+	{
 		$html .= sprintf ("<img name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 		          __('Music fragment'), __('Music fragment'),
 		          $scorerender_options['CACHE_URL'], $result);
 	}
-	if ($scorerender_options['TRANSPARENT_IMAGE'] && $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']) 
+
+	if ($scorerender_options['TRANSPARENT_IMAGE'] &&
+	    $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']) 
 	{
 		$html .= '<br /><!--[if lt IE 7]>' . __('<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.') . "<![endif]-->\n";
 	}
@@ -440,11 +455,11 @@ function scorerender_filter ($matches)
 	// since preg_replace_callback only accepts single function,
 	// we have to check which regex is matched here and create
 	// corresponding object
-	foreach ($syntax as $keyword => $regex)
+	foreach ($syntax as $notation => $regex)
 	{
 		if (preg_match ($regex, $matches[0]))
 		{
-			$class = $keyword . "Render";
+			$class = $notation . CLASS_SUFFIX;
 			// TODO: Should do it like what a class should behave
 			$render = new $class ($input, $scorerender_options);
 		}
@@ -472,9 +487,9 @@ function scorerender_content ($content)
 	global $scorerender_options, $syntax;
 
 	$regex_list = array();
-	foreach ($syntax as $keyword => $regex)
+	foreach ($syntax as $notation => $regex)
 	{
-		$config_name = strtoupper ($keyword) . '_CONTENT_ENABLED';
+		$config_name = strtoupper ($notation) . '_CONTENT_ENABLED';
 		if ($scorerender_options[$config_name])
 			$regex_list[] = $regex;
 	};
@@ -498,9 +513,9 @@ function scorerender_comment ($content)
 	global $scorerender_options, $syntax;
 
 	$regex_list = array();
-	foreach ($syntax as $keyword => $regex)
+	foreach ($syntax as $notation => $regex)
 	{
-		$config_name = strtoupper ($keyword) . '_CONTENT_ENABLED';
+		$config_name = strtoupper ($notation) . '_CONTENT_ENABLED';
 		if ($scorerender_options[$config_name])
 			$regex_list[] = $regex;
 	};
@@ -526,8 +541,8 @@ function scorerender_activity_box ()
 
 	// get posts first
 	$query_substr = array();
-	foreach (array_keys ($syntax) as $keyword)
-		$query_substr[] .= "post_content LIKE '%[/$keyword]%'";
+	foreach (array_keys ($syntax) as $notation)
+		$query_substr[] .= "post_content LIKE '%[/$notation]%'";
 	$query = "SELECT post_content FROM $wpdb->posts WHERE " . implode (" OR ", $query_substr);
 
 	$posts = $wpdb->get_col ($query);
@@ -540,8 +555,8 @@ function scorerender_activity_box ()
 
 	// followed by comments
 	$query_substr = array();
-	foreach (array_keys ($syntax) as $keyword)
-		$query_substr[] .= "comment_content LIKE '%[/$keyword]%'";
+	foreach (array_keys ($syntax) as $notation)
+		$query_substr[] .= "comment_content LIKE '%[/$notation]%'";
 	$query = sprintf ("SELECT comment_content FROM $wpdb->comments WHERE comment_approved = '1' AND (%s)",
 			  implode (" OR ", $query_substr));
 
