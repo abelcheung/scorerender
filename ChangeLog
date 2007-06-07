@@ -1,5 +1,9 @@
 2007-06-07  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php: Better ngettext usage.
+
+2007-06-07  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.*.inc.php:
 	- Drop unneeded input variable in getInputFileContents() and class
 	initialization method.

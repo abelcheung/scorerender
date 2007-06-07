@@ -571,7 +571,6 @@ function scorerender_activity_box ()
 
 	$posts = $wpdb->get_col ($query);
 	$post_count = count ($posts);
-	$number_of_posts = sprintf (__ngettext ('%d post', '%d posts', $post_count), $post_count);
 
 	foreach ($posts as $post)
 		$frag_count += array_sum (scorerender_get_fragment_count ($post));
@@ -580,32 +579,58 @@ function scorerender_activity_box ()
 	// followed by comments
 	$query_substr = array();
 	foreach (array_values ($notations) as $notation)
-		$query_substr[] .= "comment_content LIKE '%[/" . $notation['endtag'] . "]%'";
+		$query_substr[] .= "comment_content LIKE '%" . $notation['endtag'] . "%'";
 	$query = sprintf ("SELECT comment_content FROM $wpdb->comments WHERE comment_approved = '1' AND (%s)",
 			  implode (" OR ", $query_substr));
 
 	$comments = $wpdb->get_col ($query);
 	$comment_count = count ($comments);
-	$number_of_comments = sprintf (__ngettext ('%d comment', '%d comments', $comment_count), $comment_count);
 
 	foreach ($comments as $comment)
 		$frag_count += array_sum (scorerender_get_fragment_count ($comment));
 
+	$num_of_posts_str = sprintf (__ngettext ('%d post', '%d posts', $post_count), $post_count);
+	$num_of_comments_str = sprintf (__ngettext ('%d comment', '%d comments', $comment_count), $comment_count);
 
-	$number_of_fragments = sprintf (__ngettext ('%d music fragment', '%d music fragments', $frag_count), $frag_count);
+	if ((0 === $post_count) && (0 === $comment_count))
+	{
+		$first_sentence = __('This blog is currently empty.');
+	}
+	elseif (0 === $frag_count)
+	{
+		$first_sentence = __('There is no music fragment in your blog.');
+	}
+	elseif (0 === $comment_count)
+	{
+		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s.',
+		                                       'There are %d music fragments contained in %s.', $frag_count),
+		                           $frag_count, $num_of_posts_str);
+	}
+	elseif (0 === $post_count)
+	{
+		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s.',
+		                                       'There are %d music fragments contained in %s.', $frag_count),
+		                           $frag_count, $num_of_comments_str);
+	}
+	else
+	{
+		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s and %s.',
+		                                       'There are %d music fragments contained in %s and %s.', $frag_count),
+		                           $frag_count, $num_of_posts_str, $num_of_comments_str);
+	}
 
 	$img_count = scorerender_get_num_of_images();
 
 	if ( 0 > $img_count )
-		$number_of_images = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.'), 'options-general.php?page=' . plugin_basename (__FILE__));
+		$second_sentence = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.'), 'options-general.php?page=' . plugin_basename (__FILE__));
 	else
-		$number_of_images = sprintf (__ngettext ('Currently %d image are rendered and cached.',
-		                                         'Currently %d images are rendered and cached.', $img_count),
+		$second_sentence = sprintf (__ngettext ('Currently %d image are rendered and cached.',
+		                                        'Currently %d images are rendered and cached.', $img_count),
 		                             $img_count);
 ?>
 	<div>
 	<h3><?php _e('ScoreRender') ?></h3>
-	<p><?php printf (__('There are %s contained within %s and %s.'), $number_of_fragments, $number_of_posts, $number_of_comments); ?> <?php echo $number_of_images; ?></p>
+	<p><?php echo $first_sentence . '  ' . $second_sentence; ?></p>
 	</div>
 <?php
 }
