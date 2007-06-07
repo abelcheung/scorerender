@@ -83,11 +83,23 @@ class ScoreRender
 		$this->_options = array_merge ($this->_options, $options);
 	}
 
+	/**
+	 * Sets music fragment content
+	 *
+	 * @since 0.2
+	 * @param string $input The music fragment content
+	 */
 	function setMusicFragment ($input)
 	{
 		$this->_input = $input;
 	}
 
+	/**
+	 * Outputs music fragment content
+	 *
+	 * @since 0.2
+	 * @return string
+	 */
 	function getMusicFragment ()
 	{
 		return $this->_input;
