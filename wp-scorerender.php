@@ -56,11 +56,6 @@ define ('DATABASE_VERSION', 8);
  */
 define ('DPI', 72.0);
 
-/**
- * Suffix for classes
- */
-define ('CLASS_SUFFIX', 'Render');
-
 /*
  * Error constants
  */
