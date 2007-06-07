@@ -31,14 +31,14 @@ class lilypondRender extends ScoreRender
 {
 	var $_uniqueID = "lilypond";
 
-	function lilypondRender ($input, $options = array())
+	function lilypondRender ($options = array())
 	{
-		parent::init_options ($input, $options);
+		parent::init_options ($options);
 
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
-	function getInputFileContents ($input)
+	function getInputFileContents ()
 	{
 		$header = <<<EOD
 \\version "2.8.1"
@@ -57,7 +57,7 @@ class lilypondRender extends ScoreRender
 	}
 }
 EOD;
-		return $header . $input;
+		return $header . $this->_input;
 	}
 
 	function execute ($input_file, $rendered_image)

@@ -40,9 +40,9 @@ class mupRender extends ScoreRender
 	 * @param array $options
 	 * @access private
 	 */
-	function mupRender ($input, $options = array())
+	function mupRender ($options = array())
 	{
-		parent::init_options ($input, $options);
+		parent::init_options ($options);
 
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
@@ -78,7 +78,7 @@ class mupRender extends ScoreRender
 	 * @param string $input
 	 * @return string The full music content to be rendered
 	 */
-	function getInputFileContents ($input)
+	function getInputFileContents ()
 	{
 		$header = <<<EOD
 //!Mup-Arkkra-5.0
@@ -90,7 +90,7 @@ bottommargin = 0
 pagewidth = {$this->_options['IMAGE_MAX_WIDTH']}
 label = ""
 EOD;
-		return $header . "\n" . $input;
+		return $header . "\n" . $this->_input;
 	}
 
 	/**

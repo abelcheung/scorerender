@@ -72,40 +72,46 @@ define ('CLASS_SUFFIX', 'Render');
  * Dangerous content means special constructs causing
  * inclusion of another file or command execution, etc.
  */
-define('ERR_INVALID_INPUT'               , -1);
+define ('ERR_INVALID_INPUT'               , -1);
 
 /**
  * Error constant used when cache directory is not writable.
  */
-define('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
+define ('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
 
 /**
  * Error constant used when temporary working directory is not writable.
  */
-define('ERR_TEMP_DIRECTORY_NOT_WRITABLE' , -3);
+define ('ERR_TEMP_DIRECTORY_NOT_WRITABLE' , -3);
 
 /**
  * Error constant used when temporary file is not writable.
  *
  * This error is very rare, most usually it's the directory (not file) which is not writable.
  */
-define('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
+define ('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
 
 /**
  * Error constant used when conversion of rendered image to proper format failed.
  */
-define('ERR_IMAGE_CONVERT_FAILURE'       , -5);
+define ('ERR_IMAGE_CONVERT_FAILURE'       , -5);
 
 /**
  * Error constant used when any generic error occurred during rendering.
  */
-define('ERR_RENDERING_ERROR'             , -6);
+define ('ERR_RENDERING_ERROR'             , -6);
 
 /**
  * Error constant used when length of supplied content exceeds configured limit.
  */
-define('ERR_LENGTH_EXCEEDED'             , -7);
+define ('ERR_LENGTH_EXCEEDED'             , -7);
 
+/**
+ * Error constant representing internal class error.
+ *
+ * Currently used when some essential method is not implemented in classes.
+ */
+define ('ERR_INTERNAL_CLASS'              , -8);
 
 /*
  * Global Variables
@@ -384,11 +390,10 @@ function scorerender_remove_cache ()
 
 /**
  * Generate HTML content from error message or rendered image
- * @param string $input Music fragment to be rendered
  * @param object $render PHP object created for rendering relevant music fragment
  * @return string $html The HTML content
  */
-function scorerender_process_content ($input, $render)
+function scorerender_process_content ($render)
 {
 	global $scorerender_options, $notations;
 
@@ -401,17 +406,19 @@ function scorerender_process_content ($input, $render)
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
 			return sprintf (__('[%s: Cache directory not writable!]'), __('ScoreRender Error'));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary directory not writable!'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Temporary directory not writable!]'), __('ScoreRender Error'));
 		case ERR_TEMP_FILE_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary file not writable!'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Temporary file not writable!]'), __('ScoreRender Error'));
 		case ERR_IMAGE_CONVERT_FAILURE:
-			return sprintf (__('Image convert failure!'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Image convert failure!]'), __('ScoreRender Error'));
 		case ERR_RENDERING_ERROR:
-			return sprintf (__('The external rendering application did not complete successfully!'), __('ScoreRender Error'));
+			return sprintf (__('[%s: The external rendering application failed!]'), __('ScoreRender Error'));
 			                                        // '<br /><textarea cols=80 rows=10 READONLY>' .
 			                                        // $render->getCommandOutput() . '</textarea>');
 		case ERR_LENGTH_EXCEEDED:
-			return sprintf (__('Content length exceeds configured maximum length!'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Content length limit exceeded!]'), __('ScoreRender Error'));
+		case ERR_INTERNAL_CLASS:
+			return sprintf (__('[%s: Internal class initialization error!]'), __('ScoreRender Error'));
 	}
 
 	// No errors, so generate HTML
@@ -430,12 +437,15 @@ function scorerender_process_content ($input, $render)
 		{
 			if ($render instanceof $notation['classname'])
 			{
-				$input = $notation['starttag'] . "\n" . $input . "\n" . $notation['endtag'];
+				$content = $notation['starttag'] . "\n" .
+					$render->getMusicFragment() . "\n" .
+					$notation['endtag'];
 				break;
 			}
 		}
 
-		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n", rawurlencode (htmlentities ($input, ENT_NOQUOTES, get_bloginfo ('charset'))));
+		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n",
+			rawurlencode (htmlentities ($content, ENT_NOQUOTES, get_bloginfo ('charset'))));
 	}
 	else
 	{
@@ -479,14 +489,15 @@ function scorerender_filter ($matches)
 		if (preg_match ($notation['regex'], $matches[0]))
 		{
 			// TODO: Should do it like what a class should behave
-			$render = new $notation['classname'] ($input, $scorerender_options);
+			$render = new $notation['classname'] ($scorerender_options);
+			$render->setMusicFragment ($input);
+			break;
 		}
 	}
 
-	if (empty ($render))
-		return $input;
+	if (empty ($render)) return $input;
 
-	return scorerender_process_content ($input, $render);
+	return scorerender_process_content ($render);
 }
 
 

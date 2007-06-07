@@ -74,18 +74,23 @@ class ScoreRender
 	/**
 	 * Initialize ScoreRender options
 	 *
-	 * @param string $input
 	 * @param array $options
 	 * @access protected
 	 */
-	function init_options ($input, $options = array())
+	function init_options ($options = array())
 	{
-		// fallback values
 		$this->_options['FILE_FORMAT'] = 'png';
-
 		$this->_options = array_merge ($this->_options, $options);
+	}
 
+	function setMusicFragment ($input)
+	{
 		$this->_input = $input;
+	}
+
+	function getMusicFragment ()
+	{
+		return $this->_input;
 	}
 
 	/**
@@ -218,6 +223,13 @@ class ScoreRender
 			{
 				return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
 			}
+			
+			if (! method_exists ($this, 'getInputFileContents') ||
+			    ! method_exists ($this, 'execute'))
+			{
+				return ERR_INTERNAL_CLASS;
+			}
+
 			$rendered_image = $input_file . '.ps';
 
 			// Create empty output file first ASAP

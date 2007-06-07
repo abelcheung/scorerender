@@ -26,13 +26,13 @@ class abcRender extends ScoreRender
 {
 	var $_uniqueID = "abc";
 
-	function abcRender ($input, $options = array())
+	function abcRender ($options = array())
 	{
-		parent::init_options ($input, $options);
+		parent::init_options ($options);
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
-	function getInputFileContents ($input)
+	function getInputFileContents ()
 	{
 		$header = <<<EOT
 %abc
@@ -42,8 +42,8 @@ class abcRender extends ScoreRender
 %abc2mtex: yes
 EOT;
 		// input must not contain any empty line
-		$input = preg_replace ('/^$/m', '%', $input);
-		return $header . "\n" . $input;
+		$this->_input = preg_replace ('/^$/m', '%', $this->_input);
+		return $header . "\n" . $this->_input;
 	}
 
 	function execute ($input_file, $rendered_image)

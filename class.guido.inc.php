@@ -26,14 +26,14 @@ class guidoRender extends ScoreRender
 {
 	var $_uniqueID = "guido";
 
-	function guidoRender ($input, $options = array())
+	function guidoRender ($options = array())
 	{
-		parent::init_options ($input, $options);
+		parent::init_options ($options);
 	}
 
-	function getInputFileContents ($input)
+	function getInputFileContents ()
 	{
-		return $input;
+		return $this->_input;
 	}
 
 	function execute ($input_file, $rendered_image)
