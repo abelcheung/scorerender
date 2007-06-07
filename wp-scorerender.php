@@ -125,31 +125,51 @@ $default_tmp_dir = '';
 $scorerender_options = array ();
 
 /**
- * Array of supported music notation syntax.
+ * Array of supported music notation syntax and relevant attributes.
  *
  * Array keys are names of the music notations, in lower case.
- * Values are regular expression used for tag matching; the regex are
- * generated below.
+ * Their values are arrays themselves, containing:
+ * - regular expression matching relevant notation
+ * - start tag and end tag
+ * - class file and class name for corresponding notation
  *
- * @global array $notation
+ * @global array $notations
  */
-$notation = array (
-	'abc'      => '',
-	'guido'    => '',
-	'lilypond' => '',
-	'mup'      => ''
+$notations = array (
+	'abc'      => array (
+		'regex'       => '~\[abc\](.*?)\[/abc\]~si',
+		'starttag'    => '[abc]',
+		'endtag'      => '[/abc]',
+		'classname'   => 'abcRender',
+		'includefile' => 'class.abc.inc.php'),
+	'guido'    => array (
+		'regex'       => '~\[guido\](.*?)\[/guido\]~si',
+		'starttag'    => '[guido]',
+		'endtag'      => '[/guido]',
+		'classname'   => 'guidoRender',
+		'includefile' => 'class.guido.inc.php'),
+	'lilypond' => array (
+		'regex'       => '~\[lilypond\](.*?)\[/lilypond\]~si',
+		'starttag'    => '[lilypond]',
+		'endtag'      => '[/lilypond]',
+		'classname'   => 'lilypondRender',
+		'includefile' => 'class.lilypond.inc.php'),
+	'mup'      => array (
+		'regex'       => '~\[mup\](.*?)\[/mup\]~si',
+		'starttag'    => '[mup]',
+		'endtag'      => '[/mup]',
+		'classname'   => 'mupRender',
+		'includefile' => 'class.mup.inc.php'),
 );
 
 require_once('class.scorerender.inc.php');
 
-foreach ($notation as $notationname => $regex)
+foreach (array_values ($notations) as $notation)
 {
-	$notation[$notationname] = '~\['.$notationname.'\](.*?)\[/'.$notationname.'\]~si';
-
 	/**
 	 * @ignore
 	 */
-	require_once ('class.' . $notationname . '.inc.php');
+	require_once ($notation['includefile']);
 }
 
 
@@ -321,11 +341,11 @@ function scorerender_get_num_of_images ()
  */
 function scorerender_get_fragment_count ($content)
 {
-	global $notation;
+	global $notations;
 
 	$count = array();
-	foreach (array_values ($notation) as $regex)
-		$count[] = preg_match_all ($regex, $content, $matches);
+	foreach (array_values ($notations) as $notation)
+		$count[] = preg_match_all ($notation['regex'], $content, $matches);
 
 	return $count;
 }
@@ -370,7 +390,7 @@ function scorerender_remove_cache ()
  */
 function scorerender_process_content ($input, $render)
 {
-	global $scorerender_options, $notation;
+	global $scorerender_options, $notations;
 
 	$result = $render->render();
 
@@ -406,12 +426,11 @@ function scorerender_process_content ($input, $render)
 		          __('Music fragment'), __('Music fragment'),
 		          $scorerender_options['CACHE_URL'], $result);
 
-		foreach (array_keys ($notation) as $notationname)
+		foreach ($notations as $notationname => $notation)
 		{
-			$classname = $notationname . CLASS_SUFFIX;
-			if ($render instanceof $classname)
+			if ($render instanceof $notation['classname'])
 			{
-				$input = "[$notationname]\n" . $input . "\n[/$notationname]";
+				$input = $notation['starttag'] . "\n" . $input . "\n" . $notation['endtag'];
 				break;
 			}
 		}
@@ -449,19 +468,18 @@ function scorerender_process_content ($input, $render)
  */
 function scorerender_filter ($matches)
 {
-	global $scorerender_options, $notation;
+	global $scorerender_options, $notations;
 	$input = trim (html_entity_decode ($matches[1]));
 
 	// since preg_replace_callback only accepts single function,
 	// we have to check which regex is matched here and create
 	// corresponding object
-	foreach ($notation as $notationname => $regex)
+	foreach ($notations as $notationname => $notation)
 	{
-		if (preg_match ($regex, $matches[0]))
+		if (preg_match ($notation['regex'], $matches[0]))
 		{
-			$class = $notationname . CLASS_SUFFIX;
 			// TODO: Should do it like what a class should behave
-			$render = new $class ($input, $scorerender_options);
+			$render = new $notation['classname'] ($input, $scorerender_options);
 		}
 	}
 
@@ -484,14 +502,14 @@ function scorerender_filter ($matches)
  */
 function scorerender_content ($content)
 {
-	global $scorerender_options, $notation;
+	global $scorerender_options, $notations;
 
 	$regex_list = array();
-	foreach ($notation as $notationname => $regex)
+	foreach ($notations as $notationname => $notation)
 	{
 		$config_name = strtoupper ($notationname) . '_CONTENT_ENABLED';
 		if ($scorerender_options[$config_name])
-			$regex_list[] = $regex;
+			$regex_list[] = $notation['regex'];
 	};
 
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, -1);
@@ -510,14 +528,14 @@ function scorerender_content ($content)
  */
 function scorerender_comment ($content)
 {
-	global $scorerender_options, $notation;
+	global $scorerender_options, $notations;
 
 	$regex_list = array();
-	foreach ($notation as $notationname => $regex)
+	foreach ($notations as $notationname => $notation)
 	{
 		$config_name = strtoupper ($notationname) . '_CONTENT_ENABLED';
 		if ($scorerender_options[$config_name])
-			$regex_list[] = $regex;
+			$regex_list[] = $notation['regex'];
 	};
 
 	$limit = ($scorerender_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : $scorerender_options['FRAGMENT_PER_COMMENT'];
@@ -534,15 +552,15 @@ function scorerender_comment ($content)
  */
 function scorerender_activity_box ()
 {
-	global $wpdb, $notation;
+	global $wpdb, $notations;
 	$frag_count = 0;
 
 	$wpdb->hide_errors();
 
 	// get posts first
 	$query_substr = array();
-	foreach (array_keys ($notation) as $notationname)
-		$query_substr[] .= "post_content LIKE '%[/$notationname]%'";
+	foreach (array_values ($notations) as $notation)
+		$query_substr[] .= "post_content LIKE '%" . $notation['endtag'] . "%'";
 	$query = "SELECT post_content FROM $wpdb->posts WHERE " . implode (" OR ", $query_substr);
 
 	$posts = $wpdb->get_col ($query);
@@ -555,8 +573,8 @@ function scorerender_activity_box ()
 
 	// followed by comments
 	$query_substr = array();
-	foreach (array_keys ($notation) as $notationname)
-		$query_substr[] .= "comment_content LIKE '%[/$notationname]%'";
+	foreach (array_values ($notations) as $notation)
+		$query_substr[] .= "comment_content LIKE '%[/" . $notation['endtag'] . "]%'";
 	$query = sprintf ("SELECT comment_content FROM $wpdb->comments WHERE comment_approved = '1' AND (%s)",
 			  implode (" OR ", $query_substr));
 
