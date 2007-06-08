@@ -49,17 +49,17 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 8);
+define ('DATABASE_VERSION', 9);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
  */
 define ('DPI', 72.0);
 
+
 /*
  * Error constants
  */
-
 
 /**
  * Error constant used when content is known to be invalid or dangerous.
@@ -108,10 +108,19 @@ define ('ERR_LENGTH_EXCEEDED'             , -7);
  */
 define ('ERR_INTERNAL_CLASS'              , -8);
 
+
+/*
+ * How error is handled when rendering failed
+ */
+define ('ON_ERR_SHOW_MESSAGE' , '1');
+
+define ('ON_ERR_SHOW_FRAGMENT', '2');
+
+define ('ON_ERR_SHOW_NOTHING' , '3');
+
 /*
  * Global Variables
  */
-
 
 /**
  * Stores default temporary folder determined by {@link sys_get_temp_dir sys_get_temp_dir()}.
@@ -224,7 +233,7 @@ if (!function_exists ('array_intersect_key'))
 		$arrs = func_get_args ();
 		$result = array_shift ($arrs);
 		foreach ($arrs as $array)
-			foreach ($result as $key => $v)
+			foreach (array_keys ($result) as $key)
 				if (!array_key_exists ($key, $array))
 					unset ($result[$key]);
 		return $result;
@@ -272,6 +281,7 @@ function scorerender_get_options ()
 		'TRANSPARENT_IMAGE'    => true,
 		'SHOW_SOURCE'          => false,
 		'SHOW_IE_TRANSPARENCY_WARNING' => 1,
+		'ERROR_HANDLING'       => ON_ERR_SHOW_MESSAGE,
 
 		'CONTENT_MAX_LENGTH'   => 4096,
 		'FRAGMENT_PER_COMMENT' => 1,
@@ -382,6 +392,36 @@ function scorerender_remove_cache ()
 }
 
 
+/**
+ * Generate error message when rendering failed
+ * @param integer $errcode Error code
+ * @return string The corresponding html error message
+ */
+
+function scorerender_generate_html_error ($errcode)
+{
+	switch ($errcode)
+	{
+		case ERR_INVALID_INPUT:
+			return sprintf (__('[%s: Invalid or dangerous input!]'), __('ScoreRender Error'));
+		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
+			return sprintf (__('[%s: Cache directory not writable!]'), __('ScoreRender Error'));
+		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
+			return sprintf (__('[%s: Temporary directory not writable!]'), __('ScoreRender Error'));
+		case ERR_TEMP_FILE_NOT_WRITABLE:
+			return sprintf (__('[%s: Temporary file not writable!]'), __('ScoreRender Error'));
+		case ERR_IMAGE_CONVERT_FAILURE:
+			return sprintf (__('[%s: Image conversion failure!]'), __('ScoreRender Error'));
+		case ERR_RENDERING_ERROR:
+			return sprintf (__('[%s: The external rendering application failed!]'), __('ScoreRender Error'));
+			                                        // '<br /><textarea cols=80 rows=10 READONLY>' .
+			                                        // $render->getCommandOutput() . '</textarea>');
+		case ERR_LENGTH_EXCEEDED:
+			return sprintf (__('[%s: Content length limit exceeded!]'), __('ScoreRender Error'));
+		case ERR_INTERNAL_CLASS:
+			return sprintf (__('[%s: Internal class initialization error!]'), __('ScoreRender Error'));
+	}
+}
 
 /**
  * Generate HTML content from error message or rendered image
@@ -394,26 +434,29 @@ function scorerender_process_content ($render)
 
 	$result = $render->render();
 
-	switch ($result)
+	if (is_int ($result))
 	{
-		case ERR_INVALID_INPUT:
-			return sprintf (__('[%s: Invalid or dangerous input!]'), __('ScoreRender Error'));
-		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Cache directory not writable!]'), __('ScoreRender Error'));
-		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary directory not writable!]'), __('ScoreRender Error'));
-		case ERR_TEMP_FILE_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary file not writable!]'), __('ScoreRender Error'));
-		case ERR_IMAGE_CONVERT_FAILURE:
-			return sprintf (__('[%s: Image convert failure!]'), __('ScoreRender Error'));
-		case ERR_RENDERING_ERROR:
-			return sprintf (__('[%s: The external rendering application failed!]'), __('ScoreRender Error'));
-			                                        // '<br /><textarea cols=80 rows=10 READONLY>' .
-			                                        // $render->getCommandOutput() . '</textarea>');
-		case ERR_LENGTH_EXCEEDED:
-			return sprintf (__('[%s: Content length limit exceeded!]'), __('ScoreRender Error'));
-		case ERR_INTERNAL_CLASS:
-			return sprintf (__('[%s: Internal class initialization error!]'), __('ScoreRender Error'));
+		switch ($scorerender_options['ERROR_HANDLING'])
+		{
+			case ON_ERR_SHOW_NOTHING:
+				return '';
+
+			case ON_ERR_SHOW_FRAGMENT:
+				foreach (array_values ($notations) as $notation)
+				{
+					if ($render instanceof $notation['classname'])
+					{
+						return $notation['starttag'] . "\n" .
+							$render->getMusicFragment() . "\n" .
+							$notation['endtag'];
+					}
+				}
+				// Shouldn't reach here
+				return '[ScoreRender Error: Unknown notation type!]';
+
+			default:
+				return scorerender_generate_html_error ($result);
+		}
 	}
 
 	// No errors, so generate HTML
@@ -909,9 +952,19 @@ function scorerender_admin_section_content ()
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
 			<td>
-				
 				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" />
 				<label for="fragment_per_comment"><?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('When rendering failed:'); ?></th>
+			<td>
+				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(ON_ERR_SHOW_MESSAGE, $scorerender_options['ERROR_HANDLING']); ?> />
+				<label for="on_err_show_message">Show error message</label><br />
+				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_fragment" value="2" <?php checked(ON_ERR_SHOW_FRAGMENT, $scorerender_options['ERROR_HANDLING']); ?> />
+				<label for="on_err_show_fragment">Show original, unmodified music fragment</label><br />
+				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(ON_ERR_SHOW_NOTHING, $scorerender_options['ERROR_HANDLING']); ?> />
+				<label for="on_err_show_nothing">Show nothing</label>
 			</td>
 		</tr>
 		</table>
@@ -936,23 +989,27 @@ function scorerender_admin_section_caching ()
 <?php
 	$img_count = scorerender_get_num_of_images();
 
-	if ( -1 == $img_count )
-		echo "Cache directory is not a readable directory.<br />\n";
+	if ( 0 > $img_count )
+	{
+		echo "<font color='red'>" . __('Cache directory is not a readable directory.') . "<br />";
+		echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.') . "</font>\n";
+	}
 	else
 	{
-		printf (__ngettext("Cache directory contain %d image.\n",
-			           "Cache directory contain %d images.\n",
+		printf (__ngettext("Cache directory contains %d image.\n",
+			           "Cache directory contains %d images.\n",
 			           $img_count), $img_count);
 	}
 
-	if ( ($img_count >= 1) && is_writable ($scorerender_options['CACHE_DIR']) ) :
 ?>
 		<p class="submit">
+<?php	if ( is_writable ($scorerender_options['CACHE_DIR']) ) : ?>
 		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" />
+<?php	else : ?>
+		<input type="submit" name="clear_cache" disabled="disabled" value="<?php _e('Clear Cache &raquo;') ?>" />
+		<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.') ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.') ?></font>
+<?php	endif; ?>
 		</p>
-<?php
-	endif;
-?>
 	</fieldset>
 <?php
 }
