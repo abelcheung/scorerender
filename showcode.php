@@ -14,11 +14,13 @@
 
 	if ( get_magic_quotes_gpc() )
 		$code = stripslashes ($code);
+
+	define ('TEXTDOMAIN', 'scorerender');
 ?>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title><?php _e('Music fragment') ?></title>
+<title><?php _e('Music fragment', TEXTDOMAIN) ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo get_option ('blog_charset'); ?>" />
 <link rel="stylesheet" type="text/css" href="showcode.css" />
 </head>
@@ -37,7 +39,7 @@ function CopyClipboard()
 		var text="<?php echo addcslashes ($code, "\n\r\"\\"); ?>";
 		window.clipboardData.clearData();
 		window.clipboardData.setData("Text", text);
-		document.getElementById('sr_message').innerHTML = '<?php _e('Successfully copied to clipboard.') ?>';
+		document.getElementById('sr_message').innerHTML = '<?php _e('Successfully copied to clipboard.', TEXTDOMAIN) ?>';
 	}
 	else if (window.netscape && navigator.userAgent.indexOf("Opera") == -1) // Netscape or Mozilla family
 	{
@@ -48,7 +50,7 @@ function CopyClipboard()
 		catch (e)
 		{
 			document.getElementById('copybutton').disabled = true;
-			document.getElementById('sr_message').innerHTML = '<?php _e('Cut and paste is temporarily forbidden due to security feature of this browser. If you want to enable cut and paste, please type &#8220;about:config&#8221; in browser address bar, find the preference &#8220;<code>signed.applets.codebase_principal_support</code>&#8221;, change its value to &#8220;true&#8221; and try again. Alternatively, just select and copy the code below manually.') ?>';
+			document.getElementById('sr_message').innerHTML = '<?php _e('Cut and paste is temporarily forbidden due to security feature of this browser. If you want to enable cut and paste, please type &#8220;about:config&#8221; in browser address bar, find the preference &#8220;<code>signed.applets.codebase_principal_support</code>&#8221;, change its value to &#8220;true&#8221; and try again. Alternatively, just select and copy the code below manually.', TEXTDOMAIN) ?>';
 			return false;
 		}
 
@@ -71,12 +73,12 @@ function CopyClipboard()
 			return false; 
 		clip.setData(trans,null,clipid.kGlobalClipboard);
 
-		document.getElementById('sr_message').innerHTML = '<?php _e('Successfully copied to clipboard.') ?>';
+		document.getElementById('sr_message').innerHTML = '<?php _e('Successfully copied to clipboard.', TEXTDOMAIN) ?>';
 	}
 	else
 	{
 		document.getElementById('copybutton').disabled = true;
-		document.getElementById('sr_message').innerHTML = '<?php _e('Cut and paste not supported yet on this browser. Please select and copy the code below manually.') ?>';
+		document.getElementById('sr_message').innerHTML = '<?php _e('Cut and paste not supported yet on this browser. Please select and copy the code below manually.', TEXTDOMAIN) ?>';
 		return false;
 	}
 
@@ -85,15 +87,15 @@ function CopyClipboard()
 </script>
 <body>
 <div id="sr_message"></div>
-<button id="copybutton" onclick="return CopyClipboard();"><?php _e('Copy to Clipboard') ?></button><br />
-<h3><?php _e('Code:') ?></h3>
+<button id="copybutton" onclick="return CopyClipboard();"><?php _e('Copy to Clipboard', TEXTDOMAIN) ?></button><br />
+<h3><?php _e('Code:', TEXTDOMAIN) ?></h3>
 <div id="code">
 <pre>
 <?php
 	if ( !empty ($code) )
 		echo strip_tags (rawurldecode ($code));
 	else
-		_e("Nothing to see here.\n");
+		_e("Nothing to see here.", TEXTDOMAIN);
 ?>
 </pre>
 </div>

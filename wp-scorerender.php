@@ -56,6 +56,10 @@ define ('DATABASE_VERSION', 9);
  */
 define ('DPI', 72.0);
 
+/**
+ * Translation text domain
+ */
+define ('TEXTDOMAIN', 'scorerender');
 
 /*
  * Error constants
@@ -241,6 +245,17 @@ if (!function_exists ('array_intersect_key'))
 }
 
 
+/**
+ * Initialize text domain.
+ *
+ * Translations are expected to be found in the same directory containing
+ * this plugin.
+ * @since 0.2
+ */
+function scorerender_init_textdomain ()
+{
+	load_plugin_textdomain (TEXTDOMAIN, PLUGINDIR . DIRECTORY_SEPARATOR . plugin_basename (dirname (__FILE__)));
+}
 
 /**
  * Retrieve ScoreRender options from database.
@@ -403,23 +418,31 @@ function scorerender_generate_html_error ($errcode)
 	switch ($errcode)
 	{
 		case ERR_INVALID_INPUT:
-			return sprintf (__('[%s: Invalid or dangerous input!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Content is illegal or poses security concern!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Cache directory not writable!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Cache directory not writable!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary directory not writable!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Temporary directory not writable!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 		case ERR_TEMP_FILE_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary file not writable!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Temporary file not writable!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 		case ERR_IMAGE_CONVERT_FAILURE:
-			return sprintf (__('[%s: Image conversion failure!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Image conversion failure!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 		case ERR_RENDERING_ERROR:
-			return sprintf (__('[%s: The external rendering application failed!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: The external rendering application failed!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 			                                        // '<br /><textarea cols=80 rows=10 READONLY>' .
 			                                        // $render->getCommandOutput() . '</textarea>');
 		case ERR_LENGTH_EXCEEDED:
-			return sprintf (__('[%s: Content length limit exceeded!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Content length limit exceeded!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 		case ERR_INTERNAL_CLASS:
-			return sprintf (__('[%s: Internal class initialization error!]'), __('ScoreRender Error'));
+			return sprintf (__('[%s: Internal class initialization error!]', TEXTDOMAIN),
+				__('ScoreRender Error', TEXTDOMAIN));
 	}
 }
 
@@ -468,7 +491,7 @@ function scorerender_process_content ($render)
 	{
 		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/ScoreRender/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR);
 		$html .= sprintf ("<input type='image' name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
-		          __('Music fragment'), __('Music fragment'),
+		          __('Music fragment', TEXTDOMAIN), __('Music fragment', TEXTDOMAIN),
 		          $scorerender_options['CACHE_URL'], $result);
 
 		foreach ($notations as $notationname => $notation)
@@ -488,14 +511,14 @@ function scorerender_process_content ($render)
 	else
 	{
 		$html .= sprintf ("<img name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
-		          __('Music fragment'), __('Music fragment'),
+		          __('Music fragment', TEXTDOMAIN), __('Music fragment', TEXTDOMAIN),
 		          $scorerender_options['CACHE_URL'], $result);
 	}
 
 	if ($scorerender_options['TRANSPARENT_IMAGE'] &&
 	    $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']) 
 	{
-		$html .= '<br /><!--[if lt IE 7]>' . __('<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.') . "<![endif]-->\n";
+		$html .= '<br /><!--[if lt IE 7]>' . __('<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.', TEXTDOMAIN) . "<![endif]-->\n";
 	}
 
 	return $html;
@@ -632,47 +655,47 @@ function scorerender_activity_box ()
 	foreach ($comments as $comment)
 		$frag_count += array_sum (scorerender_get_fragment_count ($comment));
 
-	$num_of_posts_str = sprintf (__ngettext ('%d post', '%d posts', $post_count), $post_count);
-	$num_of_comments_str = sprintf (__ngettext ('%d comment', '%d comments', $comment_count), $comment_count);
+	$num_of_posts_str = sprintf (__ngettext ('%d post', '%d posts', $post_count, TEXTDOMAIN), $post_count);
+	$num_of_comments_str = sprintf (__ngettext ('%d comment', '%d comments', $comment_count, TEXTDOMAIN), $comment_count);
 
 	if ((0 === $post_count) && (0 === $comment_count))
 	{
-		$first_sentence = __('This blog is currently empty.');
+		$first_sentence = __('This blog is currently empty.', TEXTDOMAIN);
 	}
 	elseif (0 === $frag_count)
 	{
-		$first_sentence = __('There is no music fragment in your blog.');
+		$first_sentence = __('There is no music fragment in your blog.', TEXTDOMAIN);
 	}
 	elseif (0 === $comment_count)
 	{
 		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s.',
-		                                       'There are %d music fragments contained in %s.', $frag_count),
+		                                       'There are %d music fragments contained in %s.', $frag_count, TEXTDOMAIN),
 		                           $frag_count, $num_of_posts_str);
 	}
 	elseif (0 === $post_count)
 	{
 		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s.',
-		                                       'There are %d music fragments contained in %s.', $frag_count),
+		                                       'There are %d music fragments contained in %s.', $frag_count, TEXTDOMAIN),
 		                           $frag_count, $num_of_comments_str);
 	}
 	else
 	{
 		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s and %s.',
-		                                       'There are %d music fragments contained in %s and %s.', $frag_count),
+		                                       'There are %d music fragments contained in %s and %s.', $frag_count, TEXTDOMAIN),
 		                           $frag_count, $num_of_posts_str, $num_of_comments_str);
 	}
 
 	$img_count = scorerender_get_num_of_images();
 
 	if ( 0 > $img_count )
-		$second_sentence = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.'), 'options-general.php?page=' . plugin_basename (__FILE__));
+		$second_sentence = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.', TEXTDOMAIN), 'options-general.php?page=' . plugin_basename (__FILE__));
 	else
 		$second_sentence = sprintf (__ngettext ('Currently %d image are rendered and cached.',
-		                                        'Currently %d images are rendered and cached.', $img_count),
+		                                        'Currently %d images are rendered and cached.', $img_count, TEXTDOMAIN),
 		                             $img_count);
 ?>
 	<div>
-	<h3><?php _e('ScoreRender') ?></h3>
+	<h3><?php _e('ScoreRender', TEXTDOMAIN) ?></h3>
 	<p><?php echo $first_sentence . '  ' . $second_sentence; ?></p>
 	</div>
 <?php
@@ -694,23 +717,23 @@ function scorerender_update_options ()
 
 	$messages = array
 	(
-		'temp_dir_undefined'       => sprintf (__('WARNING: Temporary directory is NOT defined! Will fall back to %s.'), $defalt_tmp_dir),
-		'temp_dir_not_writable'    => sprintf (__('WARNING: Temporary directory is NOT writable! Will fall back to %s.'), $defalt_tmp_dir),
-		'cache_dir_undefined'      => __('ERROR: Cache directory is NOT defined! Image can not be placed inside appropriate directory.'),
-		'cache_dir_not_writable'   => __('ERROR: Cache directory is NOT writable! Image can not be placed inside appropriate directory.'),
-		'cache_url_undefined'      => __('ERROR: Cache URL is NOT defined!'),
-		'wrong_content_length'     => __('ERROR: Content length is not a non-negative integer. Value discarded.'),
-		'wrong_frag_per_comment'   => __('ERROR: Fragment per comment is not a non-negative integer. Value discarded.'),
-		'wrong_image_max_width'    => __('ERROR: Image maximum width must be positive integer >= 72. Value discarded.'),
-		'convert_not_found'        => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!'),
-		'convert_not_executable'   => __('ERROR: <tt>convert</tt> utility is NOT executable!'),
-		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>lilypond</tt>', 'Lilypond'),
-		'mup_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>mup</tt>', 'Mup'),
-		'abc_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.'), '<tt>abcm2ps</tt>', 'ABC'),
+		'temp_dir_undefined'       => sprintf (__('WARNING: Temporary directory is NOT defined! Will fall back to %s.', TEXTDOMAIN), $defalt_tmp_dir),
+		'temp_dir_not_writable'    => sprintf (__('WARNING: Temporary directory is NOT writable! Will fall back to %s.', TEXTDOMAIN), $defalt_tmp_dir),
+		'cache_dir_undefined'      => __('ERROR: Cache directory is NOT defined! Image can not be placed inside appropriate directory.', TEXTDOMAIN),
+		'cache_dir_not_writable'   => __('ERROR: Cache directory is NOT writable! Image can not be placed inside appropriate directory.', TEXTDOMAIN),
+		'cache_url_undefined'      => __('ERROR: Cache URL is NOT defined!', TEXTDOMAIN),
+		'wrong_content_length'     => __('ERROR: Content length is not a non-negative integer. Value discarded.', TEXTDOMAIN),
+		'wrong_frag_per_comment'   => __('ERROR: Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN),
+		'wrong_image_max_width'    => __('ERROR: Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN),
+		'convert_not_found'        => __('ERROR: Location of <tt>convert</tt> utility is NOT defined!', TEXTDOMAIN),
+		'convert_not_executable'   => __('ERROR: <tt>convert</tt> utility is NOT executable!', TEXTDOMAIN),
+		'lilypond_binary_problem'  => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.', TEXTDOMAIN), '<tt>lilypond</tt>', 'Lilypond'),
+		'mup_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.', TEXTDOMAIN), '<tt>mup</tt>', 'Mup'),
+		'abc_binary_problem'       => sprintf (__('WARNING: %s not found or not an executable. %s support DISABLED.', TEXTDOMAIN), '<tt>abcm2ps</tt>', 'ABC'),
 	);
 
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
-		die (__('Cheatin&#8217; uh?'));
+		die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
 
 	/*
 	 * general options
@@ -823,7 +846,7 @@ function scorerender_update_options ()
 	else
 	{
 		echo '<div id="message" class="updated fade"><p><strong>' .
-			__('Options saved.') . "</strong></p></div>\n";
+			__('Options saved.', TEXTDOMAIN) . "</strong></p></div>\n";
 	}
 }
 
@@ -840,32 +863,32 @@ function scorerender_admin_section_path ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Path options') ?></legend>
+		<legend><?php _e('Path options', TEXTDOMAIN) ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Temporary directory:') ?></th>
+			<th scope="row"><?php _e('Temporary directory:', TEXTDOMAIN) ?></th>
 			<td>
 				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape ($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
-				<?php _e('Must be writable and ideally located outside the web-accessible area.') ?>
+				<?php _e('Must be writable and ideally located outside the web-accessible area.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Image cache directory:') ?></th>
+			<th scope="row"><?php _e('Image cache directory:', TEXTDOMAIN) ?></th>
 			<td>
 				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo attribute_escape ($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
-				<?php _e('Must be writable and located inside the web-accessible area.') ?>
+				<?php _e('Must be writable and located inside the web-accessible area.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Image cache URL:') ?></th>
+			<th scope="row"><?php _e('Image cache URL:', TEXTDOMAIN) ?></th>
 			<td>
 				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo attribute_escape ($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
-				<?php _e('Must correspond to the image cache directory above.') ?>
+				<?php _e('Must correspond to the image cache directory above.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
 			<td>
 				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape ($scorerender_options['CONVERT_BIN']); ?>" size="40" />
 			</td>
@@ -888,37 +911,37 @@ function scorerender_admin_section_image ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Image options') ?></legend>
+		<legend><?php _e('Image options', TEXTDOMAIN) ?></legend>
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Image width (pixel):') ?></th>
+			<th scope="row"><?php _e('Image width (pixel):', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo attribute_escape ($scorerender_options['IMAGE_MAX_WIDTH']); ?>" size="6" />
-				<label for="image_max_width"><?php _e('Default is 360 (5 inch)') ?></label><br /><?php _e('Note that image size conversion is hardcoded to 72 DPI for most music rendering applications. And this value is just an approximation, actual image rendered for certain applications can be a bit smaller.') ?></label>
+				<label for="image_max_width"><?php _e('Default is 360 (5 inch)', TEXTDOMAIN) ?></label><br /><?php _e('Note that image size conversion is hardcoded to 72 DPI for most music rendering applications. And this value is just an approximation, actual image rendered for certain applications can be a bit smaller.', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td colspan="2">
 				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> />
-				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked'); ?></label>
+				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td colspan="2">
 				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
-				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)'); ?></label>
+				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)', TEXTDOMAIN); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td colspan="2">
 				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('show_ie_transparency_warning'); box.disabled = !box.disabled; return true;" />
-				<label for="transparent_image"><?php _e('Use transparent background') ?> <?php _e('(IE &lt;= 6 does not support transparent PNG)'); ?></label>
+				<label for="transparent_image"><?php _e('Use transparent background', TEXTDOMAIN) ?> <?php _e('(IE &lt;= 6 does not support transparent PNG)', TEXTDOMAIN); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
 			<td style="padding-left: 30px;" colspan="2">
 				<input type="checkbox" name="ScoreRender[SHOW_IE_TRANSPARENCY_WARNING]" id="show_ie_transparency_warning" value="1" <?php checked('1', $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']); if (1 != $scorerender_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
-				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used (Only possible if above box is checked)') ?></label>
+				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used (Only possible if above box is checked)', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
 		</table>
@@ -939,25 +962,25 @@ function scorerender_admin_section_content ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Content options') ?></legend>
+		<legend><?php _e('Content options', TEXTDOMAIN) ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Maximum length per fragment:') ?></th>
+			<th scope="row"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" />
-				<label for="content_max_length"><?php _e('(0 means unlimited)') ?></label>
+				<label for="content_max_length"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('Maximum number of fragment per comment:') ?></th>
+			<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" />
-				<label for="fragment_per_comment"><?php _e('(0 means unlimited)') ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.'), __('Enable parsing for comments')); ?></label>
+				<label for="fragment_per_comment"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkboxes below instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable parsing for comments', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php _e('When rendering failed:'); ?></th>
+			<th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
 			<td>
 				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(ON_ERR_SHOW_MESSAGE, $scorerender_options['ERROR_HANDLING']); ?> />
 				<label for="on_err_show_message">Show error message</label><br />
@@ -985,29 +1008,29 @@ function scorerender_admin_section_caching ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Caching') ?></legend>
+		<legend><?php _e('Caching', TEXTDOMAIN) ?></legend>
 <?php
 	$img_count = scorerender_get_num_of_images();
 
 	if ( 0 > $img_count )
 	{
-		echo "<font color='red'>" . __('Cache directory is not a readable directory.') . "<br />";
-		echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.') . "</font>\n";
+		echo "<font color='red'>" . __('Cache directory is not a readable directory.', TEXTDOMAIN) . "<br />";
+		echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) . "</font>\n";
 	}
 	else
 	{
 		printf (__ngettext("Cache directory contains %d image.\n",
 			           "Cache directory contains %d images.\n",
-			           $img_count), $img_count);
+			           $img_count, TEXTDOMAIN), $img_count);
 	}
 
 ?>
 		<p class="submit">
 <?php	if ( is_writable ($scorerender_options['CACHE_DIR']) ) : ?>
-		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;') ?>" />
+		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 <?php	else : ?>
-		<input type="submit" name="clear_cache" disabled="disabled" value="<?php _e('Clear Cache &raquo;') ?>" />
-		<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.') ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.') ?></font>
+		<input type="submit" name="clear_cache" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
+		<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
 <?php	endif; ?>
 		</p>
 	</fieldset>
@@ -1027,20 +1050,20 @@ function scorerender_admin_section_lilypond ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Lilypond options') ?></legend>
+		<legend><?php _e('Lilypond options', TEXTDOMAIN) ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<th scope="row"><?php _e('Content conversion:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="checkbox" name="ScoreRender[LILYPOND_CONTENT_ENABLED]" id="lilypond_content" value="1" <?php checked('1', $scorerender_options['LILYPOND_CONTENT_ENABLED']); ?> />
-				<label for="lilypond_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<label for="lilypond_content"><?php _e('Enable parsing for posts and pages', TEXTDOMAIN); ?></label><br />
 				<input type="checkbox" name="ScoreRender[LILYPOND_COMMENT_ENABLED]" id="lilypond_comment" value="1" <?php checked('1', $scorerender_options['LILYPOND_COMMENT_ENABLED']); ?> />
-				<label for="lilypond_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+				<label for="lilypond_comments"><?php printf ('%s %s', __('Enable parsing for comments', TEXTDOMAIN), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>lilypond</code>'); ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>lilypond</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape ($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
 			</td>
@@ -1063,30 +1086,30 @@ function scorerender_admin_section_mup ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Mup options') ?></legend>
+		<legend><?php _e('Mup options', TEXTDOMAIN) ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<th scope="row"><?php _e('Content conversion:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="checkbox" name="ScoreRender[MUP_CONTENT_ENABLED]" id="mup_content" value="1" <?php checked('1', $scorerender_options['MUP_CONTENT_ENABLED']); ?> />
-				<label for="mup_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<label for="mup_content"><?php _e('Enable parsing for posts and pages', TEXTDOMAIN); ?></label><br />
 				<input type="checkbox" name="ScoreRender[MUP_COMMENT_ENABLED]" value="1" <?php checked('1', $scorerender_options['MUP_COMMENT_ENABLED']); ?> />
-				<label for="mup_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+				<label for="mup_comments"><?php printf ('%s %s', __('Enable parsing for comments', TEXTDOMAIN), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>mup</code>'); ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape ($scorerender_options['MUP_BIN']); ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s magic file:'), '<code>mup</code>'); ?></th>
+			<th scope="row"><?php printf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape ($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
 				<br />
-				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.'), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
+				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
 			</td>
 		</tr>
 		</table>
@@ -1107,16 +1130,16 @@ function scorerender_admin_section_guido ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('GUIDO NoteServer options') ?></legend>
+		<legend><?php _e('GUIDO NoteServer options', TEXTDOMAIN) ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<th scope="row"><?php _e('Content conversion:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> />
-				<label for="guido_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<label for="guido_content"><?php _e('Enable parsing for posts and pages', TEXTDOMAIN); ?></label><br />
 				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> />
-				<label for="guido_comments"><?php _e('Enable parsing for comments'); ?></label>
+				<label for="guido_comments"><?php _e('Enable parsing for comments', TEXTDOMAIN); ?></label>
 			</td>
 		</tr>
 		</table>
@@ -1137,24 +1160,24 @@ function scorerender_admin_section_abc ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('ABC options') ?></legend>
+		<legend><?php _e('ABC options', TEXTDOMAIN) ?></legend>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:') ?></th>
+			<th scope="row"><?php _e('Content conversion:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="checkbox" name="ScoreRender[ABC_CONTENT_ENABLED]" id="abc_content" value="1" <?php checked('1', $scorerender_options['ABC_CONTENT_ENABLED']); ?> />
-				<label for="abc_content"><?php _e('Enable parsing for posts and pages'); ?></label><br />
+				<label for="abc_content"><?php _e('Enable parsing for posts and pages', TEXTDOMAIN); ?></label><br />
 				<input type="checkbox" name="ScoreRender[ABC_COMMENT_ENABLED]" id="abc_comment" value="1" <?php checked('1', $scorerender_options['ABC_COMMENT_ENABLED']); ?> />
-				<label for="abc_comments"><?php printf ('%s %s', __('Enable parsing for comments'), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)')); ?></label>
+				<label for="abc_comments"><?php printf ('%s %s', __('Enable parsing for comments', TEXTDOMAIN), __('(<span style="font-weight: bold; color: red;">Warning:</span> possible security and overloading concern.)', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:'), '<code>abcm2ps</code>'); ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
 				<br />
-				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.'), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
+				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.', TEXTDOMAIN), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
 			</td>
 		</tr>
 		</table>
@@ -1193,9 +1216,9 @@ function scorerender_admin_options ()
 	<div class="wrap">
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>
-	<h2><?php _e('ScoreRender options') ?></h2>
+	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
 
-	<p><?php _e('ScoreRender renders inline music fragments inside blog post and/or comment as images. Currently it supports the following notations:'); ?></p>
+	<p><?php _e('ScoreRender renders inline music fragments inside blog post and/or comment as images. Currently it supports the following notations:', TEXTDOMAIN); ?></p>
 	<ul>
 		<li><a target="_blank" href="http://www.lilypond.org/">Lilypond</a></li>
 		<li><?php printf ('%s, used by Mup itself and %s',
@@ -1210,7 +1233,7 @@ function scorerender_admin_options ()
 	</ul>
 
 	<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
+	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
 	</p>
 <?php
 	// path options
@@ -1238,7 +1261,7 @@ function scorerender_admin_options ()
 	scorerender_admin_section_abc(); 
 ?>
 	<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;') ?>" />
+	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
 	</p>
 
 	</div>
@@ -1255,7 +1278,7 @@ function scorerender_admin_options ()
  */
 function scorerender_admin_menu ()
 {
-	add_options_page (__('ScoreRender options'), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
+	add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
 }
 
 /*
@@ -1289,17 +1312,19 @@ if ( 0 != get_option('use_balanceTags') )
 	function turn_off_balance_tags()
 	{
 		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
-			. sprintf (__('<strong>OPTION CONFLICT</strong>: The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.'), "options-writing.php")
+			. sprintf (__('<strong>OPTION CONFLICT</strong>: The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', TEXTDOMAIN), "options-writing.php")
 			. "</p></div>";
 	}
 	add_filter ('admin_notices', 'turn_off_balance_tags');
 }
 
+add_action ('init', 'scorerender_init_textdomain');
+add_filter ('activity_box_end', 'scorerender_activity_box');
+add_filter ('admin_menu', 'scorerender_admin_menu');
+
 // earlier than default priority, since smilies conversion and wptexturize() can mess up the content
 add_filter ('the_excerpt', 'scorerender_content', 5);
 add_filter ('the_content', 'scorerender_content', 5);
 add_filter ('comment_text', 'scorerender_comment', 5);
-add_filter ('activity_box_end', 'scorerender_activity_box');
-add_filter ('admin_menu', 'scorerender_admin_menu');
 
 ?>
