@@ -638,8 +638,9 @@ function scorerender_activity_box ()
 	$posts = $wpdb->get_col ($query);
 	$post_count = count ($posts);
 
-	foreach ($posts as $post)
-		$frag_count += array_sum (scorerender_get_fragment_count ($post));
+	if (0 < $post_count)
+		foreach ($posts as $post)
+			$frag_count += array_sum (scorerender_get_fragment_count ($post));
 
 
 	// followed by comments
@@ -652,8 +653,9 @@ function scorerender_activity_box ()
 	$comments = $wpdb->get_col ($query);
 	$comment_count = count ($comments);
 
-	foreach ($comments as $comment)
-		$frag_count += array_sum (scorerender_get_fragment_count ($comment));
+	if (0 < $comment_count)
+		foreach ($comments as $comment)
+			$frag_count += array_sum (scorerender_get_fragment_count ($comment));
 
 	$num_of_posts_str = sprintf (__ngettext ('%d post', '%d posts', $post_count, TEXTDOMAIN), $post_count);
 	$num_of_comments_str = sprintf (__ngettext ('%d comment', '%d comments', $comment_count, TEXTDOMAIN), $comment_count);
