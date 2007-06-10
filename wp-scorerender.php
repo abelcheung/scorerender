@@ -467,7 +467,7 @@ function scorerender_process_content ($render)
 			case ON_ERR_SHOW_FRAGMENT:
 				foreach (array_values ($notations) as $notation)
 				{
-					if (get_class ($render) === $notation['classname'])
+					if (strtolower (get_class ($render)) === strtolower ($notation['classname']))
 					{
 						return $notation['starttag'] . "\n" .
 							$render->getMusicFragment() . "\n" .
@@ -494,9 +494,9 @@ function scorerender_process_content ($render)
 		          __('Music fragment', TEXTDOMAIN), __('Music fragment', TEXTDOMAIN),
 		          $scorerender_options['CACHE_URL'], $result);
 
-		foreach ($notations as $notationname => $notation)
+		foreach (array_values ($notations) as $notation)
 		{
-			if (get_class ($render) === $notation['classname'])
+			if (strtolower (get_class ($render)) === strtolower ($notation['classname']))
 			{
 				$content = $notation['starttag'] . "\n" .
 					$render->getMusicFragment() . "\n" .
@@ -545,7 +545,7 @@ function scorerender_filter ($matches)
 	// since preg_replace_callback only accepts single function,
 	// we have to check which regex is matched here and create
 	// corresponding object
-	foreach ($notations as $notationname => $notation)
+	foreach (array_values ($notations) as $notation)
 	{
 		if (preg_match ($notation['regex'], $matches[0]))
 		{
