@@ -467,7 +467,7 @@ function scorerender_process_content ($render)
 			case ON_ERR_SHOW_FRAGMENT:
 				foreach (array_values ($notations) as $notation)
 				{
-					if ($render instanceof $notation['classname'])
+					if (get_class ($render) === $notation['classname'])
 					{
 						return $notation['starttag'] . "\n" .
 							$render->getMusicFragment() . "\n" .
@@ -496,7 +496,7 @@ function scorerender_process_content ($render)
 
 		foreach ($notations as $notationname => $notation)
 		{
-			if ($render instanceof $notation['classname'])
+			if (get_class ($render) === $notation['classname'])
 			{
 				$content = $notation['starttag'] . "\n" .
 					$render->getMusicFragment() . "\n" .
