@@ -42,7 +42,7 @@ class mupRender extends ScoreRender
 	 */
 	function mupRender ($options = array())
 	{
-		parent::init_options ($options);
+		$this->init_options ($options);
 
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
@@ -127,7 +127,7 @@ EOD;
 		$cmd = sprintf ('%s -f %s %s 2>&1',
 		                $this->_options['MUP_BIN'],
 		                $rendered_image, $input_file);
-		$retval = parent::_exec($cmd);
+		$retval = $this->_exec($cmd);
 
 		unlink ($temp_magic_file);
 
@@ -160,7 +160,7 @@ EOD;
 			        . ' -fx "1-intensity" png:- ' . $cache_filename;
 		}
 
-		$retval = parent::_exec($cmd);
+		$retval = $this->_exec($cmd);
 
 		return ($retval == 0);
 	}

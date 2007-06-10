@@ -33,9 +33,7 @@ class lilypondRender extends ScoreRender
 
 	function lilypondRender ($options = array())
 	{
-		parent::init_options ($options);
-
-		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
+		$this->init_options ($options);
 	}
 
 	function getInputFileContents ()
@@ -48,7 +46,7 @@ class lilypondRender extends ScoreRender
 \\paper {
 	ragged-right = ##t
 	indent = 0.0\\mm
-	line-width = {$this->_options['IMAGE_MAX_WIDTH']}\\in
+	line-width = {$this->_options['IMAGE_MAX_WIDTH']}\\pt
 }
 \\layout {
 	\\context {
@@ -68,7 +66,7 @@ EOD;
 			dirname($rendered_image) . DIRECTORY_SEPARATOR . basename($rendered_image, ".ps"),
 			$input_file);
 
-		$retval = parent::_exec ($cmd);
+		$retval = $this->_exec ($cmd);
 
 		return ($retval == 0);
 	}
@@ -97,7 +95,7 @@ EOD;
 			}
 		}
 
-		$retval = parent::_exec ($cmd);
+		$retval = $this->_exec ($cmd);
 
 		return ($retval === 0);
 	}

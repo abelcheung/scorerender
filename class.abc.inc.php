@@ -28,7 +28,7 @@ class abcRender extends ScoreRender
 
 	function abcRender ($options = array())
 	{
-		parent::init_options ($options);
+		$this->init_options ($options);
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
@@ -51,7 +51,7 @@ EOT;
 		$cmd = sprintf ('%s %s -O %s 2>&1',
 		                $this->_options['ABCM2PS_BIN'],
 		                $input_file, $rendered_image);
-		$retval = parent::_exec($cmd);
+		$retval = $this->_exec($cmd);
 
 		return ($result['return_val'] == 0);
 	}
@@ -79,7 +79,7 @@ EOT;
 			        . ' -fx "1-intensity" png:- ' . $final_image;
 		}
 
-		$retval = parent::_exec($cmd);
+		$retval = $this->_exec($cmd);
 
 		return ($retval == 0);
 	}

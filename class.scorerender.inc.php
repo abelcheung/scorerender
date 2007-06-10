@@ -79,8 +79,7 @@ class ScoreRender
 	 */
 	function init_options ($options = array())
 	{
-		$this->_options['FILE_FORMAT'] = 'png';
-		$this->_options = array_merge ($this->_options, $options);
+		$this->_options = $options;
 	}
 
 	/**
@@ -173,7 +172,7 @@ class ScoreRender
 			}
 		}
 
-		$retval = ScoreRender::_exec ($cmd);
+		$retval = _exec ($cmd);
 
 		return ($retval === 0);
 	}
@@ -189,97 +188,94 @@ class ScoreRender
 	 * If any error occurs during rendering process, an error code is returned
 	 * instead.
 	 *
-	 * @return mixed
+	 * @return mixed Resulting image file name, or error code in case of error
 	 * @final
 	 */
 	function render()
 	{
 		// Check for valid code
-		if (empty ($this->_input) ||
-		    (method_exists ($this, 'isValidInput') &&
-		     !$this->isValidInput($this->_input)))
+		if ( empty ($this->_input) ||
+		     ( method_exists ($this, 'isValidInput') &&
+		       !$this->isValidInput($this->_input)) )
 			return ERR_INVALID_INPUT;
 
 		// Check for content length
-		if (isset ($this->_options['CONTENT_MAX_LENGTH']) &&
-		    ($this->_options['CONTENT_MAX_LENGTH'] > 0) &&
-		    (strlen ($this->_input) > $this->_options['CONTENT_MAX_LENGTH']))
+		if ( isset ($this->_options['CONTENT_MAX_LENGTH']) &&
+		     ($this->_options['CONTENT_MAX_LENGTH'] > 0) &&
+		     (strlen ($this->_input) > $this->_options['CONTENT_MAX_LENGTH']) )
 			return ERR_LENGTH_EXCEEDED;
 
 		// Create unique hash
 		$hash = md5 ($this->_input . $this->_options['INVERT_IMAGE']
 			     . $this->_options['TRANSPARENT_IMAGE'] . $this->_uniqueID);
 		$final_image = $this->_options['CACHE_DIR'] . DIRECTORY_SEPARATOR
-		                  . $hash . '.' . $this->_options['FILE_FORMAT'];
+		                  . $hash . '.png';
 
-		if (!is_file ($final_image))
+		if (is_file ($final_image)) return basename ($final_image);
+
+		// Create image if it does not exist
+		if ( (!isset       ($this->_options['CACHE_DIR'])) ||
+		     (!is_dir      ($this->_options['CACHE_DIR'])) ||
+		     (!is_writable ($this->_options['CACHE_DIR'])) )
 		{
-			// Check cache directory
-			if ( (!isset       ($this->_options['CACHE_DIR'])) ||
-			     (!is_dir      ($this->_options['CACHE_DIR'])) ||
-			     (!is_writable ($this->_options['CACHE_DIR'])) )
-			{
-				return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
-			}
-
-			// Check temp directory
-			if ( (!isset       ($this->_options['TEMP_DIR'])) ||
-			     (!is_dir      ($this->_options['TEMP_DIR'])) ||
-			     (!is_writable ($this->_options['TEMP_DIR'])) )
-			{
-				return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
-			}
-
-			if (($input_file = tempnam($this->_options['TEMP_DIR'],
-				'fr-' . $this->_uniqueID . '-')) === false)
-			{
-				return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
-			}
-			
-			if (! method_exists ($this, 'getInputFileContents') ||
-			    ! method_exists ($this, 'execute'))
-			{
-				return ERR_INTERNAL_CLASS;
-			}
-
-			$rendered_image = $input_file . '.ps';
-
-			// Create empty output file first ASAP
-			if (! file_exists ($rendered_image))
-				touch ($rendered_image);
-
-			if (! is_writable ($rendered_image))
-				return ERR_TEMP_FILE_NOT_WRITABLE;
-
-			// Write input file contents
-			if (($handle = fopen ($input_file, 'w')) === false)
-				return ERR_TEMP_FILE_NOT_WRITABLE;
-
-			fwrite ($handle, $this->getInputFileContents($this->_input));
-			fclose ($handle);
-
-
-			// Render using external application
-			$current_dir = getcwd();
-			chdir ($this->_options['TEMP_DIR']);
-			if (!$this->execute($input_file, $rendered_image) ||
-			    !file_exists ($rendered_image))
-			{
-				//unlink($input_file);
-				return ERR_RENDERING_ERROR;
-			}
-			chdir ($current_dir);
-
-			if (!$this->convertimg ($rendered_image, $final_image,
-			                        $this->_options['INVERT_IMAGE'],
-			                        $this->_options['TRANSPARENT_IMAGE']))
-				return ERR_IMAGE_CONVERT_FAILURE;
-
-			// Cleanup
-			unlink ($rendered_image);
-			unlink ($input_file);
-
+			return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
 		}
+
+		if ( (!isset       ($this->_options['TEMP_DIR'])) ||
+		     (!is_dir      ($this->_options['TEMP_DIR'])) ||
+		     (!is_writable ($this->_options['TEMP_DIR'])) )
+		{
+			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+		}
+
+		if (! method_exists ($this, 'getInputFileContents') ||
+		    ! method_exists ($this, 'execute') )
+		{
+			return ERR_INTERNAL_CLASS;
+		}
+
+		if ( false === ($input_file = tempnam ($this->_options['TEMP_DIR'],
+			'scorerender-' . $this->_uniqueID . '-')) )
+		{
+			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+		}
+		
+		$rendered_image = $input_file . '.ps';
+
+		// Create empty output file first ASAP
+		if (! file_exists ($rendered_image) )
+			touch ($rendered_image);
+
+		if (! is_writable ($rendered_image) )
+			return ERR_TEMP_FILE_NOT_WRITABLE;
+
+		// Write input file contents
+		if ( false === ($handle = fopen ($input_file, 'w')) )
+			return ERR_TEMP_FILE_NOT_WRITABLE;
+
+		fwrite ( $handle, $this->getInputFileContents() );
+		fclose ( $handle );
+
+
+		// Render using external application
+		$current_dir = getcwd();
+		chdir ($this->_options['TEMP_DIR']);
+		if (!$this->execute($input_file, $rendered_image) ||
+		    !file_exists ($rendered_image))
+		{
+			//unlink($input_file);
+			return ERR_RENDERING_ERROR;
+		}
+		chdir ($current_dir);
+
+		if (!$this->convertimg ($rendered_image, $final_image,
+					$this->_options['INVERT_IMAGE'],
+					$this->_options['TRANSPARENT_IMAGE']))
+			return ERR_IMAGE_CONVERT_FAILURE;
+
+		// Cleanup
+		unlink ($rendered_image);
+		unlink ($input_file);
 
 		return basename ($final_image);
 	}

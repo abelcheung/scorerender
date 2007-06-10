@@ -28,7 +28,7 @@ class guidoRender extends ScoreRender
 
 	function guidoRender ($options = array())
 	{
-		parent::init_options ($options);
+		$this->init_options ($options);
 	}
 
 	function getInputFileContents ()
@@ -66,7 +66,7 @@ class guidoRender extends ScoreRender
 			        . ' -negate png:- ' . $final_image;
 		}
 
-		$retval = parent::_exec($cmd);
+		$retval = $this->_exec($cmd);
 
 		return ($retval == 0);
 	}
