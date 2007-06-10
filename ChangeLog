@@ -1,5 +1,9 @@
 2007-06-10  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php: PHP4 compatibility fix.
+
+2007-06-10  Abel Cheung  <abelcheung@gmail.com>
+
 	* showcode.php, wp-scorerender.php:
 	- Load text domain properly.
 
