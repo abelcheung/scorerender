@@ -18,20 +18,43 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/*
- Implements rendering of ABC notation in ScoreRender, using abc2ps.
+/**
+ * Implements rendering of ABC notation in ScoreRender.
+ * @package ScoreRender
 */
 
+/**
+ * Inherited from ScoreRender class, for supporting ABC notation.
+ * @package ScoreRender
+*/
 class abcRender extends ScoreRender
 {
+	/**
+	 * @var string
+	 */
 	var $_uniqueID = "abc";
 
+	/**
+	 * Class constructor
+	 * @param array $options Options to be passed into class
+	 * @access private
+	 */
 	function abcRender ($options = array())
 	{
 		$this->init_options ($options);
 		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
 	}
 
+	/**
+	 * Outputs complete music input file for rendering.
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such necessary content to original content for processing.
+	 *
+	 * @return string The full music content to be rendered
+	 */
 	function getInputFileContents ()
 	{
 		$header = <<<EOT
@@ -46,6 +69,14 @@ EOT;
 		return $header . "\n" . $this->_input;
 	}
 
+	/**
+	 * Render raw input file into PostScript file.
+	 *
+	 * @uses ScoreRender::_exec
+	 * @param string $input_file File name of raw input file containing music content
+	 * @param string $rendered_image File name of rendered PostScript file
+	 * @return boolean Whether rendering is successful or not
+	 */
 	function execute ($input_file, $rendered_image)
 	{
 		$cmd = sprintf ('%s %s -O %s 2>&1',
@@ -56,6 +87,14 @@ EOT;
 		return ($result['return_val'] == 0);
 	}
 
+	/**
+	 * @uses ScoreRender::_exec
+	 * @param string $rendered_image The rendered PostScript file name
+	 * @param string $final_image The final PNG image file name
+	 * @param boolean $invert True if image should be white on black instead of vice versa
+	 * @param boolean $transparent True if image background should be transparent
+	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 */
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// abcm2ps output is Grayscale by default. When attempting to add

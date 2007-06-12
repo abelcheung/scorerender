@@ -23,19 +23,44 @@
  Mostly based on class.lilypondrender.inc.php from FigureRender
  Chris Lamb <chris@chris-lamb.co.uk>
  10th April 2006
-
- Implements rendering of LilyPond figures in ScoreRender.
 */
 
+/**
+ * Implements rendering of Lilypond notation in ScoreRender.
+ * @package ScoreRender
+*/
+
+/**
+ * Inherited from ScoreRender class, for supporting Lilypond notation.
+ * @package ScoreRender
+*/
 class lilypondRender extends ScoreRender
 {
+	/**
+	 * @var string
+	 */
 	var $_uniqueID = "lilypond";
 
+	/**
+	 * Class constructor
+	 * @param array $options Options to be passed into class
+	 * @access private
+	 */
 	function lilypondRender ($options = array())
 	{
 		$this->init_options ($options);
 	}
 
+	/**
+	 * Outputs complete music input file for rendering.
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such necessary content to original content for processing.
+	 *
+	 * @return string The full music content to be rendered
+	 */
 	function getInputFileContents ()
 	{
 		$header = <<<EOD
@@ -58,6 +83,14 @@ EOD;
 		return $header . $this->_input;
 	}
 
+	/**
+	 * Render raw input file into PostScript file.
+	 *
+	 * @uses ScoreRender::_exec
+	 * @param string $input_file File name of raw input file containing music content
+	 * @param string $rendered_image File name of rendered PostScript file
+	 * @return boolean Whether rendering is successful or not
+	 */
 	function execute ($input_file, $rendered_image)
 	{
 		/* lilypond adds .ps extension by itself */
@@ -71,6 +104,14 @@ EOD;
 		return ($retval == 0);
 	}
 
+	/**
+	 * @uses ScoreRender::_exec
+	 * @param string $rendered_image The rendered PostScript file name
+	 * @param string $final_image The final PNG image file name
+	 * @param boolean $invert True if image should be white on black instead of vice versa
+	 * @param boolean $transparent True if image background should be transparent
+	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 */
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1

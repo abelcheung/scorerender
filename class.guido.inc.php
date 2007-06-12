@@ -18,24 +18,55 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/*
- Implements fetching of Guido figures in ScoreRender.
+/**
+ * Implements rendering of GUIDO notation in ScoreRender.
+ * @package ScoreRender
 */
 
+/**
+ * Inherited from ScoreRender class, for supporting GUIDO notation.
+ * @package ScoreRender
+*/
 class guidoRender extends ScoreRender
 {
+	/**
+	 * @var string
+	 */
 	var $_uniqueID = "guido";
 
+	/**
+	 * Class constructor
+	 * @param array $options Options to be passed into class
+	 * @access private
+	 */
 	function guidoRender ($options = array())
 	{
 		$this->init_options ($options);
 	}
 
+	/**
+	 * Outputs complete music input file for rendering.
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such necessary content to original content for processing.
+	 *
+	 * @return string The full music content to be rendered
+	 */
 	function getInputFileContents ()
 	{
 		return $this->_input;
 	}
 
+	/**
+	 * Render raw input file into PostScript file.
+	 *
+	 * @uses ScoreRender::_exec
+	 * @param string $input_file File name of raw input file containing music content
+	 * @param string $rendered_image File name of rendered PostScript file
+	 * @return boolean Whether rendering is successful or not
+	 */
 	function execute ($input_file, $rendered_image)
 	{
 		$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
@@ -46,6 +77,14 @@ class guidoRender extends ScoreRender
 		return (copy ($url, $rendered_image));
 	}
 
+	/**
+	 * @uses ScoreRender::_exec
+	 * @param string $rendered_image The rendered PostScript file name
+	 * @param string $final_image The final PNG image file name
+	 * @param boolean $invert True if image should be white on black instead of vice versa
+	 * @param boolean $transparent True if image background should be transparent
+	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 */
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// Image from noteserver contains border

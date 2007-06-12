@@ -19,7 +19,7 @@
 */
 
 /**
- * Implements rendering of Mup figures in ScoreRender.
+ * Implements rendering of Mup notation in ScoreRender.
  * @package ScoreRender
 */
 
@@ -35,9 +35,8 @@ class mupRender extends ScoreRender
 	var $_uniqueID = "mup";
 
 	/**
-	 * mupRender class initialization method
-	 * @param string $input
-	 * @param array $options
+	 * Class constructor
+	 * @param array $options Options to be passed into class
 	 * @access private
 	 */
 	function mupRender ($options = array())
@@ -68,14 +67,13 @@ class mupRender extends ScoreRender
 	}
 
 	/**
-	 * Prepend and append content to supplied music fragment
+	 * Outputs complete music input file for rendering.
 	 *
 	 * Most usually user supplied content does not contain correct
 	 * rendering options like page margin, staff width etc, and
 	 * each notation has its own requirements. This method adds
-	 * such default rendering options to Mup notation.
+	 * such necessary content to original content for processing.
 	 *
-	 * @param string $input
 	 * @return string The full music content to be rendered
 	 */
 	function getInputFileContents ()
@@ -100,9 +98,10 @@ EOD;
 	 * necessary stuff to user supplied content), and converts it to
 	 * a PostScript file.
 	 *
-	 * @param string $input_file Content to be rendered
-	 * @param string $rendered_image PostScript file name to be rendered into
-	 * @return boolean Whether rendering is successful
+	 * @uses ScoreRender::_exec
+	 * @param string $input_file File name of raw input file containing music content
+	 * @param string $rendered_image File name of rendered PostScript file
+	 * @return boolean Whether rendering is successful or not
 	 */
 	function execute ($input_file, $rendered_image)
 	{
@@ -135,6 +134,14 @@ EOD;
 		//return ($result['return_val'] == 0);
 	}
 
+	/**
+	 * @uses ScoreRender::_exec
+	 * @param string $rendered_image The rendered PostScript file name
+	 * @param string $cache_filename The final PNG image file name
+	 * @param boolean $invert True if image should be white on black instead of vice versa
+	 * @param boolean $transparent True if image background should be transparent
+	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 */
 	function convertimg ($rendered_image, $cache_filename, $invert, $transparent)
 	{
 		/*

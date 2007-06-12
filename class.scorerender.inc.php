@@ -47,26 +47,26 @@
 class ScoreRender
 {
 	/**
-	 * @var array ScoreRender config options.
+	 * @var array $_options ScoreRender config options.
 	 * @access private
 	 */
 	var $_options;
 
 	/**
-	 * @var string The music fragment to be rendered.
+	 * @var string $_input The music fragment to be rendered.
 	 * @access private
 	 */
 	var $_input;
 
 	/**
-	 * @var string A unique identifier for each kind of notation.
+	 * @var string $_uniqueID A unique identifier for each kind of notation.
 	 * @abstract
 	 * @access private
 	 */
 	var $_uniqueID;
 
 	/**
-	 * @var string Stores output message of rendering command.
+	 * @var string $_commandOutput Stores output message of rendering command.
 	 * @access private
 	 */
 	var $_commandOutput;
@@ -74,7 +74,7 @@ class ScoreRender
 	/**
 	 * Initialize ScoreRender options
 	 *
-	 * @param array $options
+	 * @param array $options Instances are initialized with this option array
 	 * @access protected
 	 */
 	function init_options ($options = array())
@@ -86,6 +86,7 @@ class ScoreRender
 	 * Sets music fragment content
 	 *
 	 * @since 0.2
+	 * @uses $_input Stores music fragment content into this variable
 	 * @param string $input The music fragment content
 	 */
 	function setMusicFragment ($input)
@@ -97,6 +98,7 @@ class ScoreRender
 	 * Outputs music fragment content
 	 *
 	 * @since 0.2
+	 * @uses $_input Return input content, optionally prepended/appended with header or footer, and filtered in other ways
 	 * @return string
 	 */
 	function getMusicFragment ()
@@ -106,6 +108,8 @@ class ScoreRender
 
 	/**
 	 * Returns output message of rendering command.
+	 *
+	 * @uses $_commandOutput Returns this variable
 	 * @return string
 	 */
 	function getCommandOutput ()
@@ -119,8 +123,8 @@ class ScoreRender
 	 * {@internal It is basically exec() with additional stuff}}
 	 *
 	 * @param string $cmd Command to be executed
+	 * @uses $_commandOutput Command output is stored in this variable.
 	 * @access protected
-	 * @final
 	 */
 	function _exec ($cmd)
 	{
@@ -135,6 +139,17 @@ class ScoreRender
 	}
 
 	/**
+	 * Render raw input file into PostScript file.
+	 *
+	 * @param string $input_file File name of raw input file containing music content
+	 * @param string $rendered_image File name of rendered PostScript file
+	 * @abstract
+	 */
+	function execute ($input_file, $rendered_image)
+	{
+	}
+
+	/**
 	 * Converts rendered PostScript page into PNG format.
 	 *
 	 * All rendering command would generate PostScript format as output.
@@ -142,6 +157,7 @@ class ScoreRender
 	 * and the process is done here, using ImageMagick. Various effects are also
 	 * applied here, like white edge trimming, color inversion and alpha blending.
 	 *
+	 * @uses _exec
 	 * @param string $rendered_image The rendered PostScript file name
 	 * @param string $final_image The final PNG image file name
 	 * @param boolean $invert True if image should be white on black instead of vice versa
@@ -182,13 +198,22 @@ class ScoreRender
 	 *
 	 * First it tries to check if image is already rendered, and return
 	 * existing image file name immediately. Otherwise the music fragment is
-	 * rendered, resulting image is stored in cache folder, and the file name
-	 * is returned.
+	 * rendered in 2 passes (with {@link convertimg} and {@link execute},
+	 * and resulting image is stored in cache folder.
 	 *
-	 * If any error occurs during rendering process, an error code is returned
-	 * instead.
+	 * @uses ERR_INVALID_INPUT Return this error code if isValidInput method returned false
+	 * @uses ERR_LENGTH_EXCEEDED Return this error code if content length limit is exceeded
+	 * @uses ERR_CACHE_DIRECTORY_NOT_WRITABLE Return this error code if cache directory is not writable
+	 * @uses ERR_TEMP_DIRECTORY_NOT_WRITABLE Return this error code if temporary directory is not writable
+	 * @uses ERR_INTERNAL_CLASS Return this error code if essential methods are missing from subclass
+	 * @uses ERR_TEMP_FILE_NOT_WRITABLE Return this error if input file or postscript file is not writable
+	 * @uses ERR_RENDERING_ERROR Return this error code if rendering command fails
+	 * @uses ERR_IMAGE_CONVERT_FAILURE Return this error code if PS -> PNG conversion failed
 	 *
-	 * @return mixed Resulting image file name, or error code in case of error
+	 * @uses execute First pass rendering: Convert input file -> PS
+	 * @uses convertimg Second pass rendering: Convert PS -> PNG
+	 *
+	 * @return mixed Resulting image file name, or an error code in case any error occurred
 	 * @final
 	 */
 	function render()
