@@ -448,6 +448,8 @@ function scorerender_generate_html_error ($errcode)
 
 /**
  * Generate HTML content from error message or rendered image
+ *
+ * @uses scorerender_generate_html_error
  * @param object $render PHP object created for rendering relevant music fragment
  * @return string $html The HTML content
  */
@@ -534,6 +536,8 @@ function scorerender_process_content ($render)
  *
  * If no PHP class exists corresponding to certain notation, then 
  * unconverted content is returned.
+ *
+ * @uses ScoreRender::setMusicFragment
  * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
  * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
  */
@@ -569,6 +573,8 @@ function scorerender_filter ($matches)
  * Check if post rendering should be enabled.
  * If yes, then apply {@link scorerender_filter} function on $content.
  *
+ * @uses scorerender_filter Apply filter to content upon regular expression match
+ * @see scorerender_comment
  * @param string $content the whole content of blog post
  * @return string Converted blog post content.
  */
@@ -595,6 +601,8 @@ function scorerender_content ($content)
  * Check if comment rendering should be enabled.
  * If yes, then apply {@link scorerender_filter} function on $content.
  *
+ * @uses scorerender_filter Apply filter to content upon regular expression match
+ * @see scorerender_content
  * @param string $content the whole content of blog comment
  * @return string Converted blog comment content.
  */
@@ -1195,6 +1203,17 @@ function scorerender_admin_section_abc ()
  * It also checks if form button is pressed, and may call
  * {@link scorerender_remove_cache scorerender_remove_cache()} or
  * {@link scorerender_update_options scorerender_update_options()} correspondingly.
+ *
+ * @uses scorerender_remove_cache Activated when 'Remove Cache' button is clicked
+ * @uses scorerender_update_options Activate when 'Update Options' button is clicked
+ * @uses scorerender_admin_section_path Admin page -- path options
+ * @uses scorerender_admin_section_image Admin page -- image options
+ * @uses scorerender_admin_section_content Admin page -- content options
+ * @uses scorerender_admin_section_caching Admin page -- caching administration
+ * @uses scorerender_admin_section_lilypond Admin page -- lilypond options
+ * @uses scorerender_admin_section_mup Admin page -- mup options
+ * @uses scorerender_admin_section_guido Admin page -- guido options
+ * @uses scorerender_admin_section_abc Admin page -- abc options
  *
  * @access private
  */
