@@ -21,16 +21,20 @@
 
 
 /*
- Mostly based on class.figurerender.inc.php from FigureRender
- Chris Lamb <chris@chris-lamb.co.uk>
- 10th April 2006
-
- Follows the template method pattern. Subclasses should implement:
- - getInputFileContents($input)
- - execute($input_file, $rendered_image)
- optionally they can also implement:
- - isValidInput($input)
- - convertimg($rendered_image, $final_image, $invert, $transparent)
+ * Mostly based on class.figurerender.inc.php from FigureRender
+ * Chris Lamb <chris@chris-lamb.co.uk> 10th April 2006
+ *
+ * Follows the template method pattern. Subclasses must implement:
+ * - execute($input_file, $rendered_image)
+ *
+ * And the following methods should most likely be implemented as well:
+ * - getInputFileContents($input)
+ * - convertimg($rendered_image, $final_image, $invert, $transparent)
+ *
+ * Optionally they can also implement:
+ * - isValidInput($input)
+ *
+ * Please check out various class.*.inc.php for examples.
 */
 
 /**
@@ -150,6 +154,21 @@ class ScoreRender
 	}
 
 	/**
+	 * Outputs complete music input file for rendering.
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such necessary content to original content for processing.
+	 *
+	 * @return string The full music content to be rendered
+	 */
+	function getInputFileContents ()
+	{
+		return $this->_input;
+	}
+
+	/**
 	 * Converts rendered PostScript page into PNG format.
 	 *
 	 * All rendering command would generate PostScript format as output.
@@ -253,8 +272,7 @@ class ScoreRender
 			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
 		}
 
-		if (! method_exists ($this, 'getInputFileContents') ||
-		    ! method_exists ($this, 'execute') )
+		if (! method_exists ($this, 'execute') )
 		{
 			return ERR_INTERNAL_CLASS;
 		}

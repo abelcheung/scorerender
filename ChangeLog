@@ -1,3 +1,8 @@
+2007-06-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php (getInputFileContent):
+	- Implement base method but allows other subclasses to override it.
+
 2007-06-12  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php, class.*.php:
