@@ -1,3 +1,13 @@
+2007-06-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php (getInputFileContent):
+	- Removed, use the method in parent class instead.
+
+	* wp-scorerender.php:
+	- No more enables rendering for each notation or post/comment
+	separately; rendering for posts is always enabled, and rendering for
+	comment is unified in one single option.
+
 2007-06-13  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.scorerender.inc.php (getInputFileContent):
