@@ -1057,128 +1057,6 @@ function scorerender_admin_section_caching ()
 }
 
 
-
-/**
- * Section of admin page about Lilypond notation options
- *
- * @since 0.2
- * @access private
- */
-function scorerender_admin_section_lilypond ()
-{
-	global $scorerender_options;
-?>
-	<fieldset class="options">
-		<legend><?php _e('Lilypond options', TEXTDOMAIN) ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>lilypond</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape ($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-<?php
-}
-
-
-
-/**
- * Section of admin page about Mup notation options
- *
- * @since 0.2
- * @access private
- */
-function scorerender_admin_section_mup ()
-{
-	global $scorerender_options;
-?>
-	<fieldset class="options">
-		<legend><?php _e('Mup options', TEXTDOMAIN) ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape ($scorerender_options['MUP_BIN']); ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape ($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
-				<br />
-				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-<?php
-}
-
-
-
-/**
- * Section of admin page about GUIDO notation options
- *
- * @since 0.2
- * @access private
- */
-function scorerender_admin_section_guido ()
-{
-	global $scorerender_options;
-?>
-	<fieldset class="options">
-		<legend><?php _e('GUIDO NoteServer options', TEXTDOMAIN) ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php _e('Content conversion:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[GUIDO_CONTENT_ENABLED]" id="guido_content" value="1" <?php checked('1', $scorerender_options['GUIDO_CONTENT_ENABLED']); ?> />
-				<label for="guido_content"><?php _e('Enable parsing for posts and pages', TEXTDOMAIN); ?></label><br />
-				<input type="checkbox" name="ScoreRender[GUIDO_COMMENT_ENABLED]" id="guido_comment" value="1" <?php checked('1', $scorerender_options['GUIDO_COMMENT_ENABLED']); ?> />
-				<label for="guido_comments"><?php _e('Enable parsing for comments', TEXTDOMAIN); ?></label>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-<?php
-}
-
-
-
-/**
- * Section of admin page about ABC notation options
- *
- * @since 0.2
- * @access private
- */
-function scorerender_admin_section_abc ()
-{
-	global $scorerender_options;
-?>
-	<fieldset class="options">
-		<legend><?php _e('ABC options', TEXTDOMAIN) ?></legend>
-
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
-				<br />
-				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.', TEXTDOMAIN), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
-<?php
-}
-
-
-
 /**
  * Show WordPress admin page
  *
@@ -1189,13 +1067,10 @@ function scorerender_admin_section_abc ()
  * @uses scorerender_remove_cache Activated when 'Remove Cache' button is clicked
  * @uses scorerender_update_options Activate when 'Update Options' button is clicked
  * @uses scorerender_admin_section_path Admin page -- path options
+ * @uses scorerender_admin_section_prog Admin page -- program and file locations
  * @uses scorerender_admin_section_image Admin page -- image options
  * @uses scorerender_admin_section_content Admin page -- content options
  * @uses scorerender_admin_section_caching Admin page -- caching administration
- * @uses scorerender_admin_section_lilypond Admin page -- lilypond options
- * @uses scorerender_admin_section_mup Admin page -- mup options
- * @uses scorerender_admin_section_guido Admin page -- guido options
- * @uses scorerender_admin_section_abc Admin page -- abc options
  *
  * @access private
  */
@@ -1250,18 +1125,6 @@ function scorerender_admin_options ()
 
 	// caching options
 	scorerender_admin_section_caching(); 
-
-	// lilypond options
-	// scorerender_admin_section_lilypond(); 
-
-	// mup options
-	// scorerender_admin_section_mup(); 
-
-	// guido options
-	// scorerender_admin_section_guido(); 
-
-	// ABC options
-	// scorerender_admin_section_abc(); 
 ?>
 	<p class="submit">
 	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
@@ -1271,7 +1134,6 @@ function scorerender_admin_options ()
 	</form>
 	<?php
 }
-
 
 
 /**
