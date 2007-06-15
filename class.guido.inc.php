@@ -45,21 +45,6 @@ class guidoRender extends ScoreRender
 	}
 
 	/**
-	 * Outputs complete music input file for rendering.
-	 *
-	 * Most usually user supplied content does not contain correct
-	 * rendering options like page margin, staff width etc, and
-	 * each notation has its own requirements. This method adds
-	 * such necessary content to original content for processing.
-	 *
-	 * @return string The full music content to be rendered
-	 */
-	function getInputFileContents ()
-	{
-		return $this->_input;
-	}
-
-	/**
 	 * Render raw input file into PostScript file.
 	 *
 	 * @uses ScoreRender::_exec
