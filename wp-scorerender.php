@@ -872,7 +872,7 @@ function scorerender_admin_section_prog ()
 	<fieldset class="options">
 		<legend><?php _e('Program and file locations', TEXTDOMAIN) ?></legend>
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<caption><?php _e('ImageMagick <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.'); ?></caption>
+		<caption><?php _e('ImageMagick <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
 			<td>
@@ -1002,11 +1002,11 @@ function scorerender_admin_section_content ()
 			<th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
 			<td>
 				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(ON_ERR_SHOW_MESSAGE, $scorerender_options['ERROR_HANDLING']); ?> />
-				<label for="on_err_show_message">Show error message</label><br />
+				<label for="on_err_show_message"><?php _e('Show error message', TEXTDOMAIN) ?></label><br />
 				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_fragment" value="2" <?php checked(ON_ERR_SHOW_FRAGMENT, $scorerender_options['ERROR_HANDLING']); ?> />
-				<label for="on_err_show_fragment">Show original, unmodified music fragment</label><br />
+				<label for="on_err_show_fragment"><?php _e('Show original, unmodified music fragment', TEXTDOMAIN) ?></label><br />
 				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(ON_ERR_SHOW_NOTHING, $scorerender_options['ERROR_HANDLING']); ?> />
-				<label for="on_err_show_nothing">Show nothing</label>
+				<label for="on_err_show_nothing"><?php _e('Show nothing', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
 		</table>
