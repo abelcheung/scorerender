@@ -37,11 +37,6 @@
 class lilypondRender extends ScoreRender
 {
 	/**
-	 * @var string
-	 */
-	var $_uniqueID = "lilypond";
-
-	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
 	 * @access private
@@ -61,7 +56,7 @@ class lilypondRender extends ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function getInputFileContents ()
+	function get_input_content ()
 	{
 		$header = <<<EOD
 \\version "2.8.1"
@@ -141,6 +136,16 @@ EOD;
 		return ($retval === 0);
 	}
 
+	/**
+	 * Check if given program is LilyPond, and whether it is usable.
+	 *
+	 * @param string $prog The program to be checked.
+	 * @return boolean Return true if the given program is LilyPond AND it is executable.
+	 */
+	function is_lilypond_usable ($prog)
+	{
+		return parent::is_prog_usable ('GNU LilyPond', $prog, '--version');
+	}
 }
 
 ?>

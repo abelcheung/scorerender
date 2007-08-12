@@ -30,11 +30,6 @@
 class abcRender extends ScoreRender
 {
 	/**
-	 * @var string
-	 */
-	var $_uniqueID = "abc";
-
-	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
 	 * @access private
@@ -55,7 +50,7 @@ class abcRender extends ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function getInputFileContents ()
+	function get_input_content ()
 	{
 		$header = <<<EOT
 %abc

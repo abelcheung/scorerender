@@ -30,11 +30,6 @@
 class mupRender extends ScoreRender
 {
 	/**
-	 * @var string
-	 */
-	var $_uniqueID = "mup";
-
-	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
 	 * @access private
@@ -76,7 +71,7 @@ class mupRender extends ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function getInputFileContents ()
+	function get_input_content ()
 	{
 		$header = <<<EOD
 //!Mup-Arkkra-5.0
@@ -170,6 +165,17 @@ EOD;
 		$retval = $this->_exec($cmd);
 
 		return ($retval == 0);
+	}
+
+	/**
+	 * Check if given program is Mup, and whether it is usable.
+	 *
+	 * @param string $prog The program to be checked.
+	 * @return boolean Return true if the given program is Mup AND it is executable.
+	 */
+	function is_mup_usable ($prog)
+	{
+		return parent::is_prog_usable ('Arkkra Enterprises', $prog, '-v');
 	}
 }
 

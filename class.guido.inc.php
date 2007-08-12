@@ -30,11 +30,6 @@
 class guidoRender extends ScoreRender
 {
 	/**
-	 * @var string
-	 */
-	var $_uniqueID = "guido";
-
-	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
 	 * @access private
@@ -93,6 +88,11 @@ class guidoRender extends ScoreRender
 		$retval = $this->_exec($cmd);
 
 		return ($retval == 0);
+	}
+
+	function is_guido_usable ()
+	{
+		return ini_get('allow_url_fopen');
 	}
 }
 
