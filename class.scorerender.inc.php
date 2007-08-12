@@ -28,7 +28,7 @@
  * - execute($input_file, $rendered_image)
  *
  * And the following methods should most likely be implemented as well:
- * - getInputFileContents($input)
+ * - get_input_content($input)
  * - convertimg($rendered_image, $final_image, $invert, $transparent)
  *
  * Optionally they can also implement:
@@ -63,13 +63,6 @@ class ScoreRender
 	var $_input;
 
 	/**
-	 * @var string $_uniqueID A unique identifier for each kind of notation.
-	 * @abstract
-	 * @access private
-	 */
-	var $_uniqueID;
-
-	/**
 	 * @var string $_commandOutput Stores output message of rendering command.
 	 * @access private
 	 */
@@ -93,7 +86,7 @@ class ScoreRender
 	 * @uses $_input Stores music fragment content into this variable
 	 * @param string $input The music fragment content
 	 */
-	function setMusicFragment ($input)
+	function set_music_fragment ($input)
 	{
 		$this->_input = $input;
 	}
@@ -105,7 +98,7 @@ class ScoreRender
 	 * @uses $_input Return input content, optionally prepended/appended with header or footer, and filtered in other ways
 	 * @return string
 	 */
-	function getMusicFragment ()
+	function get_music_fragment ()
 	{
 		return $this->_input;
 	}
@@ -116,7 +109,7 @@ class ScoreRender
 	 * @uses $_commandOutput Returns this variable
 	 * @return string
 	 */
-	function getCommandOutput ()
+	function get_command_output ()
 	{
 		return $this->_commandOutput;
 	}
@@ -163,7 +156,7 @@ class ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function getInputFileContents ()
+	function get_input_content ()
 	{
 		return $this->_input;
 	}
@@ -251,22 +244,20 @@ class ScoreRender
 
 		// Create unique hash
 		$hash = md5 ($this->_input . $this->_options['INVERT_IMAGE']
-			     . $this->_options['TRANSPARENT_IMAGE'] . $this->_uniqueID);
-		$final_image = $this->_options['CACHE_DIR'] . DIRECTORY_SEPARATOR
-		                  . $hash . '.png';
+			     . $this->_options['TRANSPARENT_IMAGE'] . $this->get_notation_name());
+		$final_image = $this->_options['CACHE_DIR']. DIRECTORY_SEPARATOR .
+		               "sr-" . $this->get_notation_name() . "-$hash.png";
 
 		if (is_file ($final_image)) return basename ($final_image);
 
 		// Create image if it does not exist
-		if ( (!isset       ($this->_options['CACHE_DIR'])) ||
-		     (!is_dir      ($this->_options['CACHE_DIR'])) ||
+		if ( (!is_dir      ($this->_options['CACHE_DIR'])) ||
 		     (!is_writable ($this->_options['CACHE_DIR'])) )
 		{
 			return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
 		}
 
-		if ( (!isset       ($this->_options['TEMP_DIR'])) ||
-		     (!is_dir      ($this->_options['TEMP_DIR'])) ||
+		if ( (!is_dir      ($this->_options['TEMP_DIR'])) ||
 		     (!is_writable ($this->_options['TEMP_DIR'])) )
 		{
 			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
@@ -278,7 +269,7 @@ class ScoreRender
 		}
 
 		if ( false === ($input_file = tempnam ($this->_options['TEMP_DIR'],
-			'scorerender-' . $this->_uniqueID . '-')) )
+			'scorerender-' . $this->get_notation_name() . '-')) )
 		{
 			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
 		}
@@ -286,6 +277,7 @@ class ScoreRender
 		$rendered_image = $input_file . '.ps';
 
 		// Create empty output file first ASAP
+		// FIXME: Is this security risk?
 		if (! file_exists ($rendered_image) )
 			touch ($rendered_image);
 
@@ -296,7 +288,7 @@ class ScoreRender
 		if ( false === ($handle = fopen ($input_file, 'w')) )
 			return ERR_TEMP_FILE_NOT_WRITABLE;
 
-		fwrite ( $handle, $this->getInputFileContents() );
+		fwrite ( $handle, $this->get_input_content() );
 		fclose ( $handle );
 
 
@@ -311,6 +303,9 @@ class ScoreRender
 		}
 		chdir ($current_dir);
 
+		if (! is_executable ($this->_options['CONVERT_BIN']))
+			return ERR_PROGRAM_MISSING;
+
 		if (!$this->convertimg ($rendered_image, $final_image,
 					$this->_options['INVERT_IMAGE'],
 					$this->_options['TRANSPARENT_IMAGE']))
@@ -321,6 +316,61 @@ class ScoreRender
 		unlink ($input_file);
 
 		return basename ($final_image);
+	}
+
+	/**
+	 * Check if given program is usable.
+	 *
+	 * @param mixed $match The string to be searched in program output. Can be an array of strings, in this case all strings must be found. Any non-string element in the array is ignored.
+	 * @param string $prog The program to be checked
+	 * @param string ... Arguments supplied to the program (if any)
+	 * @return boolean Return TRUE if the given program is usable
+	 */
+	function is_prog_usable ($match, $prog)
+	{
+		$prog = realpath ($prog);
+
+		if (! is_executable ($prog)) return false;
+
+		$args = func_get_args ();
+		array_shift ($args);
+		array_shift ($args);
+
+		$cmdline = $prog . ' ' . implode (' ', $args) . ' 2>&1';
+		if (false === ($handle = popen ($cmdline, 'r'))) return false;
+
+		$output = fread ($handle, 2048);
+		$ok = true;
+
+		$needles = (array) $match;
+		foreach ($needles as $needle)
+		{
+			if (is_string ($needle) && (false === strpos ($output, $needle)))
+			{
+				$ok = false;
+				break;
+			}
+		}
+
+		pclose ($handle);
+		return $ok;
+	}
+
+	function is_imagemagick_usable ($prog)
+	{
+		return ScoreRender::is_prog_usable ('ImageMagick', $prog, '-version');
+	}
+
+	function get_notation_name ()
+	{
+		global $notations;
+		$classname = strtolower (get_class ($this));
+
+		foreach ($notations as $notationname => $notation)
+			if ($classname === strtolower ($notation['classname']))
+				return $notationname;
+
+		return false;
 	}
 }
 

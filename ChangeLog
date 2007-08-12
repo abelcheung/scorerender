@@ -1,3 +1,14 @@
+2007-08-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.php:
+	- More consistent function naming.
+	- Removal of $this->_uniqueID, use $this->get_notation_name() instead.
+	- Also check if programs are usable by executing a program and
+	  reading its output.
+	* wp-scorerender.php:
+	- Change cache file name, append "sr-<notation>-" to diffrentiate.
+	- load_plugin_textdomain() also check translation in WP lang dir.
+
 2007-06-15  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.guido.inc.php (getInputFileContent):
