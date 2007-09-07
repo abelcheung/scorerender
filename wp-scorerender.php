@@ -611,7 +611,7 @@ function scorerender_content ($content)
 	{
 		// unfilled program name = disable support
 		foreach ($notation['progs'] as $prog)
-			if (empty ($scorerender_options[$prog]) continue;
+			if (empty ($scorerender_options[$prog])) continue;
 		$regex_list[] = $notation['regex'];
 	};
 
@@ -642,7 +642,7 @@ function scorerender_comment ($content)
 	{
 		// unfilled program name = disable support
 		foreach ($notation['progs'] as $prog)
-			if (empty ($scorerender_options[$prog]) continue;
+			if (empty ($scorerender_options[$prog])) continue;
 		$regex_list[] = $notation['regex'];
 	};
 
