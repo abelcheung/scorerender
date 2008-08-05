@@ -518,8 +518,9 @@ function scorerender_process_content ($render)
 	{
 		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/ScoreRender/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR);
 		$html .= sprintf ("<input type='image' name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
-		          __('Music fragment', TEXTDOMAIN), __('Music fragment', TEXTDOMAIN),
-		          $scorerender_options['CACHE_URL'], $result);
+			__('Click on image to view source', TEXTDOMAIN),
+			__('Music fragment', TEXTDOMAIN),
+			$scorerender_options['CACHE_URL'], $result);
 
 		$name = $render->get_notation_name ();
 
@@ -537,8 +538,9 @@ function scorerender_process_content ($render)
 	else
 	{
 		$html .= sprintf ("<img style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
-		          __('Music fragment', TEXTDOMAIN), __('Music fragment', TEXTDOMAIN),
-		          $scorerender_options['CACHE_URL'], $result);
+			__('Music fragment', TEXTDOMAIN),
+			__('Music fragment', TEXTDOMAIN),
+			$scorerender_options['CACHE_URL'], $result);
 	}
 
 	if ($scorerender_options['TRANSPARENT_IMAGE'] &&
