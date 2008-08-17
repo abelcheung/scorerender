@@ -2,7 +2,7 @@
 /*
  ScoreRender - Renders inline music score fragments in WordPress
  Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
+ Copyright (C) 2007, 08 Abel Cheung <abelcheung at gmail dot com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
