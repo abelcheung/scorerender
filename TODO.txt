@@ -1,10 +1,5 @@
 High priority:
 * option to cover up error messages with blank image
-* option to limit image width (not sure if height will be restricted)
-* either replace post content after tag change, or just eliminate
-  tag setting and hardcode to some value
-* limit number of fragment in comment
-* limit length of content per fragment
 
 Others:
 * implement MusiXTeX support
