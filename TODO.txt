@@ -5,6 +5,7 @@
 
 == 0.4 ==
 * admin page for managing fragment images
+* better error handling (error message and debugging)
 
 == Future ==
 * implement MusiXTeX / PMX support
