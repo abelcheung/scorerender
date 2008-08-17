@@ -1,9 +1,11 @@
-High priority:
-* option to cover up error messages with blank image
-
-Others:
-* implement MusiXTeX support
-* implement MusicXML support (this one can be difficult)
-* implement PMW support
+== 0.3 ==
 * implement lilypond-book syntax support
 * chroot support for lilypond
+* implement PMW support
+
+== 0.4 ==
+* admin page for managing fragment images
+
+== Future ==
+* implement MusiXTeX / PMX support
+? implement MusicXML support (this one can be difficult)
