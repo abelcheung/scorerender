@@ -1,33 +1,45 @@
-Plugin Name: ScoreRender
-Plugin URI: http://scorerender.abelcheung.org/
-Description: Renders inline sheet music fragments in post, pages and comments.
-Author: Abel Cheung
-Version: 0.1.2
-Author URI: http://me.abelcheung.org/
+=== ScoreRender ===
+Contributors: abelcheung
+Tags: music, score, abc, mup, lilypond, guido, scorerender, figurerender
+Requires at least: 2.2
+Tested up to: 2.6
+Stable tag: 0.2
 
-=== REQUIREMENT ===
-1. Wordpress 2.0.x or later
-2. PHP 4.x (I don't know the exact requirement yet, it works fine with
-   PHP 4.4.2 on one of the wordpress installations)
-3. ImageMagick, specifically the 'convert' utility
+Renders inline sheet music fragments in post, pages and comments.
 
-=== OPTIONAL PROGRAM ===
-1. For lilypond notation, lilypond >= 2.8.1 must be installed. Doesn't
-   work with older versions.
-2. For mup notation, mup must be installed. The magic file (only available
-   after paying registration fee) can be utilized if present.
-3. For ABC notation, any program compatible with abc2ps command line options
-   is fine. However abcm2ps is preferred, due to its ability to handle multiple
-   voices within single staff.
+== Description ==
 
-=== INSTALLATION ===
-1. extract archive, and copy this folder to wp-content/plugins/.
-2. Login to WordPress and enable the plugin in admin interface.
-3. Configure ScoreRender under the ScoreRender tab of the Options page.
-4. In Option -> Writing, check if this option is turned on:
+ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in excerpts, posts, pages and (optionally) comments.  Currently it supports 4 music notations: ABC, Guido, Lilypond, Mup.
+
+ScoreRender started its life from Chris Lamb’s FigureRender plugin, which is a Wordpress plugin for rendering LaTeX and Lilypond music fragments into images. Its maintainer changed later. While continue enhancing FigureRender, all LaTeX related functionalities are submitted to [LatexRender](http://sixthform.info/steve/wordpress/), thus preserving this plugin for music rendering only and the rename.
+
+For latest version, detailed usage instructions and demo cases, please visit [ScoreRender official site](http://scorerender.abelcheung.org/).
+
+== Installation ==
+
+= New install =
+1. Please make sure ImageMagick and other music rendering programs are installed in web server. Refer to [this page](http://scorerender.abelcheung.org/installation/) for more detail.
+2. extract archive, and copy this folder to wp-content/plugins/.
+3. Login to WordPress and enable the plugin in admin interface.
+4. Configure ScoreRender under the ScoreRender tab of the Options page.
+5. In Option -> Writing, check if this option is turned on:
 
        "WordPress should correct invalidly nested XHTML automatically"
 
    It must be turned off if you intent to render Lilypond and Mup fragments,
    since this option will convert "<<" and ">>" into "< <" and "> >"
    correspondingly, thus destroying the music content and cause render error.
+
+= Upgrade =
+1. Deactivate the plugin in WordPress admin page.
+2. Remove the whole plugin folder.
+3. Upload new plugin and activate again.
+
+== Frequently Asked Questions ==
+
+== Screenshots ==
+
+http://scorerender.abelcheung.org/screenshot/
+
+== License ==
+This plugin is released under GPL.
