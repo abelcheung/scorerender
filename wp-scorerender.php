@@ -2,7 +2,7 @@
 /*
 Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
-Description: Renders inline music score fragments in WordPress. Heavily based on <a href="http://chris-lamb.co.uk/code/figurerender/">FigureRender</a> from Chris Lamb.
+Description: Renders inline music score fragments in WordPress. Heavily based on FigureRender from Chris Lamb.
 Author: Abel Cheung
 Version: 0.1.99
 Author URI: http://me.abelcheung.org/
@@ -11,7 +11,7 @@ Author URI: http://me.abelcheung.org/
 /*
  ScoreRender - Renders inline music score fragments in WordPress
  Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- Copyright (C) 2007 Abel Cheung <abelcheung at gmail dot com>
+ Copyright (C) 2007, 08 Abel Cheung <abelcheung at gmail dot com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -27,13 +27,6 @@ Author URI: http://me.abelcheung.org/
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
-/*
- Mostly based on wp-figurerender.php from FigureRender
- Chris Lamb <chris@chris-lamb.co.uk>
- 10th April 2006
-*/
-
 
 /**
  * ScoreRender documentation
@@ -220,9 +213,9 @@ if (!function_exists ('sys_get_temp_dir'))
 		// Try to get from environment variable
 		if ( !empty($_ENV['TMP']) )
 			return realpath( $_ENV['TMP'] );
-		else if ( !empty($_ENV['TMPDIR']) )
+		elseif ( !empty($_ENV['TMPDIR']) )
 			return realpath( $_ENV['TMPDIR'] );
-		else if ( !empty($_ENV['TEMP']) )
+		elseif ( !empty($_ENV['TEMP']) )
 			return realpath( $_ENV['TEMP'] );
 		// Detect by creating a temporary file
 		else
@@ -265,8 +258,10 @@ if (!function_exists ('array_intersect_key'))
 /**
  * Initialize text domain.
  *
- * Translations are expected to be found in the same directory containing
- * this plugin.
+ * Translations are expected to be found in:
+ *   - the same directory containing this plugin
+ *   - default plugin translation path (root of plugin folder)
+ *   - theme translation path (wp-content/languages or wp-includes/languages)
  * @since 0.2
  */
 function scorerender_init_textdomain ()
@@ -276,6 +271,38 @@ function scorerender_init_textdomain ()
 	load_plugin_textdomain (TEXTDOMAIN);
 	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
 }
+
+/**
+ * Guess default upload directory setting from WordPress.
+ * 
+ * WordPress is inconsistent with upload directory setting across multiple
+ * versions. Try to guess to most sensible setting and take that as default
+ * value.
+ * @since 0.2
+ */
+function get_upload_dir ()
+{
+	$uploads = wp_upload_dir();
+	if (isset ($uploads['basedir']) && isset ($uploads['baseurl']))
+		return array ('path' => $uploads['basedir'],
+			'url' => $uploads['baseurl']);
+
+	$url = trim(attribute_escape(get_option('upload_url_path')));
+	$path = trim(attribute_escape(get_option('upload_path')));
+
+	if (empty ($path))
+		$path = 'wp-content/uploads';
+
+	if (substr ($path, 0, 1) != '/')
+		$path = ABSPATH . $path;
+
+	if (empty ($url))
+		$url = attribute_escape(get_option('siteurl')) . '/' .
+			str_replace (ABSPATH, '', $path);
+
+	return (array ('path' => $path, 'url' => $url));
+}
+
 
 /**
  * Retrieve ScoreRender options from database.
@@ -296,20 +323,37 @@ function scorerender_get_options ()
 	{
 		$scorerender_options = array();
 	}
-	else if (array_key_exists ('DB_VERSION', $scorerender_options) &&
+	elseif (array_key_exists ('DB_VERSION', $scorerender_options) &&
 		($scorerender_options['DB_VERSION'] >= DATABASE_VERSION) )
 	{
 		return;
 	}
+
+	$cachefolder = get_upload_dir ();
+	$defprog = array();
+	if (substr(PHP_OS, 0, 3) == 'WIN')
+		$defprog = array (
+			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
+			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
+			'lilypond' => 'C:\Program Files\Lilypond\lilypond.exe',
+			'mup' => 'C:\Program Files\mup\mup.exe',
+		);
+	else
+		$defprog = array (
+			'abc2ps' => '/usr/bin/abcm2ps',
+			'convert' => '/usr/bin/convert',
+			'lilypond' => '/usr/bin/lilypond',
+			'mup' => '/usr/local/bin/mup',
+		);
 
 	// default options
 	$defaults = array
 	(
 		'DB_VERSION'           => DATABASE_VERSION,
 		'TEMP_DIR'             => $default_tmp_dir,
-		'CONVERT_BIN'          => '/usr/bin/convert',
-		'CACHE_DIR'            => ABSPATH . get_option('upload_path'),
-		'CACHE_URL'            => get_option('siteurl') . '/' . get_option('upload_path'),
+		'CONVERT_BIN'          => $defprog['convert'],
+		'CACHE_DIR'            => $cachefolder['path'],
+		'CACHE_URL'            => $cachefolder['url'],
 
 		'IMAGE_MAX_WIDTH'      => 360,
 		'INVERT_IMAGE'         => false,
@@ -322,12 +366,12 @@ function scorerender_get_options ()
 		'CONTENT_MAX_LENGTH'   => 4096,
 		'FRAGMENT_PER_COMMENT' => 1,
 
-		'LILYPOND_BIN'         => '/usr/bin/lilypond',
+		'LILYPOND_BIN'         => $defprog['lilypond'],
 
-		'MUP_BIN'              => '/usr/local/bin/mup',
+		'MUP_BIN'              => $defprog['mup'],
 		'MUP_MAGIC_FILE'       => '',
 
-		'ABCM2PS_BIN'          => '/usr/bin/abcm2ps',
+		'ABCM2PS_BIN'          => $defprog['abc2ps'],
 	);
 
 	// Special handling for certain versions
@@ -459,8 +503,8 @@ function scorerender_generate_html_error ($errcode)
 		case ERR_RENDERING_ERROR:
 			return sprintf (__('[%s: The external rendering application failed!]', TEXTDOMAIN),
 				__('ScoreRender Error', TEXTDOMAIN));
-			                                        // '<br /><textarea cols=80 rows=10 READONLY>' .
-			                                        // $render->get_command_output() . '</textarea>');
+		                // '<br /><textarea cols=80 rows=10 READONLY>' .
+		                // $render->get_command_output() . '</textarea>');
 		case ERR_LENGTH_EXCEEDED:
 			return sprintf (__('[%s: Content length limit exceeded!]', TEXTDOMAIN),
 				__('ScoreRender Error', TEXTDOMAIN));
@@ -781,7 +825,7 @@ function scorerender_update_options ()
 		$errmsgs[] = 'temp_dir_undefined';
 		$newopt['TEMP_DIR'] = $default_tmp_dir;
 	}
-	else if ( !is_writable ($newopt['TEMP_DIR']) )
+	elseif ( !is_writable ($newopt['TEMP_DIR']) )
 	{
 		$errmsgs[] = 'temp_dir_not_writable';
 		$newopt['TEMP_DIR'] = $default_tmp_dir;
@@ -789,7 +833,7 @@ function scorerender_update_options ()
 
 	if ( empty ($newopt['CACHE_DIR']) )
 		$errmsgs[] = 'cache_dir_undefined';
-	else if ( !is_writable ($newopt['CACHE_DIR']) )
+	elseif ( !is_writable ($newopt['CACHE_DIR']) )
 		$errmsgs[] = 'cache_dir_not_writable';
 
 	if ( empty ($newopt['CACHE_URL']) )
