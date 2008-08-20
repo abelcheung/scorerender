@@ -546,7 +546,7 @@ function scorerender_process_content ($render)
 
 				return $notations[$name]['starttag'] . "\n" .
 					$render->get_music_fragment() . "\n" .
-					$notatios[$name]['endtag'];
+					$notations[$name]['endtag'];
 
 			default:
 				return scorerender_generate_html_error ($result);
@@ -560,8 +560,8 @@ function scorerender_process_content ($render)
 	// This idea is taken from LatexRender demo site
 	if ($scorerender_options['SHOW_SOURCE'])
 	{
-		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/ScoreRender/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR);
-		$html .= sprintf ("<input type='image' name='music_image' style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, plugin_basename(__FILE__));
+		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 			__('Click on image to view source', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
 			$scorerender_options['CACHE_URL'], $result);
