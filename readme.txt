@@ -18,7 +18,7 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 == Installation ==
 
 = New install =
-1. Please make sure ImageMagick and other music rendering programs are installed in web server. Refer to [this page](http://scorerender.abelcheung.org/installation/) for more detail.
+1. Please make sure ImageMagick and other music rendering programs are installed in web server. For example, to support Lilypond fragments, Lilypond must be installed in web server. Refer to [this page](http://scorerender.abelcheung.org/installation/) for more detail.
 2. extract archive, and copy this folder to wp-content/plugins/.
 3. Login to WordPress and enable the plugin in admin interface.
 4. Configure ScoreRender under the ScoreRender tab of the Options page.
@@ -36,6 +36,14 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 3. Upload new plugin and activate again.
 
 == Frequently Asked Questions ==
+
+= It just complains about some obscure error! =
+
+The error code indicates the kind of error in some degree. There are comments inside wp-scorerender.php indicating what kind of error it is. If you can't make any heads and tails out of PHP code, feel free to ask me [through email](http://me.abelcheung.org/aboutme/).
+
+= Is any ABC notation compatible program also supported? =
+
+Though they MIGHT work, only [abcm2ps](http://moinejf.free.fr/) is tested to a great extent. All others might work or might not work well, especially regarding image sizing and transparency issues.
 
 == Screenshots ==
 
