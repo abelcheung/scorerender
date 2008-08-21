@@ -37,7 +37,10 @@ class abcRender extends ScoreRender
 	function abcRender ($options = array())
 	{
 		$this->init_options ($options);
-		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
+		// $this->_options['IMAGE_MAX_WIDTH'] /= DPI;
+		// Seems abcm2ps is using something like 120 dpi,
+		// with 72DPI the notes and letters are very thin :(
+		$this->_options['IMAGE_MAX_WIDTH'] /= 120;
 	}
 
 	/**
@@ -92,25 +95,30 @@ EOT;
 	 */
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
-		// abcm2ps output is Grayscale by default. When attempting to add
+		// old abcm2ps output is Grayscale by default. When attempting to add
 		// transparency, it can only have value 0 or 1; that means notes,
 		// slurs and letters won't have smooth outline. Converting to
 		// RGB colorspace seems to fix the problem, but can't have all
-		// options in one single pass.
+		// options in one single pass. But...
+
+		// abcm2ps devel version outputs DSC 2.0 Level 2 PostScript now,
+		// and ImageMagick automatically converts it to transparent image.
+		// So whole logic have to be rewritten.
 		$cmd = $this->_options['CONVERT_BIN'] . ' -density 96 -trim +repage ';
 
-		if (!$transparent)
-		{
-			$cmd .= (($invert) ? '-negate ' : ' ')
-			        . $rendered_image . ' ' . $final_image;
-		}
+		if (!$invert)
+			$cmd .= (($transparent) ? '' : '-flatten ') .
+					$rendered_image . ' ' . $final_image;
 		else
 		{
-			// Really need to execute convert twice this time
-			$cmd .= $rendered_image . ' png:- | ' .
-				$this->_options['CONVERT_BIN'] .
-				' -channel ' . (($invert)? 'rgba' : 'alpha')
-			        . ' -fx "1-intensity" png:- ' . $final_image;
+			if ($transparent)
+				$cmd .= sprintf (' -negate %s %s',
+					$rendered_image, $final_image);
+			else
+				$cmd .= sprintf (' -flatten %s png:- | %s -negate png:- %s',
+					$rendered_image,
+					$this->_options['CONVERT_BIN'],
+					$final_image);
 		}
 
 		$retval = $this->_exec($cmd);
