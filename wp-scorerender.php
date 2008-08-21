@@ -953,7 +953,7 @@ function scorerender_admin_section_prog ()
 	<fieldset class="options">
 		<legend><?php _e('Program and file locations', TEXTDOMAIN) ?></legend>
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
-		<caption><?php _e('ImageMagick <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
+		<caption><?php _e('ImageMagick 6.x <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
 			<td>
@@ -985,7 +985,7 @@ function scorerender_admin_section_prog ()
 			<td>
 				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
 				<br />
-				<?php printf (__('Any program with command line argument compatible with %s will do, but %s is HIGHLY recommended, because it can handle multiple voices inside single staff.', TEXTDOMAIN), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
+				<?php printf (__('Though any program with command line argument compatible with %s will do, only %s can be guaranteed to work well', TEXTDOMAIN), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
 			</td>
 		</tr>
 		</table>
@@ -1193,19 +1193,19 @@ function scorerender_admin_options ()
 	</p>
 <?php
 	// path options
-	scorerender_admin_section_path(); 
+	scorerender_admin_section_path();
 
 	// program location options
 	scorerender_admin_section_prog();
 
 	// image options
-	scorerender_admin_section_image(); 
+	scorerender_admin_section_image();
 
 	// content options
-	scorerender_admin_section_content(); 
+	scorerender_admin_section_content();
 
 	// caching options
-	scorerender_admin_section_caching(); 
+	scorerender_admin_section_caching();
 ?>
 	<p class="submit">
 	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />

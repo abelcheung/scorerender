@@ -1,5 +1,11 @@
 2008-08-21  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php, readme.txt:
+	- Recommend usage of abcm2ps only, instead of any abc2ps compatible
+	  program.
+
+2008-08-21  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.guido.inc.php (execute):
 	- Changing zoom factor to account for Guido server default DPI value.
 
