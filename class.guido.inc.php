@@ -49,9 +49,10 @@ class guidoRender extends ScoreRender
 	 */
 	function execute ($input_file, $rendered_image)
 	{
+		// 1.125 = 72/64; guido server use 64pixel per cm
 		$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
 				'http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl',
-				$this->_options['IMAGE_MAX_WIDTH'] / DPI * 2.54, 100.0, 1,
+				$this->_options['IMAGE_MAX_WIDTH'] / DPI * 2.54, 100.0, 1.125,
 				rawurlencode (file_get_contents ($input_file)));
 
 		return (copy ($url, $rendered_image));

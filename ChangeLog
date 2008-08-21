@@ -1,3 +1,14 @@
+2008-08-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php (execute):
+	- Changing zoom factor to account for Guido server default DPI value.
+
+	* class.abc.inc.php:
+	- (abcRender) Use different DPI value since abcm2ps seems to use
+	  quite large value.
+	- (convertimg) Rewrite, old logic don't work anymore,
+	  due to change in ImageMagick / abcm2ps behaviour.
+
 2008-08-17  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:
