@@ -314,8 +314,8 @@ abstract class ScoreRender
 			return ERR_IMAGE_CONVERT_FAILURE;
 
 		// Cleanup
-#		unlink ($rendered_image);
-#		unlink ($input_file);
+		unlink ($rendered_image);
+		unlink ($input_file);
 
 		return basename ($final_image);
 	}
