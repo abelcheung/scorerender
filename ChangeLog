@@ -1,6 +1,11 @@
 2008-08-22  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.*.inc.php:
+	- Move transparency and invert options into class variables properly.
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
 	- Full class method abstraction / protection.
 
 	* class.lilypond.inc.php, class.mup.inc.php, wp-scorerender.php:
