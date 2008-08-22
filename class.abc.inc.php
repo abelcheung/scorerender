@@ -107,7 +107,7 @@ EOT;
 		$cmd = $this->_options['CONVERT_BIN'] . ' -density 96 -trim +repage ';
 
 		if (!$invert)
-			$cmd .= (($transparent) ? '' : '-flatten ') .
+			$cmd .= (($transparent) ? '' : '-alpha deactivate ') .
 					$rendered_image . ' ' . $final_image;
 		else
 		{
@@ -115,7 +115,7 @@ EOT;
 				$cmd .= sprintf (' -negate %s %s',
 					$rendered_image, $final_image);
 			else
-				$cmd .= sprintf (' -flatten %s png:- | %s -negate png:- %s',
+				$cmd .= sprintf (' -alpha deactivate %s png:- | %s -negate png:- %s',
 					$rendered_image,
 					$this->_options['CONVERT_BIN'],
 					$final_image);

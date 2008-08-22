@@ -130,44 +130,6 @@ EOD;
 	}
 
 	/**
-	 * @uses ScoreRender::_exec
-	 * @param string $rendered_image The rendered PostScript file name
-	 * @param string $cache_filename The final PNG image file name
-	 * @param boolean $invert True if image should be white on black instead of vice versa
-	 * @param boolean $transparent True if image background should be transparent
-	 * @return boolean Whether conversion from PostScript to PNG is successful
-	 */
-	function convertimg ($rendered_image, $cache_filename, $invert, $transparent)
-	{
-		/*
-		 * Mup output is Grayscale by default. When attempting to add
-		 * transparency, it can only have value 0 or 1; that means notes,
-		 * slurs and letters won't have smooth outline. Converting to
-		 * RGB colorspace seems to fix the problem, but can't have all
-		 * options in one single pass.
-		 */
-		$cmd = $this->_options['CONVERT_BIN'] . ' -trim +repage ';
-
-		if (!$transparent)
-		{
-			$cmd .= (($invert) ? '-negate ' : ' ')
-			        . $rendered_image . ' ' . $cache_filename;
-		}
-		else
-		{
-			// Really need to execute convert twice this time
-			$cmd .= $rendered_image . ' png:- | ' .
-				$this->_options['CONVERT_BIN'] .
-				' -channel ' . (($invert)? 'rgba' : 'alpha')
-			        . ' -fx "1-intensity" png:- ' . $cache_filename;
-		}
-
-		$retval = $this->_exec($cmd);
-
-		return ($retval == 0);
-	}
-
-	/**
 	 * Check if given program is Mup, and whether it is usable.
 	 *
 	 * @param string $prog The program to be checked.

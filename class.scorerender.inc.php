@@ -177,27 +177,24 @@ class ScoreRender
 	 * @return boolean Whether conversion from PostScript to PNG is successful
 	 * @access protected
 	 */
-	function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	function convertimg ($rendered_image, $final_image, $invert, $transparent, $extra_arg = '')
 	{
 		// Convert to specified format
-		$cmd = $this->_options['CONVERT_BIN'] . ' -trim +repage ';
+		$cmd = sprintf ('%s %s -trim +repage ',
+			$this->_options['CONVERT_BIN'], $extra_arg);
 
 		if (!$transparent)
-		{
-			$cmd .= (($invert) ? '-negate ' : ' ')
-			        . $rendered_image . ' ' . $final_image;
-		}
+			$cmd .= sprintf (' %s %s %s',
+				(($invert) ? '-negate' : ''),
+				$rendered_image, $final_image);
 		else
 		{
-			if (!$invert)
-			{
-				$cmd .= '-channel alpha ' . $rendered_image . ' ' . $final_image;
-			}
-			else
-			{
-				$cmd .=	'-channel alpha -fx intensity -channel rgb -negate ' .
-					$rendered_image . ' ' .  $final_image;
-			}
+			// Really need to execute convert twice this time
+			$cmd .= sprintf ('-alpha activate %s png:- | %s -channel %s -fx "1-intensity" png:- %s',
+				$rendered_image,
+				$this->_options['CONVERT_BIN'],
+				(($invert)? 'rgba' : 'alpha'),
+				$final_image);
 		}
 
 		$retval = _exec ($cmd);

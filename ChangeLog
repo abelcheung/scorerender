@@ -1,3 +1,10 @@
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	- Use ImageMagick -alpha option, calling -channel alpha not more
+	creates alpha channel automatically.
+	- Simplify calls to convertimg().
+
 2008-08-21  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php, readme.txt:

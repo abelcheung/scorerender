@@ -111,27 +111,8 @@ EOD;
 	{
 		// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1
 		// and 72*1.2 = 86.4
-		$cmd = $this->_options['CONVERT_BIN'] . ' -density 86 -trim +repage ';
-
-		if (!$transparent)
-		{
-			$cmd .= (($invert) ? '-negate ' : ' ')
-			        . $rendered_image . ' ' . $final_image;
-		}
-		else
-		{
-			if (!$invert)
-			{
-				$cmd .= '-channel alpha ' . $rendered_image . ' ' . $final_image;
-			}
-			else
-			{
-				$cmd .=	'-channel alpha -fx intensity -channel rgb -negate ' .
-					$rendered_image . ' ' .  $final_image;
-			}
-		}
-
-		$retval = $this->_exec ($cmd);
+		$retval = parent::convertimg ($rendered_image, $final_image, $invert,
+			$transparent, '-density 86');
 
 		return ($retval === 0);
 	}

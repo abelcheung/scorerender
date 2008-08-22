@@ -68,25 +68,8 @@ class guidoRender extends ScoreRender
 	 */
 	function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
-		// Image from noteserver contains border
-		$cmd = $this->_options['CONVERT_BIN'] . ' -shave 1x1 -trim -geometry 56% +repage ';
-
-		if (!$transparent)
-		{
-			$cmd .= (($invert) ? '-negate ' : ' ')
-			        . $rendered_image . ' ' . $final_image;
-		}
-		else
-		{
-			// Is it possible to execute convert only once?
-			$cmd .= ' -channel alpha -fx intensity ' .
-				$rendered_image . ' png:- | ' .
-				$this->_options['CONVERT_BIN'] .
-				' -channel ' . (($invert)? 'rgba' : 'alpha')
-			        . ' -negate png:- ' . $final_image;
-		}
-
-		$retval = $this->_exec($cmd);
+		$retval = parent::convertimg ($rendered_image, $final_image, $invert,
+			$transparent, '-shave 1x1 -geometry 56%');
 
 		return ($retval == 0);
 	}
