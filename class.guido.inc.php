@@ -34,9 +34,24 @@ class guidoRender extends ScoreRender
 	 * @param array $options Options to be passed into class
 	 * @access private
 	 */
-	function guidoRender ($options = array())
+	function __construct ($options = array())
 	{
 		$this->init_options ($options);
+	}
+
+	/**
+	 * Outputs complete music input file for rendering.
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such necessary content to original content for processing.
+	 *
+	 * @return string The full music content to be rendered
+	 */
+	public function get_music_fragment ()
+	{
+		return $this->_input;
 	}
 
 	/**
@@ -47,7 +62,7 @@ class guidoRender extends ScoreRender
 	 * @param string $rendered_image File name of rendered PostScript file
 	 * @return boolean Whether rendering is successful or not
 	 */
-	function execute ($input_file, $rendered_image)
+	protected function execute ($input_file, $rendered_image)
 	{
 		// 1.125 = 72/64; guido server use 64pixel per cm
 		$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
@@ -66,15 +81,18 @@ class guidoRender extends ScoreRender
 	 * @param boolean $transparent True if image background should be transparent
 	 * @return boolean Whether conversion from PostScript to PNG is successful
 	 */
-	function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	protected function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
-		$retval = parent::convertimg ($rendered_image, $final_image, $invert,
-			$transparent, '-shave 1x1 -geometry 56%');
-
-		return ($retval == 0);
+		return parent::convertimg ($rendered_image, $final_image, $invert,
+			$transparent, false, '-shave 1x1 -geometry 56%');
 	}
 
-	function is_guido_usable ()
+	/**
+	 * Check if fopen() supports remote file.
+	 *
+	 * @return boolean Return true if remote URL can be fopen'ed.
+	 */
+	public function is_notation_usable ()
 	{
 		return ini_get('allow_url_fopen');
 	}

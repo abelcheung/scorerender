@@ -21,20 +21,18 @@
 
 
 /*
- * Mostly based on class.figurerender.inc.php from FigureRender
- * Chris Lamb <chris@chris-lamb.co.uk> 10th April 2006
+ * Methods implementable by subclasses:
  *
- * Follows the template method pattern. Subclasses must implement:
+ * Mandatory:
  * - execute($input_file, $rendered_image)
- *
- * And the following methods should most likely be implemented as well:
- * - get_input_content($input)
+ * - get_music_fragment($input)
  * - convertimg($rendered_image, $final_image, $invert, $transparent)
+ *   --- this one most usually invokes parent converting()
  *
- * Optionally they can also implement:
- * - isValidInput($input)
+ * Optional:
+ * - is_valid_input($input)
  *
- * Please check out various class.*.inc.php for examples.
+ * Please refer to class.*.inc.php for examples.
 */
 
 /**
@@ -45,28 +43,27 @@
 /**
  * ScoreRender Class
  * @package ScoreRender
- * @todo Avoid sneaking configuration options and music content directly into class when creating object
  * @abstract
  */
-class ScoreRender
+abstract class ScoreRender
 {
 	/**
 	 * @var array $_options ScoreRender config options.
 	 * @access private
 	 */
-	var $_options;
+	protected $_options;
 
 	/**
 	 * @var string $_input The music fragment to be rendered.
 	 * @access private
 	 */
-	var $_input;
+	protected $_input;
 
 	/**
 	 * @var string $_commandOutput Stores output message of rendering command.
 	 * @access private
 	 */
-	var $_commandOutput;
+	protected $_commandOutput;
 
 	/**
 	 * Initialize ScoreRender options
@@ -74,7 +71,7 @@ class ScoreRender
 	 * @param array $options Instances are initialized with this option array
 	 * @access protected
 	 */
-	function init_options ($options = array())
+	protected function init_options ($options = array())
 	{
 		$this->_options = $options;
 	}
@@ -86,7 +83,7 @@ class ScoreRender
 	 * @uses $_input Stores music fragment content into this variable
 	 * @param string $input The music fragment content
 	 */
-	function set_music_fragment ($input)
+	public function set_music_fragment ($input)
 	{
 		$this->_input = $input;
 	}
@@ -94,14 +91,16 @@ class ScoreRender
 	/**
 	 * Outputs music fragment content
 	 *
-	 * @since 0.2
-	 * @uses $_input Return input content, optionally prepended/appended with header or footer, and filtered in other ways
-	 * @return string
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. This method adds
+	 * such necessary content to original content for processing.
+	 *
+	 * @uses $_input Return input content, optionally prepended/appended with header or footer, and filtered in other ways; $_input would not be modified
+	 * @return string The full music content to be rendered
+	 * @abstract
 	 */
-	function get_music_fragment ()
-	{
-		return $this->_input;
-	}
+	abstract public function get_music_fragment ();
 
 	/**
 	 * Returns output message of rendering command.
@@ -109,7 +108,7 @@ class ScoreRender
 	 * @uses $_commandOutput Returns this variable
 	 * @return string
 	 */
-	function get_command_output ()
+	public function get_command_output ()
 	{
 		return $this->_commandOutput;
 	}
@@ -123,7 +122,7 @@ class ScoreRender
 	 * @uses $_commandOutput Command output is stored in this variable.
 	 * @access protected
 	 */
-	function _exec ($cmd)
+	protected function _exec ($cmd)
 	{
 		$cmd_output = array();
 		$retval = 0;
@@ -142,24 +141,7 @@ class ScoreRender
 	 * @param string $rendered_image File name of rendered PostScript file
 	 * @abstract
 	 */
-	function execute ($input_file, $rendered_image)
-	{
-	}
-
-	/**
-	 * Outputs complete music input file for rendering.
-	 *
-	 * Most usually user supplied content does not contain correct
-	 * rendering options like page margin, staff width etc, and
-	 * each notation has its own requirements. This method adds
-	 * such necessary content to original content for processing.
-	 *
-	 * @return string The full music content to be rendered
-	 */
-	function get_input_content ()
-	{
-		return $this->_input;
-	}
+	abstract protected function execute ($input_file, $rendered_image);
 
 	/**
 	 * Converts rendered PostScript page into PNG format.
@@ -174,32 +156,55 @@ class ScoreRender
 	 * @param string $final_image The final PNG image file name
 	 * @param boolean $invert True if image should be white on black instead of vice versa
 	 * @param boolean $transparent True if image background should be transparent
+	 * @param boolean $ps_has_alpha True if PostScript produced by music rendering program has transparency capability
+	 * @param string $extra_arg Extra arguments supplied to ImageMagick convert
 	 * @return boolean Whether conversion from PostScript to PNG is successful
 	 * @access protected
 	 */
-	function convertimg ($rendered_image, $final_image, $invert, $transparent, $extra_arg = '')
+	protected function convertimg ($rendered_image, $final_image, $invert,
+	                     $transparent, $ps_has_alpha = false, $extra_arg = '')
 	{
-		// Convert to specified format
 		$cmd = sprintf ('%s %s -trim +repage ',
 			$this->_options['CONVERT_BIN'], $extra_arg);
 
-		if (!$transparent)
-			$cmd .= sprintf (' %s %s %s',
-				(($invert) ? '-negate' : ''),
-				$rendered_image, $final_image);
+		// Damn it, older ImageMagick can't handle PostScript, but suddenly
+		// it can now, and renders all previous logic broken
+		if ($ps_has_alpha)
+		{
+			if (!$invert)
+				$cmd .= (($transparent) ? '' : '-alpha deactivate ') .
+						$rendered_image . ' ' . $final_image;
+			else
+			{
+				if ($transparent)
+					$cmd .= sprintf (' -negate %s %s',
+						$rendered_image, $final_image);
+				else
+					$cmd .= sprintf (' -alpha deactivate %s png:- | %s -negate png:- %s',
+						$rendered_image,
+						$this->_options['CONVERT_BIN'],
+						$final_image);
+			}
+		}
 		else
 		{
-			// Really need to execute convert twice this time
-			$cmd .= sprintf ('-alpha activate %s png:- | %s -channel %s -fx "1-intensity" png:- %s',
-				$rendered_image,
-				$this->_options['CONVERT_BIN'],
-				(($invert)? 'rgba' : 'alpha'),
-				$final_image);
+			if (!$transparent)
+				$cmd .= sprintf (' %s %s %s',
+					(($invert) ? '-negate' : ''),
+					$rendered_image, $final_image);
+			else
+			{
+				// Adding alpha channel and changing alpha value
+				// need separate invocations, can't do in one pass
+				$cmd .= sprintf ('-alpha activate %s png:- | %s -channel %s -fx "1-intensity" png:- %s',
+					$rendered_image,
+					$this->_options['CONVERT_BIN'],
+					(($invert)? 'rgba' : 'alpha'),
+					$final_image);
+			}
 		}
 
-		$retval = $this->_exec ($cmd);
-
-		return ($retval === 0);
+		return (0 === $this->_exec ($cmd));
 	}
 
 	/**
@@ -210,7 +215,7 @@ class ScoreRender
 	 * rendered in 2 passes (with {@link convertimg} and {@link execute},
 	 * and resulting image is stored in cache folder.
 	 *
-	 * @uses ERR_INVALID_INPUT Return this error code if isValidInput method returned false
+	 * @uses ERR_INVALID_INPUT Return this error code if is_valid_input method returned false
 	 * @uses ERR_LENGTH_EXCEEDED Return this error code if content length limit is exceeded
 	 * @uses ERR_CACHE_DIRECTORY_NOT_WRITABLE Return this error code if cache directory is not writable
 	 * @uses ERR_TEMP_DIRECTORY_NOT_WRITABLE Return this error code if temporary directory is not writable
@@ -225,12 +230,12 @@ class ScoreRender
 	 * @return mixed Resulting image file name, or an error code in case any error occurred
 	 * @final
 	 */
-	function render()
+	public function render()
 	{
 		// Check for valid code
 		if ( empty ($this->_input) ||
-		     ( method_exists ($this, 'isValidInput') &&
-		       !$this->isValidInput($this->_input)) )
+		     ( method_exists ($this, 'is_valid_input') &&
+		       !$this->is_valid_input($this->_input)) )
 			return ERR_INVALID_INPUT;
 
 		// Check for content length
@@ -285,7 +290,7 @@ class ScoreRender
 		if ( false === ($handle = fopen ($input_file, 'w')) )
 			return ERR_TEMP_FILE_NOT_WRITABLE;
 
-		fwrite ( $handle, $this->get_input_content() );
+		fwrite ( $handle, $this->get_music_fragment() );
 		fclose ( $handle );
 
 
@@ -309,8 +314,8 @@ class ScoreRender
 			return ERR_IMAGE_CONVERT_FAILURE;
 
 		// Cleanup
-		unlink ($rendered_image);
-		unlink ($input_file);
+#		unlink ($rendered_image);
+#		unlink ($input_file);
 
 		return basename ($final_image);
 	}
@@ -322,9 +327,13 @@ class ScoreRender
 	 * @param string $prog The program to be checked
 	 * @param string ... Arguments supplied to the program (if any)
 	 * @return boolean Return TRUE if the given program is usable
+	 * @access protected
+	 * @since 0.2
 	 */
-	function is_prog_usable ($match, $prog)
+	protected function is_prog_usable ($match, $prog)
 	{
+		if (empty ($prog)) return false;
+
 		$prog = realpath ($prog);
 
 		if (! is_executable ($prog)) return false;
@@ -353,12 +362,25 @@ class ScoreRender
 		return $ok;
 	}
 
-	function is_imagemagick_usable ($prog)
+	/**
+	 * Check if ImageMagick is usable.
+	 *
+	 * @param string $prog The program to be checked
+	 * @return boolean Return TRUE if ImageMagick is usable
+	 * @since 0.2
+	 */
+	public function is_imagemagick_usable ($prog)
 	{
 		return ScoreRender::is_prog_usable ('ImageMagick', $prog, '-version');
 	}
 
-	function get_notation_name ()
+	/**
+	 * Returns notation name, by comparing class name with notation name list.
+	 *
+	 * @return string Return notation name if found, FALSE otherwise.
+	 * @since 0.2
+	 */
+	public function get_notation_name ()
 	{
 		global $notations;
 		$classname = strtolower (get_class ($this));

@@ -839,9 +839,7 @@ function scorerender_update_options ()
 	if ( empty ($newopt['CACHE_URL']) )
 		$errmsgs[] = 'cache_url_undefined';
 
-	if ( empty ($newopt['CONVERT_BIN']) ||
-	     ! is_executable ($newopt['CONVERT_BIN']) ||
-	     ! ScoreRender::is_imagemagick_usable ($newopt['CONVERT_BIN']))
+	if ( ! ScoreRender::is_imagemagick_usable ($newopt['CONVERT_BIN']) )
 		$errmsgs[] = 'convert_bin_problem';
 
 	$newopt['SHOW_SOURCE']       = isset ($newopt['SHOW_SOURCE']);
@@ -867,12 +865,12 @@ function scorerender_update_options ()
 		unset ($newopt['IMAGE_MAX_WIDTH']);
 	}
 
-	if (! empty ($newopt['LILYPOND_BIN']) && ! lilypondRender::is_lilypond_usable ($newopt['LILYPOND_BIN']))
+	if (! empty ($newopt['LILYPOND_BIN']) && ! lilypondRender::is_notation_usable ($newopt['LILYPOND_BIN']))
 	{
 		$errmsgs[] = 'lilypond_bin_problem';
 	}
 
-	if (! empty ($newopt['MUP_BIN']) && ! mupRender::is_mup_usable ($newopt['MUP_BIN']))
+	if (! empty ($newopt['MUP_BIN']) && ! mupRender::is_notation_usable ($newopt['MUP_BIN']))
 	{
 		$errmsgs[] = 'mup_bin_problem';
 	}
