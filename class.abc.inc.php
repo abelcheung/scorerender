@@ -34,7 +34,7 @@ class abcRender extends ScoreRender
 	 * @param array $options Options to be passed into class
 	 * @access private
 	 */
-	function abcRender ($options = array())
+	function __construct ($options = array())
 	{
 		$this->init_options ($options);
 		// $this->_options['IMAGE_MAX_WIDTH'] /= DPI;
@@ -53,7 +53,7 @@ class abcRender extends ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function get_input_content ()
+	public function get_music_fragment ()
 	{
 		$header = <<<EOT
 %abc
@@ -63,8 +63,7 @@ class abcRender extends ScoreRender
 %abc2mtex: yes
 EOT;
 		// input must not contain any empty line
-		$this->_input = preg_replace ('/^$/m', '%', $this->_input);
-		return $header . "\n" . $this->_input;
+		return $header . "\n" . preg_replace ('/^$/m', '%', $this->_input);
 	}
 
 	/**
@@ -74,8 +73,9 @@ EOT;
 	 * @param string $input_file File name of raw input file containing music content
 	 * @param string $rendered_image File name of rendered PostScript file
 	 * @return boolean Whether rendering is successful or not
+	 * @access protected
 	 */
-	function execute ($input_file, $rendered_image)
+	protected function execute ($input_file, $rendered_image)
 	{
 		$cmd = sprintf ('%s %s -O %s 2>&1',
 		                $this->_options['ABCM2PS_BIN'],
@@ -86,44 +86,18 @@ EOT;
 	}
 
 	/**
-	 * @uses ScoreRender::_exec
+	 * @uses ScoreRender::convertimg
 	 * @param string $rendered_image The rendered PostScript file name
 	 * @param string $final_image The final PNG image file name
 	 * @param boolean $invert True if image should be white on black instead of vice versa
 	 * @param boolean $transparent True if image background should be transparent
 	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 * @access protected
 	 */
-	function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	protected function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
-		// old abcm2ps output is Grayscale by default. When attempting to add
-		// transparency, it can only have value 0 or 1; that means notes,
-		// slurs and letters won't have smooth outline. Converting to
-		// RGB colorspace seems to fix the problem, but can't have all
-		// options in one single pass. But...
-
-		// abcm2ps devel version outputs DSC 2.0 Level 2 PostScript now,
-		// and ImageMagick automatically converts it to transparent image.
-		// So whole logic have to be rewritten.
-		$cmd = $this->_options['CONVERT_BIN'] . ' -density 96 -trim +repage ';
-
-		if (!$invert)
-			$cmd .= (($transparent) ? '' : '-alpha deactivate ') .
-					$rendered_image . ' ' . $final_image;
-		else
-		{
-			if ($transparent)
-				$cmd .= sprintf (' -negate %s %s',
-					$rendered_image, $final_image);
-			else
-				$cmd .= sprintf (' -alpha deactivate %s png:- | %s -negate png:- %s',
-					$rendered_image,
-					$this->_options['CONVERT_BIN'],
-					$final_image);
-		}
-
-		$retval = $this->_exec($cmd);
-
-		return ($retval == 0);
+		return parent::convertimg ($rendered_image, $final_image,
+			$invert, $transparent, TRUE, '-density 96');
 	}
 }
 

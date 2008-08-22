@@ -1,6 +1,20 @@
 2008-08-22  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.*.inc.php:
+	- Full class method abstraction / protection.
+
+	* class.lilypond.inc.php, class.mup.inc.php, wp-scorerender.php:
+	- Rename is_*_usable() -> is_notation_usable()
+
+	* wp-scorerender.php:
+	- Move all ImageMagick checking to ScoreRender::is_imagemagick_usable().
+
+	* class.mup.inc.php:
+	- Rename isValidInput() -> is_valid_input()
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
 	- Use ImageMagick -alpha option, calling -channel alpha not more
 	creates alpha channel automatically.
 	- Simplify calls to convertimg().

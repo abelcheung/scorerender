@@ -34,7 +34,7 @@ class mupRender extends ScoreRender
 	 * @param array $options Options to be passed into class
 	 * @access private
 	 */
-	function mupRender ($options = array())
+	function __construct ($options = array())
 	{
 		$this->init_options ($options);
 
@@ -47,7 +47,7 @@ class mupRender extends ScoreRender
 	 * @param string $input
 	 * @return boolean True if content is deemed safe
 	 */
-	function isValidInput ($input)
+	protected function is_valid_input ($input)
 	{
 		$blacklist = array
 		(
@@ -71,7 +71,7 @@ class mupRender extends ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function get_input_content ()
+	public function get_music_fragment ()
 	{
 		$header = <<<EOD
 //!Mup-Arkkra-5.0
@@ -98,7 +98,7 @@ EOD;
 	 * @param string $rendered_image File name of rendered PostScript file
 	 * @return boolean Whether rendering is successful or not
 	 */
-	function execute ($input_file, $rendered_image)
+	protected function execute ($input_file, $rendered_image)
 	{
 		/* Mup requires a file ".mup" present in $HOME or
 		   current working directory. It must be present even if
@@ -135,7 +135,7 @@ EOD;
 	 * @param string $prog The program to be checked.
 	 * @return boolean Return true if the given program is Mup AND it is executable.
 	 */
-	function is_mup_usable ($prog)
+	public function is_notation_usable ($prog)
 	{
 		return parent::is_prog_usable ('Arkkra Enterprises', $prog, '-v');
 	}

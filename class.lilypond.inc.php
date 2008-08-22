@@ -39,9 +39,8 @@ class lilypondRender extends ScoreRender
 	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
-	 * @access private
 	 */
-	function lilypondRender ($options = array())
+	function __construct ($options = array())
 	{
 		$this->init_options ($options);
 	}
@@ -56,7 +55,7 @@ class lilypondRender extends ScoreRender
 	 *
 	 * @return string The full music content to be rendered
 	 */
-	function get_input_content ()
+	public function get_music_fragment ()
 	{
 		$header = <<<EOD
 \\version "2.8.1"
@@ -75,7 +74,8 @@ class lilypondRender extends ScoreRender
 	}
 }
 EOD;
-		return $header . $this->_input;
+		// When does lilypond start hating \r ? 
+		return $header . str_replace (chr(13), '', $this->_input);
 	}
 
 	/**
@@ -85,8 +85,9 @@ EOD;
 	 * @param string $input_file File name of raw input file containing music content
 	 * @param string $rendered_image File name of rendered PostScript file
 	 * @return boolean Whether rendering is successful or not
+	 * @access protected
 	 */
-	function execute ($input_file, $rendered_image)
+	protected function execute ($input_file, $rendered_image)
 	{
 		/* lilypond adds .ps extension by itself */
 		$cmd = sprintf ('%s --safe --ps --output %s %s 2>&1',
@@ -106,15 +107,14 @@ EOD;
 	 * @param boolean $invert True if image should be white on black instead of vice versa
 	 * @param boolean $transparent True if image background should be transparent
 	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 * @access protected
 	 */
-	function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	protected function convertimg ($rendered_image, $final_image, $invert, $transparent)
 	{
 		// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1
 		// and 72*1.2 = 86.4
-		$retval = parent::convertimg ($rendered_image, $final_image, $invert,
-			$transparent, '-density 86');
-
-		return ($retval === 0);
+		return parent::convertimg ($rendered_image, $final_image, $invert,
+			$transparent, true, '-density 86');
 	}
 
 	/**
@@ -123,7 +123,7 @@ EOD;
 	 * @param string $prog The program to be checked.
 	 * @return boolean Return true if the given program is LilyPond AND it is executable.
 	 */
-	function is_lilypond_usable ($prog)
+	public function is_notation_usable ($prog)
 	{
 		return parent::is_prog_usable ('GNU LilyPond', $prog, '--version');
 	}
