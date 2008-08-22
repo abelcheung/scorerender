@@ -111,7 +111,8 @@ EOD;
 	{
 		// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1
 		// and 72*1.2 = 86.4
-		return parent::convertimg ($rendered_image, $final_image, TRUE, '-density 86');
+		return parent::convertimg ($rendered_image, $final_image, TRUE,
+			'-equalize -density 86');
 	}
 
 	/**

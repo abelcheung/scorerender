@@ -1,5 +1,19 @@
 2008-08-22  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.scorerender.inc.php (convertimg):
+	- Rewritten to fix all hardcoded edge colors and unantialised edges.
+	- Drop alpha channel when not needed, to reduce image size.
+	- Newer imagemagick required.
+
+	* class.lilypond.inc.php (convertimg):
+	- Call ImageMagick with -equalize, PostScript background is #FEFEFE
+	  instead of #FFFFFF.
+
+	* wp-scorerender.php:
+	- Better description of image width setting.
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.*.inc.php:
 	- Move transparency and invert options into class variables properly.
 

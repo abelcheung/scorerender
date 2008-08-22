@@ -1005,10 +1005,10 @@ function scorerender_admin_section_image ()
 		<legend><?php _e('Image options', TEXTDOMAIN) ?></legend>
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
 		<tr valign="top">
-			<th scope="row"><?php _e('Image width (pixel):', TEXTDOMAIN) ?></th>
+			<th scope="row"><?php _e('Max image width (pixel):', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo attribute_escape ($scorerender_options['IMAGE_MAX_WIDTH']); ?>" size="6" />
-				<label for="image_max_width"><?php _e('Default is 360 (5 inch)', TEXTDOMAIN) ?></label><br /><?php _e('Note that image size conversion is hardcoded to 72 DPI for most music rendering applications. And this value is just an approximation, actual image rendered for certain applications can be a bit smaller.', TEXTDOMAIN) ?></label>
+				<label for="image_max_width"><?php _e('(Default is 360)', TEXTDOMAIN) ?></label><br /><?php _e('Note that this value is just an approximation, please allow for +-10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
