@@ -197,7 +197,7 @@ class ScoreRender
 				$final_image);
 		}
 
-		$retval = _exec ($cmd);
+		$retval = $this->_exec ($cmd);
 
 		return ($retval === 0);
 	}
