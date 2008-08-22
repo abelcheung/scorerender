@@ -185,19 +185,17 @@ abstract class ScoreRender
 		// it can now, and renders all previous logic broken
 		if ($ps_has_alpha)
 		{
-			if (!$this->is_inverted)
-				$cmd .= (($this->is_transparent) ? '' : '-alpha deactivate ') .
-						$rendered_image . ' ' . $final_image;
+			if ($this->is_transparent)
+				$cmd .= sprintf (' %s %s %s',
+					(($this->is_inverted) ? '-negate' : ''),
+					$rendered_image, $final_image);
 			else
 			{
-				if ($this->is_transparent)
-					$cmd .= sprintf (' -negate %s %s',
-						$rendered_image, $final_image);
-				else
-					$cmd .= sprintf (' -alpha deactivate %s png:- | %s -negate png:- %s',
-						$rendered_image,
-						$this->_options['CONVERT_BIN'],
-						$final_image);
+				$cmd .= sprintf (' -flatten %s png:- | %s -alpha deactivate %s png:- %s',
+					$rendered_image,
+					$this->_options['CONVERT_BIN'],
+					(($this->is_inverted) ? '-negate' : ''),
+					$final_image);
 			}
 		}
 		else
@@ -210,10 +208,10 @@ abstract class ScoreRender
 			{
 				// Adding alpha channel and changing alpha value
 				// need separate invocations, can't do in one pass
-				$cmd .= sprintf ('-alpha activate %s png:- | %s -channel %s -fx "1-intensity" png:- %s',
+				$cmd .= sprintf ('-alpha activate %s png:- | %s -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- %s',
 					$rendered_image,
 					$this->_options['CONVERT_BIN'],
-					(($this->is_inverted)? 'rgba' : 'alpha'),
+					(($this->is_inverted)? 1 : 0),
 					$final_image);
 			}
 		}

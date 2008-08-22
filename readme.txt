@@ -1,6 +1,6 @@
 === ScoreRender ===
 Contributors: abelcheung
-Tags: music, score, abc, mup, lilypond, guido, scorerender, figurerender
+Tags: music, score, music notation, abc, mup, lilypond, guido
 Requires at least: 2.2
 Tested up to: 2.6
 Stable tag: scorerender-0-1-3
@@ -11,15 +11,20 @@ Renders inline sheet music fragments in post, pages and comments.
 
 ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in excerpts, posts, pages and (optionally) comments.  Currently it supports 4 music notations: ABC, Guido, Lilypond, Mup.
 
-ScoreRender started its life from Chris Lamb’s FigureRender plugin, which is a Wordpress plugin for rendering LaTeX and Lilypond music fragments into images. Its maintainer changed later. While continue enhancing FigureRender, all LaTeX related functionalities are submitted to [LatexRender](http://sixthform.info/steve/wordpress/), thus preserving this plugin for music rendering only and the rename.
+ScoreRender started its life from Chris Lamb’s FigureRender plugin, which is a Wordpress plugin for rendering LaTeX and Lilypond music fragments into images. Its maintainership changed later. While continue enhancing FigureRender, all LaTeX related functionalities are submitted to [LatexRender](http://sixthform.info/steve/wordpress/), thus preserving this plugin for music rendering only and the rename.
 
 For latest version, detailed usage instructions and demo cases, please visit [ScoreRender official site](http://scorerender.abelcheung.org/).
 
 == Installation ==
 
+= Prerequisite =
+1. Starting from ScoreRender 0.2, PHP4 compatibility is dropped, and PHP5 is strictly needed.
+2. Starting from ScoreRender 0.2, ImageMagick >= 6.3.6-2 is needed, due to usage of -flatten option.
+3. Any music rendering programs must also be installed in web server. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Refer to [this page](http://scorerender.abelcheung.org/installation/) for more detail.
+
 = New install =
-1. Please make sure ImageMagick and other music rendering programs are installed in web server. For example, to support Lilypond fragments, Lilypond must be installed in web server. Refer to [this page](http://scorerender.abelcheung.org/installation/) for more detail.
-2. extract archive, and copy this folder to wp-content/plugins/.
+1. Install any prerequisite programs as noted above.
+2. Extract archive, and copy this folder to wp-content/plugins/.
 3. Login to WordPress and enable the plugin in admin interface.
 4. Configure ScoreRender under the ScoreRender tab of the Options page.
 5. In Option -> Writing, check if this option is turned on:
@@ -45,9 +50,19 @@ The error code indicates the kind of error in some degree. There are comments in
 
 Though they MIGHT work, only [abcm2ps](http://moinejf.free.fr/) is tested to a great extent. All others might work or might not work well, especially regarding image sizing and transparency issues.
 
+= I want to remove cache for 1 image and re-render, but how can I determine which is which? =
+
+Right now you have to view HTML source to find out cache image file name. Management of cache is planned in future, but can't say when.
+
 == Screenshots ==
 
 http://scorerender.abelcheung.org/screenshot/
 
 == License ==
 This plugin is released under GPL.
+
+== Known Problems ==
+
+= Words in images using Guido notation seems blurred. =
+This may not be fully fixable, because setting font attributes may not be possible for all text. After image resizing, they can be rendered smaller / larger than desired.
+
