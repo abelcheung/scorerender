@@ -3,7 +3,7 @@ Contributors: abelcheung
 Tags: music, score, abc, mup, lilypond, guido, scorerender, figurerender
 Requires at least: 2.2
 Tested up to: 2.6
-Stable tag: 0.2
+Stable tag: scorerender-0-1-3
 
 Renders inline sheet music fragments in post, pages and comments.
 

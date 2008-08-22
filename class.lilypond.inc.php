@@ -104,17 +104,14 @@ EOD;
 	 * @uses ScoreRender::_exec
 	 * @param string $rendered_image The rendered PostScript file name
 	 * @param string $final_image The final PNG image file name
-	 * @param boolean $invert True if image should be white on black instead of vice versa
-	 * @param boolean $transparent True if image background should be transparent
 	 * @return boolean Whether conversion from PostScript to PNG is successful
 	 * @access protected
 	 */
-	protected function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	protected function convertimg ($rendered_image, $final_image)
 	{
 		// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1
 		// and 72*1.2 = 86.4
-		return parent::convertimg ($rendered_image, $final_image, $invert,
-			$transparent, true, '-density 86');
+		return parent::convertimg ($rendered_image, $final_image, TRUE, '-density 86');
 	}
 
 	/**

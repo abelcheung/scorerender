@@ -49,21 +49,33 @@ abstract class ScoreRender
 {
 	/**
 	 * @var array $_options ScoreRender config options.
-	 * @access private
+	 * @access protected
 	 */
 	protected $_options;
 
 	/**
 	 * @var string $_input The music fragment to be rendered.
-	 * @access private
+	 * @access protected
 	 */
 	protected $_input;
 
 	/**
 	 * @var string $_commandOutput Stores output message of rendering command.
-	 * @access private
+	 * @access protected
 	 */
 	protected $_commandOutput;
+
+	/**
+	 * @var boolean $is_inverted Whether image should be rendered in white on black.
+	 * @access protected
+	 */
+	protected $is_inverted;
+
+	/**
+	 * @var boolean $is_transparent Whether rendered image should use transparent background.
+	 * @access protected
+	 */
+	protected $is_transparent;
 
 	/**
 	 * Initialize ScoreRender options
@@ -73,7 +85,10 @@ abstract class ScoreRender
 	 */
 	protected function init_options ($options = array())
 	{
+		// TODO: set all options outside class
 		$this->_options = $options;
+		$this->is_inverted = $this->_options['INVERT_IMAGE'];
+		$this->is_transparent = $this->_options['TRANSPARENT_IMAGE'];
 	}
 
 	/**
@@ -161,8 +176,7 @@ abstract class ScoreRender
 	 * @return boolean Whether conversion from PostScript to PNG is successful
 	 * @access protected
 	 */
-	protected function convertimg ($rendered_image, $final_image, $invert,
-	                     $transparent, $ps_has_alpha = false, $extra_arg = '')
+	protected function convertimg ($rendered_image, $final_image, $ps_has_alpha = false, $extra_arg = '')
 	{
 		$cmd = sprintf ('%s %s -trim +repage ',
 			$this->_options['CONVERT_BIN'], $extra_arg);
@@ -171,12 +185,12 @@ abstract class ScoreRender
 		// it can now, and renders all previous logic broken
 		if ($ps_has_alpha)
 		{
-			if (!$invert)
-				$cmd .= (($transparent) ? '' : '-alpha deactivate ') .
+			if (!$this->is_inverted)
+				$cmd .= (($this->is_transparent) ? '' : '-alpha deactivate ') .
 						$rendered_image . ' ' . $final_image;
 			else
 			{
-				if ($transparent)
+				if ($this->is_transparent)
 					$cmd .= sprintf (' -negate %s %s',
 						$rendered_image, $final_image);
 				else
@@ -188,9 +202,9 @@ abstract class ScoreRender
 		}
 		else
 		{
-			if (!$transparent)
+			if (!$this->is_transparent)
 				$cmd .= sprintf (' %s %s %s',
-					(($invert) ? '-negate' : ''),
+					(($this->is_inverted) ? '-negate' : ''),
 					$rendered_image, $final_image);
 			else
 			{
@@ -199,7 +213,7 @@ abstract class ScoreRender
 				$cmd .= sprintf ('-alpha activate %s png:- | %s -channel %s -fx "1-intensity" png:- %s',
 					$rendered_image,
 					$this->_options['CONVERT_BIN'],
-					(($invert)? 'rgba' : 'alpha'),
+					(($this->is_inverted)? 'rgba' : 'alpha'),
 					$final_image);
 			}
 		}
@@ -245,8 +259,8 @@ abstract class ScoreRender
 			return ERR_LENGTH_EXCEEDED;
 
 		// Create unique hash
-		$hash = md5 ($this->_input . $this->_options['INVERT_IMAGE']
-			     . $this->_options['TRANSPARENT_IMAGE'] . $this->get_notation_name());
+		$hash = md5 ($this->_input . $this->is_inverted
+			     . $this->is_transparent . $this->get_notation_name());
 		$final_image = $this->_options['CACHE_DIR']. DIRECTORY_SEPARATOR .
 		               "sr-" . $this->get_notation_name() . "-$hash.png";
 
@@ -308,9 +322,7 @@ abstract class ScoreRender
 		if (! is_executable ($this->_options['CONVERT_BIN']))
 			return ERR_PROGRAM_MISSING;
 
-		if (!$this->convertimg ($rendered_image, $final_image,
-					$this->_options['INVERT_IMAGE'],
-					$this->_options['TRANSPARENT_IMAGE']))
+		if (!$this->convertimg ($rendered_image, $final_image))
 			return ERR_IMAGE_CONVERT_FAILURE;
 
 		// Cleanup

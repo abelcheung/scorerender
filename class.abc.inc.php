@@ -89,15 +89,12 @@ EOT;
 	 * @uses ScoreRender::convertimg
 	 * @param string $rendered_image The rendered PostScript file name
 	 * @param string $final_image The final PNG image file name
-	 * @param boolean $invert True if image should be white on black instead of vice versa
-	 * @param boolean $transparent True if image background should be transparent
 	 * @return boolean Whether conversion from PostScript to PNG is successful
 	 * @access protected
 	 */
-	protected function convertimg ($rendered_image, $final_image, $invert, $transparent)
+	protected function convertimg ($rendered_image, $final_image)
 	{
-		return parent::convertimg ($rendered_image, $final_image,
-			$invert, $transparent, TRUE, '-density 96');
+		return parent::convertimg ($rendered_image, $final_image, TRUE, '-density 96');
 	}
 }
 
