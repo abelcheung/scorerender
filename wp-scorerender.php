@@ -560,7 +560,7 @@ function scorerender_process_content ($render)
 	// This idea is taken from LatexRender demo site
 	if ($scorerender_options['SHOW_SOURCE'])
 	{
-		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, plugin_basename(__FILE__));
+		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, dirname (plugin_basename (__FILE__)));
 		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 			__('Click on image to view source', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
