@@ -853,7 +853,8 @@ function scorerender_update_options ()
 		unset ($newopt['CONTENT_MAX_LENGTH']);
 	}
 
-	if (!ctype_digit ($newopt['FRAGMENT_PER_COMMENT']))
+	if (isset ($newopt['FRAGMENT_PER_COMMENT']) &&
+		!ctype_digit ($newopt['FRAGMENT_PER_COMMENT']))
 	{
 		$errmsgs[] = 'wrong_frag_per_comment';
 		unset ($newopt['FRAGMENT_PER_COMMENT']);
@@ -908,9 +909,9 @@ function scorerender_admin_section_path ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Path options', TEXTDOMAIN) ?></legend>
+		<h3><?php _e('Path options', TEXTDOMAIN) ?></h3>
 
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
 		<tr valign="top">
 			<th scope="row"><?php _e('Temporary directory:', TEXTDOMAIN) ?></th>
 			<td>
@@ -949,11 +950,11 @@ function scorerender_admin_section_prog ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Program and file locations', TEXTDOMAIN) ?></legend>
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
 		<caption><?php _e('ImageMagick 6.x <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
 		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<a target="_new" href="http://www.imagemagick.net/"><code>convert</code></a>') ?></th>
+			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></th>
 			<td>
 				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape ($scorerender_options['CONVERT_BIN']); ?>" size="50" />
 			</td>
@@ -1002,37 +1003,31 @@ function scorerender_admin_section_image ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Image options', TEXTDOMAIN) ?></legend>
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<h3><?php _e('Image options', TEXTDOMAIN) ?></h3>
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
 		<tr valign="top">
 			<th scope="row"><?php _e('Max image width (pixel):', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo attribute_escape ($scorerender_options['IMAGE_MAX_WIDTH']); ?>" size="6" />
-				<label for="image_max_width"><?php _e('(Default is 360)', TEXTDOMAIN) ?></label><br /><?php _e('Note that this value is just an approximation, please allow for +-10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></label>
+				<label for="image_max_width"><?php _e('(Default is 360)', TEXTDOMAIN) ?></label><br /><?php _e('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<td colspan="2">
+			<th score="row"><?php _e('Clickable image:', TEXTDOMAIN) ?></th>
+			<td>
 				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $scorerender_options['SHOW_SOURCE']); ?> />
 				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
-			<td colspan="2">
-				<input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
-				<label for="invert_image"><?php _e('Invert image colours (becomes white on black)', TEXTDOMAIN); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<td colspan="2">
-				<input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('show_ie_transparency_warning'); box.disabled = !box.disabled; return true;" />
-				<label for="transparent_image"><?php _e('Use transparent background', TEXTDOMAIN) ?> <?php _e('(IE &lt;= 6 does not support transparent PNG)', TEXTDOMAIN); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<td style="padding-left: 30px;" colspan="2">
-				<input type="checkbox" name="ScoreRender[SHOW_IE_TRANSPARENCY_WARNING]" id="show_ie_transparency_warning" value="1" <?php checked('1', $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']); if (1 != $scorerender_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
-				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used (Only possible if above box is checked)', TEXTDOMAIN) ?></label>
+			<th score="row"><?php _e('Image post-processing', TEXTDOMAIN) ?></th>
+			<td>
+				<p><input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $scorerender_options['INVERT_IMAGE']); ?> />
+				<label for="invert_image"><?php _e('White colored notes (default is black)', TEXTDOMAIN); ?></label></p>
+				<p><input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $scorerender_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('show_ie_transparency_warning'); box.disabled = !box.disabled; return true;" />
+				<label for="transparent_image"><?php _e('Use transparent background (IE &lt;= 6 does not support transparent PNG)', TEXTDOMAIN); ?></label></p>
+				<p style="padding-left: 30px;"><input type="checkbox" name="ScoreRender[SHOW_IE_TRANSPARENCY_WARNING]" id="show_ie_transparency_warning" value="1" <?php checked('1', $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']); if (1 != $scorerender_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
+				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used', TEXTDOMAIN) ?></label></p>
 			</td>
 		</tr>
 		</table>
@@ -1053,28 +1048,14 @@ function scorerender_admin_section_content ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Content options', TEXTDOMAIN) ?></legend>
+		<h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
 
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform">
+		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></th>
 			<td>
 				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" />
 				<label for="content_max_length"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Comment rendering:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', $scorerender_options['COMMENT_ENABLED']); ?> />
-				<label for="comment_enabled"><?php printf ('%s %s', __('Enable rendering for comments', TEXTDOMAIN), '<span style="font-weight: bold; color: red;">' . __('(Not recommended unless all commenters are trusted)', TEXTDOMAIN) . '</span>'); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" />
-				<label for="fragment_per_comment"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -1086,6 +1067,20 @@ function scorerender_admin_section_content ()
 				<label for="on_err_show_fragment"><?php _e('Show original, unmodified music fragment', TEXTDOMAIN) ?></label><br />
 				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(ON_ERR_SHOW_NOTHING, $scorerender_options['ERROR_HANDLING']); ?> />
 				<label for="on_err_show_nothing"><?php _e('Show nothing', TEXTDOMAIN) ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Comment rendering:', TEXTDOMAIN) ?></th>
+			<td>
+				<input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', $scorerender_options['COMMENT_ENABLED']); ?> onclick="var box = document.getElementById('fragment_per_comment'); box.disabled = !box.disabled; return true;" />
+				<label for="comment_enabled"><?php printf ('%s %s', __('Enable rendering for comments', TEXTDOMAIN), '<span style="font-weight: bold; color: red;">' . __('(Only turn on if commenters are trusted)', TEXTDOMAIN) . '</span>'); ?></label>
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
+			<td>
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" <?php if (1 != $scorerender_options['COMMENT_ENABLED']) { echo ' disabled="disabled"'; } ?> />
+				<label for="fragment_per_comment"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
 		</table>
@@ -1106,7 +1101,7 @@ function scorerender_admin_section_caching ()
 	global $scorerender_options;
 ?>
 	<fieldset class="options">
-		<legend><?php _e('Caching', TEXTDOMAIN) ?></legend>
+		<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
 <?php
 	$img_count = scorerender_get_num_of_images();
 
@@ -1123,14 +1118,12 @@ function scorerender_admin_section_caching ()
 	}
 
 ?>
-		<p class="submit">
-<?php	if ( is_writable ($scorerender_options['CACHE_DIR']) ) : ?>
+<?php if ( is_writable ($scorerender_options['CACHE_DIR']) ) : ?>
 		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
-<?php	else : ?>
+<?php else : ?>
 		<input type="submit" name="clear_cache" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 		<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
-<?php	endif; ?>
-		</p>
+<?php endif; ?>
 	</fieldset>
 <?php
 }
@@ -1186,9 +1179,6 @@ function scorerender_admin_options ()
 			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></dd></dl></li>
 	</ul>
 
-	<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
-	</p>
 <?php
 	// path options
 	scorerender_admin_section_path();

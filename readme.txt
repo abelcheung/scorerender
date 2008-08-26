@@ -24,7 +24,7 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 
 = New install =
 1. Install any prerequisite programs as noted above.
-2. Extract archive, and copy this folder to wp-content/plugins/.
+2. Extract archive, and copy 'scorerender' folder to wp-content/plugins/.
 3. Login to WordPress and enable the plugin in admin interface.
 4. Configure ScoreRender under the ScoreRender tab of the Options page.
 5. In Option -> Writing, check if this option is turned on:
