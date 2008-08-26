@@ -359,7 +359,7 @@ function scorerender_get_options ()
 		'INVERT_IMAGE'         => false,
 		'TRANSPARENT_IMAGE'    => true,
 		'SHOW_SOURCE'          => false,
-		'SHOW_IE_TRANSPARENCY_WARNING' => 1,
+		'SHOW_IE_TRANSPARENCY_WARNING' => 0,
 		'ERROR_HANDLING'       => ON_ERR_SHOW_MESSAGE,
 		'COMMENT_ENABLED'      => false,
 
