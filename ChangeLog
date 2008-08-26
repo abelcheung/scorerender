@@ -1,3 +1,4 @@
+=== ScoreRender 0.2.0 ===
 2008-08-26  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.abc.inc.php (is_notation_usable), wp-scorerender.php,

@@ -4,7 +4,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
 Description: Renders inline music score fragments in WordPress. Heavily based on FigureRender from Chris Lamb.
 Author: Abel Cheung
-Version: 0.1.99
+Version: 0.2.0
 Author URI: http://me.abelcheung.org/
 */
 
@@ -31,7 +31,7 @@ Author URI: http://me.abelcheung.org/
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.1.99
+ * @version 0.2.0
  * @author Abel Cheung <abelcheung@gmail.com>
  * @copyright Copyright (C) 2007 Abel Cheung
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
