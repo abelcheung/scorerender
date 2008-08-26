@@ -1,5 +1,21 @@
 2008-08-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.abc.inc.php (is_notation_usable), wp-scorerender.php,
+	readme.txt:
+	- Enforce usage and checking of abcm2ps.
+
+	* class.*.inc.php (is_notation_usable):
+	- Accept cgi-like string instead of single variable as input, since
+	other notation may require multiple programs and other configurations.
+
+	* class.scorerender.inc.php (is_prog_usable):
+	- Mandates that programs are given in absolute path.
+
+	* wp-scorerender.php:
+	- Ensures hooks are called very early, to prevent WP braindeadness.
+
+2008-08-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* showcode.php: Better wording about copy and paste error.
 	* wp-scorerender.php: Fix typo.
 

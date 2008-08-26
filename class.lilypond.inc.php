@@ -121,8 +121,10 @@ EOD;
 	 * @param string $prog The program to be checked.
 	 * @return boolean Return true if the given program is LilyPond AND it is executable.
 	 */
-	public function is_notation_usable ($prog)
+	public function is_notation_usable ($args = '')
 	{
+		wp_parse_str ($args, $r);
+		extract ($r, EXTR_SKIP);
 		return parent::is_prog_usable ('GNU LilyPond', $prog, '--version');
 	}
 }

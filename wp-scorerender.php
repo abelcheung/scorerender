@@ -752,21 +752,27 @@ function scorerender_activity_box ()
 	}
 	elseif (0 === $comment_count)
 	{
-		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s.',
-		                                       'There are %d music fragments contained in %s.', $frag_count, TEXTDOMAIN),
-		                           $frag_count, $num_of_posts_str);
+		$first_sentence = sprintf (
+			__ngettext ('There is %d music fragment contained in %s.',
+			            'There are %d music fragments contained in %s.',
+			            $frag_count, TEXTDOMAIN),
+			$frag_count, $num_of_posts_str);
 	}
 	elseif (0 === $post_count)
 	{
-		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s.',
-		                                       'There are %d music fragments contained in %s.', $frag_count, TEXTDOMAIN),
-		                           $frag_count, $num_of_comments_str);
+		$first_sentence = sprintf (
+			__ngettext ('There is %d music fragment contained in %s.',
+			            'There are %d music fragments contained in %s.',
+			            $frag_count, TEXTDOMAIN),
+			$frag_count, $num_of_comments_str);
 	}
 	else
 	{
-		$first_sentence = sprintf (__ngettext ('There is %d music fragments contained in %s and %s.',
-		                                       'There are %d music fragments contained in %s and %s.', $frag_count, TEXTDOMAIN),
-		                           $frag_count, $num_of_posts_str, $num_of_comments_str);
+		$first_sentence = sprintf (
+			__ngettext ('There is %d music fragment contained in %s and %s.',
+			            'There are %d music fragments contained in %s and %s.',
+			            $frag_count, TEXTDOMAIN),
+			$frag_count, $num_of_posts_str, $num_of_comments_str);
 	}
 
 	$img_count = scorerender_get_num_of_images();
@@ -796,6 +802,9 @@ function scorerender_activity_box ()
  */
 function scorerender_update_options ()
 {
+	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
+		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
+
 	global $defalt_tmp_dir, $scorerender_options;
 	$newopt = (array) $_POST['ScoreRender'];
 
@@ -810,12 +819,10 @@ function scorerender_update_options ()
 		'wrong_frag_per_comment'   => array ('level' => MSG_WARNING, 'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_image_max_width'    => array ('level' => MSG_WARNING, 'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
 		'convert_bin_problem'      => array ('level' => MSG_FATAL  , 'content' => __('<tt>convert</tt> program is NOT defined or NOT executable! The plugin will stop working.', TEXTDOMAIN)),
-		'lilypond_bin_problem'     => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s support will most likely stop working.', TEXTDOMAIN), '<tt>lilypond</tt>', 'LilyPond')),
-		'mup_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s support will most likely stop working.', TEXTDOMAIN), '<tt>mup</tt>', 'Mup')),
+		'abcm2ps_bin_problem'      => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>abcm2ps</tt>', 'ABC')),
+		'lilypond_bin_problem'     => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>lilypond</tt>', 'LilyPond')),
+		'mup_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>mup</tt>', 'Mup')),
 	);
-
-	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
-		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
 
 	/*
 	 * general options
@@ -866,14 +873,19 @@ function scorerender_update_options ()
 		unset ($newopt['IMAGE_MAX_WIDTH']);
 	}
 
-	if (! empty ($newopt['LILYPOND_BIN']) && ! lilypondRender::is_notation_usable ($newopt['LILYPOND_BIN']))
+	if (! empty ($newopt['LILYPOND_BIN']) && ! lilypondRender::is_notation_usable ('prog=' . $newopt['LILYPOND_BIN']))
 	{
 		$errmsgs[] = 'lilypond_bin_problem';
 	}
 
-	if (! empty ($newopt['MUP_BIN']) && ! mupRender::is_notation_usable ($newopt['MUP_BIN']))
+	if (! empty ($newopt['MUP_BIN']) && ! mupRender::is_notation_usable ('prog=' . $newopt['MUP_BIN']))
 	{
 		$errmsgs[] = 'mup_bin_problem';
+	}
+
+	if (! empty ($newopt['ABCM2PS_BIN']) && ! abcRender::is_notation_usable ('prog=' . $newopt['ABCM2PS_BIN']))
+	{
+		$errmsgs[] = 'abcm2ps_bin_problem';
 	}
 
 	$scorerender_options = array_merge ($scorerender_options, $newopt);
@@ -983,8 +995,6 @@ function scorerender_admin_section_prog ()
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
-				<br />
-				<?php printf (__('Though any program with command line argument compatible with %s will do, only %s can be guaranteed to work well', TEXTDOMAIN), '<code>abc2ps</code>', '<code>abcm2ps</code>'); ?>
 			</td>
 		</tr>
 		</table>
@@ -1257,8 +1267,8 @@ add_filter ('activity_box_end', 'scorerender_activity_box');
 add_filter ('admin_menu', 'scorerender_admin_menu');
 
 // earlier than default priority, since smilies conversion and wptexturize() can mess up the content
-add_filter ('the_excerpt', 'scorerender_content', 5);
-add_filter ('the_content', 'scorerender_content', 5);
-add_filter ('comment_text', 'scorerender_comment', 5);
+add_filter ('the_excerpt', 'scorerender_content', 2);
+add_filter ('the_content', 'scorerender_content', 2);
+add_filter ('comment_text', 'scorerender_comment', 2);
 
 ?>
