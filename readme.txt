@@ -3,7 +3,7 @@ Contributors: abelcheung
 Tags: music, score, music notation, abc, mup, lilypond, guido
 Requires at least: 2.2
 Tested up to: 2.6
-Stable tag: scorerender-0-1-3
+Stable tag: scorerender-0-2-0
 
 Renders inline sheet music fragments in post, pages and comments.
 
@@ -20,7 +20,7 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 = Prerequisite =
 1. Starting from ScoreRender 0.2, PHP4 compatibility is dropped, and PHP5 is strictly needed.
 2. Starting from ScoreRender 0.2, ImageMagick >= 6.3.6-2 is needed, due to usage of -flatten option.
-3. Any music rendering programs must also be installed in web server. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Refer to [this page](http://scorerender.abelcheung.org/installation/) for more detail.
+3. Any music rendering programs must also be installed in web server. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Refer to [installation page](http://scorerender.abelcheung.org/installation/) for more detail.
 
 = New install =
 1. Install any prerequisite programs as noted above.
@@ -54,15 +54,18 @@ Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. Th
 
 Right now you have to view HTML source to find out cache image file name. Management of cache is planned in future, but can't say when.
 
+= Images using Guido notation seems blurred. =
+
+This may not be fully fixable, because setting font attributes may not be possible for all text. After image resizing, they can be rendered smaller / larger than desired.
+
+= How to debug my fragment when posting ? =
+
+Simply put, no. There is no viable method for debugging a fragment yet. The best way is render it privately in your computer first, then post the content, rather than spending lots of time doing trial and error.
+
 == Screenshots ==
 
 http://scorerender.abelcheung.org/screenshot/
 
 == License ==
 This plugin is released under GPL.
-
-== Known Problems ==
-
-= Words in images using Guido notation seems blurred. =
-This may not be fully fixable, because setting font attributes may not be possible for all text. After image resizing, they can be rendered smaller / larger than desired.
 
