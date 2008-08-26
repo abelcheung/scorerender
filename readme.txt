@@ -48,7 +48,7 @@ The error code indicates the kind of error in some degree. There are comments in
 
 = Is any ABC notation compatible program also supported? =
 
-Though they MIGHT work, only [abcm2ps](http://moinejf.free.fr/) is tested to a great extent. All others might work or might not work well, especially regarding image sizing and transparency issues.
+Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. This is a design decision. If you REALLY want to use other similar programs, you are on your own, though modifying the code to support others is not very hard. Take a look at is_notation_usable() method in class.abc.inc.php.
 
 = I want to remove cache for 1 image and re-render, but how can I determine which is which? =
 

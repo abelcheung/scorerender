@@ -344,6 +344,9 @@ abstract class ScoreRender
 	{
 		if (empty ($prog)) return false;
 
+		// safe guard
+		if (substr ($prog, 0, 1) != '/') return false;
+
 		$prog = realpath ($prog);
 
 		if (! is_executable ($prog)) return false;

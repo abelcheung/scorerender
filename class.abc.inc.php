@@ -96,6 +96,19 @@ EOT;
 	{
 		return parent::convertimg ($rendered_image, $final_image, TRUE, '-density 96');
 	}
+
+	/**
+	 * Check if given program is abcm2ps, and whether it is usable.
+	 *
+	 * @param string $prog The program to be checked.
+	 * @return boolean Return true if the given program is abcm2ps AND it is executable.
+	 */
+	public function is_notation_usable ($args = '')
+	{
+		wp_parse_str ($args, $r);
+		extract ($r, EXTR_SKIP);
+		return parent::is_prog_usable ('abcm2ps', $prog, '-V');
+	}
 }
 
 ?>

@@ -91,7 +91,7 @@ class guidoRender extends ScoreRender
 	 *
 	 * @return boolean Return true if remote URL can be fopen'ed.
 	 */
-	public function is_notation_usable ()
+	public function is_notation_usable ($args = '')
 	{
 		return ini_get('allow_url_fopen');
 	}
