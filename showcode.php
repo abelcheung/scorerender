@@ -50,7 +50,7 @@ function CopyClipboard()
 		catch (e)
 		{
 			document.getElementById('copybutton').disabled = true;
-			document.getElementById('sr_message').innerHTML = '<?php _e('Cut and paste is temporarily forbidden due to security feature of this browser. If you want to enable cut and paste, please type &#8220;about:config&#8221; in browser address bar, find the preference &#8220;<code>signed.applets.codebase_principal_support</code>&#8221;, change its value to &#8220;true&#8221; and try again. Alternatively, just select and copy the code below manually.', TEXTDOMAIN) ?>';
+			document.getElementById('sr_message').innerHTML = '<?php _e('Automatic copy and paste is not enabled for this browser. Please copy and paste the code below manually.<br />For Gecko based browsers (e.g. Mozilla, Firefox, Flock), there is an alternative method: type &#8220;about:config&#8221; in browser address bar, find the preference &#8220;<code>signed.applets.codebase_principal_support</code>&#8221;, change its value to &#8220;true&#8221; and reload this page.', TEXTDOMAIN) ?>';
 			return false;
 		}
 

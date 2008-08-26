@@ -574,7 +574,7 @@ function scorerender_process_content ($render)
 
 		$content = $notations[$name]['starttag'] . "\n" .
 			$render->get_music_fragment() . "\n" .
-			$notatios[$name]['endtag'];
+			$notations[$name]['endtag'];
 
 		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n",
 			rawurlencode (htmlentities ($content, ENT_NOQUOTES, get_bloginfo ('charset'))));
