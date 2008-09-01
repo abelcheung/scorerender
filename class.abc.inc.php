@@ -29,6 +29,8 @@
 */
 class abcRender extends ScoreRender
 {
+	private $width;
+
 	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
@@ -37,10 +39,21 @@ class abcRender extends ScoreRender
 	function __construct ($options = array())
 	{
 		$this->init_options ($options);
-		// $this->_options['IMAGE_MAX_WIDTH'] /= DPI;
+	}
+
+	/**
+	 * Set maximum width of generated images
+	 *
+	 * @param integer $width Maximum width of images (in pixel)
+	 * @since 0.2.50
+	 */
+	public function set_img_width ($width)
+	{
+		parent::set_img_width ($width);
+
 		// Seems abcm2ps is using something like 120 dpi,
 		// with 72DPI the notes and letters are very thin :(
-		$this->_options['IMAGE_MAX_WIDTH'] /= 120;
+		$this->width = $this->img_max_width / 120;
 	}
 
 	/**
@@ -57,7 +70,7 @@ class abcRender extends ScoreRender
 	{
 		$header = <<<EOT
 %abc
-%%staffwidth {$this->_options['IMAGE_MAX_WIDTH']}in
+%%staffwidth {$this->width}in
 %%stretchlast no
 %%leftmargin 0.2in
 %abc2mtex: yes

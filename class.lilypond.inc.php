@@ -65,7 +65,7 @@ class lilypondRender extends ScoreRender
 \\paper {
 	ragged-right = ##t
 	indent = 0.0\\mm
-	line-width = {$this->_options['IMAGE_MAX_WIDTH']}\\pt
+	line-width = {$this->img_max_width}\\pt
 }
 \\layout {
 	\\context {

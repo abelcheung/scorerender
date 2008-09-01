@@ -4,7 +4,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
 Description: Renders inline music score fragments in WordPress. Heavily based on FigureRender from Chris Lamb.
 Author: Abel Cheung
-Version: 0.2.0
+Version: 0.2.50
 Author URI: http://me.abelcheung.org/
 */
 
@@ -31,9 +31,9 @@ Author URI: http://me.abelcheung.org/
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.2.0
+ * @version 0.2.50
  * @author Abel Cheung <abelcheung@gmail.com>
- * @copyright Copyright (C) 2007 Abel Cheung
+ * @copyright Copyright (C) 2007, 08 Abel Cheung
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -111,9 +111,9 @@ define ('ERR_LENGTH_EXCEEDED'             , -7);
 define ('ERR_INTERNAL_CLASS'              , -8);
 
 /**
- * Error constant representing some essential binary missing.
+ * Error constant representing that ImageMagick convert is unusable.
  */
-define ('ERR_PROGRAM_MISSING'             , -9);
+define ('ERR_CONVERT_UNUSABLE'            , -9);
 
 
 /*
@@ -217,20 +217,14 @@ if (!function_exists ('sys_get_temp_dir'))
 			return realpath( $_ENV['TMPDIR'] );
 		elseif ( !empty($_ENV['TEMP']) )
 			return realpath( $_ENV['TEMP'] );
-		// Detect by creating a temporary file
 		else
 		{
-			// Try to use system's temporary directory
-			// as random name shouldn't exist
+			// Detect by creating a temporary file and pick its dir name
 			$temp_file = tempnam( md5(uniqid(rand(), TRUE)), '' );
-			if ( $temp_file )
-			{
-				$temp_dir = realpath( dirname($temp_file) );
-				unlink( $temp_file );
-				return $temp_dir;
-			}
-			else
-				return FALSE;
+			if ( !$temp_file) return false;
+
+			unlink( $temp_file );
+			return realpath( dirname($temp_file) );
 		}
 	}
 }
@@ -432,6 +426,8 @@ function scorerender_get_num_of_images ()
  * @since 0.2
  * @param string $content the whole blog post content
  * @return array $count Array containing number of matched fragments for each kind of notation
+ *
+ * @todo maybe store all info into separate table
  */
 function scorerender_get_fragment_count ($content)
 {
@@ -511,8 +507,8 @@ function scorerender_generate_html_error ($errcode)
 		case ERR_INTERNAL_CLASS:
 			return sprintf (__('[%s: Internal class initialization error!]', TEXTDOMAIN),
 				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_PROGRAM_MISSING:
-			return sprintf (__('[%s: Some essential program is missing!]', TEXTDOMAIN),
+		case ERR_CONVERT_UNUSABLE:
+			return sprintf (__('[%s: ImageMagick convert is unusable!]', TEXTDOMAIN),
 				__('ScoreRender Error', TEXTDOMAIN));
 	}
 }
@@ -614,43 +610,51 @@ function scorerender_process_content ($render)
 function scorerender_filter ($matches)
 {
 	global $scorerender_options, $notations;
-	$input = trim (html_entity_decode ($matches[1]));
 
 	// since preg_replace_callback only accepts single function,
 	// we have to check which regex is matched here and create
 	// corresponding object
 	foreach (array_values ($notations) as $notation)
-	{
 		if (preg_match ($notation['regex'], $matches[0]))
 		{
-			// TODO: Should do it like what a class should behave
+			// TODO: Should only pass variables in class methods
 			$render = new $notation['classname'] ($scorerender_options);
-			$render->set_music_fragment ($input);
 			break;
 		}
-	}
 
 	if (empty ($render)) return $input;
+
+	$render->set_imagemagick_path ($scorerender_options['CONVERT_BIN']);
+	$render->set_inverted ($scorerender_options['INVERT_IMAGE']);
+	$render->set_transparency ($scorerender_options['TRANSPARENT_IMAGE']);
+	$render->set_temp_dir ($scorerender_options['TEMP_DIR']);
+	$render->set_cache_dir ($scorerender_options['CACHE_DIR']);
+	$render->set_max_length ($scorerender_options['CONTENT_MAX_LENGTH']);
+	$render->set_img_width ($scorerender_options['IMAGE_MAX_WIDTH']);
+
+	$input = trim (html_entity_decode ($matches[1]));
+	$render->set_music_fragment ($input);
 
 	return scorerender_process_content ($render);
 }
 
 
-
 /**
- * Renders music fragments contained inside posts.
+ * Renders music fragments contained inside posts / comments.
  *
- * Check if post rendering should be enabled.
+ * Check if post/comment rendering should be enabled.
  * If yes, then apply {@link scorerender_filter} function on $content.
  *
  * @uses scorerender_filter Apply filter to content upon regular expression match
- * @see scorerender_comment
- * @param string $content the whole content of blog post
- * @return string Converted blog post content.
+ * @param string $content The whole content of blog post / comment
+ * @param boolean $is_post Whether content is from post or comment
+ * @return string Converted blog post / comment content.
  */
-function scorerender_content ($content)
+function scorerender_do_conversion ($content, $is_post)
 {
 	global $scorerender_options, $notations;
+
+	if (!$is_post && !$scorerender_options['COMMENT_ENABLED']) return $content;
 
 	$regex_list = array();
 	foreach (array_values ($notations) as $notation)
@@ -661,41 +665,38 @@ function scorerender_content ($content)
 		$regex_list[] = $notation['regex'];
 	};
 
-	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, -1);
+	$limit = ($is_post) ? -1 :
+		($scorerender_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 :
+		$scorerender_options['FRAGMENT_PER_COMMENT'];
+
+	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
 }
 
+
+/**
+ * Renders music fragments contained inside posts.
+ *
+ * @uses scorerender_do_conversion
+ * @see scorerender_do_comment
+ * @return string Converted blog post content.
+ */
+function scorerender_do_content ($content)
+{
+	return scorerender_do_conversion ($content, TRUE);
+}
 
 
 /**
  * Renders music fragments contained inside comments.
  *
- * Check if comment rendering should be enabled.
- * If yes, then apply {@link scorerender_filter} function on $content.
- *
- * @uses scorerender_filter Apply filter to content upon regular expression match
- * @see scorerender_content
- * @param string $content the whole content of blog comment
+ * @uses scorerender_do_conversion
+ * @see scorerender_do_content
  * @return string Converted blog comment content.
  */
-function scorerender_comment ($content)
+function scorerender_do_comment ($content)
 {
-	global $scorerender_options, $notations;
-
-	if (! $scorerender_options['COMMENT_ENABLED']) return $content;
-
-	$regex_list = array();
-	foreach (array_values ($notations) as $notation)
-	{
-		// unfilled program name = disable support
-		foreach ($notation['progs'] as $prog)
-			if (empty ($scorerender_options[$prog])) continue;
-		$regex_list[] = $notation['regex'];
-	};
-
-	$limit = ($scorerender_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : $scorerender_options['FRAGMENT_PER_COMMENT'];
-	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
+	return scorerender_do_conversion ($content, FALSE);
 }
-
 
 
 /**
@@ -742,47 +743,45 @@ function scorerender_activity_box ()
 	$num_of_posts_str = sprintf (__ngettext ('%d post', '%d posts', $post_count, TEXTDOMAIN), $post_count);
 	$num_of_comments_str = sprintf (__ngettext ('%d comment', '%d comments', $comment_count, TEXTDOMAIN), $comment_count);
 
+
 	if ((0 === $post_count) && (0 === $comment_count))
-	{
 		$first_sentence = __('This blog is currently empty.', TEXTDOMAIN);
-	}
+
 	elseif (0 === $frag_count)
-	{
 		$first_sentence = __('There is no music fragment in your blog.', TEXTDOMAIN);
-	}
+
 	elseif (0 === $comment_count)
-	{
 		$first_sentence = sprintf (
 			__ngettext ('There is %d music fragment contained in %s.',
 			            'There are %d music fragments contained in %s.',
 			            $frag_count, TEXTDOMAIN),
 			$frag_count, $num_of_posts_str);
-	}
+
 	elseif (0 === $post_count)
-	{
 		$first_sentence = sprintf (
 			__ngettext ('There is %d music fragment contained in %s.',
 			            'There are %d music fragments contained in %s.',
 			            $frag_count, TEXTDOMAIN),
 			$frag_count, $num_of_comments_str);
-	}
+
 	else
-	{
 		$first_sentence = sprintf (
 			__ngettext ('There is %d music fragment contained in %s and %s.',
 			            'There are %d music fragments contained in %s and %s.',
 			            $frag_count, TEXTDOMAIN),
 			$frag_count, $num_of_posts_str, $num_of_comments_str);
-	}
+
 
 	$img_count = scorerender_get_num_of_images();
 
 	if ( 0 > $img_count )
 		$second_sentence = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.', TEXTDOMAIN), 'options-general.php?page=' . plugin_basename (__FILE__));
 	else
-		$second_sentence = sprintf (__ngettext ('Currently %d image are rendered and cached.',
-		                                        'Currently %d images are rendered and cached.', $img_count, TEXTDOMAIN),
-		                             $img_count);
+		$second_sentence = sprintf (
+			__ngettext ('Currently %d image are rendered and cached.',
+			            'Currently %d images are rendered and cached.',
+			            $img_count, TEXTDOMAIN),
+		        $img_count);
 ?>
 	<div>
 	<h3><?php _e('ScoreRender', TEXTDOMAIN) ?></h3>
@@ -810,8 +809,7 @@ function scorerender_update_options ()
 
 	$messages = array
 	(
-		'temp_dir_undefined'       => array ('level' => MSG_WARNING, 'content' => sprintf (__('Temporary directory is NOT defined! Will fall back to %s.', TEXTDOMAIN), $defalt_tmp_dir)),
-		'temp_dir_not_writable'    => array ('level' => MSG_WARNING, 'content' => sprintf (__('Temporary directory is NOT writable! Will fall back to %s.', TEXTDOMAIN), $defalt_tmp_dir)),
+		'temp_dir_not_writable'    => array ('level' => MSG_WARNING, 'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.')),
 		'cache_dir_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT defined! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_dir_not_writable'   => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT writable! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_url_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache URL is NOT defined! The plugin will stop working.', TEXTDOMAIN)),
@@ -827,12 +825,8 @@ function scorerender_update_options ()
 	/*
 	 * general options
 	 */
-	if ( empty ($newopt['TEMP_DIR']) )
-	{
-		$errmsgs[] = 'temp_dir_undefined';
-		$newopt['TEMP_DIR'] = $default_tmp_dir;
-	}
-	elseif ( !is_writable ($newopt['TEMP_DIR']) )
+	if ( ! empty ($newopt['TEMP_DIR']) &&
+		!is_writable ($newopt['TEMP_DIR']) )
 	{
 		$errmsgs[] = 'temp_dir_not_writable';
 		$newopt['TEMP_DIR'] = $default_tmp_dir;
@@ -846,7 +840,7 @@ function scorerender_update_options ()
 	if ( empty ($newopt['CACHE_URL']) )
 		$errmsgs[] = 'cache_url_undefined';
 
-	if ( ! ScoreRender::is_imagemagick_usable ($newopt['CONVERT_BIN']) )
+	if ( ! ScoreRender::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
 		$errmsgs[] = 'convert_bin_problem';
 
 	$newopt['SHOW_SOURCE']       = isset ($newopt['SHOW_SOURCE']);
@@ -928,7 +922,7 @@ function scorerender_admin_section_path ()
 			<th scope="row"><?php _e('Temporary directory:', TEXTDOMAIN) ?></th>
 			<td>
 				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape ($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
-				<?php _e('Must be writable and ideally located outside the web-accessible area.', TEXTDOMAIN) ?>
+				<?php _e('Must be writable and ideally located out of web-accessible area. System default will be used if left blank.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -1228,14 +1222,13 @@ function scorerender_admin_menu ()
 /*
 Remove tag balancing filter
 
-There seems to be an bug in the balanceTags function of wp-includes/functions-formatting.php
-which means that ">>" are converted to "> >", and "<<" to "< <", causing syntax errors.
-
-(This is part of the LilyPond syntax for parallel music, and Mup syntax for
-attribute change within a bar) -- Abel
-
-Since balancing filter is also used in get_the_content(), i.e. before any plugin is
-activated, removing filter is of no use. -- Abel
+There seems to be an bug in the balanceTags function of
+wp-includes/functions-formatting.php which means that ">>" are
+converted to "> >", and "<<" to "< <", causing syntax errors.  This is
+part of the LilyPond syntax for parallel music, and Mup syntax for
+attribute change within a bar.  Since balancing filter is also used
+in get_the_content() before any plugin is activated, removing
+filter is of no use.
  */
 
 /*
@@ -1256,7 +1249,7 @@ if ( 0 != get_option('use_balanceTags') )
 	function turn_off_balance_tags()
 	{
 		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
-			. sprintf (__('<strong>OPTION CONFLICT</strong>: The "correct invalidly nested XHTML automatically" option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', TEXTDOMAIN), "options-writing.php")
+			. sprintf (__('<strong>OPTION CONFLICT</strong>: The &#8216;correct invalidly nested XHTML automatically&#8217; option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', TEXTDOMAIN), "options-writing.php")
 			. "</p></div>";
 	}
 	add_filter ('admin_notices', 'turn_off_balance_tags');
@@ -1267,8 +1260,8 @@ add_filter ('activity_box_end', 'scorerender_activity_box');
 add_filter ('admin_menu', 'scorerender_admin_menu');
 
 // earlier than default priority, since smilies conversion and wptexturize() can mess up the content
-add_filter ('the_excerpt', 'scorerender_content', 2);
-add_filter ('the_content', 'scorerender_content', 2);
-add_filter ('comment_text', 'scorerender_comment', 2);
+add_filter ('the_excerpt' , 'scorerender_do_content', 2);
+add_filter ('the_content' , 'scorerender_do_content', 2);
+add_filter ('comment_text', 'scorerender_do_comment', 2);
 
 ?>

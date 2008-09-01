@@ -1,3 +1,29 @@
+2008-09-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php:
+	- (set_imagemagick_path, set_inverted, set_transparency, set_temp_dir,
+	  get_temp_dir, set_cache_dir, get_cache_dir, set_max_length,
+	  set_img_width) New func. Add methods for accessing most config
+	  options, avoid sneaking option directly when creating instance.
+	- (render) Return early if cache exist, without any other checks. Use
+	  sys_get_temp_dir() for fallback temp dir.
+	- (is_imagemagick_usable) Dropped, use is_prog_usable() instead.
+
+	* class.*.inc.php:
+	- Use private variables instead of reading options directly.
+
+	* class.mup.inc.php (is_valid_input):
+	- No need to supply input content as function argument now.
+
+	* wp-scorerender.php:
+	- Variable name change: ERR_PROGRAM_MISSING -> ERR_CONVERT_UNUSABLE
+	- (scorerender_filter) Now most options are supplied via class methods.
+	- function name change:
+	  scorerender_content -> scorerender_do_content,
+	  scorerender_comment -> scorerender_do_comment
+	- (scorerender_do_conversion) New func. Merged from aforementioned 2 funcs.
+	- Allows temp dir to be undefined.
+
 === ScoreRender 0.2.0 ===
 2008-08-26  Abel Cheung  <abelcheung@gmail.com>
 
