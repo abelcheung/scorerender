@@ -30,7 +30,7 @@
  *   --- this one most usually invokes parent converting()
  *
  * Optional:
- * - is_valid_input($input)
+ * - is_valid_input()
  *
  * Please refer to class.*.inc.php for examples.
 */
@@ -47,9 +47,11 @@
  */
 abstract class ScoreRender
 {
+
 	/**
 	 * @var array $_options ScoreRender config options.
 	 * @access protected
+	 * @todo drop this
 	 */
 	protected $_options;
 
@@ -69,13 +71,43 @@ abstract class ScoreRender
 	 * @var boolean $is_inverted Whether image should be rendered in white on black.
 	 * @access protected
 	 */
-	protected $is_inverted;
+	protected $is_inverted = false;
 
 	/**
 	 * @var boolean $is_transparent Whether rendered image should use transparent background.
 	 * @access protected
 	 */
-	protected $is_transparent;
+	protected $is_transparent = true;
+
+	/**
+	 * @var string $imagemagick Full path of ImageMagick convert
+	 * @access protected
+	 */
+	protected $imagemagick;
+
+	/**
+	 * @var string $temp_dir Temporary working directory
+	 * @access protected
+	 */
+	protected $temp_dir;
+
+	/**
+	 * @var string $cache_dir Folder for storing cached images
+	 * @access protected
+	 */
+	protected $cache_dir;
+
+	/**
+	 * @var integer $content_max_length Maximum length of score fragment source (in bytes)
+	 * @access protected
+	 */
+	protected $content_max_length = 4096;
+
+	/**
+	 * @var integer $img_max_width Maximum width of generated images
+	 * @access protected
+	 */
+	protected $img_max_width = 360;
 
 	/**
 	 * Initialize ScoreRender options
@@ -87,8 +119,6 @@ abstract class ScoreRender
 	{
 		// TODO: set all options outside class
 		$this->_options = $options;
-		$this->is_inverted = $this->_options['INVERT_IMAGE'];
-		$this->is_transparent = $this->_options['TRANSPARENT_IMAGE'];
 	}
 
 	/**
@@ -129,9 +159,126 @@ abstract class ScoreRender
 	}
 
 	/**
+	 * Returns notation name, by comparing class name with notation name list.
+	 *
+	 * @return string Return notation name if found, FALSE otherwise.
+	 * @since 0.2
+	 */
+	public function get_notation_name ()
+	{
+		global $notations;
+		$classname = strtolower (get_class ($this));
+
+		foreach ($notations as $notationname => $notation)
+			if ($classname === strtolower ($notation['classname']))
+				return $notationname;
+
+		return false;
+	}
+
+	/**
+	 * Sets path of ImageMagick convert
+	 *
+	 * @param string $path Full path of ImageMagick convert binary
+	 * @since 0.2.50
+	 */
+	public function set_imagemagick_path ($path)
+	{
+		$this->imagemagick = $path;
+	}
+
+	/**
+	 * Sets whether inverted image shall be generated
+	 *
+	 * @param boolean $invert
+	 * @since 0.2.50
+	 */
+	public function set_inverted ($invert)
+	{
+		$this->is_inverted = $invert;
+	}
+
+	/**
+	 * Sets whether transparent image shall be used
+	 *
+	 * @param boolean $transparent
+	 * @since 0.2.50
+	 */
+	public function set_transparency ($transparent)
+	{
+		$this->is_transparent = $transparent;
+	}
+
+	/**
+	 * Set temporary folder
+	 *
+	 * @param string $path
+	 * @since 0.2.50
+	 */
+	public function set_temp_dir ($path)
+	{
+		$this->temp_dir = $path;
+	}
+
+	/**
+	 * Get temporary folder path
+	 *
+	 * @return string The temporary folder if already set, or FALSE otherwise
+	 * @since 0.2.50
+	 */
+	public function get_temp_dir ()
+	{
+		return (isset ($this->temp_dir)) ? $this->temp_dir : false;
+	}
+
+	/**
+	 * Set cache folder for storing images
+	 *
+	 * @param string $path
+	 * @since 0.2.50
+	 */
+	public function set_cache_dir ($path)
+	{
+		$this->cache_dir = $path;
+	}
+
+	/**
+	 * Get cache folder path
+	 *
+	 * @return string The cache folder if already set, or FALSE otherwise
+	 * @since 0.2.50
+	 */
+	public function get_cache_dir ()
+	{
+		return (isset ($this->cache_dir)) ? $this->cache_dir : false;
+	}
+
+	/**
+	 * Set maximum allowed length of score fragment source
+	 *
+	 * @param integer $length Maximum length of score fragment source (in byte)
+	 * @since 0.2.50
+	 */
+	public function set_max_length ($length)
+	{
+		$this->content_max_length = $length;
+	}
+
+	/**
+	 * Set maximum width of generated images
+	 *
+	 * @param integer $width Maximum width of images (in pixel)
+	 * @since 0.2.50
+	 */
+	public function set_img_width ($width)
+	{
+		$this->img_max_width = $width;
+	}
+
+	/**
 	 * Executes command and stores output message
 	 *
-	 * {@internal It is basically exec() with additional stuff}}
+	 * {@internal It is basically exec() with additional stuff}
 	 *
 	 * @param string $cmd Command to be executed
 	 * @uses $_commandOutput Command output is stored in this variable.
@@ -178,11 +325,10 @@ abstract class ScoreRender
 	 */
 	protected function convertimg ($rendered_image, $final_image, $ps_has_alpha = false, $extra_arg = '')
 	{
-		$cmd = sprintf ('%s %s -trim +repage ',
-			$this->_options['CONVERT_BIN'], $extra_arg);
+		$cmd = sprintf ('%s %s -trim +repage ', $this->imagemagick, $extra_arg);
 
-		// Damn it, older ImageMagick can't handle PostScript, but suddenly
-		// it can now, and renders all previous logic broken
+		// Damn it, older ImageMagick can't handle transparency in PostScript,
+		// but suddenly it can now, and renders all previous logic broken
 		if ($ps_has_alpha)
 		{
 			if ($this->is_transparent)
@@ -190,13 +336,11 @@ abstract class ScoreRender
 					(($this->is_inverted) ? '-negate' : ''),
 					$rendered_image, $final_image);
 			else
-			{
 				$cmd .= sprintf (' -flatten %s png:- | %s -alpha deactivate %s png:- %s',
 					$rendered_image,
-					$this->_options['CONVERT_BIN'],
+					$this->imagemagick,
 					(($this->is_inverted) ? '-negate' : ''),
 					$final_image);
-			}
 		}
 		else
 		{
@@ -210,7 +354,7 @@ abstract class ScoreRender
 				// need separate invocations, can't do in one pass
 				$cmd .= sprintf ('-alpha activate %s png:- | %s -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- %s',
 					$rendered_image,
-					$this->_options['CONVERT_BIN'],
+					$this->imagemagick,
 					(($this->is_inverted)? 1 : 0),
 					$final_image);
 			}
@@ -219,116 +363,6 @@ abstract class ScoreRender
 		return (0 === $this->_exec ($cmd));
 	}
 
-	/**
-	 * Render music fragment into images
-	 *
-	 * First it tries to check if image is already rendered, and return
-	 * existing image file name immediately. Otherwise the music fragment is
-	 * rendered in 2 passes (with {@link convertimg} and {@link execute},
-	 * and resulting image is stored in cache folder.
-	 *
-	 * @uses ERR_INVALID_INPUT Return this error code if is_valid_input method returned false
-	 * @uses ERR_LENGTH_EXCEEDED Return this error code if content length limit is exceeded
-	 * @uses ERR_CACHE_DIRECTORY_NOT_WRITABLE Return this error code if cache directory is not writable
-	 * @uses ERR_TEMP_DIRECTORY_NOT_WRITABLE Return this error code if temporary directory is not writable
-	 * @uses ERR_INTERNAL_CLASS Return this error code if essential methods are missing from subclass
-	 * @uses ERR_TEMP_FILE_NOT_WRITABLE Return this error if input file or postscript file is not writable
-	 * @uses ERR_RENDERING_ERROR Return this error code if rendering command fails
-	 * @uses ERR_IMAGE_CONVERT_FAILURE Return this error code if PS -> PNG conversion failed
-	 *
-	 * @uses execute First pass rendering: Convert input file -> PS
-	 * @uses convertimg Second pass rendering: Convert PS -> PNG
-	 *
-	 * @return mixed Resulting image file name, or an error code in case any error occurred
-	 * @final
-	 */
-	public function render()
-	{
-		// Check for valid code
-		if ( empty ($this->_input) ||
-		     ( method_exists ($this, 'is_valid_input') &&
-		       !$this->is_valid_input($this->_input)) )
-			return ERR_INVALID_INPUT;
-
-		// Check for content length
-		if ( isset ($this->_options['CONTENT_MAX_LENGTH']) &&
-		     ($this->_options['CONTENT_MAX_LENGTH'] > 0) &&
-		     (strlen ($this->_input) > $this->_options['CONTENT_MAX_LENGTH']) )
-			return ERR_LENGTH_EXCEEDED;
-
-		// Create unique hash
-		$hash = md5 ($this->_input . $this->is_inverted
-			     . $this->is_transparent . $this->get_notation_name());
-		$final_image = $this->_options['CACHE_DIR']. DIRECTORY_SEPARATOR .
-		               "sr-" . $this->get_notation_name() . "-$hash.png";
-
-		if (is_file ($final_image)) return basename ($final_image);
-
-		// Create image if it does not exist
-		if ( (!is_dir      ($this->_options['CACHE_DIR'])) ||
-		     (!is_writable ($this->_options['CACHE_DIR'])) )
-		{
-			return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
-		}
-
-		if ( (!is_dir      ($this->_options['TEMP_DIR'])) ||
-		     (!is_writable ($this->_options['TEMP_DIR'])) )
-		{
-			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
-		}
-
-		if (! method_exists ($this, 'execute') )
-		{
-			return ERR_INTERNAL_CLASS;
-		}
-
-		if ( false === ($input_file = tempnam ($this->_options['TEMP_DIR'],
-			'scorerender-' . $this->get_notation_name() . '-')) )
-		{
-			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
-		}
-		
-		$rendered_image = $input_file . '.ps';
-
-		// Create empty output file first ASAP
-		// FIXME: Is this security risk?
-		if (! file_exists ($rendered_image) )
-			touch ($rendered_image);
-
-		if (! is_writable ($rendered_image) )
-			return ERR_TEMP_FILE_NOT_WRITABLE;
-
-		// Write input file contents
-		if ( false === ($handle = fopen ($input_file, 'w')) )
-			return ERR_TEMP_FILE_NOT_WRITABLE;
-
-		fwrite ( $handle, $this->get_music_fragment() );
-		fclose ( $handle );
-
-
-		// Render using external application
-		$current_dir = getcwd();
-		chdir ($this->_options['TEMP_DIR']);
-		if (!$this->execute($input_file, $rendered_image) ||
-		    !file_exists ($rendered_image))
-		{
-			//unlink($input_file);
-			return ERR_RENDERING_ERROR;
-		}
-		chdir ($current_dir);
-
-		if (! is_executable ($this->_options['CONVERT_BIN']))
-			return ERR_PROGRAM_MISSING;
-
-		if (!$this->convertimg ($rendered_image, $final_image))
-			return ERR_IMAGE_CONVERT_FAILURE;
-
-		// Cleanup
-		unlink ($rendered_image);
-		unlink ($input_file);
-
-		return basename ($final_image);
-	}
 
 	/**
 	 * Check if given program is usable.
@@ -337,10 +371,9 @@ abstract class ScoreRender
 	 * @param string $prog The program to be checked
 	 * @param string ... Arguments supplied to the program (if any)
 	 * @return boolean Return TRUE if the given program is usable
-	 * @access protected
 	 * @since 0.2
 	 */
-	protected function is_prog_usable ($match, $prog)
+	public function is_prog_usable ($match, $prog)
 	{
 		if (empty ($prog)) return false;
 
@@ -375,35 +408,113 @@ abstract class ScoreRender
 		return $ok;
 	}
 
-	/**
-	 * Check if ImageMagick is usable.
-	 *
-	 * @param string $prog The program to be checked
-	 * @return boolean Return TRUE if ImageMagick is usable
-	 * @since 0.2
-	 */
-	public function is_imagemagick_usable ($prog)
-	{
-		return ScoreRender::is_prog_usable ('ImageMagick', $prog, '-version');
-	}
 
 	/**
-	 * Returns notation name, by comparing class name with notation name list.
+	 * Render music fragment into images
 	 *
-	 * @return string Return notation name if found, FALSE otherwise.
-	 * @since 0.2
+	 * First it tries to check if image is already rendered, and return
+	 * existing image file name immediately. Otherwise the music fragment is
+	 * rendered in 2 passes (with {@link convertimg} and {@link execute},
+	 * and resulting image is stored in cache folder.
+	 *
+	 * @uses ERR_INVALID_INPUT Return this error code if is_valid_input method returned false
+	 * @uses ERR_LENGTH_EXCEEDED Return this error code if content length limit is exceeded
+	 * @uses ERR_CACHE_DIRECTORY_NOT_WRITABLE Return this error code if cache directory is not writable
+	 * @uses ERR_TEMP_DIRECTORY_NOT_WRITABLE Return this error code if temporary directory is not writable
+	 * @uses ERR_INTERNAL_CLASS Return this error code if essential methods are missing from subclass
+	 * @uses ERR_TEMP_FILE_NOT_WRITABLE Return this error if input file or postscript file is not writable
+	 * @uses ERR_RENDERING_ERROR Return this error code if rendering command fails
+	 * @uses ERR_IMAGE_CONVERT_FAILURE Return this error code if PS -> PNG conversion failed
+	 *
+	 * @uses execute First pass rendering: Convert input file -> PS
+	 * @uses convertimg Second pass rendering: Convert PS -> PNG
+	 *
+	 * @return mixed Resulting image file name, or an error code in case any error occurred
+	 * @final
 	 */
-	public function get_notation_name ()
+	public function render()
 	{
-		global $notations;
-		$classname = strtolower (get_class ($this));
+		$hash = md5 ($this->_input . $this->is_inverted
+			     . $this->is_transparent . $this->get_notation_name());
+		$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
+		               "sr-" . $this->get_notation_name() . "-$hash.png";
 
-		foreach ($notations as $notationname => $notation)
-			if ($classname === strtolower ($notation['classname']))
-				return $notationname;
+		// Need not check anything if cache exists
+		if (is_file ($final_image)) return basename ($final_image);
 
-		return false;
+		// missing class methods
+		if (! method_exists ($this, 'execute'           ) ||
+	       	    ! method_exists ($this, 'get_music_fragment'))
+			return ERR_INTERNAL_CLASS;
+
+		// Check for valid code
+		if ( empty ($this->_input) ||
+		     ( method_exists ($this, 'is_valid_input') &&
+		       !$this->is_valid_input() ) )
+			return ERR_INVALID_INPUT;
+
+		// Check for content length
+		if ( isset ($this->content_max_length) &&
+		     ($this->content_max_length > 0) &&
+		     (strlen ($this->_input) > $this->content_max_length) )
+			return ERR_LENGTH_EXCEEDED;
+
+		if ( ! $this->is_prog_usable ('ImageMagick', $this->imagemagick, '-version') )
+			return ERR_CONVERT_UNUSABLE;
+
+		if ( (!is_dir      ($this->cache_dir)) ||
+		     (!is_writable ($this->cache_dir)) )
+			return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
+
+		// Use fallback tmp dir if original one not working
+		if ( (!is_dir      ($this->temp_dir)) ||
+		     (!is_writable ($this->temp_dir)) )
+			$this->temp_dir = sys_get_temp_dir ();
+
+		if ( (!is_dir      ($this->temp_dir)) ||
+		     (!is_writable ($this->temp_dir)) )
+			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+
+		if ( false === ($input_file = tempnam ($this->temp_dir,
+			'scorerender-' . $this->get_notation_name() . '-')) )
+			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+		
+		$rendered_image = $input_file . '.ps';
+
+		if (! file_exists ($rendered_image) )
+		{
+			// Create empty output file first ASAP
+			if (! touch ($rendered_image) )
+				return ERR_TEMP_FILE_NOT_WRITABLE;
+		}
+		elseif (! is_writable ($rendered_image) )
+			return ERR_TEMP_FILE_NOT_WRITABLE;
+
+		if (false === file_put_contents ($input_file, $this->get_music_fragment()))
+			return ERR_TEMP_FILE_NOT_WRITABLE;
+
+
+		// Render using external application
+		$current_dir = getcwd();
+		chdir ($this->temp_dir);
+		if (!$this->execute($input_file, $rendered_image) ||
+		    (filesize ($rendered_image)) === 0)
+		{
+			//unlink($input_file);
+			return ERR_RENDERING_ERROR;
+		}
+		chdir ($current_dir);
+
+		if (!$this->convertimg ($rendered_image, $final_image))
+			return ERR_IMAGE_CONVERT_FAILURE;
+
+		// Cleanup
+		unlink ($rendered_image);
+		unlink ($input_file);
+
+		return basename ($final_image);
 	}
-}
+
+} // end of class
 
 ?>

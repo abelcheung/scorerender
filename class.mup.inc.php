@@ -29,6 +29,8 @@
 */
 class mupRender extends ScoreRender
 {
+	private $width;
+
 	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
@@ -37,8 +39,18 @@ class mupRender extends ScoreRender
 	function __construct ($options = array())
 	{
 		$this->init_options ($options);
+	}
 
-		$this->_options['IMAGE_MAX_WIDTH'] /= DPI;
+	/**
+	 * Set maximum width of generated images
+	 *
+	 * @param integer $width Maximum width of images (in pixel)
+	 * @since 0.2.50
+	 */
+	public function set_img_width ($width)
+	{
+		parent::set_img_width ($width);
+		$this->width = $this->img_max_width / DPI;
 	}
 
 	/**
@@ -47,7 +59,7 @@ class mupRender extends ScoreRender
 	 * @param string $input
 	 * @return boolean True if content is deemed safe
 	 */
-	protected function is_valid_input ($input)
+	protected function is_valid_input ()
 	{
 		$blacklist = array
 		(
@@ -55,7 +67,7 @@ class mupRender extends ScoreRender
 		);
 
 		foreach ($blacklist as $pattern)
-			if (preg_match ($pattern, $input))
+			if (preg_match ($pattern, $this->_input))
 				return false;
 
 		return true;
@@ -80,7 +92,7 @@ leftmargin = 0
 rightmargin = 0
 topmargin = 0
 bottommargin = 0
-pagewidth = {$this->_options['IMAGE_MAX_WIDTH']}
+pagewidth = {$this->width}
 label = ""
 EOD;
 		return $header . "\n" . $this->_input;
@@ -106,7 +118,7 @@ EOD;
 		   Even worse, the exist status in this case is 0, so
 		   _exec succeeds yet no postscript is rendered. */
 
-		$temp_magic_file = $this->_options['TEMP_DIR'] . DIRECTORY_SEPARATOR . '.mup';
+		$temp_magic_file = $this->temp_dir . DIRECTORY_SEPARATOR . '.mup';
 		if (!file_exists($temp_magic_file))
 		{
 			if (is_readable($this->_options['MUP_MAGIC_FILE']))
@@ -116,7 +128,7 @@ EOD;
 		}
 
 		/* mup forces this kind of crap */
-		putenv ("HOME=" . $this->_options['TEMP_DIR']);
+		putenv ("HOME=" . $this->temp_dir);
 
 		$cmd = sprintf ('%s -f %s %s 2>&1',
 		                $this->_options['MUP_BIN'],
