@@ -91,7 +91,7 @@ EOT;
 	protected function execute ($input_file, $rendered_image)
 	{
 		$cmd = sprintf ('%s %s -O %s 2>&1',
-		                $this->_options['ABCM2PS_BIN'],
+		                $this->mainprog,
 		                $input_file, $rendered_image);
 		$retval = $this->_exec($cmd);
 
@@ -120,7 +120,7 @@ EOT;
 	{
 		wp_parse_str ($args, $r);
 		extract ($r, EXTR_SKIP);
-		return parent::is_prog_usable ('abcm2ps', $prog, '-V');
+		return $this->is_prog_usable ('abcm2ps', $prog, '-V');
 	}
 }
 

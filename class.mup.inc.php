@@ -32,6 +32,12 @@ class mupRender extends ScoreRender
 	private $width;
 
 	/**
+	 * @var string $magic_file Location of magic file used by Mup
+	 * @access private
+	 */
+	private $magic_file;
+
+	/**
 	 * Class constructor
 	 * @param array $options Options to be passed into class
 	 * @access private
@@ -51,6 +57,17 @@ class mupRender extends ScoreRender
 	{
 		parent::set_img_width ($width);
 		$this->width = $this->img_max_width / DPI;
+	}
+
+	/**
+	 * Set the location of magic file
+	 *
+	 * @param string $file Full path of magic file
+	 * @since 0.2.50
+	 */
+	public function set_magic_file ($file)
+	{
+		$this->magic_file = $file;
 	}
 
 	/**
@@ -121,8 +138,8 @@ EOD;
 		$temp_magic_file = $this->temp_dir . DIRECTORY_SEPARATOR . '.mup';
 		if (!file_exists($temp_magic_file))
 		{
-			if (is_readable($this->_options['MUP_MAGIC_FILE']))
-				copy($this->_options['MUP_MAGIC_FILE'], $temp_magic_file);
+			if (is_readable($this->magic_file))
+				copy($this->magic_file, $temp_magic_file);
 			else
 				touch ($temp_magic_file);
 		}
@@ -131,7 +148,7 @@ EOD;
 		putenv ("HOME=" . $this->temp_dir);
 
 		$cmd = sprintf ('%s -f %s %s 2>&1',
-		                $this->_options['MUP_BIN'],
+		                $this->mainprog,
 		                $rendered_image, $input_file);
 		$retval = $this->_exec($cmd);
 
@@ -151,7 +168,7 @@ EOD;
 	{
 		wp_parse_str ($args, $r);
 		extract ($r, EXTR_SKIP);
-		return parent::is_prog_usable ('Arkkra Enterprises', $prog, '-v');
+		return $this->is_prog_usable ('Arkkra Enterprises', $prog, '-v');
 	}
 }
 

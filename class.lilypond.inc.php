@@ -91,7 +91,7 @@ EOD;
 	{
 		/* lilypond adds .ps extension by itself */
 		$cmd = sprintf ('%s --safe --ps --output %s %s 2>&1',
-			$this->_options['LILYPOND_BIN'],
+			$this->mainprog,
 			dirname($rendered_image) . DIRECTORY_SEPARATOR . basename($rendered_image, ".ps"),
 			$input_file);
 
@@ -125,7 +125,7 @@ EOD;
 	{
 		wp_parse_str ($args, $r);
 		extract ($r, EXTR_SKIP);
-		return parent::is_prog_usable ('GNU LilyPond', $prog, '--version');
+		return $this->is_prog_usable ('GNU LilyPond', $prog, '--version');
 	}
 }
 

@@ -1,3 +1,18 @@
+2008-09-03  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_process_content) Very minor change in CSS.
+	- (scorerender_filter) Also set program names in class methods.
+
+	* class.scorerender.inc.php:
+	- (set_programs) New func. For specifying programs used for rendering.
+	
+	* class.mup.inc.php:
+	- (set_magic_file) New func. For setting magic file.
+
+	* class.*.inc.php:
+	- Eliminate usage of $this->_options.
+
 2008-09-01  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.scorerender.inc.php:
