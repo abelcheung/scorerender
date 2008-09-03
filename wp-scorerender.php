@@ -577,7 +577,7 @@ function scorerender_process_content ($render)
 	}
 	else
 	{
-		$html .= sprintf ("<img style='vertical-align: bottom' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+		$html .= sprintf ("<img class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 			__('Music fragment', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
 			$scorerender_options['CACHE_URL'], $result);
@@ -586,7 +586,7 @@ function scorerender_process_content ($render)
 	if ($scorerender_options['TRANSPARENT_IMAGE'] &&
 	    $scorerender_options['SHOW_IE_TRANSPARENCY_WARNING']) 
 	{
-		$html .= '<br /><!--[if lt IE 7]><span style="font-size: smaller;">' . __('(<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.)', TEXTDOMAIN) . "</span><![endif]-->\n";
+		$html .= '<br /><!--[if lt IE 7]><span class="ie6warning" style="font-size: smaller;">' . __('(<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.)', TEXTDOMAIN) . "</span><![endif]-->\n";
 	}
 
 	return $html;
@@ -619,6 +619,15 @@ function scorerender_filter ($matches)
 		{
 			// TODO: Should only pass variables in class methods
 			$render = new $notation['classname'] ($scorerender_options);
+			$progs = array();
+			foreach ($notation['progs'] as $progname) {
+				$progs["$progname"] = $scorerender_options[$progname];
+			}
+			$render->set_programs ($progs);
+
+			if ($notation['classname'] == 'mupRender')
+				$render->set_magic_file ($scorerender_options['MUP_MAGIC_FILE']);
+
 			break;
 		}
 

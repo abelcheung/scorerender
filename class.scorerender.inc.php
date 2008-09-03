@@ -110,6 +110,12 @@ abstract class ScoreRender
 	protected $img_max_width = 360;
 
 	/**
+	 * @var string $mainprog Main program for rendering music into images
+	 * @access protected
+	 */
+	protected $mainprog;
+
+	/**
 	 * Initialize ScoreRender options
 	 *
 	 * @param array $options Instances are initialized with this option array
@@ -131,6 +137,39 @@ abstract class ScoreRender
 	public function set_music_fragment ($input)
 	{
 		$this->_input = $input;
+	}
+
+	/**
+	 * Set the main program used to render music
+	 *
+	 * @param mixed $progs A single program or array of programs to be used
+	 * @since 0.2.50
+	 */
+	public function set_programs ($progs)
+	{
+		if (is_string ($progs))
+		{
+			$this->mainprog = $progs;
+			return;
+		}
+		elseif (!is_array ($progs) || empty ($progs))
+			return;
+		else
+		{
+			switch (count ($progs))
+		       	{
+			  case 1:
+				$v = array_values ($progs);
+				$this->mainprog = $v[0];
+				break;
+			  default:
+				// Only picks the first element
+				// TODO: set all others, like TeX, dvips,...
+				list ($k) = array_keys ($progs);
+				$this->mainprog = $progs[$k];
+				break;
+			}
+		}
 	}
 
 	/**
