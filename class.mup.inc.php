@@ -38,16 +38,6 @@ class mupRender extends ScoreRender
 	private $magic_file;
 
 	/**
-	 * Class constructor
-	 * @param array $options Options to be passed into class
-	 * @access private
-	 */
-	function __construct ($options = array())
-	{
-		$this->init_options ($options);
-	}
-
-	/**
 	 * Set maximum width of generated images
 	 *
 	 * @param integer $width Maximum width of images (in pixel)

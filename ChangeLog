@@ -1,3 +1,14 @@
+2008-09-04  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php: Completely eliminate class constructor.
+
+	* wp-scorerender.php:
+	- (scorerender_do_content, scorerender_do_comment) Dropped.
+	  Replaced by anonymous function in add_action().
+
+	* class.scorerender.inc.php:
+	- (init_options) Dropped. $this->_options truely gone.
+
 2008-09-03  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

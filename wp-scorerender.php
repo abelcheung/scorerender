@@ -683,32 +683,6 @@ function scorerender_do_conversion ($content, $is_post)
 
 
 /**
- * Renders music fragments contained inside posts.
- *
- * @uses scorerender_do_conversion
- * @see scorerender_do_comment
- * @return string Converted blog post content.
- */
-function scorerender_do_content ($content)
-{
-	return scorerender_do_conversion ($content, TRUE);
-}
-
-
-/**
- * Renders music fragments contained inside comments.
- *
- * @uses scorerender_do_conversion
- * @see scorerender_do_content
- * @return string Converted blog comment content.
- */
-function scorerender_do_comment ($content)
-{
-	return scorerender_do_conversion ($content, FALSE);
-}
-
-
-/**
  * Display info in WordPress Dashboard
  *
  * @since 0.2
@@ -1269,8 +1243,23 @@ add_filter ('activity_box_end', 'scorerender_activity_box');
 add_filter ('admin_menu', 'scorerender_admin_menu');
 
 // earlier than default priority, since smilies conversion and wptexturize() can mess up the content
+/*
 add_filter ('the_excerpt' , 'scorerender_do_content', 2);
 add_filter ('the_content' , 'scorerender_do_content', 2);
 add_filter ('comment_text', 'scorerender_do_comment', 2);
+ */
+add_filter ('the_excerpt' ,
+	create_function ('$content',
+		'return scorerender_do_conversion ($content, TRUE);'),
+	2);
+add_filter ('the_content' ,
+	create_function ('$content',
+		'return scorerender_do_conversion ($content, TRUE);'),
+	2);
+add_filter ('comment_text',
+	create_function ('$content',
+		'return scorerender_do_conversion ($content, FALSE);'),
+	2);
+
 
 ?>

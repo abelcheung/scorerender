@@ -49,13 +49,6 @@ abstract class ScoreRender
 {
 
 	/**
-	 * @var array $_options ScoreRender config options.
-	 * @access protected
-	 * @todo drop this
-	 */
-	protected $_options;
-
-	/**
 	 * @var string $_input The music fragment to be rendered.
 	 * @access protected
 	 */
@@ -114,18 +107,6 @@ abstract class ScoreRender
 	 * @access protected
 	 */
 	protected $mainprog;
-
-	/**
-	 * Initialize ScoreRender options
-	 *
-	 * @param array $options Instances are initialized with this option array
-	 * @access protected
-	 */
-	protected function init_options ($options = array())
-	{
-		// TODO: set all options outside class
-		$this->_options = $options;
-	}
 
 	/**
 	 * Sets music fragment content
