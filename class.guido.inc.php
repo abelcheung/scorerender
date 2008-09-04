@@ -30,16 +30,6 @@
 class guidoRender extends ScoreRender
 {
 	/**
-	 * Class constructor
-	 * @param array $options Options to be passed into class
-	 * @access private
-	 */
-	function __construct ($options = array())
-	{
-		$this->init_options ($options);
-	}
-
-	/**
 	 * Outputs complete music input file for rendering.
 	 *
 	 * Most usually user supplied content does not contain correct
