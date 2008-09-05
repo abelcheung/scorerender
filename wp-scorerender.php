@@ -59,62 +59,6 @@ define ('TEXTDOMAIN', 'scorerender');
  */
 define ('REGEX_CACHE_IMAGE', '/^sr-\w+-[0-9A-Fa-f]{32}\.png$/');
 
-/*
- * Error constants
- */
-
-/**
- * Error constant used when content is known to be invalid or dangerous.
- *
- * Dangerous content means special constructs causing
- * inclusion of another file or command execution, etc.
- */
-define ('ERR_INVALID_INPUT'               , -1);
-
-/**
- * Error constant used when cache directory is not writable.
- */
-define ('ERR_CACHE_DIRECTORY_NOT_WRITABLE', -2);
-
-/**
- * Error constant used when temporary working directory is not writable.
- */
-define ('ERR_TEMP_DIRECTORY_NOT_WRITABLE' , -3);
-
-/**
- * Error constant used when temporary file is not writable.
- *
- * This error is very rare, most usually it's the directory (not file) which is not writable.
- */
-define ('ERR_TEMP_FILE_NOT_WRITABLE'      , -4);
-
-/**
- * Error constant used when conversion of rendered image to proper format failed.
- */
-define ('ERR_IMAGE_CONVERT_FAILURE'       , -5);
-
-/**
- * Error constant used when any generic error occurred during rendering.
- */
-define ('ERR_RENDERING_ERROR'             , -6);
-
-/**
- * Error constant used when length of supplied content exceeds configured limit.
- */
-define ('ERR_LENGTH_EXCEEDED'             , -7);
-
-/**
- * Error constant representing internal class error.
- *
- * Currently used when some essential method is not implemented in classes.
- */
-define ('ERR_INTERNAL_CLASS'              , -8);
-
-/**
- * Error constant representing that ImageMagick convert is unusable.
- */
-define ('ERR_CONVERT_UNUSABLE'            , -9);
-
 
 /*
  * How error is handled when rendering failed
@@ -472,48 +416,6 @@ function scorerender_remove_cache ()
 
 
 /**
- * Generate error message when rendering failed
- * @param integer $errcode Error code
- * @return string The corresponding html error message
- */
-
-function scorerender_generate_html_error ($errcode)
-{
-	switch ($errcode)
-	{
-		case ERR_INVALID_INPUT:
-			return sprintf (__('[%s: Content is illegal or poses security concern!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Cache directory not writable!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary directory not writable!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_TEMP_FILE_NOT_WRITABLE:
-			return sprintf (__('[%s: Temporary file not writable!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_IMAGE_CONVERT_FAILURE:
-			return sprintf (__('[%s: Image conversion failure!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_RENDERING_ERROR:
-			return sprintf (__('[%s: The external rendering application failed!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		                // '<br /><textarea cols=80 rows=10 READONLY>' .
-		                // $render->get_command_output() . '</textarea>');
-		case ERR_LENGTH_EXCEEDED:
-			return sprintf (__('[%s: Content length limit exceeded!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_INTERNAL_CLASS:
-			return sprintf (__('[%s: Internal class initialization error!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-		case ERR_CONVERT_UNUSABLE:
-			return sprintf (__('[%s: ImageMagick convert is unusable!]', TEXTDOMAIN),
-				__('ScoreRender Error', TEXTDOMAIN));
-	}
-}
-
-/**
  * Generate HTML content from error message or rendered image
  *
  * @uses scorerender_generate_html_error
@@ -526,26 +428,27 @@ function scorerender_process_content ($render)
 
 	$result = $render->render();
 
-	if (is_int ($result))
+	if (false === $result)
 	{
 		switch ($scorerender_options['ERROR_HANDLING'])
 		{
-			case ON_ERR_SHOW_NOTHING:
-				return '';
+		  case ON_ERR_SHOW_NOTHING:
+			return '';
 
-			case ON_ERR_SHOW_FRAGMENT:
-				$name = $render->get_notation_name ();
+		  case ON_ERR_SHOW_FRAGMENT:
+			$name = $render->get_notation_name ();
 
-				// Shouldn't reach here
-				if (false === $name)
-					return '[ScoreRender Error: Unknown notation type!]';
+			// Shouldn't reach here
+			if (false === $name)
+				return sprintf (__('[%s: Unknown notation type!]', TEXTDOMAIN),
+					__('ScoreRender Error', TEXTDOMAIN));
 
-				return $notations[$name]['starttag'] . "\n" .
-					$render->get_music_fragment() . "\n" .
-					$notations[$name]['endtag'];
+			return $notations[$name]['starttag'] . "\n" .
+				$render->get_music_fragment() . "\n" .
+				$notations[$name]['endtag'];
 
-			default:
-				return scorerender_generate_html_error ($result);
+		  default:
+			return $render->get_error_msg ();
 		}
 	}
 
@@ -554,6 +457,7 @@ function scorerender_process_content ($render)
 	// is most likely multi-line, and some are quite long
 
 	// This idea is taken from LatexRender demo site
+	// FIXME: completely gone berserk if folder containing this plugin is a symlink, plugin_basename() sucks
 	if ($scorerender_options['SHOW_SOURCE'])
 	{
 		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, dirname (plugin_basename (__FILE__)));
@@ -603,7 +507,6 @@ function scorerender_process_content ($render)
  * If no PHP class exists corresponding to certain notation, then 
  * unconverted content is returned.
  *
- * @uses ScoreRender::set_music_fragment
  * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
  * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
  */
@@ -617,8 +520,7 @@ function scorerender_filter ($matches)
 	foreach (array_values ($notations) as $notation)
 		if (preg_match ($notation['regex'], $matches[0]))
 		{
-			// TODO: Should only pass variables in class methods
-			$render = new $notation['classname'] ($scorerender_options);
+			$render = new $notation['classname'];
 			$progs = array();
 			foreach ($notation['progs'] as $progname) {
 				$progs["$progname"] = $scorerender_options[$progname];
@@ -1094,7 +996,7 @@ function scorerender_admin_section_caching ()
 
 	if ( 0 > $img_count )
 	{
-		echo "<font color='red'>" . __('Cache directory is not a readable directory.', TEXTDOMAIN) . "<br />";
+		echo "<font color='red'>" . __('Cache directory is not readable, thus no image count is shown.', TEXTDOMAIN) . "<br />";
 		echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) . "</font>\n";
 	}
 	else
@@ -1242,12 +1144,8 @@ add_action ('init', 'scorerender_init_textdomain');
 add_filter ('activity_box_end', 'scorerender_activity_box');
 add_filter ('admin_menu', 'scorerender_admin_menu');
 
-// earlier than default priority, since smilies conversion and wptexturize() can mess up the content
-/*
-add_filter ('the_excerpt' , 'scorerender_do_content', 2);
-add_filter ('the_content' , 'scorerender_do_content', 2);
-add_filter ('comment_text', 'scorerender_do_comment', 2);
- */
+// earlier than default priority, since
+// smilies conversion and wptexturize() can mess up the content
 add_filter ('the_excerpt' ,
 	create_function ('$content',
 		'return scorerender_do_conversion ($content, TRUE);'),

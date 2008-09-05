@@ -110,7 +110,7 @@ EOT;
 	{
 		wp_parse_str ($args, $r);
 		extract ($r, EXTR_SKIP);
-		return $this->is_prog_usable ('abcm2ps', $prog, '-V');
+		return parent::is_prog_usable ('abcm2ps', $prog, '-V');
 	}
 }
 
