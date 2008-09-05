@@ -116,7 +116,7 @@ EOD;
 	{
 		wp_parse_str ($args, $r);
 		extract ($r, EXTR_SKIP);
-		return $this->is_prog_usable ('GNU LilyPond', $prog, '--version');
+		return parent::is_prog_usable ('GNU LilyPond', $prog, '--version');
 	}
 }
 

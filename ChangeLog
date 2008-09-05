@@ -1,3 +1,15 @@
+2008-09-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, class.scorerender.inc.php:
+	- Move error handling into class.
+	- scorerender_generate_html_error -> ScoreRender::get_error_msg()
+	- ScoreRender::render() only emittes failure instead of returning
+	  error code, since error is retrieved by get_error_msg() instead.
+
+	* class.*.inc.php:
+	- Fix is_notation_usable(), it should be invokable even if no class is
+	  initialized.
+
 2008-09-04  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.*.inc.php: Completely eliminate class constructor.

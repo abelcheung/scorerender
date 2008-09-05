@@ -47,6 +47,72 @@
  */
 abstract class ScoreRender
 {
+	/*
+	 * Error constants
+	 */
+
+	/**
+	 * Error constant used when content is known to be invalid or dangerous.
+	 *
+	 * Dangerous content means special constructs causing
+	 * inclusion of another file or command execution, etc.
+	 */
+	const ERR_INVALID_INPUT = -1;
+
+	/**
+	 * Error constant used when cache directory is not writable.
+	 */
+	const ERR_CACHE_DIRECTORY_NOT_WRITABLE = -2;
+
+	/**
+	 * Error constant used when temporary working directory is not writable.
+	 */
+	const ERR_TEMP_DIRECTORY_NOT_WRITABLE = -3;
+
+	/**
+	 * Error constant used when temporary file is not writable.
+	 *
+	 * This error is very rare, most usually it's the directory (not file) which is not writable.
+	 */
+	const ERR_TEMP_FILE_NOT_WRITABLE = -4;
+
+	/**
+	 * Error constant used when conversion of rendered image to proper format (PostScript -> PNG) failed.
+	 */
+	const ERR_IMAGE_CONVERT_FAILURE = -5;
+
+	/**
+	 * Error constant used when any generic error occurred during rendering.
+	 */
+	const ERR_RENDERING_ERROR = -6;
+
+	/**
+	 * Error constant used when length of supplied content exceeds configured limit.
+	 */
+	const ERR_LENGTH_EXCEEDED = -7;
+
+	/**
+	 * Error constant representing internal class error.
+	 *
+	 * Currently used when some essential method is not implemented in classes.
+	 */
+	const ERR_INTERNAL_CLASS = -8;
+
+	/**
+	 * Error constant representing that ImageMagick convert is unusable.
+	 */
+	const ERR_CONVERT_UNUSABLE = -9;
+
+	/**
+	 * Error constant representing final image unreadable.
+	 */
+	const ERR_IMAGE_NOT_VIEWABLE = -10;
+
+
+	/*
+	 * Variables
+	 */
+
 
 	/**
 	 * @var string $_input The music fragment to be rendered.
@@ -109,6 +175,17 @@ abstract class ScoreRender
 	protected $mainprog;
 
 	/**
+	 * @var integer $error_code Contains error code about which kind of failure is encountered during rendering
+	 * @access protected
+	 */
+	protected $error_code;
+
+
+	/*
+	 * Methods
+	 */
+
+	/**
 	 * Sets music fragment content
 	 *
 	 * @since 0.2
@@ -124,6 +201,7 @@ abstract class ScoreRender
 	 * Set the main program used to render music
 	 *
 	 * @param mixed $progs A single program or array of programs to be used
+	 * @uses $mainprog Full path is stored in this variable
 	 * @since 0.2.50
 	 */
 	public function set_programs ($progs)
@@ -161,7 +239,6 @@ abstract class ScoreRender
 	 * each notation has its own requirements. This method adds
 	 * such necessary content to original content for processing.
 	 *
-	 * @uses $_input Return input content, optionally prepended/appended with header or footer, and filtered in other ways; $_input would not be modified
 	 * @return string The full music content to be rendered
 	 * @abstract
 	 */
@@ -293,6 +370,62 @@ abstract class ScoreRender
 	public function set_img_width ($width)
 	{
 		$this->img_max_width = $width;
+	}
+
+	/**
+	 * Utility function: format error message into standardized format
+	 *
+	 * @param string $mesg Original error message
+	 * @return string Formatted message
+	 * @since 0.2.50
+	 * @access private
+	 */
+	private function format_error_msg ($mesg)
+	{
+		return sprintf (__('[%s: %s]', TEXTDOMAIN),
+			__('ScoreRender Error', TEXTDOMAIN), $mesg);
+	}
+
+	/**
+	 * Retrieve error message
+	 *
+	 * @return string Localized error message
+	 * @since 0.2.50
+	 */
+	public function get_error_msg ()
+	{
+		switch ($this->error_code)
+		{
+		  case ERR_INVALID_INPUT:
+			return $this->format_error_msg (__('Content is illegal or poses security concern!', TEXTDOMAIN));
+
+		  case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
+			return $this->format_error_msg (__('Cache directory not writable!', TEXTDOMAIN));
+
+		  case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
+			return $this->format_error_msg (__('Temporary directory not writable!', TEXTDOMAIN));
+
+		  case ERR_TEMP_FILE_NOT_WRITABLE:
+			return $this->format_error_msg (__('Temporary file not writable!', TEXTDOMAIN));
+
+		  case ERR_IMAGE_CONVERT_FAILURE:
+			return $this->format_error_msg (__('Image conversion failure!', TEXTDOMAIN));
+
+		  case ERR_RENDERING_ERROR:
+			return $this->format_error_msg (__('The external rendering application failed!', TEXTDOMAIN));
+
+		  case ERR_LENGTH_EXCEEDED:
+			return $this->format_error_msg (__('Content length limit exceeded!', TEXTDOMAIN));
+
+		  case ERR_INTERNAL_CLASS:
+			return $this->format_error_msg (__('Internal class initialization error!', TEXTDOMAIN));
+
+		  case ERR_CONVERT_UNUSABLE:
+			return $this->format_error_msg (__('ImageMagick program is unusable!', TEXTDOMAIN));
+
+		case ERR_IMAGE_NOT_VIEWABLE:
+			return $this->format_error_msg (__('Image is not viewable!', TEXTDOMAIN));
+		}
 	}
 
 	/**
@@ -460,31 +593,52 @@ abstract class ScoreRender
 		               "sr-" . $this->get_notation_name() . "-$hash.png";
 
 		// Need not check anything if cache exists
-		if (is_file ($final_image)) return basename ($final_image);
+		if (is_file ($final_image))
+			if (is_readable ($final_image))
+				return basename ($final_image);
+			else
+			{
+				$this->error_code = ERR_IMAGE_NOT_VIEWABLE;
+				return false;
+			}
 
 		// missing class methods
 		if (! method_exists ($this, 'execute'           ) ||
-	       	    ! method_exists ($this, 'get_music_fragment'))
-			return ERR_INTERNAL_CLASS;
+		    ! method_exists ($this, 'get_music_fragment'))
+		{
+			$this->error_code = ERR_INTERNAL_CLASS;
+			return false;
+		}
 
 		// Check for valid code
 		if ( empty ($this->_input) ||
-		     ( method_exists ($this, 'is_valid_input') &&
-		       !$this->is_valid_input() ) )
-			return ERR_INVALID_INPUT;
+			( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
+		{
+			$this->error_code = ERR_INVALID_INPUT;
+			return false;
+		}
 
 		// Check for content length
 		if ( isset ($this->content_max_length) &&
 		     ($this->content_max_length > 0) &&
 		     (strlen ($this->_input) > $this->content_max_length) )
-			return ERR_LENGTH_EXCEEDED;
+		{
+			$this->error_code = ERR_LENGTH_EXCEEDED;
+			return false;
+		}
 
 		if ( ! $this->is_prog_usable ('ImageMagick', $this->imagemagick, '-version') )
-			return ERR_CONVERT_UNUSABLE;
+		{
+			$this->error_code = ERR_CONVERT_UNUSABLE;
+			return false;
+		}
 
 		if ( (!is_dir      ($this->cache_dir)) ||
 		     (!is_writable ($this->cache_dir)) )
-			return ERR_CACHE_DIRECTORY_NOT_WRITABLE;
+		{
+			$this->error_code = ERR_CACHE_DIRECTORY_NOT_WRITABLE;
+			return false;
+		}
 
 		// Use fallback tmp dir if original one not working
 		if ( (!is_dir      ($this->temp_dir)) ||
@@ -493,11 +647,17 @@ abstract class ScoreRender
 
 		if ( (!is_dir      ($this->temp_dir)) ||
 		     (!is_writable ($this->temp_dir)) )
-			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+		{
+			$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+			return false;
+		}
 
 		if ( false === ($input_file = tempnam ($this->temp_dir,
 			'scorerender-' . $this->get_notation_name() . '-')) )
-			return ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+		{
+			$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+			return false;
+		}
 		
 		$rendered_image = $input_file . '.ps';
 
@@ -505,13 +665,22 @@ abstract class ScoreRender
 		{
 			// Create empty output file first ASAP
 			if (! touch ($rendered_image) )
-				return ERR_TEMP_FILE_NOT_WRITABLE;
+			{
+				$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
+				return false;
+			}
 		}
 		elseif (! is_writable ($rendered_image) )
-			return ERR_TEMP_FILE_NOT_WRITABLE;
+		{
+			$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
+			return false;
+		}
 
 		if (false === file_put_contents ($input_file, $this->get_music_fragment()))
-			return ERR_TEMP_FILE_NOT_WRITABLE;
+		{
+			$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
+			return false;
+		}
 
 
 		// Render using external application
@@ -521,12 +690,16 @@ abstract class ScoreRender
 		    (filesize ($rendered_image)) === 0)
 		{
 			//unlink($input_file);
-			return ERR_RENDERING_ERROR;
+			$this->error_code = ERR_RENDERING_ERROR;
+			return false;
 		}
 		chdir ($current_dir);
 
 		if (!$this->convertimg ($rendered_image, $final_image))
-			return ERR_IMAGE_CONVERT_FAILURE;
+		{
+			$this->error_code = ERR_IMAGE_CONVERT_FAILURE;
+			return false;
+		}
 
 		// Cleanup
 		unlink ($rendered_image);

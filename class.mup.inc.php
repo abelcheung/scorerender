@@ -158,7 +158,7 @@ EOD;
 	{
 		wp_parse_str ($args, $r);
 		extract ($r, EXTR_SKIP);
-		return $this->is_prog_usable ('Arkkra Enterprises', $prog, '-v');
+		return parent::is_prog_usable ('Arkkra Enterprises', $prog, '-v');
 	}
 }
 
