@@ -274,7 +274,7 @@ function scorerender_get_options ()
 			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
 			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
 			'lilypond' => 'C:\Program Files\Lilypond\lilypond.exe',
-			'mup' => 'C:\Program Files\mup\mup.exe',
+			'mup' => 'C:\Program Files\mupmate\mup.exe',
 		);
 	else
 		$defprog = array (
