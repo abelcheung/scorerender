@@ -29,89 +29,91 @@
 */
 class abcRender extends ScoreRender
 {
-	private $width;
 
-	/**
-	 * Set maximum width of generated images
-	 *
-	 * @param integer $width Maximum width of images (in pixel)
-	 * @since 0.2.50
-	 */
-	public function set_img_width ($width)
-	{
-		parent::set_img_width ($width);
+private $width;
 
-		// Seems abcm2ps is using something like 120 dpi,
-		// with 72DPI the notes and letters are very thin :(
-		$this->width = $this->img_max_width / 120;
-	}
+/**
+ * Set maximum width of generated images
+ *
+ * @param integer $width Maximum width of images (in pixel)
+ * @since 0.2.50
+ */
+public function set_img_width ($width)
+{
+	parent::set_img_width ($width);
 
-	/**
-	 * Outputs complete music input file for rendering.
-	 *
-	 * Most usually user supplied content does not contain correct
-	 * rendering options like page margin, staff width etc, and
-	 * each notation has its own requirements. This method adds
-	 * such necessary content to original content for processing.
-	 *
-	 * @return string The full music content to be rendered
-	 */
-	public function get_music_fragment ()
-	{
-		$header = <<<EOT
+	// Seems abcm2ps is using something like 120 dpi,
+	// with 72DPI the notes and letters are very thin :(
+	$this->width = $this->img_max_width / 120;
+}
+
+/**
+ * Outputs complete music input file for rendering.
+ *
+ * Most usually user supplied content does not contain correct
+ * rendering options like page margin, staff width etc, and
+ * each notation has its own requirements. This method adds
+ * such necessary content to original content for processing.
+ *
+ * @return string The full music content to be rendered
+ */
+public function get_music_fragment ()
+{
+	$header = <<<EOT
 %abc
 %%staffwidth {$this->width}in
 %%stretchlast no
 %%leftmargin 0.2in
 %abc2mtex: yes
 EOT;
-		// input must not contain any empty line
-		return $header . "\n" . preg_replace ('/^$/m', '%', $this->_input);
-	}
-
-	/**
-	 * Render raw input file into PostScript file.
-	 *
-	 * @uses ScoreRender::_exec
-	 * @param string $input_file File name of raw input file containing music content
-	 * @param string $rendered_image File name of rendered PostScript file
-	 * @return boolean Whether rendering is successful or not
-	 * @access protected
-	 */
-	protected function execute ($input_file, $rendered_image)
-	{
-		$cmd = sprintf ('%s %s -O %s 2>&1',
-		                $this->mainprog,
-		                $input_file, $rendered_image);
-		$retval = $this->_exec($cmd);
-
-		return ($result['return_val'] == 0);
-	}
-
-	/**
-	 * @uses ScoreRender::convertimg
-	 * @param string $rendered_image The rendered PostScript file name
-	 * @param string $final_image The final PNG image file name
-	 * @return boolean Whether conversion from PostScript to PNG is successful
-	 * @access protected
-	 */
-	protected function convertimg ($rendered_image, $final_image)
-	{
-		return parent::convertimg ($rendered_image, $final_image, TRUE, '-density 96');
-	}
-
-	/**
-	 * Check if given program is abcm2ps, and whether it is usable.
-	 *
-	 * @param string $prog The program to be checked.
-	 * @return boolean Return true if the given program is abcm2ps AND it is executable.
-	 */
-	public function is_notation_usable ($args = '')
-	{
-		wp_parse_str ($args, $r);
-		extract ($r, EXTR_SKIP);
-		return parent::is_prog_usable ('abcm2ps', $prog, '-V');
-	}
+	// input must not contain any empty line
+	return $header . "\n" . preg_replace ('/^$/m', '%', $this->_input);
 }
+
+/**
+ * Render raw input file into PostScript file.
+ *
+ * @uses ScoreRender::_exec
+ * @param string $input_file File name of raw input file containing music content
+ * @param string $intermediate_image File name of rendered PostScript file
+ * @return boolean Whether rendering is successful or not
+ * @access protected
+ */
+protected function conversion_step1 ($input_file, $intermediate_image)
+{
+	$cmd = sprintf ('%s %s -O %s 2>&1',
+			$this->mainprog,
+			$input_file, $intermediate_image);
+	$retval = $this->_exec($cmd);
+
+	return ($result['return_val'] == 0);
+}
+
+/**
+ * @uses ScoreRender::conversion_step2
+ * @param string $intermediate_image The rendered PostScript file name
+ * @param string $final_image The final PNG image file name
+ * @return boolean Whether conversion from PostScript to PNG is successful
+ * @access protected
+ */
+protected function conversion_step2 ($intermediate_image, $final_image)
+{
+	return parent::conversion_step2 ($intermediate_image, $final_image, TRUE, '-density 96');
+}
+
+/**
+ * Check if given program is abcm2ps, and whether it is usable.
+ *
+ * @param string $prog The program to be checked.
+ * @return boolean Return true if the given program is abcm2ps AND it is executable.
+ */
+public function is_notation_usable ($args = '')
+{
+	wp_parse_str ($args, $r);
+	extract ($r, EXTR_SKIP);
+	return parent::is_prog_usable ('abcm2ps', $prog, '-V');
+}
+
+} // end of class
 
 ?>
