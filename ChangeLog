@@ -1,3 +1,9 @@
+2008-09-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Eliminate incorrect use of attribute_escape().
+	- (is_windows) New func. Convenient func for determining Windows platform.
+
 2008-09-05  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php, class.scorerender.inc.php:
