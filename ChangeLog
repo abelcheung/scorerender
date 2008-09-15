@@ -1,5 +1,12 @@
 2008-09-15  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.*.inc.php:
+	- Cosmetic changes: indentation
+	- (execute) Rename to conversion_step1()
+	- (convertimg) Rename to conversion_step2()
+
+2008-09-15  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php:
 	- Eliminate incorrect use of attribute_escape().
 	- (is_windows) New func. Convenient func for determining Windows platform.
