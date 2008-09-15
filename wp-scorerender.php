@@ -141,6 +141,12 @@ foreach (array_values ($notations) as $notation)
 }
 
 
+function is_windows ()
+{
+	return (substr(PHP_OS, 0, 3) == 'WIN');
+}
+
+
 /*
  * Backported functions -- sys_get_temp_dir and array_intersect_key
  */
@@ -225,17 +231,18 @@ function get_upload_dir ()
 		return array ('path' => $uploads['basedir'],
 			'url' => $uploads['baseurl']);
 
-	$url = trim(attribute_escape(get_option('upload_url_path')));
-	$path = trim(attribute_escape(get_option('upload_path')));
+	$url = trim(get_option('upload_url_path'));
+	$path = trim(get_option('upload_path'));
 
 	if (empty ($path))
-		$path = 'wp-content/uploads';
+		$path = 'wp-content'.DIRECTORY_SEPARATOR.'uploads';
 
-	if (substr ($path, 0, 1) != '/')
+	if ( (!is_windows() && (substr ($path, 0, 1) != '/')) ||
+	     ( is_windows() && (substr ($path, 1, 1) != ':')) )
 		$path = ABSPATH . $path;
 
 	if (empty ($url))
-		$url = attribute_escape(get_option('siteurl')) . '/' .
+		$url = get_option('siteurl') . '/' .
 			str_replace (ABSPATH, '', $path);
 
 	return (array ('path' => $path, 'url' => $url));
@@ -269,7 +276,7 @@ function scorerender_get_options ()
 
 	$cachefolder = get_upload_dir ();
 	$defprog = array();
-	if (substr(PHP_OS, 0, 3) == 'WIN')
+	if (is_windows ())
 		$defprog = array (
 			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
 			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
@@ -806,21 +813,21 @@ function scorerender_admin_section_path ()
 		<tr valign="top">
 			<th scope="row"><?php _e('Temporary directory:', TEXTDOMAIN) ?></th>
 			<td>
-				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo attribute_escape ($scorerender_options['TEMP_DIR']); ?>" size="60" /><br />
+				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo $scorerender_options['TEMP_DIR']; ?>" size="60" /><br />
 				<?php _e('Must be writable and ideally located out of web-accessible area. System default will be used if left blank.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache directory:', TEXTDOMAIN) ?></th>
 			<td>
-				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo attribute_escape ($scorerender_options['CACHE_DIR']); ?>" size="60" /><br />
+				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo $scorerender_options['CACHE_DIR']; ?>" size="60" /><br />
 				<?php _e('Must be writable and located inside the web-accessible area.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache URL:', TEXTDOMAIN) ?></th>
 			<td>
-				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo attribute_escape ($scorerender_options['CACHE_URL']); ?>" size="60" /><br />
+				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo $scorerender_options['CACHE_URL']; ?>" size="60" /><br />
 				<?php _e('Must correspond to the image cache directory above.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
@@ -847,25 +854,25 @@ function scorerender_admin_section_prog ()
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></th>
 			<td>
-				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo attribute_escape ($scorerender_options['CONVERT_BIN']); ?>" size="50" />
+				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo $scorerender_options['CONVERT_BIN']; ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>lilypond</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo attribute_escape ($scorerender_options['LILYPOND_BIN']); ?>" size="50" />
+				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo $scorerender_options['LILYPOND_BIN']; ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo attribute_escape ($scorerender_options['MUP_BIN']); ?>" size="50" />
+				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo $scorerender_options['MUP_BIN']; ?>" size="50" />
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo attribute_escape ($scorerender_options['MUP_MAGIC_FILE']); ?>" size="50" />
+				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo $scorerender_options['MUP_MAGIC_FILE']; ?>" size="50" />
 				<br />
 				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
 			</td>
@@ -873,7 +880,7 @@ function scorerender_admin_section_prog ()
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></th>
 			<td>
-				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo attribute_escape ($scorerender_options['ABCM2PS_BIN']); ?>" size="50" />
+				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo $scorerender_options['ABCM2PS_BIN']; ?>" size="50" />
 			</td>
 		</tr>
 		</table>
@@ -897,7 +904,7 @@ function scorerender_admin_section_image ()
 		<tr valign="top">
 			<th scope="row"><?php _e('Max image width (pixel):', TEXTDOMAIN) ?></th>
 			<td>
-				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo attribute_escape ($scorerender_options['IMAGE_MAX_WIDTH']); ?>" size="6" />
+				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo $scorerender_options['IMAGE_MAX_WIDTH']; ?>" size="6" />
 				<label for="image_max_width"><?php _e('(Default is 360)', TEXTDOMAIN) ?></label><br /><?php _e('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
@@ -943,7 +950,7 @@ function scorerender_admin_section_content ()
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></th>
 			<td>
-				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo attribute_escape ($scorerender_options['CONTENT_MAX_LENGTH']); ?>" size="6" />
+				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo $scorerender_options['CONTENT_MAX_LENGTH']; ?>" size="6" />
 				<label for="content_max_length"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?></label>
 			</td>
 		</tr>
@@ -968,7 +975,7 @@ function scorerender_admin_section_content ()
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
 			<td>
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo attribute_escape ($scorerender_options['FRAGMENT_PER_COMMENT']); ?>" size="6" <?php if (1 != $scorerender_options['COMMENT_ENABLED']) { echo ' disabled="disabled"'; } ?> />
+				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo $scorerender_options['FRAGMENT_PER_COMMENT']; ?>" size="6" <?php if (1 != $scorerender_options['COMMENT_ENABLED']) { echo ' disabled="disabled"'; } ?> />
 				<label for="fragment_per_comment"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></label>
 			</td>
 		</tr>
