@@ -47,6 +47,7 @@ class pmwRender extends ScoreRender
 		$header = <<<EOD
 Sheetsize A3
 Linelength {$this->img_max_width}
+Magnification 1.5
 
 EOD;
 		// PMW doesn't like \n\r
