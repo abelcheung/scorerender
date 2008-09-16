@@ -1,5 +1,10 @@
 2008-09-16  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.pmw.inc.php: New file for Philip's Music Writer support.
+	* wp-scorerender.php: Add changes necessary for PMW support.
+
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.scorerender.inc.php:
 	- (create_temp_dir) Fix usage and parent directory name.
 

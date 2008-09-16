@@ -42,7 +42,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 10);
+define ('DATABASE_VERSION', 11);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -128,6 +128,13 @@ $notations = array (
 		'classname'   => 'mupRender',
 		'includefile' => 'class.mup.inc.php',
 		'progs'       => array ('MUP_BIN')),
+	'pmw'      => array (
+		'regex'       => '~\[pmw\](.*?)\[/pmw\]~si',
+		'starttag'    => '[pmw]',
+		'endtag'      => '[/pmw]',
+		'classname'   => 'pmwRender',
+		'includefile' => 'class.pmw.inc.php',
+		'progs'       => array ('PMW_BIN')),
 );
 
 require_once('class.scorerender.inc.php');
@@ -254,8 +261,9 @@ function transform_paths (&$setting, $is_internal)
 	if (!is_array ($setting)) return;
 	
 	// Transform path related settings to unix presentation
-	$keys = array ('TEMP_DIR', 'CACHE_DIR', 'CONVERT_BIN',
-		'LILYPOND_BIN', 'MUP_BIN', 'MUP_MAGIC_FILE', 'ABCM2PS_BIN');
+	$keys = array ('TEMP_DIR', 'CACHE_DIR',
+		'CONVERT_BIN', 'LILYPOND_BIN', 'MUP_BIN',
+		'MUP_MAGIC_FILE', 'ABCM2PS_BIN', 'PMW_BIN');
 	
 	foreach ($keys as $key)
 		if (isset ($setting[$key]))
@@ -355,6 +363,7 @@ function scorerender_get_options ()
 			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
 			'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
 			'mup' => 'C:\Program Files\mupmate\mup.exe',
+			'pmw' => 'C:\Program Files\pmw\pmw.exe',
 		);
 	else
 		$defprog = array (
@@ -362,6 +371,7 @@ function scorerender_get_options ()
 			'convert' => '/usr/bin/convert',
 			'lilypond' => '/usr/bin/lilypond',
 			'mup' => '/usr/local/bin/mup',
+			'pmw' => '/usr/local/bin/pmw',
 		);
 
 	// default options
@@ -390,6 +400,7 @@ function scorerender_get_options ()
 		'MUP_MAGIC_FILE'       => '',
 
 		'ABCM2PS_BIN'          => $defprog['abc2ps'],
+		'PMW_BIN'              => $defprog['pmw'],
 	);
 
 	// Special handling for certain versions
@@ -792,6 +803,7 @@ function scorerender_update_options ()
 		'abcm2ps_bin_problem'      => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>abcm2ps</tt>', 'ABC')),
 		'lilypond_bin_problem'     => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>lilypond</tt>', 'LilyPond')),
 		'mup_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>mup</tt>', 'Mup')),
+		'pmw_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>pmw</tt>', 'Philip\'s Music Writer')),
 	);
 
 	/*
@@ -852,6 +864,11 @@ function scorerender_update_options ()
 	if (! empty ($newopt['ABCM2PS_BIN']) && ! abcRender::is_notation_usable ('prog=' . $newopt['ABCM2PS_BIN']))
 	{
 		$errmsgs[] = 'abcm2ps_bin_problem';
+	}
+
+	if (! empty ($newopt['PMW_BIN']) && ! pmwRender::is_notation_usable ('prog=' . $newopt['PMW_BIN']))
+	{
+		$errmsgs[] = 'pmw_bin_problem';
 	}
 
 	$scorerender_options = array_merge ($scorerender_options, $newopt);
@@ -963,6 +980,12 @@ function scorerender_admin_section_prog ()
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></th>
 			<td>
 				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo $scorerender_options['ABCM2PS_BIN']; ?>" size="50" />
+			</td>
+		</tr>
+		<tr valign="top">
+			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>pmw</code>'); ?></th>
+			<td>
+				<input name="ScoreRender[PMW_BIN]" class="code" type="text" id="pmw_bin" value="<?php echo $scorerender_options['PMW_BIN']; ?>" size="50" />
 			</td>
 		</tr>
 		</table>
@@ -1155,6 +1178,7 @@ function scorerender_admin_options ()
 			'<a target="_blank" href="http://www.ihp-ffo.de/~msm/">abc2ps</a>',
 			'<a target="_blank" href="http://moinejf.free.fr/">abcm2ps</a>',
 			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></dd></dl></li>
+		<li><a target="_blank" href="http://www.quercite.com/pmw.html">Philip's Music Writer</a> (<?php printf ('<code>%s</code>, <code>%s</code>', $notations['pmw']['starttag'], $notations['pmw']['endtag']); ?>)</li>
 	</ul>
 
 <?php
@@ -1247,6 +1271,5 @@ add_filter ('comment_text',
 	create_function ('$content',
 		'return scorerender_do_conversion ($content, FALSE);'),
 	2);
-
 
 ?>
