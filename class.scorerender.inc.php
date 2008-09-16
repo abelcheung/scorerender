@@ -430,6 +430,33 @@ public function get_error_msg ()
 }
 
 /**
+ * Create temporary directory
+ *
+ * Inspired from PHP tempnam documentation comment
+ * @param string $dir
+ * @param string $prefix
+ * @param integer $mode
+ */
+function create_temp_dir ($dir, $prefix='', $mode=0700)
+{
+	trailingslashit ($dir);
+
+	// Not secure indeed. But PHP doesn't provide facility to create temp folder anyway.
+	$chars = str_split ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+	$i = 0;
+	
+	do {
+		$path = $dir . $prefix .
+			sprintf ("%s%s%s%s%s%s",
+				$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)],
+				$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)]);
+	}
+	while (!mkdir ($path, $mode) && (++$i < 100));
+
+	return ($i < 100) ? $path : FALSE;
+}
+
+/**
  * Executes command and stores output message
  *
  * {@internal It is basically exec() with additional stuff}
@@ -440,14 +467,17 @@ public function get_error_msg ()
  */
 protected function _exec ($cmd)
 {
-	$cmd_output = array();
+	$this->_commandOutput = '';
 	$retval = 0;
 
-	exec ($cmd, $cmd_output, $retval);
+	if (false === ($handle = popen ($cmd, 'r'))) return 129;
 
-	$this->_commandOutput = implode ("\n", $cmd_output);
+	while (!feof ($handle))
+		$this->_commandOutput .= fread ($handle, 2048);
 
-	return $retval;
+	pclose ($handle);
+
+	return $retval;	
 }
 
 /**
@@ -479,18 +509,18 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  */
 protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_alpha = false, $extra_arg = '')
 {
-	$cmd = sprintf ('%s %s -trim +repage ', $this->imagemagick, $extra_arg);
+	$cmd = sprintf ('"%s" %s -trim +repage ', $this->imagemagick, $extra_arg);
 
 	// Damn it, older ImageMagick can't handle transparency in PostScript,
 	// but suddenly it can now, and renders all previous logic broken
 	if ($ps_has_alpha)
 	{
 		if ($this->is_transparent)
-			$cmd .= sprintf (' %s %s %s',
+			$cmd .= sprintf (' %s "%s" "%s"',
 				(($this->is_inverted) ? '-negate' : ''),
 				$intermediate_image, $final_image);
 		else
-			$cmd .= sprintf (' -flatten %s png:- | %s -alpha deactivate %s png:- %s',
+			$cmd .= sprintf (' -flatten "%s" png:- | "%s" -alpha deactivate %s png:- "%s"',
 				$intermediate_image,
 				$this->imagemagick,
 				(($this->is_inverted) ? '-negate' : ''),
@@ -499,14 +529,14 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 	else
 	{
 		if (!$this->is_transparent)
-			$cmd .= sprintf (' %s %s %s',
+			$cmd .= sprintf (' %s "%s" "%s"',
 				(($this->is_inverted) ? '-negate' : ''),
 				$intermediate_image, $final_image);
 		else
 		{
 			// Adding alpha channel and changing alpha value
 			// need separate invocations, can't do in one pass
-			$cmd .= sprintf ('-alpha activate %s png:- | %s -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- %s',
+			$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- "%s"',
 				$intermediate_image,
 				$this->imagemagick,
 				(($this->is_inverted)? 1 : 0),
@@ -521,18 +551,20 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 /**
  * Check if given program is usable.
  *
+ * @since 0.2
+ * @uses is_absolute_path
  * @param mixed $match The string to be searched in program output. Can be an array of strings, in this case all strings must be found. Any non-string element in the array is ignored.
  * @param string $prog The program to be checked
  * @param string ... Arguments supplied to the program (if any)
  * @return boolean Return TRUE if the given program is usable
- * @since 0.2
  */
 public function is_prog_usable ($match, $prog)
 {
 	if (empty ($prog)) return false;
 
 	// safe guard
-	if (substr ($prog, 0, 1) != '/') return false;
+	if (!is_absolute_path ($prog))
+		return false;
 
 	$prog = realpath ($prog);
 
@@ -542,7 +574,7 @@ public function is_prog_usable ($match, $prog)
 	array_shift ($args);
 	array_shift ($args);
 
-	$cmdline = $prog . ' ' . implode (' ', $args) . ' 2>&1';
+	$cmdline = '"' . $prog . '" ' . implode (' ', $args) . ' 2>&1';
 	if (false === ($handle = popen ($cmdline, 'r'))) return false;
 
 	$output = fread ($handle, 2048);
@@ -653,10 +685,17 @@ public function render()
 		return false;
 	}
 
-	if ( false === ($input_file = tempnam ($this->temp_dir,
-		'scorerender-' . $this->get_notation_name() . '-')) )
+	if ( false === ($temp_working_dir = create_temp_dir ($this->temp_dir,
+		'sr-')) )
 	{
 		$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;
+		return false;
+	}
+
+	if ( false === ($input_file = tempnam ($temp_working_dir,
+		'scorerender-' . $this->get_notation_name() . '-')) )
+	{
+		$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
 		return false;
 	}
 	
@@ -686,11 +725,12 @@ public function render()
 
 	// Render using external application
 	$current_dir = getcwd();
-	chdir ($this->temp_dir);
+	chdir ($temp_working_dir);
 	if (!$this->conversion_step1($input_file, $intermediate_image) ||
 	    (filesize ($intermediate_image)) === 0)
 	{
-		//unlink($input_file);
+		unlink($input_file);
+		@rmdir ($temp_working_dir);
 		$this->error_code = ERR_RENDERING_ERROR;
 		return false;
 	}
@@ -705,6 +745,7 @@ public function render()
 	// Cleanup
 	unlink ($intermediate_image);
 	unlink ($input_file);
+	@rmdir ($temp_working_dir);
 
 	return basename ($final_image);
 }
