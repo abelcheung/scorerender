@@ -439,7 +439,10 @@ public function get_error_msg ()
  */
 function create_temp_dir ($dir, $prefix='', $mode=0700)
 {
-	trailingslashit ($dir);
+	$dir = trailingslashit ($dir);
+
+	if ( !is_dir ($dir) || !is_writable ($dir) )
+		$dir = sys_get_temp_dir ();
 
 	// Not secure indeed. But PHP doesn't provide facility to create temp folder anyway.
 	$chars = str_split ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
@@ -451,7 +454,7 @@ function create_temp_dir ($dir, $prefix='', $mode=0700)
 				$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)],
 				$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)]);
 	}
-	while (!mkdir ($path, $mode) && (++$i < 100));
+	while (!@mkdir ($path, $mode) && (++$i < 100));
 
 	return ($i < 100) ? $path : FALSE;
 }
@@ -685,7 +688,7 @@ public function render()
 		return false;
 	}
 
-	if ( false === ($temp_working_dir = create_temp_dir ($this->temp_dir,
+	if ( false === ($temp_working_dir = $this->create_temp_dir ($this->temp_dir,
 		'sr-')) )
 	{
 		$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;

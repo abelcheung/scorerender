@@ -61,7 +61,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 			$this->img_max_width / DPI * 2.54, 100.0, 1.125,
 			rawurlencode (file_get_contents ($input_file)));
 
-	return (copy ($url, $intermediate_image));
+	return (@copy ($url, $intermediate_image));
 }
 
 /**
