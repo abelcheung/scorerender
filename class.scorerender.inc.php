@@ -470,6 +470,8 @@ function create_temp_dir ($dir, $prefix='', $mode=0700)
  */
 protected function _exec ($cmd)
 {
+	if (DEBUG) print_r ($cmd);
+
 	$this->_commandOutput = '';
 	$retval = 0;
 
@@ -732,8 +734,10 @@ public function render()
 	if (!$this->conversion_step1($input_file, $intermediate_image) ||
 	    (filesize ($intermediate_image)) === 0)
 	{
-		unlink($input_file);
-		@rmdir ($temp_working_dir);
+		if (! DEBUG) {
+			unlink ($input_file);
+			@rmdir ($temp_working_dir);
+		}
 		$this->error_code = ERR_RENDERING_ERROR;
 		return false;
 	}
@@ -746,9 +750,11 @@ public function render()
 	}
 
 	// Cleanup
-	unlink ($intermediate_image);
-	unlink ($input_file);
-	@rmdir ($temp_working_dir);
+	if (! DEBUG) {
+		unlink ($intermediate_image);
+		unlink ($input_file);
+		@rmdir ($temp_working_dir);
+	}
 
 	return basename ($final_image);
 }
