@@ -1,5 +1,13 @@
 2008-09-16  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.scorerender.inc.php:
+	- (create_temp_dir) Fix usage and parent directory name.
+
+	* class.{guido,scorerender}.inc.php:
+	- Hide unimportant errors.
+
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.{abc,mup,lilypond,scorerender}.inc.php:
 	- Quote command line arguments properly (yes, PHP Win32 does not support
 	  quoting commands at least since 4.3.x)
