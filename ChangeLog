@@ -1,3 +1,23 @@
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.{abc,mup,lilypond,scorerender}.inc.php:
+	- Quote command line arguments properly (yes, PHP Win32 does not support
+	  quoting commands at least since 4.3.x)
+
+	* wp-scorerender.php: All sort of Win32 fixes.
+	- (get_path_presentation) New func. Convert slash <-> backslash in paths.
+	- (transform_paths) New func. Convert path slashes in settings.
+	- (is_absolute_path) New func. Self-explanatory.
+	- (get_upload_dir) Rewrite to allow transforming slashes <--> backslashes.
+	- (scorerender_get_options, scorerender_update_options) Convert to backslashes
+	  for displaying paths under Windows, but store Unix style slashes in DB.
+
+	* class.scorerender.php:
+	- (create_temp_dir) New func. Like tempnam, but for directory. Not good to
+	  litter all temp files under $TMP.
+	- (_exec) Rewritten to use popen, so need not assign another variable for output.
+	- (render) Adjusted to use temp dir instead of temp file.
+
 2008-09-15  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.*.inc.php:

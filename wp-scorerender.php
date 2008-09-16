@@ -141,12 +141,6 @@ foreach (array_values ($notations) as $notation)
 }
 
 
-function is_windows ()
-{
-	return (substr(PHP_OS, 0, 3) == 'WIN');
-}
-
-
 /*
  * Backported functions -- sys_get_temp_dir and array_intersect_key
  */
@@ -216,34 +210,109 @@ function scorerender_init_textdomain ()
 	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
 }
 
+
+/**
+ * Convenience function: Check if OS is Windows
+ *
+ * @since 0.2.50
+ * return boolean True if OS is Windows, false otherwise.
+ */
+function is_windows ()
+{
+	return (substr(PHP_OS, 0, 3) == 'WIN');
+}
+
+
+/**
+ * Transform path string to Windows or Unix presentation
+ *
+ * @since 0.2.50
+ * @param string $path The path to be transformed
+ * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
+ * @uses is_windows
+ * @return string $path The resulting path, with appropriate slashes or backslashes
+ */
+function get_path_presentation ($path, $is_internal)
+{
+	if (is_windows () && ! $is_internal)
+		return preg_replace ('#/+#', '\\', $path);
+
+	// FIXME: Japanese and Chinese users have to avoid non-UTF8 charsets
+	return preg_replace ('#\\\\+#', '/', $path);
+}
+
+/**
+ * Transform all path related options in ScoreRender settings
+ *
+ * @since 0.2.50
+ * @uses get_path_presentation
+ * @pararm array $array The settings to be transformed (as an array)
+ * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
+ */
+function transform_paths (&$setting, $is_internal)
+{
+	if (!is_array ($setting)) return;
+	
+	// Transform path related settings to unix presentation
+	$keys = array ('TEMP_DIR', 'CACHE_DIR', 'CONVERT_BIN',
+		'LILYPOND_BIN', 'MUP_BIN', 'MUP_MAGIC_FILE', 'ABCM2PS_BIN');
+	
+	foreach ($keys as $key)
+		if (isset ($setting[$key]))
+			$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
+
+}
+
+/**
+ * Convenience function: Check if a path is aboslute path
+ *
+ * @since 0.2.50
+ * @return boolean True if path is absolute, false otherwise.
+ */
+function is_absolute_path ($path)
+{
+	// FIXME: How about network shares on Windows?
+	return ( (!is_windows() && (substr ($path, 0, 1) == '/')) ||
+	         ( is_windows() && preg_match ('/^[A-Za-z]:/', $path) ) );
+}
+
 /**
  * Guess default upload directory setting from WordPress.
  * 
  * WordPress is inconsistent with upload directory setting across multiple
  * versions. Try to guess to most sensible setting and take that as default
  * value.
+ *
  * @since 0.2
+ * @uses get_path_presentation
+ * @uses is_absolute_path
+ * @return array Returns array containing both full path ('path' key) and corresponding URL ('url' key)
  */
 function get_upload_dir ()
 {
 	$uploads = wp_upload_dir();
-	if (isset ($uploads['basedir']) && isset ($uploads['baseurl']))
-		return array ('path' => $uploads['basedir'],
-			'url' => $uploads['baseurl']);
-
-	$url = trim(get_option('upload_url_path'));
-	$path = trim(get_option('upload_path'));
-
+	
+	if (isset ($uploads['basedir']))
+		$path = $uploads['basedir'];
+	else
+		$path = trim(get_option('upload_path'));
+	
 	if (empty ($path))
 		$path = 'wp-content'.DIRECTORY_SEPARATOR.'uploads';
 
-	if ( (!is_windows() && (substr ($path, 0, 1) != '/')) ||
-	     ( is_windows() && (substr ($path, 1, 1) != ':')) )
+	if (!is_absolute_path ($path))
 		$path = ABSPATH . $path;
 
+	if (isset ($uploads['baseurl']))
+		$url = $uploads['baseurl'];
+	else
+		$url = trim(get_option('upload_url_path'));
+	
 	if (empty ($url))
 		$url = get_option('siteurl') . '/' .
 			str_replace (ABSPATH, '', $path);
+
+	$path = get_path_presentation ($path, FALSE);
 
 	return (array ('path' => $path, 'url' => $url));
 }
@@ -261,7 +330,6 @@ function scorerender_get_options ()
 {
 	global $scorerender_options, $default_tmp_dir;
 
-	$default_tmp_dir = sys_get_temp_dir();
 	$scorerender_options = get_option ('scorerender_options');
 
 	if (!is_array ($scorerender_options))
@@ -271,16 +339,21 @@ function scorerender_get_options ()
 	elseif (array_key_exists ('DB_VERSION', $scorerender_options) &&
 		($scorerender_options['DB_VERSION'] >= DATABASE_VERSION) )
 	{
+		transform_paths ($scorerender_options, FALSE);
 		return;
 	}
 
+	$default_tmp_dir = sys_get_temp_dir();
 	$cachefolder = get_upload_dir ();
+
 	$defprog = array();
+	// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
+	// So just make up some close enough paths for them
 	if (is_windows ())
 		$defprog = array (
 			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
 			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
-			'lilypond' => 'C:\Program Files\Lilypond\lilypond.exe',
+			'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
 			'mup' => 'C:\Program Files\mupmate\mup.exe',
 		);
 	else
@@ -335,7 +408,11 @@ function scorerender_get_options ()
 	$scorerender_options = array_intersect_key ($scorerender_options, $defaults);
 	$scorerender_options = array_merge ($defaults, $scorerender_options);
 	$scorerender_options['DB_VERSION'] = DATABASE_VERSION;
+
+	transform_paths ($scorerender_options, TRUE);
 	update_option ('scorerender_options', $scorerender_options);
+	transform_paths ($scorerender_options, FALSE);
+	
 	return;
 }
 
@@ -456,6 +533,7 @@ function scorerender_process_content ($render)
 
 		  default:
 			return $render->get_error_msg ();
+			//return $render->get_command_output ();
 		}
 	}
 
@@ -697,7 +775,9 @@ function scorerender_update_options ()
 		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
 
 	global $defalt_tmp_dir, $scorerender_options;
+
 	$newopt = (array) $_POST['ScoreRender'];
+	transform_paths ($newopt, TRUE);
 
 	$messages = array
 	(
@@ -775,7 +855,9 @@ function scorerender_update_options ()
 	}
 
 	$scorerender_options = array_merge ($scorerender_options, $newopt);
+	transform_paths ($scorerender_options, TRUE);
 	update_option ('scorerender_options', $scorerender_options);
+	transform_paths ($scorerender_options, FALSE);
 
 	if ( !empty ($errmsgs) )
 	{

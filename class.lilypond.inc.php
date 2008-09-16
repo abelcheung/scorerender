@@ -83,7 +83,7 @@ EOD;
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
 	/* lilypond adds .ps extension by itself */
-	$cmd = sprintf ('%s --safe --ps --output %s %s 2>&1',
+	$cmd = sprintf ('"%s" --safe --ps --output "%s" "%s" 2>&1',
 		$this->mainprog,
 		dirname($intermediate_image) . DIRECTORY_SEPARATOR . basename($intermediate_image, ".ps"),
 		$input_file);
