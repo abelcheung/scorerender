@@ -29,39 +29,6 @@
 */
 class pmwRender extends ScoreRender
 {
-	private $width;
-
-	/**
-	 * Set maximum width of generated images
-	 *
-	 * @param integer $width Maximum width of images (in pixel)
-	 * @since 0.2.50
-	 */
-	public function set_img_width ($width)
-	{
-		parent::set_img_width ($width);
-		$this->width = $this->img_max_width / DPI;
-	}
-
-	/**
-	 * Checks if given content is invalid or dangerous content
-	 *
-	 * @param string $input
-	 * @return boolean True if content is deemed safe
-	 */
-	protected function is_valid_input ()
-	{
-		$blacklist = array
-		(
-			'/^\s*\binclude\b/', '/^\s*\bfontfile\b/'
-		);
-
-		foreach ($blacklist as $pattern)
-			if (preg_match ($pattern, $this->_input))
-				return false;
-
-		return true;
-	}
 
 	/**
 	 * Outputs complete music input file for rendering.
@@ -75,7 +42,15 @@ class pmwRender extends ScoreRender
 	 */
 	public function get_music_fragment ()
 	{
-		return $this->_input;
+		// If page size is changed here, it must also be changed
+		// under conversion_step2().
+		$header = <<<EOD
+Sheetsize A3
+Linelength {$this->img_max_width}
+
+EOD;
+		// PMW doesn't like \n\r
+		return str_replace ("\r", '', $header . $this->_input);
 	}
 
 	/**
@@ -92,12 +67,26 @@ class pmwRender extends ScoreRender
 	 */
 	protected function conversion_step1 ($input_file, $intermediate_image)
 	{
-		$cmd = sprintf ('%s -includefont %s %s 2>&1',
+		$cmd = sprintf ('%s -includefont -o %s %s 2>&1',
 		                $this->mainprog,
 		                $intermediate_image, $input_file);
 		$retval = $this->_exec($cmd);
 
 		return ($result['return_val'] == 0);
+	}
+
+	/**
+	 * @param string $intermediate_image The rendered PostScript file name
+	 * @param string $final_image The final PNG image file name
+	 * @return boolean Whether conversion from PostScript to PNG is successful
+	 * @access protected
+	 */
+	protected function conversion_step2 ($intermediate_image, $final_image)
+	{
+		// ImageMagick mistakenly identify all PostScript produced by PMW as
+		// having Letter (8.5"x11") size! Braindead.
+		return parent::conversion_step2 ($intermediate_image, $final_image, TRUE,
+			'-page a3');
 	}
 
 	/**

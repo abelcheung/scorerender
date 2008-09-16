@@ -59,6 +59,10 @@ define ('TEXTDOMAIN', 'scorerender');
  */
 define ('REGEX_CACHE_IMAGE', '/^sr-\w+-[0-9A-Fa-f]{32}\.png$/');
 
+/**
+ * Debugging purpose
+ */
+define (DEBUG, FALSE);
 
 /*
  * How error is handled when rendering failed
@@ -543,8 +547,10 @@ function scorerender_process_content ($render)
 				$notations[$name]['endtag'];
 
 		  default:
-			return $render->get_error_msg ();
-			//return $render->get_command_output ();
+			if (DEBUG)
+				return $render->get_command_output ();
+			else
+				return $render->get_error_msg ();
 		}
 	}
 
