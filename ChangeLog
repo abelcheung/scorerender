@@ -1,3 +1,13 @@
+2008-09-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.{pmw,lilypond,abc,mup}.inc.php:
+	- Don't add stderr redirection, let _exec handle that.
+
+	* class.scorerender.inc.php:
+	- (create_temp_dir) Set default argument for 1st argument.
+	- (_exec) Create batch file for Windows before execution, to
+	  circumvent stupid exec bug.
+
 2008-09-16  Abel Cheung  <abelcheung@gmail.com>
 
 	* class.pmw.inc.php: Fix ImageMagick and PMW command invocation.

@@ -361,6 +361,8 @@ function scorerender_get_options ()
 	$defprog = array();
 	// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
 	// So just make up some close enough paths for them
+	// PMW doesn't even have public available Win32 binary, perhaps
+	// somebody might be able to compile it with MinGW?
 	if (is_windows ())
 		$defprog = array (
 			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
@@ -887,9 +889,9 @@ function scorerender_update_options ()
 		foreach (array_values ($errmsgs) as $m)
 		{
 			if ($messages[$m]['level'] == MSG_WARNING)
-				echo '<div id="scorerender-error-' . $messages[$m] . '" class="updated fade-ff0000"><p><strong>' . sprintf (__('WARNING: %s', TEXTDOMAIN), $messages[$m]['content']) . "</strong></p></div>\n";
+				echo '<div id="scorerender-error-' . $messages[$m] . '" class="updated fade-800000"><p><strong>' . sprintf (__('WARNING: %s', TEXTDOMAIN), $messages[$m]['content']) . "</strong></p></div>\n";
 			elseif ($messages[$m]['level'] == MSG_FATAL)
-				echo '<div id="scorerender-error-' . $messages[$m] . '" class="updated" style="background-color: #ff0000; color: white;"><p><strong>' . sprintf (__('ERROR: %s', TEXTDOMAIN), $messages[$m]['content']) . "</strong></p></div>\n";
+				echo '<div id="scorerender-error-' . $messages[$m] . '" class="updated" style="background-color: #800000; color: white;"><p><strong>' . sprintf (__('ERROR: %s', TEXTDOMAIN), $messages[$m]['content']) . "</strong></p></div>\n";
 		}
 	}
 	else

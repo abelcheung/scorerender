@@ -81,7 +81,7 @@ EOT;
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	$cmd = sprintf ('"%s" "%s" -O "%s" 2>&1',
+	$cmd = sprintf ('"%s" "%s" -O "%s"',
 			$this->mainprog,
 			$input_file, $intermediate_image);
 	$retval = $this->_exec($cmd);

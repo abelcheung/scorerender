@@ -83,7 +83,7 @@ EOD;
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
 	/* lilypond adds .ps extension by itself */
-	$cmd = sprintf ('"%s" --safe --ps --output "%s" "%s" 2>&1',
+	$cmd = sprintf ('"%s" --safe --ps --output "%s" "%s"',
 		$this->mainprog,
 		dirname($intermediate_image) . DIRECTORY_SEPARATOR . basename($intermediate_image, ".ps"),
 		$input_file);
@@ -94,7 +94,6 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * @uses ScoreRender::_exec
  * @param string $intermediate_image The rendered PostScript file name
  * @param string $final_image The final PNG image file name
  * @return boolean Whether conversion from PostScript to PNG is successful
