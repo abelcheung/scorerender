@@ -1,5 +1,11 @@
 2008-09-18  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	- (scorerender_update_options) Fix bug: IE transparency warning option
+	  can't be turned off once it is turned on.
+
+2008-09-18  Abel Cheung  <abelcheung@gmail.com>
+
 	* class.{pmw,lilypond,abc,mup}.inc.php:
 	- Don't add stderr redirection, let _exec handle that.
 
