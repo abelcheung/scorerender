@@ -1,5 +1,10 @@
 2008-09-18  Abel Cheung  <abelcheung@gmail.com>
 
+	* class.*.inc.php: Moved to notation/ subdirectory.
+	* wp-scorerender.php: Updated file locations to reflect file move.
+
+2008-09-18  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php:
 	- (scorerender_update_options) Fix bug: IE transparency warning option
 	  can't be turned off once it is turned on.
