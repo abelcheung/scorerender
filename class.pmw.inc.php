@@ -68,7 +68,7 @@ EOD;
 	 */
 	protected function conversion_step1 ($input_file, $intermediate_image)
 	{
-		$cmd = sprintf ('%s -includefont -o %s %s 2>&1',
+		$cmd = sprintf ('"%s" -includefont -o "%s" "%s"',
 		                $this->mainprog,
 		                $intermediate_image, $input_file);
 		$retval = $this->_exec($cmd);
@@ -85,7 +85,8 @@ EOD;
 	protected function conversion_step2 ($intermediate_image, $final_image)
 	{
 		// ImageMagick mistakenly identify all PostScript produced by PMW as
-		// having Letter (8.5"x11") size! Braindead.
+		// having Letter (8.5"x11") size! Braindead. Without -page option it
+		// just displays incomprehensible error.
 		return parent::conversion_step2 ($intermediate_image, $final_image, TRUE,
 			'-page a3');
 	}

@@ -138,7 +138,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	/* mup forces this kind of crap */
 	putenv ("HOME=" . $this->temp_dir);
 
-	$cmd = sprintf ('"%s" -f "%s" "%s" 2>&1',
+	$cmd = sprintf ('"%s" -f "%s" "%s"',
 			$this->mainprog,
 			$intermediate_image, $input_file);
 	$retval = $this->_exec($cmd);

@@ -48,7 +48,6 @@ public function get_music_fragment ()
 /**
  * Render raw input file into PostScript file.
  *
- * @uses ScoreRender::_exec
  * @param string $input_file File name of raw input file containing music content
  * @param string $intermediate_image File name of rendered PostScript file
  * @return boolean Whether rendering is successful or not
@@ -65,7 +64,6 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * @uses ScoreRender::_exec
  * @param string $intermediate_image The rendered PostScript file name
  * @param string $final_image The final PNG image file name
  * @return boolean Whether conversion from PostScript to PNG is successful

@@ -424,7 +424,7 @@ public function get_error_msg ()
 	  case ERR_CONVERT_UNUSABLE:
 		return $this->format_error_msg (__('ImageMagick program is unusable!', TEXTDOMAIN));
 
-	case ERR_IMAGE_NOT_VIEWABLE:
+	  case ERR_IMAGE_NOT_VIEWABLE:
 		return $this->format_error_msg (__('Image is not viewable!', TEXTDOMAIN));
 	}
 }
@@ -437,12 +437,12 @@ public function get_error_msg ()
  * @param string $prefix
  * @param integer $mode
  */
-function create_temp_dir ($dir, $prefix='', $mode=0700)
+public function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
 {
-	$dir = trailingslashit ($dir);
+	if (!empty ($dir)) $dir = trailingslashit ($dir);
 
 	if ( !is_dir ($dir) || !is_writable ($dir) )
-		$dir = sys_get_temp_dir ();
+		$dir = trailingslashit (sys_get_temp_dir ());
 
 	// Not secure indeed. But PHP doesn't provide facility to create temp folder anyway.
 	$chars = str_split ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
@@ -468,19 +468,33 @@ function create_temp_dir ($dir, $prefix='', $mode=0700)
  * @uses $_commandOutput Command output is stored in this variable.
  * @access protected
  */
-protected function _exec ($cmd)
+final protected function _exec ($cmd)
 {
 	if (DEBUG) print_r ($cmd);
 
-	$this->_commandOutput = '';
+	$cmd_output = array();
+
 	$retval = 0;
 
-	if (false === ($handle = popen ($cmd, 'r'))) return 129;
-
-	while (!feof ($handle))
-		$this->_commandOutput .= fread ($handle, 2048);
-
-	pclose ($handle);
+	if (!is_windows ())
+		exec ($cmd . " 2>&1", $cmd_output, $retval);
+	else
+	{
+		// Circumvent PHP ***FEATURE*** under Windows: exec, popen etc can't
+		// accept command line containing more than 2 double quotes
+		if (false === ($tmpdir = $this->create_temp_dir ('', 'sr-batch-'))) return 129;
+		if (false === ($tmpbatchfile = tempnam ($tmpdir, 'sr-'))) return 129;
+		rename ($tmpbatchfile, $tmpbatchfile.".bat");
+		$tmpbatchfile .= ".bat";
+		file_put_contents ($tmpbatchfile, sprintf ("@echo off\n\r%s\n\r", $cmd));
+		exec ($tmpbatchfile . " 2>&1", $cmd_output, $retval);
+		if (! DEBUG)
+		{
+			unlink ($tmpbatchfile);
+			rmdir ($tmpdir);
+		}
+	}
+	$this->_commandOutput = implode ("\n", $cmd_output);
 
 	return $retval;	
 }
@@ -609,6 +623,7 @@ public function is_prog_usable ($match, $prog)
  * and resulting image is stored in cache folder.
  *
  * @uses ERR_INVALID_INPUT Return this error code if is_valid_input method returned false
+ * @uses ERR_IMAGE_NOT_VIEWABLE Return this error code if image is rendered but not readable
  * @uses ERR_LENGTH_EXCEEDED Return this error code if content length limit is exceeded
  * @uses ERR_CACHE_DIRECTORY_NOT_WRITABLE Return this error code if cache directory is not writable
  * @uses ERR_TEMP_DIRECTORY_NOT_WRITABLE Return this error code if temporary directory is not writable
@@ -617,6 +632,9 @@ public function is_prog_usable ($match, $prog)
  * @uses ERR_RENDERING_ERROR Return this error code if rendering command fails
  * @uses ERR_IMAGE_CONVERT_FAILURE Return this error code if PS -> PNG conversion failed
  *
+ * @uses get_music_fragment Obtain music content from this method
+ * @uses is_valid_input Validate content before rendering
+ * @uses is_prog_usable Check if ImageMagick is functional
  * @uses conversion_step1 First pass rendering: Convert input file -> PS
  * @uses conversion_step2 Second pass rendering: Convert PS -> PNG
  *
