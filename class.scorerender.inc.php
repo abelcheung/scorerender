@@ -486,7 +486,7 @@ final protected function _exec ($cmd)
 		if (false === ($tmpbatchfile = tempnam ($tmpdir, 'sr-'))) return 129;
 		rename ($tmpbatchfile, $tmpbatchfile.".bat");
 		$tmpbatchfile .= ".bat";
-		file_put_contents ($tmpbatchfile, sprintf ("@echo off\n\r%s\n\r", $cmd));
+		file_put_contents ($tmpbatchfile, sprintf ("@echo off\r\n%s\r\n", $cmd));
 		exec ($tmpbatchfile . " 2>&1", $cmd_output, $retval);
 		if (! DEBUG)
 		{
