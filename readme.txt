@@ -3,7 +3,7 @@ Contributors: abelcheung
 Tags: music, score, music notation, abc, mup, lilypond, guido
 Requires at least: 2.2
 Tested up to: 2.6
-Stable tag: scorerender-0-2-0
+Stable tag: scorerender-0-2-1
 
 Renders inline sheet music fragments in post, pages and comments.
 
