@@ -838,6 +838,7 @@ function scorerender_update_options ()
 	$newopt['SHOW_SOURCE']       = isset ($newopt['SHOW_SOURCE']);
 	$newopt['INVERT_IMAGE']      = isset ($newopt['INVERT_IMAGE']);
 	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE']);
+	$newopt['SHOW_IE_TRANSPARENCY_WARNING'] = isset ($newopt['SHOW_IE_TRANSPARENCY_WARNING']);
 	$newopt['COMMENT_ENABLED']   = isset ($newopt['COMMENT_ENABLED']);
 
 	if (!ctype_digit ($newopt['CONTENT_MAX_LENGTH']))
