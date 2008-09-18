@@ -4,7 +4,7 @@ Plugin Name: ScoreRender
 Plugin URI: http://scorerender.abelcheung.org/
 Description: Renders inline music score fragments in WordPress. Heavily based on FigureRender from Chris Lamb.
 Author: Abel Cheung
-Version: 0.2.0
+Version: 0.2.1
 Author URI: http://me.abelcheung.org/
 */
 
@@ -852,6 +852,7 @@ function scorerender_update_options ()
 	$newopt['SHOW_SOURCE']       = isset ($newopt['SHOW_SOURCE']);
 	$newopt['INVERT_IMAGE']      = isset ($newopt['INVERT_IMAGE']);
 	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE']);
+	$newopt['SHOW_IE_TRANSPARENCY_WARNING'] = isset ($newopt['SHOW_IE_TRANSPARENCY_WARNING']);
 	$newopt['COMMENT_ENABLED']   = isset ($newopt['COMMENT_ENABLED']);
 
 	if (!ctype_digit ($newopt['CONTENT_MAX_LENGTH']))
