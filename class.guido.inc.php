@@ -71,8 +71,13 @@ protected function conversion_step1 ($input_file, $intermediate_image)
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
-	return parent::conversion_step2 ($intermediate_image, $final_image, FALSE,
-		'-shave 1x1 -geometry 56%');
+	// Under Windows, percent sign must be escaped
+	if (is_windows ())
+		return parent::conversion_step2 ($intermediate_image, $final_image, FALSE,
+			'-shave 1x1 -geometry 56%%');
+	else
+		return parent::conversion_step2 ($intermediate_image, $final_image, FALSE,
+			'-shave 1x1 -geometry 56%');
 }
 
 /**
