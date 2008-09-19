@@ -120,34 +120,57 @@ EOD;
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	/* Mup requires a file ".mup" present in $HOME or
-	   current working directory. It must be present even if
-	   not registered, otherwise mup refuse to render anything.
-	   Even worse, the exist status in this case is 0, so
-	   _exec succeeds yet no postscript is rendered. */
+	/* Mup requires a magic file before it is usable.
+	   On Unix this file is named ".mup", and must reside in $HOME or current working directory.
+	   On Windows / DOS, it is named "mup.ok" instead, and located in current working directory or same location as mup.exe do.
+	   It must be present even if not registered, otherwise mup refuse to render anything.
+	   Even worse, the exist status in this case is 0, so _exec() succeeds yet no postscript is rendered. */
 
-	$temp_magic_file = $this->temp_dir . DIRECTORY_SEPARATOR . '.mup';
-	if (!file_exists($temp_magic_file))
+	if (is_windows())
 	{
-		if (is_readable($this->magic_file))
-			copy($this->magic_file, $temp_magic_file);
-		else
-			touch ($temp_magic_file);
+		$cmd = sprintf (
+				'COPY "%s" .\mup.ok' . "\r\n" .
+				'"%s" -f "%s" "%s"' . "\r\n" .
+				'DEL .\mup.ok' . "\r\n",
+				(is_readable($this->magic_file)) ? $this->magic_file : 'NUL:',
+				$this->mainprog,
+				$intermediate_image, $input_file);
+		$retval = $this->_exec($cmd);
 	}
+	else
+	{
+		$temp_magic_file = $this->temp_dir . '/.mup';
+		
+		if (!file_exists($temp_magic_file))
+		{
+			if (is_readable($this->magic_file))
+				copy($this->magic_file, $temp_magic_file);
+			else
+				touch ($temp_magic_file);
+		}
 
-	/* mup forces this kind of crap */
-	putenv ("HOME=" . $this->temp_dir);
+		/* mup forces this kind of crap */
+		putenv ("HOME=" . $this->temp_dir);
 
-	$cmd = sprintf ('"%s" -f "%s" "%s"',
-			$this->mainprog,
-			$intermediate_image, $input_file);
-	$retval = $this->_exec($cmd);
+		$cmd = sprintf ('"%s" -f "%s" "%s"',
+				$this->mainprog,
+				$intermediate_image, $input_file);
+		$retval = $this->_exec($cmd);
 
-	unlink ($temp_magic_file);
-
+		unlink ($temp_magic_file);
+	}
+	
 	return (filesize ($intermediate_image) != 0);
 	//return ($result['return_val'] == 0);
 }
+
+protected function conversion_step2 ($intermediate_image, $final_image)
+{
+	// FIXME: mind boggling exercise: why ImageMagick identifies PostScript produced by Mup as having
+	// transparency on Windows, yet otherwise on Linux?
+	return parent::conversion_step2 ($intermediate_image, $final_image, is_windows());
+}
+
 
 /**
  * Check if given program is Mup, and whether it is usable.
