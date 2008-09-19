@@ -440,7 +440,7 @@ public function get_error_msg ()
  */
 final protected function _exec ($cmd)
 {
-	if (DEBUG) print_r ($cmd);
+	if (DEBUG) { echo '<pre style="overflow: auto">' . $cmd . "</pre>\n"; }
 
 	$cmd_output = array();
 
