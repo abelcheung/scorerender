@@ -1,5 +1,10 @@
 2008-09-19  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-class.php:
+	- (create_temp_dir) Moved to scorerender-utils.php.
+
+2008-09-19  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php: Code refactoring, move util functions to
 	  scorerender-utils.php
 	* class.scorerender.inc.php -> scorerender-class.php

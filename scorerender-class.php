@@ -430,36 +430,6 @@ public function get_error_msg ()
 }
 
 /**
- * Create temporary directory
- *
- * Inspired from PHP tempnam documentation comment
- * @param string $dir
- * @param string $prefix
- * @param integer $mode
- */
-public function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
-{
-	if (!empty ($dir)) $dir = trailingslashit ($dir);
-
-	if ( !is_dir ($dir) || !is_writable ($dir) )
-		$dir = trailingslashit (sys_get_temp_dir ());
-
-	// Not secure indeed. But PHP doesn't provide facility to create temp folder anyway.
-	$chars = str_split ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-	$i = 0;
-	
-	do {
-		$path = $dir . $prefix .
-			sprintf ("%s%s%s%s%s%s",
-				$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)],
-				$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)]);
-	}
-	while (!@mkdir ($path, $mode) && (++$i < 100));
-
-	return ($i < 100) ? $path : FALSE;
-}
-
-/**
  * Executes command and stores output message
  *
  * {@internal It is basically exec() with additional stuff}
@@ -482,7 +452,7 @@ final protected function _exec ($cmd)
 	{
 		// Circumvent PHP ***FEATURE*** under Windows: exec, popen etc can't
 		// accept command line containing more than 2 double quotes
-		if (false === ($tmpdir = $this->create_temp_dir ('', 'sr-batch-'))) return 129;
+		if (false === ($tmpdir = create_temp_dir ('', 'sr-batch-'))) return 129;
 		if (false === ($tmpbatchfile = tempnam ($tmpdir, 'sr-'))) return 129;
 		rename ($tmpbatchfile, $tmpbatchfile.".bat");
 		$tmpbatchfile .= ".bat";
@@ -708,8 +678,7 @@ public function render()
 		return false;
 	}
 
-	if ( false === ($temp_working_dir = $this->create_temp_dir ($this->temp_dir,
-		'sr-')) )
+	if ( false === ($temp_working_dir = create_temp_dir ($this->temp_dir, 'sr-')) )
 	{
 		$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;
 		return false;
