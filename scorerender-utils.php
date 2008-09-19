@@ -104,7 +104,7 @@ function is_absolute_path ($path)
  * @param integer $mode Access mode of temp directory
  * @return string Full path of created temp directory, or FALSE on failure
  */
-public function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
+function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
 {
 	if ( !is_dir ($dir) || !is_writable ($dir) )
 		$dir = sys_get_temp_dir ();
