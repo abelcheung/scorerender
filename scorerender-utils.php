@@ -95,4 +95,34 @@ function is_absolute_path ($path)
 	         ( is_windows() && preg_match ('/^[A-Za-z]:/', $path) ) );
 }
 
+/**
+ * Create temporary directory
+ *
+ * Inspired from PHP tempnam documentation comment
+ * @param string $dir Base directory on which temp folder is created
+ * @param string $prefix Prefix of temp directory
+ * @param integer $mode Access mode of temp directory
+ * @return string Full path of created temp directory, or FALSE on failure
+ */
+public function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
+{
+	if ( !is_dir ($dir) || !is_writable ($dir) )
+		$dir = sys_get_temp_dir ();
+
+	if (!empty ($dir)) $dir = trailingslashit ($dir);
+
+	// Not secure indeed. But PHP doesn't provide facility to create temp folder anyway.
+	$chars = str_split ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+	$i = 0;
+	
+	do {
+		$path = $dir . $prefix . sprintf ("%s%s%s%s%s%s",
+			$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)],
+			$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)]);
+	}
+	while (!@mkdir ($path, $mode) && (++$i < 100));
+
+	return ($i < 100) ? $path : FALSE;
+}
+
 ?>
