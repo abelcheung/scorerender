@@ -151,6 +151,56 @@ foreach (array_values ($notations) as $notation)
 	require_once ($notation['includefile']);
 }
 
+$defprog = array();
+// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
+// So just make up some close enough paths for them
+// PMW doesn't even have public available Win32 binary, perhaps
+// somebody might be able to compile it with MinGW?
+if (is_windows ())
+	$defprog = array (
+		'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
+		'convert' => 'C:\Program Files\ImageMagick\convert.exe',
+		'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
+		'mup' => 'C:\Program Files\mupmate\mup.exe',
+		'pmw' => '',
+	);
+else
+	$defprog = array (
+		'abc2ps' => '/usr/bin/abcm2ps',
+		'convert' => '/usr/bin/convert',
+		'lilypond' => '/usr/bin/lilypond',
+		'mup' => '/usr/local/bin/mup',
+		'pmw' => '/usr/local/bin/pmw',
+	);
+
+// default options
+$default_settings = array
+(
+	'DB_VERSION'           => array ('type' =>   'none', 'value' => DATABASE_VERSION),
+	'TEMP_DIR'             => array ('type' =>   'path', 'value' => sys_get_temp_dir()),
+	'CACHE_DIR'            => array ('type' =>   'path', 'value' => $cachefolder['path']),
+	'CACHE_URL'            => array ('type' =>    'url', 'value' => $cachefolder['url']),
+
+	'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
+	'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
+	'TRANSPARENT_IMAGE'    => array ('type' =>   'bool', 'value' => true),
+	'SHOW_SOURCE'          => array ('type' =>   'bool', 'value' => false),
+	'SHOW_IE_TRANSPARENCY_WARNING' => array ('type' =>   'bool', 'value' => false),
+	'COMMENT_ENABLED'      => array ('type' =>   'bool', 'value' => false),
+	'ERROR_HANDLING'       => array ('type' =>   'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+
+	'CONTENT_MAX_LENGTH'   => array ('type' =>    'int', 'value' => 4096),
+	'FRAGMENT_PER_COMMENT' => array ('type' =>    'int', 'value' => 1),
+
+	'CONVERT_BIN'          => array ('type' =>   'prog', 'value' => $defprog['convert']),
+	'LILYPOND_BIN'         => array ('type' =>   'prog', 'value' => $defprog['lilypond']),
+	'MUP_BIN'              => array ('type' =>   'prog', 'value' => $defprog['mup']),
+	'ABCM2PS_BIN'          => array ('type' =>   'prog', 'value' => $defprog['abc2ps']),
+	'PMW_BIN'              => array ('type' =>   'prog', 'value' => $defprog['pmw']),
+	'MUP_MAGIC_FILE'       => array ('type' =>   'path', 'value' => ''),
+);
+
+
 /**
  * Initialize text domain.
  *
@@ -181,14 +231,13 @@ function transform_paths (&$setting, $is_internal)
 {
 	if (!is_array ($setting)) return;
 	
-	// Transform path related settings to unix presentation
-	$keys = array ('TEMP_DIR', 'CACHE_DIR',
-		'CONVERT_BIN', 'LILYPOND_BIN', 'MUP_BIN',
-		'MUP_MAGIC_FILE', 'ABCM2PS_BIN', 'PMW_BIN');
+	global $default_settings;
 	
-	foreach ($keys as $key)
-		if (isset ($setting[$key]))
-			$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
+	// Transform path and program settings to unix presentation
+	foreach ($default_settings as $key => $val)
+		if ( ($val['type'] == 'path') || ($val['type'] == 'prog') )
+			if (isset ($setting[$key]))
+				$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
 
 }
 
@@ -254,7 +303,7 @@ function scorerender_get_upload_dir ()
  */
 function scorerender_get_options ()
 {
-	global $sr_options;
+	global $sr_options, $default_settings;
 
 	$sr_options = get_option ('scorerender_options');
 
@@ -271,57 +320,6 @@ function scorerender_get_options ()
 
 	$cachefolder = scorerender_get_upload_dir ();
 
-	$defprog = array();
-	// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
-	// So just make up some close enough paths for them
-	// PMW doesn't even have public available Win32 binary, perhaps
-	// somebody might be able to compile it with MinGW?
-	if (is_windows ())
-		$defprog = array (
-			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
-			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
-			'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
-			'mup' => 'C:\Program Files\mupmate\mup.exe',
-			'pmw' => '',
-		);
-	else
-		$defprog = array (
-			'abc2ps' => '/usr/bin/abcm2ps',
-			'convert' => '/usr/bin/convert',
-			'lilypond' => '/usr/bin/lilypond',
-			'mup' => '/usr/local/bin/mup',
-			'pmw' => '/usr/local/bin/pmw',
-		);
-
-	// default options
-	$defaults = array
-	(
-		'DB_VERSION'           => DATABASE_VERSION,
-		'TEMP_DIR'             => sys_get_temp_dir(),
-		'CONVERT_BIN'          => $defprog['convert'],
-		'CACHE_DIR'            => $cachefolder['path'],
-		'CACHE_URL'            => $cachefolder['url'],
-
-		'IMAGE_MAX_WIDTH'      => 360,
-		'INVERT_IMAGE'         => false,
-		'TRANSPARENT_IMAGE'    => true,
-		'SHOW_SOURCE'          => false,
-		'SHOW_IE_TRANSPARENCY_WARNING' => 0,
-		'ERROR_HANDLING'       => ON_ERR_SHOW_MESSAGE,
-		'COMMENT_ENABLED'      => false,
-
-		'CONTENT_MAX_LENGTH'   => 4096,
-		'FRAGMENT_PER_COMMENT' => 1,
-
-		'LILYPOND_BIN'         => $defprog['lilypond'],
-
-		'MUP_BIN'              => $defprog['mup'],
-		'MUP_MAGIC_FILE'       => '',
-
-		'ABCM2PS_BIN'          => $defprog['abc2ps'],
-		'PMW_BIN'              => $defprog['pmw'],
-	);
-
 	// Special handling for certain versions
 	if ($sr_options['DB_VERSION'] <= 9)
 	{
@@ -335,6 +333,10 @@ function scorerender_get_options ()
 	}
 
 	// remove current settings not present in newest schema, then merge default values
+	$defaults = array();
+	while (list ($key, $val) = each ($default_settings))
+		$defaults += array ($key => $val['value']);
+
 	$sr_options = array_intersect_key ($sr_options, $defaults);
 	$sr_options = array_merge ($defaults, $sr_options);
 	$sr_options['DB_VERSION'] = DATABASE_VERSION;
@@ -706,7 +708,7 @@ function scorerender_update_options ()
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
 		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
 
-	global $sr_options;
+	global $sr_options, $default_settings;
 
 	$newopt = (array) $_POST['ScoreRender'];
 	transform_paths ($newopt, TRUE);
@@ -748,46 +750,44 @@ function scorerender_update_options ()
 	if ( ! ScoreRender::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
 		$errmsgs[] = 'convert_bin_problem';
 
-	$newopt['SHOW_SOURCE']       = isset ($newopt['SHOW_SOURCE']);
-	$newopt['INVERT_IMAGE']      = isset ($newopt['INVERT_IMAGE']);
-	$newopt['TRANSPARENT_IMAGE'] = isset ($newopt['TRANSPARENT_IMAGE']);
-	$newopt['SHOW_IE_TRANSPARENCY_WARNING'] = isset ($newopt['SHOW_IE_TRANSPARENCY_WARNING']);
-	$newopt['COMMENT_ENABLED']   = isset ($newopt['COMMENT_ENABLED']);
+	foreach ($default_settings as $key => $val)
+		if ($val['type'] == 'bool')
+			$newopt[$key] = isset ($newopt[$key]);
 
-	if (!ctype_digit ($newopt['CONTENT_MAX_LENGTH']))
+	if ( !ctype_digit ($newopt['CONTENT_MAX_LENGTH']) )
 	{
 		$errmsgs[] = 'wrong_content_length';
 		unset ($newopt['CONTENT_MAX_LENGTH']);
 	}
 
-	if (isset ($newopt['FRAGMENT_PER_COMMENT']) &&
-		!ctype_digit ($newopt['FRAGMENT_PER_COMMENT']))
+	if ( isset ($newopt['FRAGMENT_PER_COMMENT']) &&
+		!ctype_digit ($newopt['FRAGMENT_PER_COMMENT']) )
 	{
 		$errmsgs[] = 'wrong_frag_per_comment';
 		unset ($newopt['FRAGMENT_PER_COMMENT']);
 	}
 
-	if (!ctype_digit ($newopt['IMAGE_MAX_WIDTH']) || ($newopt['IMAGE_MAX_WIDTH'] < (1 * DPI)))
+	if ( !ctype_digit ($newopt['IMAGE_MAX_WIDTH']) || ($newopt['IMAGE_MAX_WIDTH'] < (1 * DPI)) )
 	{
 		$errmsgs[] = 'wrong_image_max_width';
 		unset ($newopt['IMAGE_MAX_WIDTH']);
 	}
 
 	// FIXME: Anyway to do pluggable checking without access these methods directly?
-	if (! empty ($newopt['LILYPOND_BIN']) &&
-			! lilypondRender::is_notation_usable ('prog=' . $newopt['LILYPOND_BIN']))
+	if ( ! empty ($newopt['LILYPOND_BIN']) &&
+			! lilypondRender::is_notation_usable ('prog=' . $newopt['LILYPOND_BIN']) )
 		$errmsgs[] = 'lilypond_bin_problem';
 
-	if (! empty ($newopt['MUP_BIN']) &&
-			! mupRender::is_notation_usable ('prog=' . $newopt['MUP_BIN']))
+	if ( ! empty ($newopt['MUP_BIN']) &&
+			! mupRender::is_notation_usable ('prog=' . $newopt['MUP_BIN']) )
 		$errmsgs[] = 'mup_bin_problem';
 
-	if (! empty ($newopt['ABCM2PS_BIN']) &&
-			! abcRender::is_notation_usable ('prog=' . $newopt['ABCM2PS_BIN']))
+	if ( ! empty ($newopt['ABCM2PS_BIN']) &&
+			! abcRender::is_notation_usable ('prog=' . $newopt['ABCM2PS_BIN']) )
 		$errmsgs[] = 'abcm2ps_bin_problem';
 
-	if (! empty ($newopt['PMW_BIN']) &&
-			! pmwRender::is_notation_usable ('prog=' . $newopt['PMW_BIN']))
+	if ( ! empty ($newopt['PMW_BIN']) &&
+			! pmwRender::is_notation_usable ('prog=' . $newopt['PMW_BIN']) )
 		$errmsgs[] = 'pmw_bin_problem';
 
 	$sr_options = array_merge ($sr_options, $newopt);
@@ -806,10 +806,8 @@ function scorerender_update_options ()
 		}
 	}
 	else
-	{
 		echo '<div id="message" class="updated fade"><p><strong>' .
 			__('Options saved.', TEXTDOMAIN) . "</strong></p></div>\n";
-	}
 }
 
 
