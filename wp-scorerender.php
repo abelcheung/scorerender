@@ -8,31 +8,12 @@ Version: 0.2.50
 Author URI: http://me.abelcheung.org/
 */
 
-/*
- ScoreRender - Renders inline music score fragments in WordPress
- Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- Copyright (C) 2007, 08 Abel Cheung <abelcheung at gmail dot com>
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- as published by the Free Software Foundation; either version 2
- of the License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
-
 /**
  * ScoreRender documentation
  * @package ScoreRender
  * @version 0.2.50
- * @author Abel Cheung <abelcheung@gmail.com>
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
  * @copyright Copyright (C) 2007, 08 Abel Cheung
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
