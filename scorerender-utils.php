@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ScoreRender documentation
+ * @package ScoreRender
+ * @version 0.2.50
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
+ * @copyright Copyright (C) 2007, 08 Abel Cheung
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ */
+
 //
 // Backported function: sys_get_temp_dir
 // http://www.phpit.net/article/creating-zip-tar-archives-dynamically-php/2/
