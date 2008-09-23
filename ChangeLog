@@ -1,3 +1,7 @@
+2008-09-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php: phpdoc update.
+
 2008-09-21  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php, scorerender-admin.php:

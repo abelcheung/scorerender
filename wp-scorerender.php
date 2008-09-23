@@ -60,7 +60,7 @@ define ('MSG_FATAL', 2);
  */
 
 /**
- * Stores all ScoreRender config options.
+ * Stores all current ScoreRender settings.
  * @global array $sr_options
  */
 $sr_options = array ();
@@ -73,6 +73,7 @@ $sr_options = array ();
  * - regular expression matching relevant notation
  * - start tag and end tag
  * - class file and class name for corresponding notation
+ * - programs necessary for that notation to work
  *
  * @global array $notations
  */
@@ -132,11 +133,19 @@ foreach (array_values ($notations) as $notation)
 	require_once ($notation['includefile']);
 }
 
+/**
+ * Default program locations, mainly on Windows and Linux.
+ * Used by $default_settings.
+ * @global array $defprog
+ * @see $default_settings
+ */
 $defprog = array();
+
 // ImageMagick use versioned folders, abcm2ps don't have Win32 installer
 // So just make up some close enough paths for them
 // PMW doesn't even have public available Win32 binary, perhaps
 // somebody might be able to compile it with MinGW?
+
 if (is_windows ())
 	$defprog = array (
 		'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
@@ -154,7 +163,11 @@ else
 		'pmw' => '/usr/local/bin/pmw',
 	);
 
-// default options
+/**
+ * Default options used for first-time install. Also contains the type of value,
+ * so other actions can be applied depending on setting type.
+ * @global array $default_settings
+ */
 $default_settings = array
 (
 	'DB_VERSION'           => array ('type' =>   'none', 'value' => DATABASE_VERSION),
@@ -204,8 +217,8 @@ function scorerender_init_textdomain ()
  * Transform all path related options in ScoreRender settings
  *
  * @since 0.2.50
- * @uses get_path_presentation
- * @pararm array $array The settings to be transformed (as an array)
+ * @uses get_path_presentation()
+ * @param array $array The settings to be transformed (as an array)
  * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
  */
 function transform_paths (&$setting, $is_internal)
@@ -230,8 +243,8 @@ function transform_paths (&$setting, $is_internal)
  * value.
  *
  * @since 0.2
- * @uses get_path_presentation
- * @uses is_absolute_path
+ * @uses get_path_presentation()
+ * @uses is_absolute_path()
  * @return array Returns array containing both full path ('path' key) and corresponding URL ('url' key)
  */
 function scorerender_get_upload_dir ()
@@ -281,6 +294,9 @@ function scorerender_get_upload_dir ()
  * small than that of PHP file (most likely occur when plugin is
  * JUST upgraded), then it also merges old config with new default
  * config and update the options in database.
+ *
+ * @uses scorerender_get_upload_dir()
+ * @uses transform_paths()
  */
 function scorerender_get_options ()
 {
@@ -333,9 +349,13 @@ function scorerender_get_options ()
 /**
  * Generate HTML content from error message or rendered image
  *
- * @uses scorerender_generate_html_error
+ * @uses ScoreRender::render()
+ * @uses ScoreRender::get_notation_name()
+ * @uses ScoreRender::get_music_fragment()
+ * @uses ScoreRender::get_error_msg()
+ *
  * @param object $render PHP object created for rendering relevant music fragment
- * @return string $html The HTML content
+ * @return string The HTML content containing image, if successful. Otherwise may display error message or other stuff, depending on setting.
  */
 function scorerender_process_content ($render)
 {
@@ -419,11 +439,24 @@ function scorerender_process_content ($render)
 /**
  * Generate converted HTML fragment from music notation fragment
  *
- * Create PHP object for each kind of matched music notation, render fragment
- * inside, and output the rendered result as HTML.
+ * Create PHP object for each kind of matched music notation, and set
+ * all relevant parameters needed for rendering. Afterwards, pass
+ * everything to {@link scorerender_process_content()} for rendering.
  *
  * If no PHP class exists corresponding to certain notation, then 
- * unconverted content is returned.
+ * unconverted content is returned immediately.
+ *
+ * @uses scorerender_process_content()
+ * @uses ScoreRender::set_programs()
+ * @uses ScoreRender::set_imagemagick_path()
+ * @uses ScoreRender::set_inverted()
+ * @uses ScoreRender::set_transparency()
+ * @uses ScoreRender::set_temp_dir()
+ * @uses ScoreRender::set_cache_dir()
+ * @uses ScoreRender::set_max_length()
+ * @uses ScoreRender::set_img_width()
+ * @uses ScoreRender::set_music_fragment()
+ * @uses mupRender::set_magic_file()
  *
  * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
  * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
@@ -474,7 +507,7 @@ function scorerender_filter ($matches)
  * Check if post/comment rendering should be enabled.
  * If yes, then apply {@link scorerender_filter} function on $content.
  *
- * @uses scorerender_filter Apply filter to content upon regular expression match
+ * @uses scorerender_filter() Apply filter to content upon regular expression match
  * @param string $content The whole content of blog post / comment
  * @param boolean $is_post Whether content is from post or comment
  * @return string Converted blog post / comment content.
@@ -502,6 +535,9 @@ function scorerender_do_conversion ($content, $is_post)
 }
 
 
+/**
+ * All admin page related stuff
+ */
 require_once ('scorerender-admin.php');
 
 /**

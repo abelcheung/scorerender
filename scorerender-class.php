@@ -22,7 +22,6 @@
 /**
  * ScoreRender Class
  * @package ScoreRender
- * @abstract
  */
 abstract class ScoreRender
 {
@@ -96,67 +95,56 @@ const ERR_IMAGE_NOT_VIEWABLE = -10;
 
 /**
  * @var string $_input The music fragment to be rendered.
- * @access protected
  */
 protected $_input;
 
 /**
  * @var string $_commandOutput Stores output message of rendering command.
- * @access protected
  */
 protected $_commandOutput;
 
 /**
  * @var boolean $is_inverted Whether image should be rendered in white on black.
- * @access protected
  */
 protected $is_inverted = false;
 
 /**
  * @var boolean $is_transparent Whether rendered image should use transparent background.
- * @access protected
  */
 protected $is_transparent = true;
 
 /**
  * @var string $imagemagick Full path of ImageMagick convert
- * @access protected
  */
 protected $imagemagick;
 
 /**
  * @var string $temp_dir Temporary working directory
- * @access protected
  */
 protected $temp_dir;
 
 /**
  * @var string $cache_dir Folder for storing cached images
- * @access protected
  */
 protected $cache_dir;
 
 /**
  * @var integer $content_max_length Maximum length of score fragment source (in bytes)
- * @access protected
  */
 protected $content_max_length = 4096;
 
 /**
  * @var integer $img_max_width Maximum width of generated images
- * @access protected
  */
 protected $img_max_width = 360;
 
 /**
  * @var string $mainprog Main program for rendering music into images
- * @access protected
  */
 protected $mainprog;
 
 /**
  * @var integer $error_code Contains error code about which kind of failure is encountered during rendering
- * @access protected
  */
 protected $error_code;
 
@@ -216,11 +204,13 @@ public function set_programs ($progs)
  *
  * Most usually user supplied content does not contain correct
  * rendering options like page margin, staff width etc, and
- * each notation has its own requirements. This method adds
- * such necessary content to original content for processing.
+ * each notation has its own requirements. Some also require additional
+ * filtering before able to be used by rendering programs.
+ * Such conversions are applied on output as well, though original content
+ * ($_input) is not modified in any way.
  *
- * @return string The full music content to be rendered
- * @abstract
+ * @uses $_input
+ * @return string The full music content to be rendered, after necessary filtering
  */
 abstract public function get_music_fragment ();
 
@@ -267,7 +257,7 @@ public function set_imagemagick_path ($path)
 /**
  * Sets whether inverted image shall be generated
  *
- * @param boolean $invert
+ * @param boolean $invert White note is rendered if TRUE, black otherwise.
  * @since 0.2.50
  */
 public function set_inverted ($invert)
@@ -278,7 +268,7 @@ public function set_inverted ($invert)
 /**
  * Sets whether transparent image shall be used
  *
- * @param boolean $transparent
+ * @param boolean $transparent Use transparent background if TRUE, black or white otherwise.
  * @since 0.2.50
  */
 public function set_transparency ($transparent)
@@ -289,7 +279,7 @@ public function set_transparency ($transparent)
 /**
  * Set temporary folder
  *
- * @param string $path
+ * @param string $path The desired temporary folder to use.
  * @since 0.2.50
  */
 public function set_temp_dir ($path)
@@ -311,7 +301,7 @@ public function get_temp_dir ()
 /**
  * Set cache folder for storing images
  *
- * @param string $path
+ * @param string $path The desired cache folder to use.
  * @since 0.2.50
  */
 public function set_cache_dir ($path)
@@ -358,7 +348,6 @@ public function set_img_width ($width)
  * @param string $mesg Original error message
  * @return string Formatted message
  * @since 0.2.50
- * @access private
  */
 private function format_error_msg ($mesg)
 {
@@ -369,6 +358,7 @@ private function format_error_msg ($mesg)
 /**
  * Retrieve error message
  *
+ * @uses $error_code Message is generated according to error code
  * @return string Localized error message
  * @since 0.2.50
  */
@@ -411,11 +401,11 @@ public function get_error_msg ()
 /**
  * Executes command and stores output message
  *
- * {@internal It is basically exec() with additional stuff}
+ * {@internal It is basically exec() with additional stuff}}
  *
  * @param string $cmd Command to be executed
- * @uses $_commandOutput Command output is stored in this variable.
- * @access protected
+ * @uses $_commandOutput Command output is stored after execution.
+ * @final
  */
 final protected function _exec ($cmd)
 {
@@ -449,31 +439,38 @@ final protected function _exec ($cmd)
 }
 
 /**
- * Render raw input file into PostScript file.
+ * First step of rendering process: execute the real command
  *
+ * The command reads input content (after necessary conversion),
+ * and converts it to a PostScript file.
+ *
+ * @uses ScoreRender::_exec
  * @param string $input_file File name of raw input file containing music content
  * @param string $intermediate_image File name of rendered PostScript file
- * @abstract
+ * @return boolean Whether rendering is successful or not
  */
 abstract protected function conversion_step1 ($input_file, $intermediate_image);
 
 /**
- * Converts rendered PostScript page into PNG format.
+ * Second step of rendering process: Convert rendered PostScript page into PNG format
  *
- * All rendering command would generate PostScript format as output.
+ * (Almost) All rendering commands generate PostScript format as output.
  * In order to show the image, it must be converted to PNG format first,
- * and the process is done here, using ImageMagick. Various effects are also
- * applied here, like white edge trimming, color inversion and alpha blending.
+ * using ImageMagick. Various effects are also applied, like white edge
+ * trimming, color inversion and alpha blending.
  *
- * @uses _exec
+ * In inherited classes, only the first 2 arguments are supplied. All other arguments
+ * are automatically determined within the inherited classes.
+ *
+ * @uses _exec()
+ * @uses $imagemagick
+ * @uses $is_inverted
+ * @uses $is_transparent
  * @param string $intermediate_image The rendered PostScript file name
  * @param string $final_image The final PNG image file name
- * @param boolean $invert True if image should be white on black instead of vice versa
- * @param boolean $transparent True if image background should be transparent
  * @param boolean $ps_has_alpha True if PostScript produced by music rendering program has transparency capability
  * @param string $extra_arg Extra arguments supplied to ImageMagick convert
- * @return boolean Whether conversion from PostScript to PNG is successful
- * @access protected
+ * @return boolean Whether PostScript -> PNG conversion is successful and PNG file is successfully generated in cache folder
  */
 protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_alpha = false, $extra_arg = '')
 {
@@ -520,11 +517,11 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
  * Check if given program is usable.
  *
  * @since 0.2
- * @uses is_absolute_path
+ * @uses is_absolute_path()
  * @param mixed $match The string to be searched in program output. Can be an array of strings, in this case all strings must be found. Any non-string element in the array is ignored.
  * @param string $prog The program to be checked
  * @param string ... Arguments supplied to the program (if any)
- * @return boolean Return TRUE if the given program is usable
+ * @return boolean Return TRUE if the given program is usable, FALSE otherwise
  */
 public function is_prog_usable ($match, $prog)
 {
@@ -569,28 +566,23 @@ public function is_prog_usable ($match, $prog)
  * First it tries to check if image is already rendered, and return
  * existing image file name immediately. Otherwise the music fragment is
  * rendered in 2 passes (with {@link conversion_step1} and {@link conversion_step2},
- * and resulting image is stored in cache folder.
+ * and resulting image is stored in cache folder. Error code will be
+ * set appropriately
  *
- * @uses ERR_INVALID_INPUT Return this error code if is_valid_input method returned false
- * @uses ERR_IMAGE_NOT_VIEWABLE Return this error code if image is rendered but not readable
- * @uses ERR_LENGTH_EXCEEDED Return this error code if content length limit is exceeded
- * @uses ERR_CACHE_DIRECTORY_NOT_WRITABLE Return this error code if cache directory is not writable
- * @uses ERR_TEMP_DIRECTORY_NOT_WRITABLE Return this error code if temporary directory is not writable
- * @uses ERR_INTERNAL_CLASS Return this error code if essential methods are missing from subclass
- * @uses ERR_TEMP_FILE_NOT_WRITABLE Return this error if input file or postscript file is not writable
- * @uses ERR_RENDERING_ERROR Return this error code if rendering command fails
- * @uses ERR_IMAGE_CONVERT_FAILURE Return this error code if PS -> PNG conversion failed
+ * @uses get_music_fragment() Obtain music content from this method
+ * @uses is_valid_input() Validate content before rendering
+ * @uses is_prog_usable() Check if ImageMagick is functional
+ * @uses conversion_step1() First pass rendering: Convert input file -> PS
+ * @uses conversion_step2() Second pass rendering: Convert PS -> PNG
+ * @uses $error_code Type of error encountered is stored here
+ * @uses $cache_dir
+ * @uses $temp_dir
+ * @uses $content_max_length Content length is checked here
  *
- * @uses get_music_fragment Obtain music content from this method
- * @uses is_valid_input Validate content before rendering
- * @uses is_prog_usable Check if ImageMagick is functional
- * @uses conversion_step1 First pass rendering: Convert input file -> PS
- * @uses conversion_step2 Second pass rendering: Convert PS -> PNG
- *
- * @return mixed Resulting image file name, or an error code in case any error occurred
+ * @return mixed Resulting image file name, or FALSE upon error
  * @final
  */
-public function render()
+final public function render()
 {
 	$hash = md5 ($this->_input . $this->is_inverted
 		     . $this->is_transparent . $this->get_notation_name());

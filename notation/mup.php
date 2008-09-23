@@ -63,14 +63,7 @@ protected function is_valid_input ()
 }
 
 /**
- * Outputs complete music input file for rendering.
- *
- * Most usually user supplied content does not contain correct
- * rendering options like page margin, staff width etc, and
- * each notation has its own requirements. This method adds
- * such necessary content to original content for processing.
- *
- * @return string The full music content to be rendered
+ * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
  */
 public function get_music_fragment ()
 {
@@ -88,16 +81,7 @@ EOD;
 }
 
 /**
- * Execute the real command for first time rendering
- *
- * The command reads input content (after prepending and appending
- * necessary stuff to user supplied content), and converts it to
- * a PostScript file.
- *
- * @uses ScoreRender::_exec
- * @param string $input_file File name of raw input file containing music content
- * @param string $intermediate_image File name of rendered PostScript file
- * @return boolean Whether rendering is successful or not
+ * Refer to {@link ScoreRender::conversion_step1() parent method} for more detail.
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
@@ -145,6 +129,9 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	//return ($result['return_val'] == 0);
 }
 
+/**
+ * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
+ */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
 	// FIXME: mind boggling exercise: why ImageMagick identifies PostScript produced by Mup as having

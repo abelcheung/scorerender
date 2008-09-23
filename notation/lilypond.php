@@ -18,14 +18,7 @@ class lilypondRender extends ScoreRender
 {
 
 /**
- * Outputs complete music input file for rendering.
- *
- * Most usually user supplied content does not contain correct
- * rendering options like page margin, staff width etc, and
- * each notation has its own requirements. This method adds
- * such necessary content to original content for processing.
- *
- * @return string The full music content to be rendered
+ * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
  */
 public function get_music_fragment ()
 {
@@ -52,13 +45,7 @@ EOD;
 }
 
 /**
- * Render raw input file into PostScript file.
- *
- * @uses ScoreRender::_exec
- * @param string $input_file File name of raw input file containing music content
- * @param string $intermediate_image File name of rendered PostScript file
- * @return boolean Whether rendering is successful or not
- * @access protected
+ * Refer to {@link ScoreRender::conversion_step1() parent method} for more detail.
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
@@ -74,10 +61,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * @param string $intermediate_image The rendered PostScript file name
- * @param string $final_image The final PNG image file name
- * @return boolean Whether conversion from PostScript to PNG is successful
- * @access protected
+ * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
