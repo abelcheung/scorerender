@@ -1,3 +1,7 @@
+2008-09-24  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php: More phpdoc update.
+
 2008-09-23  Abel Cheung  <abelcheung@gmail.com>
 
 	* *.php, notation/*.php: phpdoc update.

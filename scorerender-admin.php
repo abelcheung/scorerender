@@ -16,6 +16,7 @@
  * The returned numbers are mainly used for showing info in WordPress Dashboard
  *
  * @since 0.2
+ * @uses $notations Content is compared to regex specified in $notations
  * @param string $content the whole blog post content
  * @return array $count Array containing number of matched fragments for each kind of notation
  *
@@ -37,7 +38,7 @@ function scorerender_get_fragment_count ($content)
  * Returns number of cached images inside cache directory
  *
  * @since 0.2
- * @return integer number of images inside cache directory
+ * @return integer number of images inside cache directory, or -1 if cache dir can't be read
  */
 function scorerender_get_num_of_images ()
 {
@@ -64,8 +65,9 @@ function scorerender_get_num_of_images ()
  * Display info in WordPress Dashboard
  *
  * @since 0.2
- * @uses scorerender_get_fragment_count
- * @uses scorerender_get_num_of_images
+ * @uses scorerender_get_fragment_count()
+ * @uses scorerender_get_num_of_images()
+ * @uses $notations Regex in $notations is used to compose SQL statement
  * @access private
  */
 function scorerender_activity_box ()
@@ -537,16 +539,16 @@ function scorerender_admin_section_caching ()
  * Show WordPress admin page
  *
  * It also checks if form button is pressed, and may call
- * {@link scorerender_remove_cache scorerender_remove_cache()} or
- * {@link scorerender_update_options scorerender_update_options()} correspondingly.
+ * {@link scorerender_remove_cache() scorerender_remove_cache()} or
+ * {@link scorerender_update_options() scorerender_update_options()} correspondingly.
  *
- * @uses scorerender_remove_cache Activated when 'Remove Cache' button is clicked
- * @uses scorerender_update_options Activate when 'Update Options' button is clicked
- * @uses scorerender_admin_section_path Admin page -- path options
- * @uses scorerender_admin_section_prog Admin page -- program and file locations
- * @uses scorerender_admin_section_image Admin page -- image options
- * @uses scorerender_admin_section_content Admin page -- content options
- * @uses scorerender_admin_section_caching Admin page -- caching administration
+ * @uses scorerender_remove_cache() Activated when 'Remove Cache' button is clicked
+ * @uses scorerender_update_options() Activate when 'Update Options' button is clicked
+ * @uses scorerender_admin_section_path() Admin page -- path options
+ * @uses scorerender_admin_section_prog() Admin page -- program and file locations
+ * @uses scorerender_admin_section_image() Admin page -- image options
+ * @uses scorerender_admin_section_content() Admin page -- content options
+ * @uses scorerender_admin_section_caching() Admin page -- caching administration
  *
  * @access private
  */

@@ -218,7 +218,7 @@ function scorerender_init_textdomain ()
  *
  * @since 0.2.50
  * @uses get_path_presentation()
- * @param array $array The settings to be transformed (as an array)
+ * @param array $setting The settings to be transformed, either from existing setting or from newly submitted setting
  * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
  */
 function transform_paths (&$setting, $is_internal)
@@ -355,7 +355,7 @@ function scorerender_get_options ()
  * @uses ScoreRender::get_error_msg()
  *
  * @param object $render PHP object created for rendering relevant music fragment
- * @return string The HTML content containing image, if successful. Otherwise may display error message or other stuff, depending on setting.
+ * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
 function scorerender_process_content ($render)
 {
@@ -478,6 +478,7 @@ function scorerender_filter ($matches)
 			}
 			$render->set_programs ($progs);
 
+			// Hmm, not very scalable. Any possibility to use hooks?
 			if ($notation['classname'] == 'mupRender')
 				$render->set_magic_file ($sr_options['MUP_MAGIC_FILE']);
 

@@ -58,7 +58,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 /**
  * Check if given program is Philip's Music Writer, and whether it is usable.
  *
- * @param string $prog The program to be checked.
+ * @param string $args A CGI-like query string containing the program to be checked.
+ * @uses is_prog_usable()
  * @return boolean Return true if the given program is pmw AND it is executable.
  */
 public function is_notation_usable ($args = '')
