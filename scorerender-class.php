@@ -170,6 +170,7 @@ public function set_music_fragment ($input)
  *
  * @param mixed $progs A single program or array of programs to be used
  * @uses $mainprog Full path is stored in this variable
+ * @todo For some notations like PMX/MusiXTeX, multiple programs must be set, currently this function can only handle one.
  * @since 0.2.50
  */
 public function set_programs ($progs)
@@ -191,7 +192,6 @@ public function set_programs ($progs)
 			break;
 		  default:
 			// Only picks the first element
-			// TODO: set all others, like TeX, dvips,...
 			list ($k) = array_keys ($progs);
 			$this->mainprog = $progs[$k];
 			break;
@@ -228,7 +228,7 @@ public function get_command_output ()
 /**
  * Returns notation name, by comparing class name with notation name list.
  *
- * @return string Return notation name if found, FALSE otherwise.
+ * @return string|boolean Return notation name if found, FALSE otherwise.
  * @since 0.2
  */
 public function get_notation_name ()
@@ -290,7 +290,7 @@ public function set_temp_dir ($path)
 /**
  * Get temporary folder path
  *
- * @return string The temporary folder if already set, or FALSE otherwise
+ * @return string|boolean The temporary folder if already set, or FALSE otherwise
  * @since 0.2.50
  */
 public function get_temp_dir ()
@@ -312,7 +312,7 @@ public function set_cache_dir ($path)
 /**
  * Get cache folder path
  *
- * @return string The cache folder if already set, or FALSE otherwise
+ * @return string|boolean The cache folder if already set, or FALSE otherwise
  * @since 0.2.50
  */
 public function get_cache_dir ()
@@ -333,6 +333,9 @@ public function set_max_length ($length)
 
 /**
  * Set maximum width of generated images
+ *
+ * For some notations the unit for width is not pixel; under those situations
+ * the methods are overrided in inherited notations.
  *
  * @param integer $width Maximum width of images (in pixel)
  * @since 0.2.50
@@ -401,10 +404,13 @@ public function get_error_msg ()
 /**
  * Executes command and stores output message
  *
- * {@internal It is basically exec() with additional stuff}}
+ * It is basically {@link exec() exec()} with additional stuff. On Windows,
+ * however, the command is dumped into a batch first before executing,
+ * in order to circumvent an ancient unfixed bug.
  *
  * @param string $cmd Command to be executed
  * @uses $_commandOutput Command output is stored after execution.
+ * @return integer Exit status of the command. Special case: return 129 if creation of temp file failed on Windows.
  * @final
  */
 final protected function _exec ($cmd)
@@ -444,7 +450,7 @@ final protected function _exec ($cmd)
  * The command reads input content (after necessary conversion),
  * and converts it to a PostScript file.
  *
- * @uses ScoreRender::_exec
+ * @uses _exec()
  * @param string $input_file File name of raw input file containing music content
  * @param string $intermediate_image File name of rendered PostScript file
  * @return boolean Whether rendering is successful or not
@@ -520,7 +526,7 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
  * @uses is_absolute_path()
  * @param mixed $match The string to be searched in program output. Can be an array of strings, in this case all strings must be found. Any non-string element in the array is ignored.
  * @param string $prog The program to be checked
- * @param string ... Arguments supplied to the program (if any)
+ * @param string $args Extra variable arguments supplied to the program (if any)
  * @return boolean Return TRUE if the given program is usable, FALSE otherwise
  */
 public function is_prog_usable ($match, $prog)
@@ -579,7 +585,7 @@ public function is_prog_usable ($match, $prog)
  * @uses $temp_dir
  * @uses $content_max_length Content length is checked here
  *
- * @return mixed Resulting image file name, or FALSE upon error
+ * @return string|boolean Resulting image file name, or FALSE upon error
  * @final
  */
 final public function render()
