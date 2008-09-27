@@ -1,3 +1,15 @@
+2008-09-27  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php (scorerender_filter):
+	* notation/mup.php (set_magic_file_hook):
+	- Instead of hardcoding extra setting for Mup, add wordpress action to
+	  handle any extra settings instead. More scalable, though
+	  that means injecting setting names into class directly.
+
+	* scorerender-class.php:
+	- (scorerender_cache_location_match) New func. Check if cache dir and
+	  cache url matches.
+
 2008-09-24  Abel Cheung  <abelcheung@gmail.com>
 
 	* *.php, notation/*.php: More phpdoc update.

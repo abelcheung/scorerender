@@ -472,15 +472,12 @@ function scorerender_filter ($matches)
 		if (preg_match ($notation['regex'], $matches[0]))
 		{
 			$render = new $notation['classname'];
+
 			$progs = array();
 			foreach ($notation['progs'] as $progname) {
 				$progs["$progname"] = $sr_options[$progname];
 			}
 			$render->set_programs ($progs);
-
-			// Hmm, not very scalable. Any possibility to use hooks?
-			if ($notation['classname'] == 'mupRender')
-				$render->set_magic_file ($sr_options['MUP_MAGIC_FILE']);
 
 			break;
 		}
@@ -494,6 +491,8 @@ function scorerender_filter ($matches)
 	$render->set_cache_dir ($sr_options['CACHE_DIR']);
 	$render->set_max_length ($sr_options['CONTENT_MAX_LENGTH']);
 	$render->set_img_width ($sr_options['IMAGE_MAX_WIDTH']);
+
+	do_action ('sr_set_class_variable', $sr_options);
 
 	$input = trim (html_entity_decode ($matches[1]));
 	$render->set_music_fragment ($input);
@@ -528,9 +527,9 @@ function scorerender_do_conversion ($content, $is_post)
 		$regex_list[] = $notation['regex'];
 	};
 
-	$limit = ($is_post) ? -1 :
-		($sr_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 :
-		$sr_options['FRAGMENT_PER_COMMENT'];
+	$limit = ($is_post)                                 ? -1 :
+	         ($sr_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 :
+	          $sr_options['FRAGMENT_PER_COMMENT'];
 
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
 }

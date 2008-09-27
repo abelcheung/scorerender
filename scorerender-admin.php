@@ -186,6 +186,47 @@ function scorerender_remove_cache ()
 
 
 /**
+ * Check if cache folder and cache URL settings match or not.
+ *
+ * This is done by creating a temp file with random file name, and
+ * see if it is accessible via URL.
+ *
+ * Note that no error checking is done for path and URL, so make sure
+ * their validity are confirmed before using.
+ *
+ * @param string $path Cache full path
+ * @param string $url Cache URL
+ * @return boolean Whether both point to the same location.
+ */
+function scorerender_cache_location_match ($path, $url)
+{
+	$retval = true;
+	/*
+	 * Just a very crude check. Non-existance of URL before file creation
+	 * is not verified; neither does non-existance of URL after file removal
+	 */
+	$tmpfile = tempnam ($path, (string) mt_rand());
+
+	if (false === $tmpfile)
+		$retval = false;
+
+	else
+	{
+		if ( false === strpos ($tmpfile, $path) )
+			$retval = false;
+		elseif ( false === ( $fh = @fopen (
+				trailingslashit($url).basename($tmpfile), 'r') ) )
+			$retval = false;
+		else
+			fclose ($fh);
+
+		unlink ($tmpfile);
+	}
+	return $retval;
+}
+
+
+/**
  * Update ScoreRender options in database with submitted options.
  *
  * A warning banner will be shown on top of admin page for each
@@ -201,6 +242,7 @@ function scorerender_update_options ()
 
 	$newopt = (array) $_POST['ScoreRender'];
 	transform_paths ($newopt, TRUE);
+	$errmsgs = array ();
 
 	$messages = array
 	(
@@ -208,6 +250,7 @@ function scorerender_update_options ()
 		'cache_dir_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT defined! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_dir_not_writable'   => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT writable! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_url_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache URL is NOT defined! The plugin will stop working.', TEXTDOMAIN)),
+		'cache_dir_url_unmatch'    => array ('level' => MSG_WARNING, 'content' => __('Cache directory and URL probably do not correspond to the same location.', TEXTDOMAIN)),
 		'wrong_content_length'     => array ('level' => MSG_WARNING, 'content' => __('Content length is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_frag_per_comment'   => array ('level' => MSG_WARNING, 'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_image_max_width'    => array ('level' => MSG_WARNING, 'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
@@ -235,6 +278,14 @@ function scorerender_update_options ()
 
 	if ( empty ($newopt['CACHE_URL']) )
 		$errmsgs[] = 'cache_url_undefined';
+
+	if ( ! in_array ('cache_dir_undefined'   , $errmsgs) &&
+	     ! in_array ('cache_dir_not_writable', $errmsgs) &&
+	     ! in_array ('cache_url_undefined'   , $errmsgs) )
+	{
+		if ( ! scorerender_cache_location_match ($newopt['CACHE_DIR'], $newopt['CACHE_URL']) )
+			$errmsgs[] = 'cache_dir_url_unmatch';
+	}
 
 	if ( ! ScoreRender::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
 		$errmsgs[] = 'convert_bin_problem';
@@ -616,6 +667,5 @@ function scorerender_admin_options ()
 	</form>
 	<?php
 }
-
 
 ?>
