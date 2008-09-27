@@ -19,6 +19,11 @@ private $width;
  */
 private $magic_file;
 
+function __construct ()
+{
+	add_action ('sr_set_class_variable', array (&$this, 'set_magic_file_hook'));
+}
+
 /**
  * Set maximum width of generated images
  *
@@ -152,6 +157,23 @@ public function is_notation_usable ($args = '')
 	wp_parse_str ($args, $r);
 	extract ($r, EXTR_SKIP);
 	return parent::is_prog_usable ('Arkkra Enterprises', $prog, '-v');
+}
+
+/**
+ * Set the location of magic file
+ * This is not supposed to be called directly; it is used as a
+ * WordPress action hook instead.
+ *
+ * {@internal OK, I cheated. Shouldn't have been leaking external
+ * config option names into class, but this can help saving me
+ * headache in the future}}
+ *
+ * @since 0.2.50
+ */
+public function set_magic_file_hook ($options)
+{
+	if (isset ($options['MUP_MAGIC_FILE']))
+		$this->set_magic_file ($options['MUP_MAGIC_FILE']);
 }
 
 }  // end of class
