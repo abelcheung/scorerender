@@ -240,6 +240,8 @@ public function get_notation_name ()
 		if ($classname === strtolower ($notation['classname']))
 			return $notationname;
 
+	throw new Exception ( $this->format_error_msg (
+		__('Unknown notation type!', TEXTDOMAIN) ) );
 	return false;
 }
 
@@ -606,7 +608,7 @@ final public function render()
 		}
 
 	// missing class methods
-	if (! method_exists ($this, 'conversion_step1'           ) ||
+	if (! method_exists ($this, 'conversion_step1'  ) ||
 	    ! method_exists ($this, 'get_music_fragment'))
 	{
 		$this->error_code = ERR_INTERNAL_CLASS;
