@@ -371,12 +371,11 @@ function scorerender_process_content ($render)
 			return '';
 
 		  case ON_ERR_SHOW_FRAGMENT:
-			$name = $render->get_notation_name ();
-
-			// Shouldn't reach here
-			if (false === $name)
-				return sprintf (__('[%s: Unknown notation type!]', TEXTDOMAIN),
-					__('ScoreRender Error', TEXTDOMAIN));
+			try {
+				$name = $render->get_notation_name ();
+			} catch (Exception $e) {
+				return $e->getMessage();
+			}
 
 			return $notations[$name]['starttag'] . "\n" .
 				$render->get_music_fragment() . "\n" .
