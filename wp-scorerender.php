@@ -513,9 +513,15 @@ function scorerender_filter ($matches)
  */
 function scorerender_do_conversion ($content, $is_post)
 {
-	global $sr_options, $notations;
+	global $sr_options, $notations, $post;
 
 	if (!$is_post && !$sr_options['COMMENT_ENABLED']) return $content;
+
+	if ($is_post)
+	{
+		$author = new WP_User ($post->post_author);
+		if (!$author->has_cap ('unfiltered_html')) return $content;
+	}
 
 	$regex_list = array();
 	foreach (array_values ($notations) as $notation)

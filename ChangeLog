@@ -1,3 +1,9 @@
+2008-09-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_filter) Only convert content if user as unfiltered_html
+	  capability and content is not a comment.
+
 2008-09-28  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php, scorerender-class.php:
