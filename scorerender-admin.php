@@ -238,7 +238,7 @@ function scorerender_update_options ()
 	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
 		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
 
-	global $sr_options, $default_settings;
+	global $sr_options;
 
 	$newopt = (array) $_POST['ScoreRender'];
 	transform_paths ($newopt, TRUE);
@@ -290,8 +290,10 @@ function scorerender_update_options ()
 	if ( ! ScoreRender::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
 		$errmsgs[] = 'convert_bin_problem';
 
-	foreach ($default_settings as $key => $val)
-		if ($val['type'] == 'bool')
+	// Any boolean values set to false would not appear in $_POST
+	$var_types = scorerender_get_def_settings (TYPES_ONLY);
+	foreach ($var_types as $key => $type)
+		if ($type == 'bool')
 			$newopt[$key] = isset ($newopt[$key]);
 
 	if ( !ctype_digit ($newopt['CONTENT_MAX_LENGTH']) )
@@ -667,5 +669,33 @@ function scorerender_admin_options ()
 	</form>
 	<?php
 }
+
+/**
+ * Append submenu item into WordPress menu
+ *
+ * @access private
+ */
+function scorerender_admin_menu ()
+{
+	add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
+}
+
+
+if ( 0 != get_option('use_balanceTags') )
+{
+	/**
+	 * @ignore
+	 */
+	function sr_turn_off_balance_tags()
+	{
+		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
+			. sprintf (__('<strong>OPTION CONFLICT</strong>: The &#8216;correct invalidly nested XHTML automatically&#8217; option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', TEXTDOMAIN), "options-writing.php")
+			. "</p></div>";
+	}
+	add_filter ('admin_notices', 'sr_turn_off_balance_tags');
+}
+
+add_filter ('activity_box_end', 'scorerender_activity_box');
+add_filter ('admin_menu', 'scorerender_admin_menu');
 
 ?>

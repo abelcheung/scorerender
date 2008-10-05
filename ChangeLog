@@ -1,3 +1,18 @@
+2008-10-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-utils.php:
+	- (wp_parse_str) Taken from WordPress for backword compat with WP 2.2
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Move all admin related stuff to scorerender-admin.php, and only
+	  include them if WP_ADMIN is defined (inside admin page).
+
+	* wp-scorerender.php:
+	- (scorerender_get_def_settings, scorerender_populate_options) Move
+	  default setting into functions, for some unknown reason global
+	  variables disappear upon plugin activation, thereby rendering
+	  default settings to nil. Fix plugin upgrade.
+
 2008-09-30  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

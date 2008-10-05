@@ -55,6 +55,9 @@ define ('ON_ERR_SHOW_NOTHING' , '3');
 define ('MSG_WARNING', 1);
 define ('MSG_FATAL', 2);
 
+define ('TYPES_ONLY', 1);
+define ('VALUES_ONLY', 2);
+
 /*
  * Global Variables
  */
@@ -134,65 +137,77 @@ foreach (array_values ($notations) as $notation)
 }
 
 /**
- * Default program locations, mainly on Windows and Linux.
- * Used by $default_settings.
- * @global array $defprog
- * @see $default_settings
- */
-$defprog = array();
-
-// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
-// So just make up some close enough paths for them
-// PMW doesn't even have public available Win32 binary, perhaps
-// somebody might be able to compile it with MinGW?
-
-if (is_windows ())
-	$defprog = array (
-		'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
-		'convert' => 'C:\Program Files\ImageMagick\convert.exe',
-		'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
-		'mup' => 'C:\Program Files\mupmate\mup.exe',
-		'pmw' => '',
-	);
-else
-	$defprog = array (
-		'abc2ps' => '/usr/bin/abcm2ps',
-		'convert' => '/usr/bin/convert',
-		'lilypond' => '/usr/bin/lilypond',
-		'mup' => '/usr/local/bin/mup',
-		'pmw' => '/usr/local/bin/pmw',
-	);
-
-/**
  * Default options used for first-time install. Also contains the type of value,
  * so other actions can be applied depending on setting type.
  * @global array $default_settings
  */
-$default_settings = array
-(
-	'DB_VERSION'           => array ('type' =>   'none', 'value' => DATABASE_VERSION),
-	'TEMP_DIR'             => array ('type' =>   'path', 'value' => sys_get_temp_dir()),
-	'CACHE_DIR'            => array ('type' =>   'path', 'value' => $cachefolder['path']),
-	'CACHE_URL'            => array ('type' =>    'url', 'value' => $cachefolder['url']),
+function scorerender_get_def_settings ($return_type = 0)
+{
+	// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
+	// So just make up some close enough paths for them
+	// PMW doesn't even have public available Win32 binary, perhaps
+	// somebody might be able to compile it with MinGW?
 
-	'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
-	'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
-	'TRANSPARENT_IMAGE'    => array ('type' =>   'bool', 'value' => true),
-	'SHOW_SOURCE'          => array ('type' =>   'bool', 'value' => false),
-	'SHOW_IE_TRANSPARENCY_WARNING' => array ('type' =>   'bool', 'value' => false),
-	'COMMENT_ENABLED'      => array ('type' =>   'bool', 'value' => false),
-	'ERROR_HANDLING'       => array ('type' =>   'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+	if (is_windows ())
+		$defprog = array (
+			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
+			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
+			'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
+			'mup' => 'C:\Program Files\mupmate\mup.exe',
+			'pmw' => '',
+		);
+	else
+		$defprog = array (
+			'abc2ps' => '/usr/bin/abcm2ps',
+			'convert' => '/usr/bin/convert',
+			'lilypond' => '/usr/bin/lilypond',
+			'mup' => '/usr/local/bin/mup',
+			'pmw' => '/usr/local/bin/pmw',
+		);
 
-	'CONTENT_MAX_LENGTH'   => array ('type' =>    'int', 'value' => 4096),
-	'FRAGMENT_PER_COMMENT' => array ('type' =>    'int', 'value' => 1),
+	$cachefolder = scorerender_get_upload_dir ();
 
-	'CONVERT_BIN'          => array ('type' =>   'prog', 'value' => $defprog['convert']),
-	'LILYPOND_BIN'         => array ('type' =>   'prog', 'value' => $defprog['lilypond']),
-	'MUP_BIN'              => array ('type' =>   'prog', 'value' => $defprog['mup']),
-	'ABCM2PS_BIN'          => array ('type' =>   'prog', 'value' => $defprog['abc2ps']),
-	'PMW_BIN'              => array ('type' =>   'prog', 'value' => $defprog['pmw']),
-	'MUP_MAGIC_FILE'       => array ('type' =>   'path', 'value' => ''),
-);
+	$default_settings = array
+	(
+		'DB_VERSION'           => array ('type' =>   'none', 'value' => DATABASE_VERSION),
+		'TEMP_DIR'             => array ('type' =>   'path', 'value' => sys_get_temp_dir()),
+		'CACHE_DIR'            => array ('type' =>   'path', 'value' => $cachefolder['path']),
+		'CACHE_URL'            => array ('type' =>    'url', 'value' => $cachefolder['url']),
+
+		'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
+		'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
+		'TRANSPARENT_IMAGE'    => array ('type' =>   'bool', 'value' => true),
+		'SHOW_SOURCE'          => array ('type' =>   'bool', 'value' => false),
+		'SHOW_IE_TRANSPARENCY_WARNING' => array ('type' =>   'bool', 'value' => false),
+		'COMMENT_ENABLED'      => array ('type' =>   'bool', 'value' => false),
+		'ERROR_HANDLING'       => array ('type' =>   'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+
+		'CONTENT_MAX_LENGTH'   => array ('type' =>    'int', 'value' => 4096),
+		'FRAGMENT_PER_COMMENT' => array ('type' =>    'int', 'value' => 1),
+
+		'CONVERT_BIN'          => array ('type' =>   'prog', 'value' => $defprog['convert']),
+		'LILYPOND_BIN'         => array ('type' =>   'prog', 'value' => $defprog['lilypond']),
+		'MUP_BIN'              => array ('type' =>   'prog', 'value' => $defprog['mup']),
+		'ABCM2PS_BIN'          => array ('type' =>   'prog', 'value' => $defprog['abc2ps']),
+		'PMW_BIN'              => array ('type' =>   'prog', 'value' => $defprog['pmw']),
+		'MUP_MAGIC_FILE'       => array ('type' =>   'path', 'value' => ''),
+	);
+
+	$retval = array();
+	switch ($return_type)
+	{
+	  case TYPES_ONLY:
+		foreach ($default_settings as $key => $val)
+			$retval += array ($key => $val['type']);
+		return $retval;
+	  case VALUES_ONLY:
+		foreach ($default_settings as $key => $val)
+			$retval += array ($key => $val['value']);
+		return $retval;
+	  default:
+		return $default_settings;
+	}
+};
 
 
 /**
@@ -225,11 +240,11 @@ function transform_paths (&$setting, $is_internal)
 {
 	if (!is_array ($setting)) return;
 	
-	global $default_settings;
+	$default_settings = scorerender_get_def_settings(TYPES_ONLY);
 	
 	// Transform path and program settings to unix presentation
-	foreach ($default_settings as $key => $val)
-		if ( ($val['type'] == 'path') || ($val['type'] == 'prog') )
+	foreach ($default_settings as $key => $type)
+		if ( ($type == 'path') || ($type == 'prog') )
 			if (isset ($setting[$key]))
 				$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
 
@@ -286,6 +301,25 @@ function scorerender_get_upload_dir ()
 	return (array ('path' => $path, 'url' => $url));
 }
 
+function scorerender_populate_options ()
+{
+	global $sr_options;
+
+	$defaults = scorerender_get_def_settings(VALUES_ONLY);
+
+	// safe guard
+	if (empty ($defaults)) return;
+
+	if (empty ($sr_options))
+		$sr_options = $defaults;
+	else
+	{
+		// remove current settings not present in newest schema, then merge default values
+		$sr_options = array_intersect_key ($sr_options, $defaults);
+		$sr_options = array_merge ($defaults, $sr_options);
+		$sr_options['DB_VERSION'] = DATABASE_VERSION;
+	}
+}
 
 /**
  * Retrieve ScoreRender options from database.
@@ -300,14 +334,12 @@ function scorerender_get_upload_dir ()
  */
 function scorerender_get_options ()
 {
-	global $sr_options, $default_settings;
+	global $sr_options;
 
 	$sr_options = get_option ('scorerender_options');
 
 	if (!is_array ($sr_options))
-	{
 		$sr_options = array();
-	}
 	elseif (array_key_exists ('DB_VERSION', $sr_options) &&
 		($sr_options['DB_VERSION'] >= DATABASE_VERSION) )
 	{
@@ -315,11 +347,8 @@ function scorerender_get_options ()
 		return;
 	}
 
-	$cachefolder = scorerender_get_upload_dir ();
-
 	// Special handling for certain versions
 	if ($sr_options['DB_VERSION'] <= 9)
-	{
 		if ( $sr_options['LILYPOND_COMMENT_ENABLED'] ||
 		     $sr_options['MUP_COMMENT_ENABLED']      ||
 		     $sr_options['ABC_COMMENT_ENABLED']      ||
@@ -327,16 +356,8 @@ function scorerender_get_options ()
 		{
 			$sr_options['COMMENT_ENABLED'] = true;
 		}
-	}
 
-	// remove current settings not present in newest schema, then merge default values
-	$defaults = array();
-	while (list ($key, $val) = each ($default_settings))
-		$defaults += array ($key => $val['value']);
-
-	$sr_options = array_intersect_key ($sr_options, $defaults);
-	$sr_options = array_merge ($defaults, $sr_options);
-	$sr_options['DB_VERSION'] = DATABASE_VERSION;
+	scorerender_populate_options ();
 
 	transform_paths ($sr_options, TRUE);
 	update_option ('scorerender_options', $sr_options);
@@ -540,20 +561,8 @@ function scorerender_do_conversion ($content, $is_post)
 }
 
 
-/**
- * All admin page related stuff
- */
-require_once ('scorerender-admin.php');
-
-/**
- * Append submenu item into WordPress menu
- *
- * @access private
- */
-function scorerender_admin_menu ()
-{
-	add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
-}
+if (defined ('WP_ADMIN'))
+	include_once ('scorerender-admin.php');
 
 /*
 Remove tag balancing filter
@@ -565,9 +574,7 @@ part of the LilyPond syntax for parallel music, and Mup syntax for
 attribute change within a bar.  Since balancing filter is also used
 in get_the_content() before any plugin is activated, removing
 filter is of no use.
- */
 
-/*
 remove_filter ('content_save_pre', 'balanceTags', 50);
 remove_filter ('excerpt_save_pre', 'balanceTags', 50);
 remove_filter ('comment_save_pre', 'balanceTags', 50);
@@ -577,23 +584,7 @@ remove_filter ('comment_text', 'force_balance_tags', 25);
 
 scorerender_get_options ();
 
-if ( 0 != get_option('use_balanceTags') )
-{
-	/**
-	 * @ignore
-	 */
-	function turn_off_balance_tags()
-	{
-		echo '<div id="balancetag-warning" class="updated" style="background-color: #ff6666"><p>'
-			. sprintf (__('<strong>OPTION CONFLICT</strong>: The &#8216;correct invalidly nested XHTML automatically&#8217; option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', TEXTDOMAIN), "options-writing.php")
-			. "</p></div>";
-	}
-	add_filter ('admin_notices', 'turn_off_balance_tags');
-}
-
 add_action ('init', 'scorerender_init_textdomain');
-add_filter ('activity_box_end', 'scorerender_activity_box');
-add_filter ('admin_menu', 'scorerender_admin_menu');
 
 // earlier than default priority, since
 // smilies conversion and wptexturize() can mess up the content
