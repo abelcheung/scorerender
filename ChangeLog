@@ -1,3 +1,9 @@
+2009-01-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- (_exec) Replace batch file creation hack with "cmd /c : &" hack,
+	  which is not as fragile as batch file creation and deletion.
+
 2008-10-05  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-utils.php:
