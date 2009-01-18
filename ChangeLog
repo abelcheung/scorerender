@@ -3,6 +3,9 @@
 	* scorerender-class.php:
 	- (_exec) Replace batch file creation hack with "cmd /c : &" hack,
 	  which is not as fragile as batch file creation and deletion.
+	* notation/mup.php:
+	- (conversion_step1) Adjust temp license file creation routine, since
+	  batch file is no more used.
 
 2008-10-05  Abel Cheung  <abelcheung@gmail.com>
 
