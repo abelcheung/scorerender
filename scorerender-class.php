@@ -253,7 +253,7 @@ public function get_notation_name ()
  */
 public function set_imagemagick_path ($path)
 {
-	$this->imagemagick = $path;
+	$this->imagemagick = escapeshellcmd($path);
 }
 
 /**
@@ -412,7 +412,7 @@ public function get_error_msg ()
  *
  * @param string $cmd Command to be executed
  * @uses $_commandOutput Command output is stored after execution.
- * @return integer Exit status of the command. Special case: return 129 if creation of temp file failed on Windows.
+ * @return integer Exit status of the command.
  * @final
  */
 final protected function _exec ($cmd)
@@ -427,19 +427,9 @@ final protected function _exec ($cmd)
 		exec ($cmd . " 2>&1", $cmd_output, $retval);
 	else
 	{
-		// Circumvent PHP ***FEATURE*** under Windows: exec, popen etc can't
-		// accept command line containing more than 2 double quotes
-		if (false === ($tmpdir = create_temp_dir ('', 'sr-batch-'))) return 129;
-		if (false === ($tmpbatchfile = tempnam ($tmpdir, 'sr-'))) return 129;
-		rename ($tmpbatchfile, $tmpbatchfile.".bat");
-		$tmpbatchfile .= ".bat";
-		file_put_contents ($tmpbatchfile, sprintf ("@echo off\r\n%s\r\n", $cmd));
-		exec ($tmpbatchfile . " 2>&1", $cmd_output, $retval);
-		if (! DEBUG)
-		{
-			unlink ($tmpbatchfile);
-			rmdir ($tmpdir);
-		}
+		// ": &" is used to bypass cmd.exe /c, which prevents commands
+		// with more than 2 double quotes to run
+		exec (": & " . $cmd, $cmd_ouotput, $retval);
 	}
 	$this->_commandOutput = implode ("\n", $cmd_output);
 
