@@ -253,7 +253,7 @@ public function get_notation_name ()
  */
 public function set_imagemagick_path ($path)
 {
-	$this->imagemagick = escapeshellcmd($path);
+	$this->imagemagick = $path;
 }
 
 /**
@@ -423,14 +423,13 @@ final protected function _exec ($cmd)
 
 	$retval = 0;
 
-	if (!is_windows ())
-		exec ($cmd . " 2>&1", $cmd_output, $retval);
-	else
-	{
-		// ": &" is used to bypass cmd.exe /c, which prevents commands
-		// with more than 2 double quotes to run
-		exec (": & " . $cmd, $cmd_ouotput, $retval);
-	}
+	$cmd .= " 2>&1";
+	// ": &" is used to bypass cmd.exe /c, which prevents commands
+	// with more than 2 double quotes to run
+	if (is_windows())
+		$cmd = '\: \& ' . $cmd;
+		
+	exec ($cmd, $cmd_output, $retval);
 	$this->_commandOutput = implode ("\n", $cmd_output);
 
 	return $retval;	

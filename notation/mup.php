@@ -97,41 +97,30 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	   Even worse, the exist status in this case is 0, so _exec() succeeds yet no postscript is rendered. */
 
 	if (is_windows())
-	{
-		$cmd = sprintf (
-				'COPY "%s" .\mup.ok' . "\r\n" .
-				'"%s" -f "%s" "%s"' . "\r\n" .
-				'DEL .\mup.ok' . "\r\n",
-				(is_readable($this->magic_file)) ? $this->magic_file : 'NUL:',
-				$this->mainprog,
-				$intermediate_image, $input_file);
-		$retval = $this->_exec($cmd);
-	}
+		$temp_magic_file = $this->temp_dir . '\mup.ok';
 	else
-	{
 		$temp_magic_file = $this->temp_dir . '/.mup';
-		
-		if (!file_exists($temp_magic_file))
-		{
-			if (is_readable($this->magic_file))
-				copy($this->magic_file, $temp_magic_file);
-			else
-				touch ($temp_magic_file);
-		}
-
-		/* mup forces this kind of crap */
-		putenv ("HOME=" . $this->temp_dir);
-
-		$cmd = sprintf ('"%s" -f "%s" "%s"',
-				$this->mainprog,
-				$intermediate_image, $input_file);
-		$retval = $this->_exec($cmd);
-
-		unlink ($temp_magic_file);
+	
+	if (!file_exists($temp_magic_file))
+	{
+		if (is_readable($this->magic_file))
+			copy($this->magic_file, $temp_magic_file);
+		else
+			touch ($temp_magic_file);
 	}
+
+	/* mup forces this kind of crap */
+	putenv ("HOME=" . $this->temp_dir);
+	chdir ($this->temp_dir);
+	
+	$cmd = sprintf ('"%s" -f "%s" "%s"',
+			$this->mainprog,
+			$intermediate_image, $input_file);
+	$retval = $this->_exec($cmd);
+
+	unlink ($temp_magic_file);
 	
 	return (filesize ($intermediate_image) != 0);
-	//return ($result['return_val'] == 0);
 }
 
 /**
