@@ -1,6 +1,6 @@
 === ScoreRender ===
 Contributors: abelcheung
-Tags: music, score, music notation, abc, mup, lilypond, guido
+Tags: music, music notation, music typesetting, score, abc, mup, lilypond, guido, pmw
 Requires at least: 2.2
 Tested up to: 2.7
 Stable tag: scorerender-0-2-1
@@ -9,7 +9,7 @@ Renders inline sheet music fragments in post, pages and comments.
 
 == Description ==
 
-ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in excerpts, posts, pages and (optionally) comments.  Currently it supports 4 music notations: ABC, Guido, Lilypond, Mup.
+ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in excerpts, posts, pages and (optionally) comments.  Currently it supports 5 music notations: ABC, Guido, Lilypond, Mup and Philip's Music Writer.
 
 ScoreRender started its life from Chris Lamb’s FigureRender plugin, which is a Wordpress plugin for rendering LaTeX and Lilypond music fragments into images. Its maintainership changed later. While continue enhancing FigureRender, all LaTeX related functionalities are submitted to [LatexRender](http://sixthform.info/steve/wordpress/), thus preserving this plugin for music rendering only and the rename.
 
@@ -20,7 +20,7 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 = Prerequisite =
 1. Starting from ScoreRender 0.2, PHP4 compatibility is dropped, and PHP5 is strictly needed.
 2. Starting from ScoreRender 0.2, ImageMagick >= 6.3.6-2 is needed, due to usage of -flatten option.
-3. Any music rendering programs must also be installed in web server. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Refer to [installation page](http://scorerender.abelcheung.org/installation/) for more detail.
+3. Music rendering programs must also be installed on the same machine web server is running. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Refer to [installation page](http://scorerender.abelcheung.org/installation/) for more detail.
 
 = New install =
 1. Install any prerequisite programs as noted above.
@@ -58,9 +58,15 @@ Right now you have to view HTML source to find out cache image file name. Manage
 
 This may not be fully fixable, because setting font attributes may not be possible for all text. After image resizing, they can be rendered smaller / larger than desired.
 
-= How to debug my fragment when posting ? =
+= How to debug my fragment when posting? =
 
-Simply put, no. There is no viable method for debugging a fragment yet. The best way is render it privately in your computer first, then post the content, rather than spending lots of time doing trial and error.
+Simply put, don't do that now if possible. There is no viable method for debugging a fragment yet. The best way is render it privately in your computer first, then post the content, rather than needlessly spending lots of time on trial and error.
+
+= How can I install Philip's Music Writer? =
+
+Only by downloading source from its official website and compile the program yourself. The author failed to notice any binary package for Windows or Linux as of Feb 2009.
+
+Compiling and using PMW on Windows may only be possible through code changes.
 
 == Screenshots ==
 
