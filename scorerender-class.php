@@ -87,6 +87,11 @@ const ERR_CONVERT_UNUSABLE = -9;
  */
 const ERR_IMAGE_NOT_VIEWABLE = -10;
 
+/**
+ * Error constant representing web host disabled certain PHP functions
+ */
+const ERR_FUNC_DISABLED = -11;
+
 
 /*
  * Variables
@@ -400,6 +405,8 @@ public function get_error_msg ()
 
 	  case ERR_IMAGE_NOT_VIEWABLE:
 		return $this->format_error_msg (__('Image is not viewable!', TEXTDOMAIN));
+	  case ERR_FUNC_DISABLED:
+		return $this->format_error_msg (__('Some PHP functions are disabled by web host.', TEXTDOMAIN));
 	}
 }
 
@@ -509,6 +516,18 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 	return (0 === $this->_exec ($cmd));
 }
 
+/**
+ * Check if certain functions are disabled
+ *
+ * @since 0.2.50
+ * @return boolean Return TRUE if popen() or pclose() are disabled, FALSE otherwise
+ */
+public function is_web_hosting ()
+{
+	if (!function_exists ('popen') ||
+	    !function_exists ('pclose'))
+		return true;
+}
 
 /**
  * Check if given program is usable.
@@ -532,12 +551,16 @@ public function is_prog_usable ($match, $prog)
 
 	if (! is_executable ($prog)) return false;
 
+	// short circuit if some funcs are disabled by web host
+	if (self::is_web_hosting())
+		return true;
+
 	$args = func_get_args ();
 	array_shift ($args);
 	array_shift ($args);
 
 	$cmdline = '"' . $prog . '" ' . implode (' ', $args) . ' 2>&1';
-	if (false === ($handle = popen ($cmdline, 'r'))) return false;
+	if (false == ($handle = popen ($cmdline, 'r'))) return false;
 
 	$output = fread ($handle, 2048);
 	$ok = true;

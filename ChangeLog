@@ -1,3 +1,9 @@
+2009-03-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php, scorerender-admin.php:
+	- If web host disabled certain PHP process execution functions, just
+	  display warning message instead of running into fatal error.
+
 2009-01-18  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php:
