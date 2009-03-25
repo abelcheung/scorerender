@@ -259,6 +259,7 @@ function scorerender_update_options ()
 		'lilypond_bin_problem'     => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>lilypond</tt>', 'LilyPond')),
 		'mup_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>mup</tt>', 'Mup')),
 		'pmw_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>pmw</tt>', 'Philip\'s Music Writer')),
+		'prog_check_disabled'      => array ('level' => MSG_WARNING, 'content' => sprintf (__('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN))),
 	);
 
 	/*
@@ -286,6 +287,9 @@ function scorerender_update_options ()
 		if ( ! scorerender_cache_location_match ($newopt['CACHE_DIR'], $newopt['CACHE_URL']) )
 			$errmsgs[] = 'cache_dir_url_unmatch';
 	}
+
+	if ( ScoreRender::is_web_hosting() )
+		$errmsgs[] = 'prog_check_disabled';
 
 	if ( ! ScoreRender::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
 		$errmsgs[] = 'convert_bin_problem';
