@@ -567,7 +567,7 @@ function scorerender_add_ie6_style()
 ?>
 <!--[if lte IE 6]>
 <style type="text/css">
-.scorerender-image { behavior: url(<?php echo $path; ?>/iepngfix.htc); }
+.scorerender-image { behavior: url(<?php echo $path; ?>/iepngfix.php); }
 </style>
 <![endif]-->
 <?php
