@@ -1,3 +1,11 @@
+2009-03-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* iepngfix.php, blank.gif:
+	- Incorporate IE PNG Alpha Fix v2.0alpha3 from
+	  http://www.twinhelix.com/css/iepngfix/
+	* wp-scorerender.php (scorerender_add_ie6_style):
+	- Add relevant CSS style for IE <= 6.
+
 2009-03-25  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php, scorerender-admin.php:

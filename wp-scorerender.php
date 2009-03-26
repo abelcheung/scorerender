@@ -560,6 +560,18 @@ function scorerender_do_conversion ($content, $is_post)
 	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
 }
 
+function scorerender_add_ie6_style()
+{
+	$uri = get_bloginfo('url').'/'.PLUGINDIR.'/scorerender';
+	$path = parse_url ($uri, PHP_URL_PATH);
+?>
+<!--[if lte IE 6]>
+<style type="text/css">
+.scorerender-image { behavior: url(<?php echo $path; ?>/iepngfix.htc); }
+</style>
+<![endif]-->
+<?php
+}
 
 if (defined ('WP_ADMIN'))
 	include_once ('scorerender-admin.php');
@@ -585,6 +597,7 @@ remove_filter ('comment_text', 'force_balance_tags', 25);
 scorerender_get_options ();
 
 add_action ('init', 'scorerender_init_textdomain');
+add_action ('wp_head', 'scorerender_add_ie6_style');
 
 // earlier than default priority, since
 // smilies conversion and wptexturize() can mess up the content

@@ -46,6 +46,11 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 
 The error code indicates the kind of error in some degree. There are comments inside wp-scorerender.php indicating what kind of error it is. If you can't make any heads and tails out of PHP code, feel free to ask me [through email](http://me.abelcheung.org/aboutme/).
 
+= Why music score fragments are not rendered at all? =
+
+* Check if the beginning tag and ending tag of your music score fragment are correct.
+* It will only be rendered if logged in user has 'unfiltered_html' capability, i.e. the user has 'Administrator' or 'Editor' role in WordPress. User can ask blog admin to boost their capabilities if needed.
+
 = Is any ABC notation compatible program also supported? =
 
 Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. This is a design decision. If you REALLY want to use other similar programs, you are on your own, though modifying the code to support others is not very hard. Take a look at `is_notation_usable()` method in class.abc.inc.php.
@@ -73,7 +78,8 @@ Compiling and using PMW on Windows may only be possible through code changes.
 http://scorerender.abelcheung.org/screenshot/
 
 == License ==
-This plugin is released under GPL.
+This plugin is released under GPL v2.
+IE Alpha Fix is released under LGPL v2.1 or later.
 
 == ChangeLog ==
 
