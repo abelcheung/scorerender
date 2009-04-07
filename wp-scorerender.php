@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 11);
+define ('DATABASE_VERSION', 12);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -177,8 +177,8 @@ function scorerender_get_def_settings ($return_type = 0)
 		'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
 		'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
 		'TRANSPARENT_IMAGE'    => array ('type' =>   'bool', 'value' => true),
+		'USE_IE6_PNG_ALPHA_FIX'=> array ('type' =>   'bool', 'value' => true),
 		'SHOW_SOURCE'          => array ('type' =>   'bool', 'value' => false),
-		'SHOW_IE_TRANSPARENCY_WARNING' => array ('type' =>   'bool', 'value' => false),
 		'COMMENT_ENABLED'      => array ('type' =>   'bool', 'value' => false),
 		'ERROR_HANDLING'       => array ('type' =>   'enum', 'value' => ON_ERR_SHOW_MESSAGE),
 
@@ -445,12 +445,6 @@ function scorerender_process_content ($render)
 			$sr_options['CACHE_URL'], $result);
 	}
 
-	if ($sr_options['TRANSPARENT_IMAGE'] &&
-	    $sr_options['SHOW_IE_TRANSPARENCY_WARNING']) 
-	{
-		$html .= '<br /><!--[if lt IE 7]><span class="ie6warning" style="font-size: smaller;">' . __('(<font color="red">Warning</font>: Internet Explorer &lt; 7 is incapable of displaying transparent PNG image, so the above image may not show properly in your browser as expected. Please either use any other browser such as <a href="http://www.getfirefox.com/" target="_blank">Firefox</a> or <a href="http://www.opera.com/" target="_blank">Opera</a>, or at least upgrade to IE 7. Alternatively, ask site admin to disable transparent image.)', TEXTDOMAIN) . "</span><![endif]-->\n";
-	}
-
 	return $html;
 }
 
@@ -562,6 +556,7 @@ function scorerender_do_conversion ($content, $is_post)
 
 function scorerender_add_ie6_style()
 {
+	// FIXME: hardcoded path is not nice
 	$uri = get_bloginfo('url').'/'.PLUGINDIR.'/scorerender';
 	$path = parse_url ($uri, PHP_URL_PATH);
 ?>
@@ -594,10 +589,16 @@ remove_filter ('pre_comment_content', 'balanceTags', 30);
 remove_filter ('comment_text', 'force_balance_tags', 25);
  */
 
+// retrieve plugin options first
 scorerender_get_options ();
 
+// initialize translation files
 add_action ('init', 'scorerender_init_textdomain');
-add_action ('wp_head', 'scorerender_add_ie6_style');
+
+// IE6 PNG translucency filter
+if ($sr_options['TRANSPARENT_IMAGE'] &&
+    $sr_options['USE_IE6_PNG_ALPHA_FIX'])
+	add_action ('wp_head', 'scorerender_add_ie6_style');
 
 // earlier than default priority, since
 // smilies conversion and wptexturize() can mess up the content
