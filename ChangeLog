@@ -1,3 +1,8 @@
+2009-04-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Drop IE warning option, add IE translucency option instead.
+
 2009-03-26  Abel Cheung  <abelcheung@gmail.com>
 
 	* iepngfix.php, blank.gif:

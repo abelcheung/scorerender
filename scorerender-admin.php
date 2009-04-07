@@ -487,10 +487,10 @@ function scorerender_admin_section_image ()
 			<td>
 				<p><input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $sr_options['INVERT_IMAGE']); ?> />
 				<label for="invert_image"><?php _e('White colored notes (default is black)', TEXTDOMAIN); ?></label></p>
-				<p><input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $sr_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('show_ie_transparency_warning'); box.disabled = !box.disabled; return true;" />
-				<label for="transparent_image"><?php _e('Use transparent background (IE &lt;= 6 does not support transparent PNG)', TEXTDOMAIN); ?></label></p>
-				<p style="padding-left: 30px;"><input type="checkbox" name="ScoreRender[SHOW_IE_TRANSPARENCY_WARNING]" id="show_ie_transparency_warning" value="1" <?php checked('1', $sr_options['SHOW_IE_TRANSPARENCY_WARNING']); if (1 != $sr_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
-				<label for="show_ie_transparency_warning"><?php _e('Show warning message when such browser is used', TEXTDOMAIN) ?></label></p>
+				<p><input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $sr_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('use_ie6_png_alpha_fix'); box.disabled = !box.disabled; return true;" />
+				<label for="transparent_image"><?php _e('Use transparent background', TEXTDOMAIN); ?></label></p>
+				<p style="padding-left: 30px;"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', $sr_options['USE_IE6_PNG_ALPHA_FIX']); if (1 != $sr_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
+				<label for="use_ie6_png_alpha_fix"><?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label><br /><small><?php printf ('Turning on this option enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6, which is not supported by IE below version 7. This option only affects images rendered by ScoreRender. <strong>Make sure you have NOT installed any plugin with the same functionality before turning on this option, which may conflict with each other.</strong>', 'http://www.twinhelix.com/css/iepngfix/' ); ?></small></p>
 			</td>
 		</tr>
 		</table>
