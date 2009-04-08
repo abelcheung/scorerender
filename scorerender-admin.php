@@ -375,14 +375,14 @@ function scorerender_admin_section_path ()
 			<th scope="row"><?php _e('Temporary directory:', TEXTDOMAIN) ?></th>
 			<td>
 				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo $sr_options['TEMP_DIR']; ?>" size="60" /><br />
-				<?php _e('Must be writable and ideally located out of web-accessible area. System default will be used if left blank.', TEXTDOMAIN) ?>
+				<?php _e('Must be writable and ideally <strong>NOT</strong> accessible from web. System default will be used if left blank.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Image cache directory:', TEXTDOMAIN) ?></th>
 			<td>
 				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo $sr_options['CACHE_DIR']; ?>" size="60" /><br />
-				<?php _e('Must be writable and located inside the web-accessible area.', TEXTDOMAIN) ?>
+				<?php _e('Must be writable and accessible from web.', TEXTDOMAIN) ?>
 			</td>
 		</tr>
 		<tr valign="top">
@@ -635,16 +635,17 @@ function scorerender_admin_options ()
 	<ul>
 		<li><a target="_blank" href="http://www.lilypond.org/">Lilypond</a>
 		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['lilypond']['starttag'], $notations['lilypond']['endtag']); ?>)</li>
-		<li><dl><dt><a target="_blank" href="http://www.arkkra.com/">Mup</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['mup']['starttag'], $notations['mup']['endtag']); ?>)</dt><dd><?php printf ('Used by Mup itself and %s', '<a target="_blank" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></dd></dl></li>
-		<li><a target="_new" href="http://www.informatik.tu-darmstadt.de/AFS/GUIDO/">GUIDO</a>
+		<li><a target="_blank" href="http://www.arkkra.com/">Mup</a>
+		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['mup']['starttag'], $notations['mup']['endtag']); ?>)
+		<?php printf ('Used by Mup itself and %s', '<a target="_blank" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></li>
+		<li><a target="_blank" href="http://www.informatik.tu-darmstadt.de/AFS/GUIDO/">GUIDO</a>
 		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['guido']['starttag'], $notations['guido']['endtag']); ?>)</li>
-		<li><dl><dt><a target="_blank" href="http://abcnotation.org.uk/">ABC</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['abc']['starttag'], $notations['abc']['endtag']); ?>)</dt>
-		<dd><?php printf ('Used by various programs like %s, %s or %s',
+		<li><a target="_blank" href="http://abcnotation.org.uk/">ABC</a>
+		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['abc']['starttag'], $notations['abc']['endtag']); ?>)
+		<?php printf ('Used by various programs like %s, %s or %s',
 			'<a target="_blank" href="http://www.ihp-ffo.de/~msm/">abc2ps</a>',
 			'<a target="_blank" href="http://moinejf.free.fr/">abcm2ps</a>',
-			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></dd></dl></li>
+			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></li>
 		<li><a target="_blank" href="http://www.quercite.com/pmw.html">Philip's Music Writer</a>
 		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['pmw']['starttag'], $notations['pmw']['endtag']); ?>)</li>
 	</ul>
