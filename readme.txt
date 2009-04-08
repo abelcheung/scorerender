@@ -2,7 +2,7 @@
 Contributors: abelcheung
 Tags: music, music notation, music typesetting, score, abc, mup, lilypond, guido, pmw
 Requires at least: 2.2
-Tested up to: 2.7
+Tested up to: 2.7.1
 Stable tag: scorerender-0-2-1
 
 Renders inline sheet music fragments in post, pages and comments.
@@ -83,9 +83,16 @@ IE Alpha Fix is released under LGPL v2.1 or later.
 
 == ChangeLog ==
 
+**Version 0.3.0**
+* Philip's Music Writer notation support.
+* Drop IE PNG transparency warning altogether, IE Alpha fix has been incorporated, which provides translucent PNG support for IE 5.5 / 6.x.
+* Better support of installation on web hosting, where disabling certain PHP functions is common practise.
+* Rendering or not also depends on 'unfiltered_html' WordPress capability.
+* Refactor functions and files, so admin page is only included when needed, and PHP class no longer access global variables.
+
 **Version 0.2.1**
 
-* Fix turning on/off IE transparency option.
+* Fix turning on/off IE PNG transparency warning option.
 
 **Version 0.2.0**
 
