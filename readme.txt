@@ -85,6 +85,7 @@ Zero Clipboard is released under LGPL.
 == ChangeLog ==
 
 **Version 0.3.0**
+
 * Philip's Music Writer notation support.
 * IE Alpha fix has been incorporated, which provides translucent PNG support for IE 5.5 / 6.x. Thus drop IE PNG transparency warning altogether. 
 * Zero Clipboard has been incorporated, which provides cross platform copy and paste via flash. Warning about non-IE browser during copy and paste is removed.
