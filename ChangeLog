@@ -1,5 +1,11 @@
 2009-04-30  Abel Cheung  <abelcheung@gmail.com>
 
+	* showcode.php:
+	- Completely revamped to utilize Zero Clipboard by jhuckaby.
+	  No more "mozilla not supported" thing.
+
+2009-04-30  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php:
 	- No need to use DIRECTORY_SEPARATOR.
 
