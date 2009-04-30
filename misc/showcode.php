@@ -1,9 +1,9 @@
 <?php
-	// plugin file should be either 2 or 3 levels from WP top dir
-	if (file_exists ('../../../wp-config.php'))
+	// this file must be either 3 or 4 levels from WP top dir
+	if (file_exists ('../../../../wp-config.php'))
+		require_once ('../../../../wp-config.php');
+	elseif (file_exists ('../../../wp-config.php'))
 		require_once ('../../../wp-config.php');
-	elseif (file_exists ('../../wp-config.php'))
-		require_once ('../../wp-config.php');
 
 	if ( isset ($_POST['code']) )
 		$code = $_POST['code'];
