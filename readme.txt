@@ -3,17 +3,17 @@ Contributors: abelcheung
 Tags: music, music notation, music typesetting, score, abc, mup, lilypond, guido, pmw
 Requires at least: 2.2
 Tested up to: 2.7.1
-Stable tag: scorerender-0-2-1
+Stable tag: scorerender-0-3-0
 
 Renders inline sheet music fragments in post, pages and comments.
 
 == Description ==
 
-ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in excerpts, posts, pages and (optionally) comments.  Currently it supports 5 music notations: ABC, Guido, Lilypond, Mup and Philip's Music Writer.
+ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in posts, pages and (optionally) comments.  Currently it supports 5 music notations: ABC, Guido, Lilypond, Mup and Philip's Music Writer.
 
 ScoreRender started its life from Chris Lamb’s FigureRender plugin, which is a Wordpress plugin for rendering LaTeX and Lilypond music fragments into images. Its maintainership changed later. While continue enhancing FigureRender, all LaTeX related functionalities are submitted to [LatexRender](http://sixthform.info/steve/wordpress/), thus preserving this plugin for music rendering only and the rename.
 
-For latest version, detailed usage instructions and demo cases, please visit [ScoreRender official site](http://scorerender.abelcheung.org/).
+For latest version, detailed usage instructions and demo cases, please visit [ScoreRender official site](http://scorerender.abelcheung.org/). Requires PHP5, ImageMagick and various programs to generate music score (except Guido notation).
 
 == Installation ==
 
@@ -75,17 +75,19 @@ Compiling and using PMW on Windows may only be possible through code changes.
 
 == Screenshots ==
 
-http://scorerender.abelcheung.org/screenshot/
+Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for screenshots.
 
 == License ==
 This plugin is released under GPL v2.
 IE Alpha Fix is released under LGPL v2.1 or later.
+Zero Clipboard is released under LGPL.
 
 == ChangeLog ==
 
 **Version 0.3.0**
 * Philip's Music Writer notation support.
-* Drop IE PNG transparency warning altogether, IE Alpha fix has been incorporated, which provides translucent PNG support for IE 5.5 / 6.x.
+* IE Alpha fix has been incorporated, which provides translucent PNG support for IE 5.5 / 6.x. Thus drop IE PNG transparency warning altogether. 
+* Zero Clipboard has been incorporated, which provides cross platform copy and paste via flash. Warning about non-IE browser during copy and paste is removed.
 * Better support of installation on web hosting, where disabling certain PHP functions is common practise.
 * Rendering or not also depends on 'unfiltered_html' WordPress capability.
 * Refactor functions and files, so admin page is only included when needed, and PHP class no longer access global variables.
