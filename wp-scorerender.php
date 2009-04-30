@@ -418,7 +418,7 @@ function scorerender_process_content ($render)
 	// FIXME: completely gone berserk if folder containing this plugin is a symlink, plugin_basename() sucks
 	if ($sr_options['SHOW_SOURCE'])
 	{
-		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, dirname (plugin_basename (__FILE__)));
+		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/misc/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, dirname (plugin_basename (__FILE__)));
 		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 			__('Click on image to view source', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
@@ -562,7 +562,7 @@ function scorerender_add_ie6_style()
 ?>
 <!--[if lte IE 6]>
 <style type="text/css">
-.scorerender-image { behavior: url(<?php echo $path; ?>/iepngfix.php); }
+.scorerender-image { behavior: url(<?php echo $path; ?>/misc/iepngfix.php); }
 </style>
 <![endif]-->
 <?php

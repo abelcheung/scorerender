@@ -1,16 +1,19 @@
 2009-04-30  Abel Cheung  <abelcheung@gmail.com>
 
-	* showcode.php:
+	* showcode.php, showcode.css:
 	- Completely revamped to utilize Zero Clipboard by jhuckaby.
 	  No more "mozilla not supported" thing.
+	- Move to misc/ subfolder.
+
+	* blank.gif, iepngfix.php:
+	- Move to misc/ subfolder.
 
 	* misc/ZeroClipbard.js, misc/ZeroClipboard.swf:
 	- New files.
 
-2009-04-30  Abel Cheung  <abelcheung@gmail.com>
-
 	* wp-scorerender.php:
 	- No need to use DIRECTORY_SEPARATOR.
+	- Adopt new path for IE png fix and showcode.php.
 
 2009-04-08  Abel Cheung  <abelcheung@gmail.com>
 
