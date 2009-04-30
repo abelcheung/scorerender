@@ -51,8 +51,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 	// just displays incomprehensible error. Perhaps PMW is to be blamed
 	// though, since there is no BoundingBox nor page dimension specified
 	// in PostScript produced by PMW.
-	return parent::conversion_step2 ($intermediate_image, $final_image, TRUE,
-		'-page a3');
+	return parent::conversion_step2 ($intermediate_image,
+		$final_image, FALSE, '-page a3');
 }
 
 /**
