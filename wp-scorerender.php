@@ -222,7 +222,7 @@ function scorerender_get_def_settings ($return_type = 0)
 function scorerender_init_textdomain ()
 {
 	// load_textdomain() already does file existance checking
-	load_plugin_textdomain (TEXTDOMAIN, PLUGINDIR . DIRECTORY_SEPARATOR . plugin_basename (dirname (__FILE__)));
+	load_plugin_textdomain (TEXTDOMAIN, PLUGINDIR.'/'.plugin_basename (dirname (__FILE__)));
 	load_plugin_textdomain (TEXTDOMAIN);
 	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
 }
@@ -277,7 +277,7 @@ function scorerender_get_upload_dir ()
 		$path = trim(get_option('upload_path'));
 	
 	if (empty ($path))
-		$path = 'wp-content'.DIRECTORY_SEPARATOR.'uploads';
+		$path = 'wp-content/uploads';
 
 	if (!is_absolute_path ($path))
 		$path = ABSPATH . $path;
