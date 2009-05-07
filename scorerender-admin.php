@@ -3,10 +3,10 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.2.50
+ * @version 0.3.0
  * @author Abel Cheung <abelcheung at gmail dot com>
  * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- * @copyright Copyright (C) 2007, 08 Abel Cheung
+ * @copyright Copyright (C) 2007-09 Abel Cheung
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -194,6 +194,7 @@ function scorerender_remove_cache ()
  * Note that no error checking is done for path and URL, so make sure
  * their validity are confirmed before using.
  *
+ * @since 0.3
  * @param string $path Cache full path
  * @param string $url Cache URL
  * @return boolean Whether both point to the same location.
@@ -358,6 +359,31 @@ function scorerender_update_options ()
 
 
 /**
+ * Manage certain items with JavaScript on admin page.
+ *
+ * @since 0.3
+ * @access private
+ */
+function scorerender_admin_add_js() {
+?>
+<script type="text/javascript">
+//<![CDATA[
+	jQuery(document).ready(function($){
+		$("#comment_enabled").click(function(){
+			if ( $("#comment_enabled").is(":checked") )
+				$("#fragment_per_comment").removeAttr("disabled");
+			else
+				$("#fragment_per_comment").attr('disabled', true);
+		});
+	});
+//]]>
+</script>
+<?php
+}
+add_filter('admin_head', 'scorerender_admin_add_js');
+
+
+/**
  * Section of admin page about path options
  *
  * @since 0.2
@@ -367,33 +393,35 @@ function scorerender_admin_section_path ()
 {
 	global $sr_options;
 ?>
-	<fieldset class="options">
-		<h3><?php _e('Path options', TEXTDOMAIN) ?></h3>
 
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
-		<tr valign="top">
-			<th scope="row"><?php _e('Temporary directory:', TEXTDOMAIN) ?></th>
-			<td>
-				<input name="ScoreRender[TEMP_DIR]" class="code" type="text" id="temp_dir" value="<?php echo $sr_options['TEMP_DIR']; ?>" size="60" /><br />
-				<?php _e('Must be writable and ideally <strong>NOT</strong> accessible from web. System default will be used if left blank.', TEXTDOMAIN) ?>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Image cache directory:', TEXTDOMAIN) ?></th>
-			<td>
-				<input name="ScoreRender[CACHE_DIR]" class="code" type="text" id="cache_dir" value="<?php echo $sr_options['CACHE_DIR']; ?>" size="60" /><br />
-				<?php _e('Must be writable and accessible from web.', TEXTDOMAIN) ?>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Image cache URL:', TEXTDOMAIN) ?></th>
-			<td>
-				<input name="ScoreRender[CACHE_URL]" class="code" type="text" id="cache_url" value="<?php echo $sr_options['CACHE_URL']; ?>" size="60" /><br />
-				<?php _e('Must correspond to the image cache directory above.', TEXTDOMAIN) ?>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
+<h3><?php _e('Path options', TEXTDOMAIN) ?></h3>
+<table class="form-table">
+
+<tr valign="top">
+<th scope="row"><label for="temp_dir"><?php _e('Temporary directory:', TEXTDOMAIN) ?></label></th>
+<td>
+<input name="ScoreRender[TEMP_DIR]" type="text" id="temp_dir" value="<?php echo $sr_options['TEMP_DIR']; ?>" size="60" class="regular-text code" />
+<div class="setting-description"><?php _e('Must be writable and ideally <strong>NOT</strong> accessible from web. System default will be used if left blank.', TEXTDOMAIN) ?></div>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="cache_dir"><?php _e('Image cache directory:', TEXTDOMAIN) ?></label></th>
+<td>
+<input name="ScoreRender[CACHE_DIR]" type="text" id="cache_dir" value="<?php echo $sr_options['CACHE_DIR']; ?>" size="60" class="regular-text code" />
+<div class="setting-description"><?php _e('Must be writable and accessible from web.', TEXTDOMAIN) ?></div>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="cache_url"><?php _e('Image cache URL:', TEXTDOMAIN) ?></label></th>
+<td>
+<input name="ScoreRender[CACHE_URL]" type="text" id="cache_url" value="<?php echo $sr_options['CACHE_URL']; ?>" size="60" class="regular-text code" /><br />
+<div class="setting-description"><?php _e('Must correspond to the image cache directory above.', TEXTDOMAIN) ?></div>
+</td>
+</tr>
+
+</table>
 <?php
 }
 
@@ -408,50 +436,45 @@ function scorerender_admin_section_prog ()
 {
 	global $sr_options;
 ?>
-	<fieldset class="options">
-		<h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
-		<caption><?php _e('ImageMagick 6.x <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></th>
-			<td>
-				<input name="ScoreRender[CONVERT_BIN]" class="code" type="text" id="convert_bin" value="<?php echo $sr_options['CONVERT_BIN']; ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>lilypond</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[LILYPOND_BIN]" class="code" type="text" id="lilypond_bin" value="<?php echo $sr_options['LILYPOND_BIN']; ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[MUP_BIN]" class="code" type="text" id="mup_bin" value="<?php echo $sr_options['MUP_BIN']; ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[MUP_MAGIC_FILE]" class="code" type="text" id="mup_magic_file" value="<?php echo $sr_options['MUP_MAGIC_FILE']; ?>" size="50" />
-				<br />
-				<?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN), 'http://www.arkkra.com/doc/faq.html#payment'); ?>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[ABCM2PS_BIN]" class="code" type="text" id="abcm2ps_bin" value="<?php echo $sr_options['ABCM2PS_BIN']; ?>" size="50" />
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>pmw</code>'); ?></th>
-			<td>
-				<input name="ScoreRender[PMW_BIN]" class="code" type="text" id="pmw_bin" value="<?php echo $sr_options['PMW_BIN']; ?>" size="50" />
-			</td>
-		</tr>
-		</table>
-	</fieldset>
+
+<h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
+<table class="form-table">
+
+<caption><?php _e('ImageMagick 6.x <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
+
+<tr valign="top">
+<th scope="row"><label for="convert_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></label></th>
+<td><input name="ScoreRender[CONVERT_BIN]" type="text" id="convert_bin" value="<?php echo $sr_options['CONVERT_BIN']; ?>" size="50" class="regular-text code" /></td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="lilypond_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>lilypond</code>'); ?></label></th>
+<td><input name="ScoreRender[LILYPOND_BIN]" type="text" id="lilypond_bin" value="<?php echo $sr_options['LILYPOND_BIN']; ?>" size="50" class="regular-text code" /></td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="mup_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>mup</code>'); ?></label></th>
+<td><input name="ScoreRender[MUP_BIN]" type="text" id="mup_bin" value="<?php echo $sr_options['MUP_BIN']; ?>" size="50" class="regular-text code" /></td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="mup_magic_file"><?php printf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'); ?></label></th>
+<td><input name="ScoreRender[MUP_MAGIC_FILE]" type="text" id="mup_magic_file" value="<?php echo $sr_options['MUP_MAGIC_FILE']; ?>" size="50" class="regular-text code" />
+<div class="setting-description"><?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN), 'http://www.arkkra.com/doc/faq.html#payment'); ?></div>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="abcm2ps_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></label></th>
+<td><input name="ScoreRender[ABCM2PS_BIN]" type="text" id="abcm2ps_bin" value="<?php echo $sr_options['ABCM2PS_BIN']; ?>" size="50" class="regular-text code" /></td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="pmw_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>pmw</code>'); ?></label></th>
+<td><input name="ScoreRender[PMW_BIN]" type="text" id="pmw_bin" value="<?php echo $sr_options['PMW_BIN']; ?>" size="50" class="regular-text code" /></td>
+</tr>
+
+</table>
 <?php
 }
 
@@ -465,36 +488,38 @@ function scorerender_admin_section_image ()
 {
 	global $sr_options;
 ?>
-	<fieldset class="options">
-		<h3><?php _e('Image options', TEXTDOMAIN) ?></h3>
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
-		<tr valign="top">
-			<th scope="row"><?php _e('Max image width (pixel):', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo $sr_options['IMAGE_MAX_WIDTH']; ?>" size="6" />
-				<label for="image_max_width"><?php _e('(Default is 360)', TEXTDOMAIN) ?></label><br /><?php _e('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th score="row"><?php _e('Clickable image:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
-				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th score="row"><?php _e('Image post-processing', TEXTDOMAIN) ?></th>
-			<td>
-				<p><input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $sr_options['INVERT_IMAGE']); ?> />
-				<label for="invert_image"><?php _e('White colored notes (default is black)', TEXTDOMAIN); ?></label></p>
-				<p><input type="checkbox" name="ScoreRender[TRANSPARENT_IMAGE]" id="transparent_image" value="1" <?php checked('1', $sr_options['TRANSPARENT_IMAGE']); ?> onclick="var box = document.getElementById('use_ie6_png_alpha_fix'); box.disabled = !box.disabled; return true;" />
-				<label for="transparent_image"><?php _e('Use transparent background', TEXTDOMAIN); ?></label></p>
-				<p style="padding-left: 30px;"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', $sr_options['USE_IE6_PNG_ALPHA_FIX']); if (1 != $sr_options['TRANSPARENT_IMAGE']) { echo ' disabled="disabled"'; } ?> />
-				<label for="use_ie6_png_alpha_fix"><?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label><br /><small><?php printf ('Turning on this option enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6, which is not supported by IE below version 7. This option only affects images rendered by ScoreRender. <strong>Make sure you have NOT installed any plugin with the same functionality before turning on this option, which may conflict with each other.</strong>', 'http://www.twinhelix.com/css/iepngfix/' ); ?></small></p>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
+<h3><?php _e('Image options', TEXTDOMAIN) ?></h3>
+<table class="form-table">
+
+<tr valign="top">
+<th scope="row"><label for="image_max_width"><?php _e('Max image width (pixel):', TEXTDOMAIN) ?></label></th>
+<td><input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo $sr_options['IMAGE_MAX_WIDTH']; ?>" size="6" class="regular-text" />
+<div class="setting-description"><?php _e('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></div>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><label for="show_input"><?php _e('Clickable image:', TEXTDOMAIN) ?></label></th>
+<td><label for="show_input"><input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
+<?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><?php _e('Image post-processing:', TEXTDOMAIN) ?></th>
+<td>
+<fieldset><legend class="hidden"><?php _e('Image post-processing:', TEXTDOMAIN) ?></legend>
+<label for="invert_image"><input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $sr_options['INVERT_IMAGE']); ?> />
+<?php _e('White colored notes (default is black)', TEXTDOMAIN); ?></label>
+<br />
+<label for="use_ie6_png_alpha_fix"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', $sr_options['USE_IE6_PNG_ALPHA_FIX']); ?> />
+<?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label>
+<div class="setting-description"><?php printf ('Turning on this option enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6, which is not supported by IE below version 7. This option only affects images rendered by ScoreRender. <strong>Make sure you have NOT installed any plugin with the same functionality before turning on this option, which may conflict with each other.</strong>', 'http://www.twinhelix.com/css/iepngfix/' ); ?></div>
+</fieldset>
+</td>
+</tr>
+
+</table>
 <?php
 }
 
@@ -510,44 +535,48 @@ function scorerender_admin_section_content ()
 {
 	global $sr_options;
 ?>
-	<fieldset class="options">
-		<h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
+<h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
+<table class="form-table">
 
-		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
-		<tr valign="top">
-			<th scope="row"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo $sr_options['CONTENT_MAX_LENGTH']; ?>" size="6" />
-				<label for="content_max_length"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
-			<td>
-				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(ON_ERR_SHOW_MESSAGE, $sr_options['ERROR_HANDLING']); ?> />
-				<label for="on_err_show_message"><?php _e('Show error message', TEXTDOMAIN) ?></label><br />
-				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_fragment" value="2" <?php checked(ON_ERR_SHOW_FRAGMENT, $sr_options['ERROR_HANDLING']); ?> />
-				<label for="on_err_show_fragment"><?php _e('Show original, unmodified music fragment', TEXTDOMAIN) ?></label><br />
-				<input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(ON_ERR_SHOW_NOTHING, $sr_options['ERROR_HANDLING']); ?> />
-				<label for="on_err_show_nothing"><?php _e('Show nothing', TEXTDOMAIN) ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Comment rendering:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', $sr_options['COMMENT_ENABLED']); ?> onclick="var box = document.getElementById('fragment_per_comment'); box.disabled = !box.disabled; return true;" />
-				<label for="comment_enabled"><?php printf ('%s %s', __('Enable rendering for comments', TEXTDOMAIN), '<span style="font-weight: bold; color: red;">' . __('(Only turn on if commenters are trusted)', TEXTDOMAIN) . '</span>'); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
-			<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo $sr_options['FRAGMENT_PER_COMMENT']; ?>" size="6" <?php if (1 != $sr_options['COMMENT_ENABLED']) { echo ' disabled="disabled"'; } ?> />
-				<label for="fragment_per_comment"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></label>
-			</td>
-		</tr>
-		</table>
-	</fieldset>
+<tr valign="top">
+<th scope="row"><label for="content_max_length"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></label></th>
+<td><input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo $sr_options['CONTENT_MAX_LENGTH']; ?>" size="6" class="regular-text" />
+<span class="setting-description"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?></span>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
+<td>
+<fieldset><legend class="hidden"><?php _e('When rendering failed:', TEXTDOMAIN); ?></legend>
+<label for="on_err_show_message"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(ON_ERR_SHOW_MESSAGE, $sr_options['ERROR_HANDLING']); ?> />
+<?php _e('Show error message', TEXTDOMAIN) ?></label><br />
+<label for="on_err_show_fragment"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_fragment" value="2" <?php checked(ON_ERR_SHOW_FRAGMENT, $sr_options['ERROR_HANDLING']); ?> />
+<?php _e('Show original, unmodified music fragment', TEXTDOMAIN) ?></label><br />
+<label for="on_err_show_nothing"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(ON_ERR_SHOW_NOTHING, $sr_options['ERROR_HANDLING']); ?> />
+<?php _e('Show nothing', TEXTDOMAIN) ?></label>
+</fieldset>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><?php _e('Comment rendering:', TEXTDOMAIN) ?></th>
+<td>
+<label for="comment_enabled"><input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', $sr_options['COMMENT_ENABLED']); ?> />
+<?php _e('Enable rendering for comments', TEXTDOMAIN) ?></label>
+<div class="setting-description" style="color: red;"><?php _e('Only turn on if commenters are trusted', TEXTDOMAIN) ?></div>
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
+<td>
+<label for="fragment_per_comment"><input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo $sr_options['FRAGMENT_PER_COMMENT']; ?>" size="6" <?php if (1 != $sr_options['COMMENT_ENABLED']) { echo ' disabled="disabled"'; } ?> class="regular-text" /></label>
+<span class="setting-description"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></span>
+</td>
+</tr>
+
+</table>
 <?php
 }
 
@@ -563,31 +592,31 @@ function scorerender_admin_section_caching ()
 {
 	global $sr_options;
 ?>
-	<fieldset class="options">
-		<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
+<fieldset class="options">
+	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
 <?php
-	$img_count = scorerender_get_num_of_images();
+$img_count = scorerender_get_num_of_images();
 
-	if ( 0 > $img_count )
-	{
-		echo "<font color='red'>" . __('Cache directory is not readable, thus no image count is shown.', TEXTDOMAIN) . "<br />";
-		echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) . "</font>\n";
-	}
-	else
-	{
-		printf (__ngettext("Cache directory contains %d image.\n",
-			           "Cache directory contains %d images.\n",
-			           $img_count, TEXTDOMAIN), $img_count);
-	}
+if ( 0 > $img_count )
+{
+	echo "<font color='red'>" . __('Cache directory is not readable, thus no image count is shown.', TEXTDOMAIN) . "<br />";
+	echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) . "</font>\n";
+}
+else
+{
+	printf (__ngettext("Cache directory contains %d image.\n",
+			   "Cache directory contains %d images.\n",
+			   $img_count, TEXTDOMAIN), $img_count);
+}
 
 ?>
 <?php if ( is_writable ($sr_options['CACHE_DIR']) ) : ?>
-		<input type="submit" name="clear_cache" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
+	<input type="submit" name="clear_cache" class="button-secondary" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 <?php else : ?>
-		<input type="submit" name="clear_cache" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
-		<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
+	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
+	<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
 <?php endif; ?>
-	</fieldset>
+</fieldset>
 <?php
 }
 
@@ -667,7 +696,7 @@ function scorerender_admin_options ()
 	scorerender_admin_section_caching();
 ?>
 	<p class="submit">
-	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
+	<input type="submit" name="Submit" class="button-primary" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
 	</p>
 
 	</div>

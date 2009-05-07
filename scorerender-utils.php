@@ -3,10 +3,10 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.2.50
+ * @version 0.3.0
  * @author Abel Cheung <abelcheung at gmail dot com>
  * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- * @copyright Copyright (C) 2007, 08 Abel Cheung
+ * @copyright Copyright (C) 2007-09 Abel Cheung
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
@@ -75,7 +75,7 @@ if (!function_exists ('wp_parse_str')) {
 /**
  * Convenience function: Check if OS is Windows
  *
- * @since 0.2.50
+ * @since 0.3
  * return boolean True if OS is Windows, false otherwise.
  */
 function is_windows ()
@@ -87,7 +87,7 @@ function is_windows ()
 /**
  * Transform path string to Windows or Unix presentation
  *
- * @since 0.2.50
+ * @since 0.3
  * @param string $path The path to be transformed
  * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
  * @uses is_windows
@@ -105,7 +105,7 @@ function get_path_presentation ($path, $is_internal)
 /**
  * Convenience function: Check if a path is aboslute path
  *
- * @since 0.2.50
+ * @since 0.3
  * @return boolean True if path is absolute, false otherwise.
  */
 function is_absolute_path ($path)
