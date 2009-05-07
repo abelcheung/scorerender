@@ -17,6 +17,11 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
+ * @version 0.3.0
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
+ * @copyright Copyright (C) 2007-09 Abel Cheung
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
 /**
@@ -176,7 +181,7 @@ public function set_music_fragment ($input)
  * @param mixed $progs A single program or array of programs to be used
  * @uses $mainprog Full path is stored in this variable
  * @todo For some notations like PMX/MusiXTeX, multiple programs must be set, currently this function can only handle one.
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_programs ($progs)
 {
@@ -254,7 +259,7 @@ public function get_notation_name ()
  * Sets path of ImageMagick convert
  *
  * @param string $path Full path of ImageMagick convert binary
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_imagemagick_path ($path)
 {
@@ -265,7 +270,7 @@ public function set_imagemagick_path ($path)
  * Sets whether inverted image shall be generated
  *
  * @param boolean $invert White note is rendered if TRUE, black otherwise.
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_inverted ($invert)
 {
@@ -276,7 +281,7 @@ public function set_inverted ($invert)
  * Sets whether transparent image shall be used
  *
  * @param boolean $transparent Use transparent background if TRUE, black or white otherwise.
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_transparency ($transparent)
 {
@@ -287,7 +292,7 @@ public function set_transparency ($transparent)
  * Set temporary folder
  *
  * @param string $path The desired temporary folder to use.
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_temp_dir ($path)
 {
@@ -298,7 +303,7 @@ public function set_temp_dir ($path)
  * Get temporary folder path
  *
  * @return string|boolean The temporary folder if already set, or FALSE otherwise
- * @since 0.2.50
+ * @since 0.3
  */
 public function get_temp_dir ()
 {
@@ -309,7 +314,7 @@ public function get_temp_dir ()
  * Set cache folder for storing images
  *
  * @param string $path The desired cache folder to use.
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_cache_dir ($path)
 {
@@ -320,7 +325,7 @@ public function set_cache_dir ($path)
  * Get cache folder path
  *
  * @return string|boolean The cache folder if already set, or FALSE otherwise
- * @since 0.2.50
+ * @since 0.3
  */
 public function get_cache_dir ()
 {
@@ -331,7 +336,7 @@ public function get_cache_dir ()
  * Set maximum allowed length of score fragment source
  *
  * @param integer $length Maximum length of score fragment source (in byte)
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_max_length ($length)
 {
@@ -345,7 +350,7 @@ public function set_max_length ($length)
  * the methods are overrided in inherited notations.
  *
  * @param integer $width Maximum width of images (in pixel)
- * @since 0.2.50
+ * @since 0.3
  */
 public function set_img_width ($width)
 {
@@ -357,7 +362,7 @@ public function set_img_width ($width)
  *
  * @param string $mesg Original error message
  * @return string Formatted message
- * @since 0.2.50
+ * @since 0.3
  */
 private function format_error_msg ($mesg)
 {
@@ -370,7 +375,7 @@ private function format_error_msg ($mesg)
  *
  * @uses $error_code Message is generated according to error code
  * @return string Localized error message
- * @since 0.2.50
+ * @since 0.3
  */
 public function get_error_msg ()
 {
@@ -519,7 +524,7 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 /**
  * Check if certain functions are disabled
  *
- * @since 0.2.50
+ * @since 0.3
  * @return boolean Return TRUE if popen() or pclose() are disabled, FALSE otherwise
  */
 public function is_web_hosting ()

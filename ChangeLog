@@ -1,3 +1,12 @@
+2009-05-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender*.php:
+	- Update copyright and version.
+
+	* scorerender-admin.php:
+	- Drop transparency option in admin page.
+	- Change admin page to match WordPress 2.7 style, and use jQuery.
+
 === ScoreRender 0.3.0 ===
 2009-04-30  Abel Cheung  <abelcheung@gmail.com>
 
