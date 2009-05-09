@@ -1,7 +1,11 @@
 2009-05-09  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php (scorerender_process_content):
+	- Also show image dimension in output image tag. (trunk)
+	- Always use \r\n as line break when showing image code, otherwise
+	  copy and paste can be problematic under Windows. (trunk)
 	* scorerender*.php:
-	- Update copyright and version.
+	- Update copyright and version. (trunk)
 
 === ScoreRender 0.3.0 ===
 2009-04-30  Abel Cheung  <abelcheung@gmail.com>

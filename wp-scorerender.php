@@ -430,8 +430,8 @@ function scorerender_process_content ($render)
 		if (false === $name)
 			return '[ScoreRender Error: Unknown notation type!]';
 
-		$content = $notations[$name]['starttag'] . "\n" .
-			$render->get_music_fragment() . "\n" .
+		$content = $notations[$name]['starttag'] . "\r\n" .
+			preg_replace ("/(?<!\r)\n/s", "\r\n", $render->get_music_fragment()) . "\r\n" .
 			$notations[$name]['endtag'];
 
 		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n",
@@ -439,7 +439,8 @@ function scorerender_process_content ($render)
 	}
 	else
 	{
-		$html .= sprintf ("<img class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+		list ($width, $height, $type, $attr) = getimagesize( $sr_options['CACHE_DIR'].'/'.$result );
+		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s/%s' />\n",
 			__('Music fragment', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
 			$sr_options['CACHE_URL'], $result);
