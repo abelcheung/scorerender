@@ -439,7 +439,8 @@ function scorerender_process_content ($render)
 	}
 	else
 	{
-		$html .= sprintf ("<img class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+		list ($width, $height, $type, $attr) = getimagesize( $sr_options['CACHE_DIR'].'/'.$result );
+		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s/%s' />\n",
 			__('Music fragment', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
 			$sr_options['CACHE_URL'], $result);
