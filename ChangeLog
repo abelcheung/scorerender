@@ -4,6 +4,8 @@
 	- Also show image dimension in output image tag.
 	- Always use \r\n as line break when showing image code, otherwise
 	  copy and paste can be problematic under Windows.
+	* scorerender-class.php, wp-scorerender.php:
+	- Completely remove transparency option, which is not optional now.
 
 2009-05-07  Abel Cheung  <abelcheung@gmail.com>
 

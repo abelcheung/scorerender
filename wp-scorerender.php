@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 12);
+define ('DATABASE_VERSION', 13);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -176,7 +176,6 @@ function scorerender_get_def_settings ($return_type = 0)
 
 		'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
 		'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
-		'TRANSPARENT_IMAGE'    => array ('type' =>   'bool', 'value' => true),
 		'USE_IE6_PNG_ALPHA_FIX'=> array ('type' =>   'bool', 'value' => true),
 		'SHOW_SOURCE'          => array ('type' =>   'bool', 'value' => false),
 		'COMMENT_ENABLED'      => array ('type' =>   'bool', 'value' => false),
@@ -465,7 +464,6 @@ function scorerender_process_content ($render)
  * @uses ScoreRender::set_programs()
  * @uses ScoreRender::set_imagemagick_path()
  * @uses ScoreRender::set_inverted()
- * @uses ScoreRender::set_transparency()
  * @uses ScoreRender::set_temp_dir()
  * @uses ScoreRender::set_cache_dir()
  * @uses ScoreRender::set_max_length()
@@ -501,7 +499,6 @@ function scorerender_filter ($matches)
 
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
 	$render->set_inverted ($sr_options['INVERT_IMAGE']);
-	$render->set_transparency ($sr_options['TRANSPARENT_IMAGE']);
 	$render->set_temp_dir ($sr_options['TEMP_DIR']);
 	$render->set_cache_dir ($sr_options['CACHE_DIR']);
 	$render->set_max_length ($sr_options['CONTENT_MAX_LENGTH']);
@@ -597,8 +594,7 @@ scorerender_get_options ();
 add_action ('init', 'scorerender_init_textdomain');
 
 // IE6 PNG translucency filter
-if ($sr_options['TRANSPARENT_IMAGE'] &&
-    $sr_options['USE_IE6_PNG_ALPHA_FIX'])
+if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
 	add_action ('wp_head', 'scorerender_add_ie6_style');
 
 // earlier than default priority, since

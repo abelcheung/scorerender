@@ -5,7 +5,7 @@
  * Mandatory:
  * - conversion_step1($input_file, $intermediate_image)
  * - get_music_fragment($input)
- * - conversion_step2($intermediate_image, $final_image, $invert, $transparent)
+ * - conversion_step2($intermediate_image, $final_image, $invert)
  *   --- this one most usually invokes parent converting()
  *
  * Optional:
@@ -117,11 +117,6 @@ protected $_commandOutput;
  * @var boolean $is_inverted Whether image should be rendered in white on black.
  */
 protected $is_inverted = false;
-
-/**
- * @var boolean $is_transparent Whether rendered image should use transparent background.
- */
-protected $is_transparent = true;
 
 /**
  * @var string $imagemagick Full path of ImageMagick convert
@@ -275,17 +270,6 @@ public function set_imagemagick_path ($path)
 public function set_inverted ($invert)
 {
 	$this->is_inverted = $invert;
-}
-
-/**
- * Sets whether transparent image shall be used
- *
- * @param boolean $transparent Use transparent background if TRUE, black or white otherwise.
- * @since 0.3
- */
-public function set_transparency ($transparent)
-{
-	$this->is_transparent = $transparent;
 }
 
 /**
@@ -474,7 +458,6 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  * @uses _exec()
  * @uses $imagemagick
  * @uses $is_inverted
- * @uses $is_transparent
  * @param string $intermediate_image The rendered PostScript file name
  * @param string $final_image The final PNG image file name
  * @param boolean $ps_has_alpha True if PostScript produced by music rendering program has transparency capability
@@ -489,33 +472,19 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 	// but suddenly it can now, and renders all previous logic broken
 	if ($ps_has_alpha)
 	{
-		if ($this->is_transparent)
-			$cmd .= sprintf (' %s "%s" "%s"',
-				(($this->is_inverted) ? '-negate' : ''),
-				$intermediate_image, $final_image);
-		else
-			$cmd .= sprintf (' -flatten "%s" png:- | "%s" -alpha deactivate %s png:- "%s"',
-				$intermediate_image,
-				$this->imagemagick,
-				(($this->is_inverted) ? '-negate' : ''),
-				$final_image);
+		$cmd .= sprintf (' %s "%s" "%s"',
+			(($this->is_inverted) ? '-negate' : ''),
+			$intermediate_image, $final_image);
 	}
 	else
 	{
-		if (!$this->is_transparent)
-			$cmd .= sprintf (' %s "%s" "%s"',
-				(($this->is_inverted) ? '-negate' : ''),
-				$intermediate_image, $final_image);
-		else
-		{
-			// Adding alpha channel and changing alpha value
-			// need separate invocations, can't do in one pass
-			$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- "%s"',
-				$intermediate_image,
-				$this->imagemagick,
-				(($this->is_inverted)? 1 : 0),
-				$final_image);
-		}
+		// Adding alpha channel and changing alpha value
+		// need separate invocations, can't do in one pass
+		$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- "%s"',
+			$intermediate_image,
+			$this->imagemagick,
+			(($this->is_inverted)? 1 : 0),
+			$final_image);
 	}
 
 	return (0 === $this->_exec ($cmd));
@@ -610,7 +579,7 @@ public function is_prog_usable ($match, $prog)
 final public function render()
 {
 	$hash = md5 ($this->_input . $this->is_inverted
-		     . $this->is_transparent . $this->get_notation_name());
+		     . $this->get_notation_name());
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
 		       "sr-" . $this->get_notation_name() . "-$hash.png";
 
