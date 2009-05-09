@@ -2,6 +2,8 @@
 
 	* wp-scorerender.php (scorerender_process_content):
 	- Also show image dimension in output image tag.
+	- Always use \r\n as line break when showing image code, otherwise
+	  copy and paste can be problematic under Windows.
 
 2009-05-07  Abel Cheung  <abelcheung@gmail.com>
 
