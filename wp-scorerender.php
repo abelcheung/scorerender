@@ -143,27 +143,71 @@ foreach (array_values ($notations) as $notation)
  */
 function scorerender_get_def_settings ($return_type = 0)
 {
-	// ImageMagick use versioned folders, abcm2ps don't have Win32 installer
-	// So just make up some close enough paths for them
 	// PMW doesn't even have public available Win32 binary, perhaps
 	// somebody might be able to compile it with MinGW?
 
 	if (is_windows ())
-		$defprog = array (
-			'abc2ps' => 'C:\Program Files\abcm2ps\abcm2ps.exe',
-			'convert' => 'C:\Program Files\ImageMagick\convert.exe',
-			'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
-			'mup' => 'C:\Program Files\mupmate\mup.exe',
-			'pmw' => '',
-		);
+	{
+		if ( function_exists ('glob') ) // just in case this is disabled
+		{
+			$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
+			$lilypond = glob ('C:\Program Files\Lilypond\usr\bin\lilypond.exe');
+			$mup      = glob ('C:\Program Files\mupmate\mup.exe');
+			$abcm2ps  = glob ('C:\Program Files\*\abcm2ps.exe');
+
+			$convert  = empty($convert)  ? '' : $convert[0];
+			$lilypond = empty($lilypond) ? '' : $lilypond[0];
+			$mup      = empty($mup)      ? '' : $mup[0];
+			$abcm2ps  = empty($abcm2ps)  ? '' : $abcm2ps[0];
+
+			$defprog = array (
+				'abc2ps'   => $abcm2ps,
+				'convert'  => $convert,
+				'lilypond' => $lilypond,
+				'mup'      => $mup,
+				'pmw'      => '',
+			);
+		}
+		else
+		{
+			$defprog = array (
+				'abc2ps'   => 'C:\Program Files\abcm2ps\abcm2ps.exe',
+				'convert'  => 'C:\Program Files\ImageMagick\convert.exe',
+				'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
+				'mup'      => 'C:\Program Files\mupmate\mup.exe',
+				'pmw'      => '',
+			);
+		}
+	}
 	else
-		$defprog = array (
-			'abc2ps' => '/usr/bin/abcm2ps',
-			'convert' => '/usr/bin/convert',
-			'lilypond' => '/usr/bin/lilypond',
-			'mup' => '/usr/local/bin/mup',
-			'pmw' => '/usr/local/bin/pmw',
-		);
+	{
+		if ( function_exists ('system') )
+		{
+			$convert  = system ('which convert');
+			$abc2ps   = system ('which abcm2ps');
+			$lilypond = system ('which lilypond');
+			$mup      = system ('which mup');
+			$pmw      = system ('which pmw');
+
+			$defprog = array (
+				'abc2ps'   => $abc2ps,
+				'convert'  => $convert,
+				'lilypond' => $lilypond,
+				'mup'      => $mup,
+				'pmw'      => $pmw
+			);
+		}
+		else
+		{
+			$defprog = array (
+				'abc2ps'   => '/usr/bin/abcm2ps',
+				'convert'  => '/usr/bin/convert',
+				'lilypond' => '/usr/bin/lilypond',
+				'mup'      => '/usr/local/bin/mup',
+				'pmw'      => '/usr/local/bin/pmw',
+			);
+		}
+	}
 
 	$cachefolder = scorerender_get_upload_dir ();
 
