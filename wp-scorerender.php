@@ -181,13 +181,13 @@ function scorerender_get_def_settings ($return_type = 0)
 	}
 	else
 	{
-		if ( function_exists ('system') )
+		if ( function_exists ('shell_exec') )
 		{
-			$convert  = system ('which convert');
-			$abc2ps   = system ('which abcm2ps');
-			$lilypond = system ('which lilypond');
-			$mup      = system ('which mup');
-			$pmw      = system ('which pmw');
+			$convert  = shell_exec ('which convert');
+			$abc2ps   = shell_exec ('which abcm2ps');
+			$lilypond = shell_exec ('which lilypond');
+			$mup      = shell_exec ('which mup');
+			$pmw      = shell_exec ('which pmw');
 
 			$defprog = array (
 				'abc2ps'   => $abc2ps,
