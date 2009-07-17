@@ -10,151 +10,6 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-/**
- * Calculate number of fragments contained inside a blog post
- *
- * The returned numbers are mainly used for showing info in WordPress Dashboard
- *
- * @since 0.2
- * @uses $notations Content is compared to regex specified in $notations
- * @param string $content the whole blog post content
- * @return array $count Array containing number of matched fragments for each kind of notation
- *
- * @todo maybe store all info into separate table
- */
-function scorerender_get_fragment_count ($content)
-{
-	global $notations;
-
-	$count = array();
-	foreach (array_values ($notations) as $notation)
-		$count[] = preg_match_all ($notation['regex'], $content, $matches);
-
-	return $count;
-}
-
-
-/**
- * Returns number of cached images inside cache directory
- *
- * @since 0.2
- * @return integer number of images inside cache directory, or -1 if cache dir can't be read
- */
-function scorerender_get_num_of_images ()
-{
-	global $sr_options;
-
-	if (!is_dir ($sr_options['CACHE_DIR']) || !is_readable ($sr_options['CACHE_DIR']))
-		return -1;
-
-	$count = 0;
-	if ($handle = opendir ($sr_options['CACHE_DIR']))
-	{
-		while (false !== ($file = readdir ($handle)))
-		{
-			if (preg_match (REGEX_CACHE_IMAGE, $file))
-				$count++;
-		}
-		closedir ($handle);
-	}
-	return $count;
-}
-
-
-/**
- * Display info in WordPress Dashboard
- *
- * @since 0.2
- * @uses scorerender_get_fragment_count()
- * @uses scorerender_get_num_of_images()
- * @uses $notations Regex in $notations is used to compose SQL statement
- * @access private
- */
-function scorerender_activity_box ()
-{
-	global $wpdb, $notations;
-	$frag_count = 0;
-
-	$wpdb->hide_errors();
-
-	// get posts first
-	$query_substr = array();
-	foreach (array_values ($notations) as $notation)
-		$query_substr[] .= "post_content LIKE '%" . $notation['endtag'] . "%'";
-	$query = "SELECT post_content FROM $wpdb->posts WHERE " . implode (" OR ", $query_substr);
-
-	$posts = $wpdb->get_col ($query);
-	$post_count = count ($posts);
-
-	if (0 < $post_count)
-		foreach ($posts as $post)
-			$frag_count += array_sum (scorerender_get_fragment_count ($post));
-
-
-	// followed by comments
-	$query_substr = array();
-	foreach (array_values ($notations) as $notation)
-		$query_substr[] .= "comment_content LIKE '%" . $notation['endtag'] . "%'";
-	$query = sprintf ("SELECT comment_content FROM $wpdb->comments WHERE comment_approved = '1' AND (%s)",
-			  implode (" OR ", $query_substr));
-
-	$comments = $wpdb->get_col ($query);
-	$comment_count = count ($comments);
-
-	if (0 < $comment_count)
-		foreach ($comments as $comment)
-			$frag_count += array_sum (scorerender_get_fragment_count ($comment));
-
-	$num_of_posts_str = sprintf (__ngettext ('%d post', '%d posts', $post_count, TEXTDOMAIN), $post_count);
-	$num_of_comments_str = sprintf (__ngettext ('%d comment', '%d comments', $comment_count, TEXTDOMAIN), $comment_count);
-
-
-	if ((0 === $post_count) && (0 === $comment_count))
-		$first_sentence = __('This blog is currently empty.', TEXTDOMAIN);
-
-	elseif (0 === $frag_count)
-		$first_sentence = __('There is no music fragment in your blog.', TEXTDOMAIN);
-
-	elseif (0 === $comment_count)
-		$first_sentence = sprintf (
-			__ngettext ('There is %d music fragment contained in %s.',
-			            'There are %d music fragments contained in %s.',
-			            $frag_count, TEXTDOMAIN),
-			$frag_count, $num_of_posts_str);
-
-	elseif (0 === $post_count)
-		$first_sentence = sprintf (
-			__ngettext ('There is %d music fragment contained in %s.',
-			            'There are %d music fragments contained in %s.',
-			            $frag_count, TEXTDOMAIN),
-			$frag_count, $num_of_comments_str);
-
-	else
-		$first_sentence = sprintf (
-			__ngettext ('There is %d music fragment contained in %s and %s.',
-			            'There are %d music fragments contained in %s and %s.',
-			            $frag_count, TEXTDOMAIN),
-			$frag_count, $num_of_posts_str, $num_of_comments_str);
-
-
-	$img_count = scorerender_get_num_of_images();
-
-	if ( 0 > $img_count )
-		$second_sentence = sprintf (__('<font color="red">The cache directory is either non-existant or not readable.</font> Please <a href="%s">change the setting</a> and make sure the directory exists.', TEXTDOMAIN), 'options-general.php?page=' . plugin_basename (__FILE__));
-	else
-		$second_sentence = sprintf (
-			__ngettext ('Currently %d image are rendered and cached.',
-			            'Currently %d images are rendered and cached.',
-			            $img_count, TEXTDOMAIN),
-		        $img_count);
-?>
-	<div>
-	<h3><?php _e('ScoreRender', TEXTDOMAIN) ?></h3>
-	<p><?php echo $first_sentence . '  ' . $second_sentence; ?></p>
-	</div>
-<?php
-}
-
 
 /**
  * Remove all cached images in cache directory
@@ -380,7 +235,6 @@ function scorerender_admin_add_js() {
 </script>
 <?php
 }
-add_filter('admin_head', 'scorerender_admin_add_js');
 
 
 /**
@@ -711,7 +565,8 @@ function scorerender_admin_options ()
  */
 function scorerender_admin_menu ()
 {
-	add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
+	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
+	add_filter('admin_head' . $plugin_page, 'scorerender_admin_add_js');
 }
 
 
@@ -729,7 +584,6 @@ if ( 0 != get_option('use_balanceTags') )
 	add_filter ('admin_notices', 'sr_turn_off_balance_tags');
 }
 
-add_filter ('activity_box_end', 'scorerender_activity_box');
 add_filter ('admin_menu', 'scorerender_admin_menu');
 
 ?>
