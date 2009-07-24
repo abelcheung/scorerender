@@ -82,7 +82,7 @@ This plugin is released under GPL v2.
 IE Alpha Fix is released under LGPL v2.1 or later.
 Zero Clipboard is released under LGPL.
 
-== ChangeLog ==
+== Changelog ==
 
 **Version 0.3.0**
 
