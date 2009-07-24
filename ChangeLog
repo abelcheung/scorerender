@@ -1,3 +1,10 @@
+2009-07-24  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php: Version bump.
+	* wp-scorerender.php:
+	- (scorerender_get_def_settings) Avoid determining program path when
+	  just requesting variable types. 
+
 2009-07-17  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-admin.php:
