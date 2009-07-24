@@ -55,6 +55,7 @@ define ('ON_ERR_SHOW_NOTHING' , '3');
 define ('MSG_WARNING', 1);
 define ('MSG_FATAL', 2);
 
+define ('TYPES_AND_VALUES', 0);
 define ('TYPES_ONLY', 1);
 define ('VALUES_ONLY', 2);
 
@@ -141,82 +142,16 @@ foreach (array_values ($notations) as $notation)
  * so other actions can be applied depending on setting type.
  * @global array $default_settings
  */
-function scorerender_get_def_settings ($return_type = 0)
+function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 {
-	// PMW doesn't even have public available Win32 binary, perhaps
-	// somebody might be able to compile it with MinGW?
-
-	if (is_windows ())
-	{
-		if ( function_exists ('glob') ) // just in case this is disabled
-		{
-			$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
-			$lilypond = glob ('C:\Program Files\Lilypond\usr\bin\lilypond.exe');
-			$mup      = glob ('C:\Program Files\mupmate\mup.exe');
-			$abcm2ps  = glob ('C:\Program Files\*\abcm2ps.exe');
-
-			$convert  = empty($convert)  ? '' : $convert[0];
-			$lilypond = empty($lilypond) ? '' : $lilypond[0];
-			$mup      = empty($mup)      ? '' : $mup[0];
-			$abcm2ps  = empty($abcm2ps)  ? '' : $abcm2ps[0];
-
-			$defprog = array (
-				'abc2ps'   => $abcm2ps,
-				'convert'  => $convert,
-				'lilypond' => $lilypond,
-				'mup'      => $mup,
-				'pmw'      => '',
-			);
-		}
-		else
-		{
-			$defprog = array (
-				'abc2ps'   => 'C:\Program Files\abcm2ps\abcm2ps.exe',
-				'convert'  => 'C:\Program Files\ImageMagick\convert.exe',
-				'lilypond' => 'C:\Program Files\Lilypond\usr\bin\lilypond.exe',
-				'mup'      => 'C:\Program Files\mupmate\mup.exe',
-				'pmw'      => '',
-			);
-		}
-	}
-	else
-	{
-		if ( function_exists ('shell_exec') )
-		{
-			$convert  = shell_exec ('which convert');
-			$abc2ps   = shell_exec ('which abcm2ps');
-			$lilypond = shell_exec ('which lilypond');
-			$mup      = shell_exec ('which mup');
-			$pmw      = shell_exec ('which pmw');
-
-			$defprog = array (
-				'abc2ps'   => $abc2ps,
-				'convert'  => $convert,
-				'lilypond' => $lilypond,
-				'mup'      => $mup,
-				'pmw'      => $pmw
-			);
-		}
-		else
-		{
-			$defprog = array (
-				'abc2ps'   => '/usr/bin/abcm2ps',
-				'convert'  => '/usr/bin/convert',
-				'lilypond' => '/usr/bin/lilypond',
-				'mup'      => '/usr/local/bin/mup',
-				'pmw'      => '/usr/local/bin/pmw',
-			);
-		}
-	}
-
-	$cachefolder = scorerender_get_upload_dir ();
+	$retval = array();
 
 	$default_settings = array
 	(
 		'DB_VERSION'           => array ('type' =>   'none', 'value' => DATABASE_VERSION),
 		'TEMP_DIR'             => array ('type' =>   'path', 'value' => sys_get_temp_dir()),
-		'CACHE_DIR'            => array ('type' =>   'path', 'value' => $cachefolder['path']),
-		'CACHE_URL'            => array ('type' =>    'url', 'value' => $cachefolder['url']),
+		'CACHE_DIR'            => array ('type' =>   'path', 'value' => ''),
+		'CACHE_URL'            => array ('type' =>    'url', 'value' => ''),
 
 		'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
 		'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
@@ -228,26 +163,89 @@ function scorerender_get_def_settings ($return_type = 0)
 		'CONTENT_MAX_LENGTH'   => array ('type' =>    'int', 'value' => 4096),
 		'FRAGMENT_PER_COMMENT' => array ('type' =>    'int', 'value' => 1),
 
-		'CONVERT_BIN'          => array ('type' =>   'prog', 'value' => $defprog['convert']),
-		'LILYPOND_BIN'         => array ('type' =>   'prog', 'value' => $defprog['lilypond']),
-		'MUP_BIN'              => array ('type' =>   'prog', 'value' => $defprog['mup']),
-		'ABCM2PS_BIN'          => array ('type' =>   'prog', 'value' => $defprog['abc2ps']),
-		'PMW_BIN'              => array ('type' =>   'prog', 'value' => $defprog['pmw']),
+		'CONVERT_BIN'          => array ('type' =>   'prog', 'value' => ''),
+		'LILYPOND_BIN'         => array ('type' =>   'prog', 'value' => ''),
+		'MUP_BIN'              => array ('type' =>   'prog', 'value' => ''),
+		'ABCM2PS_BIN'          => array ('type' =>   'prog', 'value' => ''),
+		'PMW_BIN'              => array ('type' =>   'prog', 'value' => ''),
 		'MUP_MAGIC_FILE'       => array ('type' =>   'path', 'value' => ''),
 	);
 
-	$retval = array();
-	switch ($return_type)
+	if (TYPES_ONLY == $return_type)
 	{
-	  case TYPES_ONLY:
 		foreach ($default_settings as $key => $val)
 			$retval += array ($key => $val['type']);
 		return $retval;
+	}
+
+	$convert = '';
+	$lilypond = '';
+	$mup = '';
+	$abcm2ps = '';
+	$pmw = '';
+
+	if (is_windows ())
+	{
+		if ( function_exists ('glob') ) // just in case this is disabled
+		{
+			$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
+			$abcm2ps  = glob ('C:\Program Files\*\abcm2ps.exe');
+			$lilypond = glob ('C:\Program Files\Lilypond\usr\bin\lilypond.exe');
+			$mup      = glob ('C:\Program Files\mupmate\mup.exe');
+
+			// PMW doesn't even have public available Win32 binary, perhaps
+			// somebody might be able to compile it with MinGW?
+
+			$convert  = empty($convert)  ? '' : $convert[0];
+			$abcm2ps  = empty($abcm2ps)  ? '' : $abcm2ps[0];
+			$lilypond = empty($lilypond) ? '' : $lilypond[0];
+			$mup      = empty($mup)      ? '' : $mup[0];
+		}
+		else
+		{
+			$convert  = 'C:\Program Files\ImageMagick\convert.exe';
+			$abcm2ps  = 'C:\Program Files\abcm2ps\abcm2ps.exe';
+			$lilypond = 'C:\Program Files\Lilypond\usr\bin\lilypond.exe';
+			$mup      = 'C:\Program Files\mupmate\mup.exe';
+		}
+	}
+	else
+	{
+		if ( function_exists ('shell_exec') )
+		{
+			$convert  = shell_exec ('which convert');
+			$abc2mps  = shell_exec ('which abcm2ps');
+			$lilypond = shell_exec ('which lilypond');
+			$mup      = shell_exec ('which mup');
+			$pmw      = shell_exec ('which pmw');
+		}
+		else
+		{
+			$convert  = '/usr/bin/convert';
+			$abcm2ps  = '/usr/bin/abcm2ps';
+			$lilypond = '/usr/bin/lilypond';
+			$mup      = '/usr/local/bin/mup';
+			$pmw      = '/usr/local/bin/pmw';
+		}
+	}
+
+	$default_settings['CONVERT_BIN']['value']  = $convert;
+	$default_settings['LILYPOND_BIN']['value'] = $lilypond;
+	$default_settings['MUP_BIN']['value']      = $mup;
+	$default_settings['ABCM2PS_BIN']['value']  = $abcm2ps;
+	$default_settings['PMW_BIN']['value']      = $pmw;
+
+	$cachefolder = scorerender_get_upload_dir ();
+	$default_settings['CACHE_DIR']['value'] = $cachefolder['path'];
+	$default_settings['CACHE_URL']['value'] = $cachefolder['url'];
+
+	switch ($return_type)
+	{
 	  case VALUES_ONLY:
 		foreach ($default_settings as $key => $val)
 			$retval += array ($key => $val['value']);
 		return $retval;
-	  default:
+	  case TYPES_AND_VALUES:
 		return $default_settings;
 	}
 };
@@ -513,7 +511,6 @@ function scorerender_process_content ($render)
  * @uses ScoreRender::set_max_length()
  * @uses ScoreRender::set_img_width()
  * @uses ScoreRender::set_music_fragment()
- * @uses mupRender::set_magic_file()
  *
  * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
  * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
