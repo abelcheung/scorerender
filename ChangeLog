@@ -1,5 +1,14 @@
 2009-07-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	- Also define notation URLs and names. (trunk)
+	- (scorerender_get_def_settings) Replaced by trunk version, which has
+	  better auto detection of binaries. (trunk)
+	* scorerender-admin.php (scorerender_admin_options):
+	- Strip redundant description. (trunk)
+
+2009-07-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php (is_prog_usable):
 	- Fix program checking logic, which fails if desired matching string
 	  is not shown on the first line of program output. (trunk)

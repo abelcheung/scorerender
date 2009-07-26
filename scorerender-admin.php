@@ -631,23 +631,12 @@ function scorerender_admin_options ()
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
 
-	<p><?php _e('ScoreRender renders inline music fragments inside blog post and/or comment as images. Currently it supports the following notations (each notation name is followed by its starting and ending tag):', TEXTDOMAIN); ?></p>
+	<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending tag after each notation name. Each music fragment must be enclosed by corresponding pair of tags.', TEXTDOMAIN); ?></p>
 	<ul>
-		<li><a target="_blank" href="http://www.lilypond.org/">Lilypond</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['lilypond']['starttag'], $notations['lilypond']['endtag']); ?>)</li>
-		<li><a target="_blank" href="http://www.arkkra.com/">Mup</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['mup']['starttag'], $notations['mup']['endtag']); ?>)
-		<?php printf ('Used by Mup itself and %s', '<a target="_blank" href="http://noteedit.berlios.de/">Noteedit</a>'); ?></li>
-		<li><a target="_blank" href="http://www.informatik.tu-darmstadt.de/AFS/GUIDO/">GUIDO</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['guido']['starttag'], $notations['guido']['endtag']); ?>)</li>
-		<li><a target="_blank" href="http://abcnotation.org.uk/">ABC</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['abc']['starttag'], $notations['abc']['endtag']); ?>)
-		<?php printf ('Used by various programs like %s, %s or %s',
-			'<a target="_blank" href="http://www.ihp-ffo.de/~msm/">abc2ps</a>',
-			'<a target="_blank" href="http://moinejf.free.fr/">abcm2ps</a>',
-			'<a target="_blank" href="http://trillian.mit.edu/~jc/music/abc/src/">jcabc2ps</a>'); ?></li>
-		<li><a target="_blank" href="http://www.quercite.com/pmw.html">Philip's Music Writer</a>
-		(<?php printf ('<code>%s</code>, <code>%s</code>', $notations['pmw']['starttag'], $notations['pmw']['endtag']); ?>)</li>
+<?php	foreach ($notations as $tag => $notation_data) : ?>
+	<li><a target="_blank" href="<?php echo $notation_data['url']; ?>"><?php echo $notation_data['name']; ?></a>
+	(<code><?php echo $notation_data['starttag']; ?></code>, <code><?php echo $notation_data['endtag']; ?></code>)</li>
+<?php	endforeach; ?>
 	</ul>
 
 <?php
