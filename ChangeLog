@@ -1,3 +1,9 @@
+2009-07-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php (is_prog_usable):
+	- Fix program checking logic, which fails if desired matching string
+	  is not shown on the first line of program output. (trunk)
+
 2009-05-09  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php (scorerender_process_content):

@@ -568,14 +568,14 @@ public function is_prog_usable ($match, $prog)
 	if (false == ($handle = popen ($cmdline, 'r'))) return false;
 
 	$output = fread ($handle, 2048);
-	$ok = true;
+	$ok = false;
 
 	$needles = (array) $match;
 	foreach ($needles as $needle)
 	{
-		if (is_string ($needle) && (false === strpos ($output, $needle)))
+		if (is_string ($needle) && (false !== strpos ($output, $needle)))
 		{
-			$ok = false;
+			$ok = true;
 			break;
 		}
 	}
