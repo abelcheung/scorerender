@@ -1,5 +1,11 @@
 2009-07-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-class.php:
+	- Fix program checking logic, which fails if desired matching string
+	  is not shown on the first line of program output. 
+
+2009-07-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-admin.php:
 	- Tweak admin page to match WP 2.8 style.
 	- (scorerender_get_num_of_images) Restore this func.
