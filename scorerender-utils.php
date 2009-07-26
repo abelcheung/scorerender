@@ -145,4 +145,25 @@ function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
 	return ($i < 100) ? $path : FALSE;
 }
 
+/**
+ * Transform all path related options in ScoreRender settings
+ *
+ * @since 0.3
+ * @uses get_path_presentation()
+ * @param array $setting The settings to be transformed, either from existing setting or from newly submitted setting
+ * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
+ */
+function transform_paths (&$setting, $is_internal)
+{
+	if (!is_array ($setting)) return;
+	
+	$default_settings = scorerender_get_def_settings(TYPES_ONLY);
+	
+	// Transform path and program settings to unix presentation
+	foreach ($default_settings as $key => $type)
+		if ( ( ($type == 'path') || ($type == 'prog') ) && isset( $setting[$key] ) )
+			$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
+
+}
+
 ?>

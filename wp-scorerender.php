@@ -88,35 +88,50 @@ $notations = array (
 		'endtag'      => '[/abc]',
 		'classname'   => 'abcRender',
 		'includefile' => 'notation/abc.php',
-		'progs'       => array ('ABCM2PS_BIN')),
+		'progs'       => array ('ABCM2PS_BIN'),
+		'url'         => 'http://abcnotation.org.uk/',
+		'name'        => 'ABC',
+	),
 	'guido'    => array (
 		'regex'       => '~\[guido\](.*?)\[/guido\]~si',
 		'starttag'    => '[guido]',
 		'endtag'      => '[/guido]',
 		'classname'   => 'guidoRender',
 		'includefile' => 'notation/guido.php',
-		'progs'       => array ()),
+		'progs'       => array (),
+		'url'         => 'http://www.informatik.tu-darmstadt.de/AFS/GUIDO/',
+		'name'        => 'GUIDO',
+	),
 	'lilypond' => array (
 		'regex'       => '~\[lilypond\](.*?)\[/lilypond\]~si',
 		'starttag'    => '[lilypond]',
 		'endtag'      => '[/lilypond]',
 		'classname'   => 'lilypondRender',
 		'includefile' => 'notation/lilypond.php',
-		'progs'       => array ('LILYPOND_BIN')),
+		'progs'       => array ('LILYPOND_BIN'),
+		'url'         => 'http://www.lilypond.org/',
+		'name'        => 'Lilypond',
+	),
 	'mup'      => array (
 		'regex'       => '~\[mup\](.*?)\[/mup\]~si',
 		'starttag'    => '[mup]',
 		'endtag'      => '[/mup]',
 		'classname'   => 'mupRender',
 		'includefile' => 'notation/mup.php',
-		'progs'       => array ('MUP_BIN')),
+		'progs'       => array ('MUP_BIN'),
+		'url'         => 'http://www.arkkra.com/',
+		'name'        => 'Mup',
+	),
 	'pmw'      => array (
 		'regex'       => '~\[pmw\](.*?)\[/pmw\]~si',
 		'starttag'    => '[pmw]',
 		'endtag'      => '[/pmw]',
 		'classname'   => 'pmwRender',
 		'includefile' => 'notation/pmw.php',
-		'progs'       => array ('PMW_BIN')),
+		'progs'       => array ('PMW_BIN'),
+		'url'         => 'http://www.quercite.com/pmw.html',
+		'name'        => "Philip's Music Writer",
+	),
 );
 
 /**
@@ -268,28 +283,6 @@ function scorerender_init_textdomain ()
 	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
 }
 
-
-/**
- * Transform all path related options in ScoreRender settings
- *
- * @since 0.2.50
- * @uses get_path_presentation()
- * @param array $setting The settings to be transformed, either from existing setting or from newly submitted setting
- * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
- */
-function transform_paths (&$setting, $is_internal)
-{
-	if (!is_array ($setting)) return;
-	
-	$default_settings = scorerender_get_def_settings(TYPES_ONLY);
-	
-	// Transform path and program settings to unix presentation
-	foreach ($default_settings as $key => $type)
-		if ( ($type == 'path') || ($type == 'prog') )
-			if (isset ($setting[$key]))
-				$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
-
-}
 
 /**
  * Guess default upload directory setting from WordPress.

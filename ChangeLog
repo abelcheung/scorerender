@@ -1,3 +1,15 @@
+2009-07-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Tweak admin page to match WP 2.8 style.
+	- (scorerender_get_num_of_images) Restore this func.
+	- (scorerender_remove_cache) Simplify check.
+	- (scorerender_admin_options) Fix typo causing javascript to not
+	  included in admin page, strip redundant description.
+	* wp-scorerender.php:
+	- (transform_paths) Move to scorerender-utils.php.
+	- Also define notation URLs and names.
+
 2009-07-24  Abel Cheung  <abelcheung@gmail.com>
 
 	* *.php: Version bump.
