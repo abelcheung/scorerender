@@ -84,6 +84,14 @@ Zero Clipboard is released under LGPL.
 
 == Changelog ==
 
+**Version 0.3.1**
+
+* Incorporate certain fixes from trunk:
+* Show image dimension in output
+* Fix line break when showing score source code under Windows
+* Better autodetection of program
+* Bug fix in program availability checkinng
+
 **Version 0.3.0**
 
 * Philip's Music Writer notation support.
