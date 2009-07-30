@@ -135,18 +135,24 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 
 
 /**
- * Check if given program is Mup, and whether it is usable.
+ * Check if given program locations are correct and usable
  *
- * @param string $args A CGI-like query string containing the program to be checked.
- * @uses is_prog_usable()
- * @return boolean Return true if the given program is Mup AND it is executable.
+ * @param array $errmsgs An array of messages to be added if program checking failed
+ * @param array $opt Array of ScoreRender options, containing all program paths
+ * @uses ScoreRender::is_prog_usable()
  */
-public function is_notation_usable ($args = '')
+public static function is_notation_usable (&$errmsgs, &$opt)
 {
-	wp_parse_str ($args, $r);
-	extract ($r, EXTR_SKIP);
-	return parent::is_prog_usable ('Arkkra Enterprises', $prog, '-v');
+	global $notations;
+
+	$ok = true;
+	foreach ($notations['mup']['progs'] as $prog)
+		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('Arkkra Enterprises', $opt[$prog], '-v') )
+			$ok = false;
+			
+	if (!$ok) $errmsgs[] = 'mup_bin_problem';
 }
+
 
 /**
  * Set the location of magic file
@@ -165,6 +171,37 @@ public function set_magic_file_hook ($options)
 		$this->set_magic_file ($options['MUP_MAGIC_FILE']);
 }
 
+/**
+ * Define any additional error or warning messages if settings for notation
+ * has any problem.
+ */
+public static function define_admin_messages (&$adm_msgs)
+{
+	global $notations;
+
+	$adm_msgs['mup_bin_problem'] = array (
+		'level' => MSG_WARNING,
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['mup']['name'])
+	);
+}
+
 }  // end of class
 
+
+$notations['mup'] = array (
+	'regex'       => '~\[mup\](.*?)\[/mup\]~si',
+	'starttag'    => '[mup]',
+	'endtag'      => '[/mup]',
+	'classname'   => 'mupRender',
+	'progs'       => array ('MUP_BIN'),
+	'url'         => 'http://www.arkkra.com/',
+	'name'        => 'Mup',
+);
+
+
+add_action ('scorerender_define_adm_msgs',
+	array( 'mupRender', 'define_admin_messages' ) );
+
+add_action ('scorerender_check_notation_progs',
+	array( 'mupRender', 'is_notation_usable' ), 10, 2 );
 ?>

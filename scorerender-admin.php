@@ -126,12 +126,11 @@ function scorerender_update_options ()
 		'wrong_frag_per_comment'   => array ('level' => MSG_WARNING, 'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_image_max_width'    => array ('level' => MSG_WARNING, 'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
 		'convert_bin_problem'      => array ('level' => MSG_FATAL  , 'content' => __('<tt>convert</tt> program is NOT defined or NOT executable! The plugin will stop working.', TEXTDOMAIN)),
-		'abcm2ps_bin_problem'      => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>abcm2ps</tt>', 'ABC')),
-		'lilypond_bin_problem'     => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>lilypond</tt>', 'LilyPond')),
-		'mup_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>mup</tt>', 'Mup')),
-		'pmw_bin_problem'          => array ('level' => MSG_WARNING, 'content' => sprintf (__('%s program does not look like a correct one. %s notation support will most likely stop working.', TEXTDOMAIN), '<tt>pmw</tt>', 'Philip\'s Music Writer')),
 		'prog_check_disabled'      => array ('level' => MSG_WARNING, 'content' => sprintf (__('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN))),
 	);
+
+	// error message definition for each notation
+	do_action_ref_array ('scorerender_define_adm_msgs', array(&$sr_adm_msgs));
 
 	/*
 	 * general options
@@ -190,22 +189,8 @@ function scorerender_update_options ()
 		unset ($newopt['IMAGE_MAX_WIDTH']);
 	}
 
-	// FIXME: Anyway to do pluggable checking without access these methods directly?
-	if ( ! empty ($newopt['LILYPOND_BIN']) &&
-			! lilypondRender::is_notation_usable ('prog=' . $newopt['LILYPOND_BIN']) )
-		$errmsgs[] = 'lilypond_bin_problem';
-
-	if ( ! empty ($newopt['MUP_BIN']) &&
-			! mupRender::is_notation_usable ('prog=' . $newopt['MUP_BIN']) )
-		$errmsgs[] = 'mup_bin_problem';
-
-	if ( ! empty ($newopt['ABCM2PS_BIN']) &&
-			! abcRender::is_notation_usable ('prog=' . $newopt['ABCM2PS_BIN']) )
-		$errmsgs[] = 'abcm2ps_bin_problem';
-
-	if ( ! empty ($newopt['PMW_BIN']) &&
-			! pmwRender::is_notation_usable ('prog=' . $newopt['PMW_BIN']) )
-		$errmsgs[] = 'pmw_bin_problem';
+	// program checking for each notation
+	do_action_ref_array ('scorerender_check_notation_progs', array(&$errmsgs, &$newopt));
 
 	$sr_options = array_merge ($sr_options, $newopt);
 	transform_paths ($sr_options, TRUE);

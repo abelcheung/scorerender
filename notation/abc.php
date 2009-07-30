@@ -66,19 +66,55 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Check if given program is abcm2ps, and whether it is usable.
+ * Check if given program locations are correct and usable
  *
- * @param string $args A CGI-like query string containing the program to be checked.
- * @uses is_prog_usable()
- * @return boolean Return true if the given program is abcm2ps AND it is executable.
+ * @param array $errmsgs An array of messages to be added if program checking failed
+ * @param array $opt Array of ScoreRender options, containing all program paths
+ * @uses ScoreRender::is_prog_usable()
  */
-public function is_notation_usable ($args = '')
+public static function is_notation_usable (&$errmsgs, &$opt)
 {
-	wp_parse_str ($args, $r);
-	extract ($r, EXTR_SKIP);
-	return parent::is_prog_usable ('abcm2ps', $prog, '-V');
+	global $notations;
+
+	$ok = true;
+	foreach ($notations['abc']['progs'] as $prog)
+		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('abcm2ps', $opt[$prog], '-V') )
+			$ok = false;
+			
+	if (!$ok) $errmsgs[] = 'abcm2ps_bin_problem';
+}
+
+/**
+ * Define any additional error or warning messages if settings for notation
+ * has any problem.
+ */
+public static function define_admin_messages (&$adm_msgs)
+{
+	global $notations;
+
+	$adm_msgs['abcm2ps_bin_problem'] = array (
+		'level' => MSG_WARNING,
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['abc']['name'])
+	);
 }
 
 } // end of class
 
+
+$notations['abc'] = array (
+	'regex'       => '~\[abc\](.*?)\[/abc\]~si',
+	'starttag'    => '[abc]',
+	'endtag'      => '[/abc]',
+	'classname'   => 'abcRender',
+	'progs'       => array ('ABCM2PS_BIN'),
+	'url'         => 'http://abcnotation.org.uk/',
+	'name'        => 'ABC',
+);
+
+
+add_action ('scorerender_define_adm_msgs',
+	array( 'abcRender', 'define_admin_messages' ) );
+
+add_action ('scorerender_check_notation_progs',
+	array( 'abcRender', 'is_notation_usable' ), 10, 2 );
 ?>

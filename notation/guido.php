@@ -55,11 +55,24 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * @return boolean Return true if remote URL can be fopen'ed.
  */
+/*
 public function is_notation_usable ($args = '')
 {
 	return ini_get('allow_url_fopen');
 }
+ */
 
 } // end of class
+
+
+$notations['guido'] = array (
+	'regex'       => '~\[guido\](.*?)\[/guido\]~si',
+	'starttag'    => '[guido]',
+	'endtag'      => '[/guido]',
+	'classname'   => 'guidoRender',
+	'progs'       => array (),
+	'url'         => 'http://www.informatik.tu-darmstadt.de/AFS/GUIDO/',
+	'name'        => 'GUIDO',
+);
 
 ?>

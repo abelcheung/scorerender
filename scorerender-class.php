@@ -496,7 +496,7 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
  * @since 0.3
  * @return boolean Return TRUE if popen() or pclose() are disabled, FALSE otherwise
  */
-public function is_web_hosting ()
+public static function is_web_hosting ()
 {
 	if (!function_exists ('popen') ||
 	    !function_exists ('pclose'))
@@ -513,7 +513,7 @@ public function is_web_hosting ()
  * @param string $args Extra variable arguments supplied to the program (if any)
  * @return boolean Return TRUE if the given program is usable, FALSE otherwise
  */
-public function is_prog_usable ($match, $prog)
+public static function is_prog_usable ($match, $prog)
 {
 	if (empty ($prog)) return false;
 

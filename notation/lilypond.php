@@ -1,10 +1,4 @@
 <?php
-/*
- Mostly based on class.lilypondrender.inc.php from FigureRender
- Chris Lamb <chris@chris-lamb.co.uk>
- 10th April 2006
-*/
-
 /**
  * Implements rendering of Lilypond notation in ScoreRender.
  * @package ScoreRender
@@ -72,19 +66,55 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Check if given program is LilyPond, and whether it is usable.
+ * Check if given program locations are correct and usable
  *
- * @param string $args A CGI-like query string containing the program to be checked.
- * @uses is_prog_usable()
- * @return boolean Return true if the given program is LilyPond AND it is executable.
+ * @param array $errmsgs An array of messages to be added if program checking failed
+ * @param array $opt Array of ScoreRender options, containing all program paths
+ * @uses ScoreRender::is_prog_usable()
  */
-public function is_notation_usable ($args = '')
+public static function is_notation_usable (&$errmsgs, &$opt)
 {
-	wp_parse_str ($args, $r);
-	extract ($r, EXTR_SKIP);
-	return parent::is_prog_usable ('GNU LilyPond', $prog, '--version');
+	global $notations;
+
+	$ok = true;
+	foreach ($notations['lilypond']['progs'] as $prog)
+		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('GNU LilyPond', $opt[$prog], '--version') )
+			$ok = false;
+			
+	if (!$ok) $errmsgs[] = 'lilypond_bin_problem';
+}
+
+/**
+ * Define any additional error or warning messages if settings for notation
+ * has any problem.
+ */
+public static function define_admin_messages (&$adm_msgs)
+{
+	global $notations;
+
+	$adm_msgs['lilypond_bin_problem'] = array (
+		'level' => MSG_WARNING,
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['lilypond']['name'])
+	);
 }
 
 } // end of class
 
+
+$notations['lilypond'] = array (
+	'regex'       => '~\[lilypond\](.*?)\[/lilypond\]~si',
+	'starttag'    => '[lilypond]',
+	'endtag'      => '[/lilypond]',
+	'classname'   => 'lilypondRender',
+	'progs'       => array ('LILYPOND_BIN'),
+	'url'         => 'http://www.lilypond.org/',
+	'name'        => 'LilyPond',
+);
+
+
+add_action ('scorerender_define_adm_msgs',
+	array( 'lilypondRender', 'define_admin_messages' ) );
+
+add_action ('scorerender_check_notation_progs',
+	array( 'lilypondRender', 'is_notation_usable' ), 10, 2 );
 ?>

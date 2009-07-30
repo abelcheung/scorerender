@@ -56,19 +56,55 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Check if given program is Philip's Music Writer, and whether it is usable.
+ * Check if given program locations are correct and usable
  *
- * @param string $args A CGI-like query string containing the program to be checked.
- * @uses is_prog_usable()
- * @return boolean Return true if the given program is pmw AND it is executable.
+ * @param array $errmsgs An array of messages to be added if program checking failed
+ * @param array $opt Array of ScoreRender options, containing all program paths
+ * @uses ScoreRender::is_prog_usable()
  */
-public function is_notation_usable ($args = '')
+public static function is_notation_usable (&$errmsgs, &$opt)
 {
-	wp_parse_str ($args, $r);
-	extract ($r, EXTR_SKIP);
-	return parent::is_prog_usable ('PMW version', $prog, '-V');
+	global $notations;
+
+	$ok = true;
+	foreach ($notations['pmw']['progs'] as $prog)
+		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('PMW version', $opt[$prog], '-V') )
+			$ok = false;
+			
+	if (!$ok) $errmsgs[] = 'pmw_bin_problem';
+}
+
+/**
+ * Define any additional error or warning messages if settings for notation
+ * has any problem.
+ */
+public static function define_admin_messages (&$adm_msgs)
+{
+	global $notations;
+
+	$adm_msgs['pmw_bin_problem'] = array (
+		'level' => MSG_WARNING,
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['pmw']['name'])
+	);
 }
 
 } // end of class
 
+
+$notations['pmw'] = array (
+	'regex'       => '~\[pmw\](.*?)\[/pmw\]~si',
+	'starttag'    => '[pmw]',
+	'endtag'      => '[/pmw]',
+	'classname'   => 'pmwRender',
+	'progs'       => array ('PMW_BIN'),
+	'url'         => 'http://www.quercite.com/pmw.html',
+	'name'        => "Philip's Music Writer",
+);
+
+
+add_action ('scorerender_define_adm_msgs',
+	array( 'pmwRender', 'define_admin_messages' ) );
+
+add_action ('scorerender_check_notation_progs',
+	array( 'pmwRender', 'is_notation_usable' ), 10, 2 );
 ?>
