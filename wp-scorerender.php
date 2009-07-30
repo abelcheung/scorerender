@@ -81,58 +81,7 @@ $sr_options = array ();
  *
  * @global array $notations
  */
-$notations = array (
-	'abc'      => array (
-		'regex'       => '~\[abc\](.*?)\[/abc\]~si',
-		'starttag'    => '[abc]',
-		'endtag'      => '[/abc]',
-		'classname'   => 'abcRender',
-		'includefile' => 'notation/abc.php',
-		'progs'       => array ('ABCM2PS_BIN'),
-		'url'         => 'http://abcnotation.org.uk/',
-		'name'        => 'ABC',
-	),
-	'guido'    => array (
-		'regex'       => '~\[guido\](.*?)\[/guido\]~si',
-		'starttag'    => '[guido]',
-		'endtag'      => '[/guido]',
-		'classname'   => 'guidoRender',
-		'includefile' => 'notation/guido.php',
-		'progs'       => array (),
-		'url'         => 'http://www.informatik.tu-darmstadt.de/AFS/GUIDO/',
-		'name'        => 'GUIDO',
-	),
-	'lilypond' => array (
-		'regex'       => '~\[lilypond\](.*?)\[/lilypond\]~si',
-		'starttag'    => '[lilypond]',
-		'endtag'      => '[/lilypond]',
-		'classname'   => 'lilypondRender',
-		'includefile' => 'notation/lilypond.php',
-		'progs'       => array ('LILYPOND_BIN'),
-		'url'         => 'http://www.lilypond.org/',
-		'name'        => 'Lilypond',
-	),
-	'mup'      => array (
-		'regex'       => '~\[mup\](.*?)\[/mup\]~si',
-		'starttag'    => '[mup]',
-		'endtag'      => '[/mup]',
-		'classname'   => 'mupRender',
-		'includefile' => 'notation/mup.php',
-		'progs'       => array ('MUP_BIN'),
-		'url'         => 'http://www.arkkra.com/',
-		'name'        => 'Mup',
-	),
-	'pmw'      => array (
-		'regex'       => '~\[pmw\](.*?)\[/pmw\]~si',
-		'starttag'    => '[pmw]',
-		'endtag'      => '[/pmw]',
-		'classname'   => 'pmwRender',
-		'includefile' => 'notation/pmw.php',
-		'progs'       => array ('PMW_BIN'),
-		'url'         => 'http://www.quercite.com/pmw.html',
-		'name'        => "Philip's Music Writer",
-	),
-);
+$notations = array();
 
 /**
  * Utility functions used by ScoreRender
@@ -144,13 +93,17 @@ require_once('scorerender-utils.php');
  */
 require_once('scorerender-class.php');
 
+require_once('notation/abc.php');
+require_once('notation/guido.php');
+require_once('notation/lilypond.php');
+require_once('notation/mup.php');
+require_once('notation/pmw.php');
+/*
 foreach (array_values ($notations) as $notation)
 {
-	/**
-	 * @ignore
-	 */
 	require_once ($notation['includefile']);
 }
+ */
 
 /**
  * Default options used for first-time install. Also contains the type of value,

@@ -1,3 +1,18 @@
+2009-07-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Move notation data to each notation file.
+	* scorerender-class.php:
+	- Mark is_web_hosting() and is_prog_usable() as static function.
+	* scorerender-admin.php (scorerender_update_options):
+	- Move error messages and program checking to each notation file, and
+	  use wordpress hook to execute them.
+	* notation/{abc,lilypond,mup,pmw}.php:
+	- (define_admin_messages): New func.
+	- (is_notation_usable): Reworked to produce error message as well.
+	* notation/guido.php (is_notation_usable):
+	- Disabled for now.
+
 2009-07-26  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php:
