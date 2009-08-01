@@ -185,6 +185,22 @@ public static function define_admin_messages (&$adm_msgs)
 	);
 }
 
+/**
+ * Output program setting HTML for notation
+ */
+public static function program_setting_entry ($output)
+{
+	$output .= parent::program_setting_entry (
+		'mup_bin', 'mup', 'MUP_BIN');
+	$output .= parent::program_setting_entry (
+		'mup_magic_file', '', 'MUP_MAGIC_FILE',
+		sprintf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'),
+		sprintf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN),
+			'http://www.arkkra.com/doc/faq.html#payment')
+	);
+	return $output;
+}
+
 }  // end of class
 
 
@@ -204,4 +220,7 @@ add_action ('scorerender_define_adm_msgs',
 
 add_action ('scorerender_check_notation_progs',
 	array( 'mupRender', 'is_notation_usable' ), 10, 2 );
+
+add_filter ('scorerender_prog_and_file_loc',
+	array( 'mupRender', 'program_setting_entry' ) );
 ?>
