@@ -98,6 +98,16 @@ public static function define_admin_messages (&$adm_msgs)
 	);
 }
 
+/**
+ * Output program setting HTML for notation
+ */
+public static function program_setting_entry ($output)
+{
+	$output .= parent::program_setting_entry (
+		'lilypond_bin', 'lilypond', 'LILYPOND_BIN');
+	return $output;
+}
+
 } // end of class
 
 
@@ -117,4 +127,7 @@ add_action ('scorerender_define_adm_msgs',
 
 add_action ('scorerender_check_notation_progs',
 	array( 'lilypondRender', 'is_notation_usable' ), 10, 2 );
+
+add_filter ('scorerender_prog_and_file_loc',
+	array( 'lilypondRender', 'program_setting_entry' ) );
 ?>

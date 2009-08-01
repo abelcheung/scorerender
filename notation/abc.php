@@ -98,6 +98,16 @@ public static function define_admin_messages (&$adm_msgs)
 	);
 }
 
+/**
+ * Output program setting HTML for notation
+ */
+public static function program_setting_entry ($output)
+{
+	$output .= parent::program_setting_entry (
+		'abcm2ps_bin', 'abcm2ps', 'ABCM2PS_BIN');
+	return $output;
+}
+
 } // end of class
 
 
@@ -117,4 +127,7 @@ add_action ('scorerender_define_adm_msgs',
 
 add_action ('scorerender_check_notation_progs',
 	array( 'abcRender', 'is_notation_usable' ), 10, 2 );
+
+add_filter ('scorerender_prog_and_file_loc',
+	array( 'abcRender', 'program_setting_entry' ) );
 ?>

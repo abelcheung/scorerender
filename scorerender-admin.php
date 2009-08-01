@@ -301,32 +301,10 @@ function scorerender_admin_section_prog ()
 <td><input name="ScoreRender[CONVERT_BIN]" type="text" id="convert_bin" value="<?php echo $sr_options['CONVERT_BIN']; ?>" class="regular-text code" /></td>
 </tr>
 
-<tr valign="top">
-<th scope="row"><label for="lilypond_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>lilypond</code>'); ?></label></th>
-<td><input name="ScoreRender[LILYPOND_BIN]" type="text" id="lilypond_bin" value="<?php echo $sr_options['LILYPOND_BIN']; ?>" class="regular-text code" /></td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><label for="mup_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>mup</code>'); ?></label></th>
-<td><input name="ScoreRender[MUP_BIN]" type="text" id="mup_bin" value="<?php echo $sr_options['MUP_BIN']; ?>" class="regular-text code" /></td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><label for="mup_magic_file"><?php printf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'); ?></label></th>
-<td><input name="ScoreRender[MUP_MAGIC_FILE]" type="text" id="mup_magic_file" value="<?php echo $sr_options['MUP_MAGIC_FILE']; ?>" class="regular-text code" />
-<div class="setting-description"><?php printf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN), 'http://www.arkkra.com/doc/faq.html#payment'); ?></div>
-</td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><label for="abcm2ps_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>abcm2ps</code>'); ?></label></th>
-<td><input name="ScoreRender[ABCM2PS_BIN]" type="text" id="abcm2ps_bin" value="<?php echo $sr_options['ABCM2PS_BIN']; ?>" class="regular-text code" /></td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><label for="pmw_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>pmw</code>'); ?></label></th>
-<td><input name="ScoreRender[PMW_BIN]" type="text" id="pmw_bin" value="<?php echo $sr_options['PMW_BIN']; ?>" class="regular-text code" /></td>
-</tr>
+<?php
+	$output = apply_filters ('scorerender_prog_and_file_loc', $output);
+	echo $output;
+?>
 
 </table>
 <?php

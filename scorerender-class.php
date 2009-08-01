@@ -711,6 +711,33 @@ final public function render()
 	return basename ($final_image);
 }
 
+/**
+ * Output program setting HTML for notation
+ *
+ * @param string $id ID for input text field
+ * @param string $bin_name Name of binary program
+ * @param string $setting_name Name of setting used by the binary
+ * @param string $title Title for setting entry
+ * @param string $desc Optional description, shown under setting entry
+ *
+ * @return string HTML for the program setting in admin page
+ */
+public static function program_setting_entry ($id, $bin_name, $setting_name, $title = '', $desc = '')
+{
+	global $sr_options;
+
+	$output = "<tr valign='top'>\n"
+		. "<th scope='row'><label for='{$id}'>"
+		. ( empty ($title) ? sprintf (__('Location of %s binary:', TEXTDOMAIN), '<code>'.$bin_name.'</code>') : $title )
+		. "</label></th>\n"
+		. "<td><input name='ScoreRender[{$setting_name}]' type='text' id='{$id}' "
+		. "value='{$sr_options[$setting_name]}' class='regular-text code' />"
+		. ( empty ($desc) ? '' : "<div class='setting-description'>{$desc}</div>\n" )
+		. "</td>\n</tr>\n";
+
+	return $output;
+}
+
 } // end of class
 
 ?>
