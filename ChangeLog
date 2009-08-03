@@ -1,3 +1,11 @@
+2009-08-03  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- scorerender_filter() -> scorerender_init_class(), better reflecting
+	  its actual purpose.
+	* scorerender-class.php, notation/*.php:
+	- (program_setting_entry): Drop $id parameter.
+
 2009-08-01  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-admin.php (scorerender_admin_section_prog):

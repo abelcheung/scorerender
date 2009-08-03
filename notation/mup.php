@@ -191,9 +191,9 @@ public static function define_admin_messages (&$adm_msgs)
 public static function program_setting_entry ($output)
 {
 	$output .= parent::program_setting_entry (
-		'mup_bin', 'mup', 'MUP_BIN');
+		'mup', 'MUP_BIN');
 	$output .= parent::program_setting_entry (
-		'mup_magic_file', '', 'MUP_MAGIC_FILE',
+		'', 'MUP_MAGIC_FILE',
 		sprintf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'),
 		sprintf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN),
 			'http://www.arkkra.com/doc/faq.html#payment')

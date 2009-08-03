@@ -116,28 +116,30 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 
 	$default_settings = array
 	(
-		'DB_VERSION'           => array ('type' =>   'none', 'value' => DATABASE_VERSION),
-		'TEMP_DIR'             => array ('type' =>   'path', 'value' => sys_get_temp_dir()),
-		'CACHE_DIR'            => array ('type' =>   'path', 'value' => ''),
-		'CACHE_URL'            => array ('type' =>    'url', 'value' => ''),
+		'DB_VERSION'           => array ('type' => 'none', 'value' => DATABASE_VERSION),
+		'TEMP_DIR'             => array ('type' => 'path', 'value' => sys_get_temp_dir()),
+		'CACHE_DIR'            => array ('type' => 'path', 'value' => ''),
+		'CACHE_URL'            => array ('type' =>  'url', 'value' => ''),
 
-		'IMAGE_MAX_WIDTH'      => array ('type' =>    'int', 'value' => 360),
-		'INVERT_IMAGE'         => array ('type' =>   'bool', 'value' => false),
-		'USE_IE6_PNG_ALPHA_FIX'=> array ('type' =>   'bool', 'value' => true),
-		'SHOW_SOURCE'          => array ('type' =>   'bool', 'value' => false),
-		'COMMENT_ENABLED'      => array ('type' =>   'bool', 'value' => false),
-		'ERROR_HANDLING'       => array ('type' =>   'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+		'IMAGE_MAX_WIDTH'      => array ('type' =>  'int', 'value' => 360),
+		'INVERT_IMAGE'         => array ('type' => 'bool', 'value' => false),
+		'USE_IE6_PNG_ALPHA_FIX'=> array ('type' => 'bool', 'value' => true),
+		'SHOW_SOURCE'          => array ('type' => 'bool', 'value' => false),
+		'COMMENT_ENABLED'      => array ('type' => 'bool', 'value' => false),
+		'ERROR_HANDLING'       => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
 
-		'CONTENT_MAX_LENGTH'   => array ('type' =>    'int', 'value' => 4096),
-		'FRAGMENT_PER_COMMENT' => array ('type' =>    'int', 'value' => 1),
+		'CONTENT_MAX_LENGTH'   => array ('type' =>  'int', 'value' => 4096),
+		'FRAGMENT_PER_COMMENT' => array ('type' =>  'int', 'value' => 1),
 
-		'CONVERT_BIN'          => array ('type' =>   'prog', 'value' => ''),
-		'LILYPOND_BIN'         => array ('type' =>   'prog', 'value' => ''),
-		'MUP_BIN'              => array ('type' =>   'prog', 'value' => ''),
-		'ABCM2PS_BIN'          => array ('type' =>   'prog', 'value' => ''),
-		'PMW_BIN'              => array ('type' =>   'prog', 'value' => ''),
-		'MUP_MAGIC_FILE'       => array ('type' =>   'path', 'value' => ''),
+		'CONVERT_BIN'          => array ('type' => 'prog', 'value' => ''),
+		'LILYPOND_BIN'         => array ('type' => 'prog', 'value' => ''),
+		'MUP_BIN'              => array ('type' => 'prog', 'value' => ''),
+		'ABCM2PS_BIN'          => array ('type' => 'prog', 'value' => ''),
+		'PMW_BIN'              => array ('type' => 'prog', 'value' => ''),
+		'MUP_MAGIC_FILE'       => array ('type' => 'path', 'value' => ''),
 	);
+
+	do_action_ref_array ('scorerender_define_var_type', array(&$default_settings));
 
 	if (TYPES_ONLY == $return_type)
 	{
@@ -439,7 +441,7 @@ function scorerender_process_content ($render)
 
 
 /**
- * Generate converted HTML fragment from music notation fragment
+ * Initialize PHP class for corresponding music notation
  *
  * Create PHP object for each kind of matched music notation, and set
  * all relevant parameters needed for rendering. Afterwards, pass
@@ -461,7 +463,7 @@ function scorerender_process_content ($render)
  * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
  * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
  */
-function scorerender_filter ($matches)
+function scorerender_init_class ($matches)
 {
 	global $sr_options, $notations;
 
@@ -485,11 +487,11 @@ function scorerender_filter ($matches)
 	if (empty ($render)) return $input;
 
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
-	$render->set_inverted ($sr_options['INVERT_IMAGE']);
-	$render->set_temp_dir ($sr_options['TEMP_DIR']);
-	$render->set_cache_dir ($sr_options['CACHE_DIR']);
-	$render->set_max_length ($sr_options['CONTENT_MAX_LENGTH']);
-	$render->set_img_width ($sr_options['IMAGE_MAX_WIDTH']);
+	$render->set_inverted         ($sr_options['INVERT_IMAGE']);
+	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
+	$render->set_cache_dir        ($sr_options['CACHE_DIR']);
+	$render->set_max_length       ($sr_options['CONTENT_MAX_LENGTH']);
+	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
 
 	do_action ('sr_set_class_variable', $sr_options);
 
@@ -504,9 +506,9 @@ function scorerender_filter ($matches)
  * Renders music fragments contained inside posts / comments.
  *
  * Check if post/comment rendering should be enabled.
- * If yes, then apply {@link scorerender_filter} function on $content.
+ * If yes, then apply {@link scorerender_init_class} function on $content.
  *
- * @uses scorerender_filter() Apply filter to content upon regular expression match
+ * @uses scorerender_init_class() Apply filter to content upon regular expression match
  * @param string $content The whole content of blog post / comment
  * @param boolean $is_post Whether content is from post or comment
  * @return string Converted blog post / comment content.
@@ -536,7 +538,7 @@ function scorerender_do_conversion ($content, $is_post)
 	         ($sr_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 :
 	          $sr_options['FRAGMENT_PER_COMMENT'];
 
-	return preg_replace_callback ($regex_list, 'scorerender_filter', $content, $limit);
+	return preg_replace_callback ($regex_list, 'scorerender_init_class', $content, $limit);
 }
 
 function scorerender_add_ie6_style()
