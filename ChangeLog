@@ -3,6 +3,7 @@
 	* wp-scorerender.php:
 	- scorerender_filter() -> scorerender_init_class(), better reflecting
 	  its actual purpose.
+	- scorerender_do_conversion() -> scorerender_conversion_hook()
 	* scorerender-class.php, notation/*.php:
 	- (program_setting_entry): Drop $id parameter.
 

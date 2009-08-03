@@ -53,11 +53,11 @@ define ('ON_ERR_SHOW_FRAGMENT', '2');
 define ('ON_ERR_SHOW_NOTHING' , '3');
 
 define ('MSG_WARNING', 1);
-define ('MSG_FATAL', 2);
+define ('MSG_FATAL'  , 2);
 
 define ('TYPES_AND_VALUES', 0);
-define ('TYPES_ONLY', 1);
-define ('VALUES_ONLY', 2);
+define ('TYPES_ONLY'      , 1);
+define ('VALUES_ONLY'     , 2);
 
 /*
  * Global Variables
@@ -93,17 +93,14 @@ require_once('scorerender-utils.php');
  */
 require_once('scorerender-class.php');
 
+/**
+ * @ignore
+ */
 require_once('notation/abc.php');
 require_once('notation/guido.php');
 require_once('notation/lilypond.php');
 require_once('notation/mup.php');
 require_once('notation/pmw.php');
-/*
-foreach (array_values ($notations) as $notation)
-{
-	require_once ($notation['includefile']);
-}
- */
 
 /**
  * Default options used for first-time install. Also contains the type of value,
@@ -503,17 +500,17 @@ function scorerender_init_class ($matches)
 
 
 /**
- * Renders music fragments contained inside posts / comments.
+ * The hook attached to WordPress plugin system.
  *
  * Check if post/comment rendering should be enabled.
  * If yes, then apply {@link scorerender_init_class} function on $content.
  *
- * @uses scorerender_init_class() Apply filter to content upon regular expression match
+ * @uses scorerender_init_class() Initialize class upon regular expression match
  * @param string $content The whole content of blog post / comment
- * @param boolean $is_post Whether content is from post or comment
+ * @param boolean $is_post TRUE if content comes from post / page, FALSE otherwise
  * @return string Converted blog post / comment content.
  */
-function scorerender_do_conversion ($content, $is_post)
+function scorerender_conversion_hook ($content, $is_post)
 {
 	global $sr_options, $notations, $post;
 
@@ -590,15 +587,15 @@ if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
 // smilies conversion and wptexturize() can mess up the content
 add_filter ('the_excerpt' ,
 	create_function ('$content',
-		'return scorerender_do_conversion ($content, TRUE);'),
+		'return scorerender_conversion_hook ($content, TRUE);'),
 	2);
 add_filter ('the_content' ,
 	create_function ('$content',
-		'return scorerender_do_conversion ($content, TRUE);'),
+		'return scorerender_conversion_hook ($content, TRUE);'),
 	2);
 add_filter ('comment_text',
 	create_function ('$content',
-		'return scorerender_do_conversion ($content, FALSE);'),
+		'return scorerender_conversion_hook ($content, FALSE);'),
 	2);
 
 ?>
