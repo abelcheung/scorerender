@@ -94,7 +94,7 @@ public static function define_admin_messages (&$adm_msgs)
 public static function program_setting_entry ($output)
 {
 	$output .= parent::program_setting_entry (
-		'pmw_bin', 'pmw', 'PMW_BIN');
+		'pmw', 'PMW_BIN');
 	return $output;
 }
 

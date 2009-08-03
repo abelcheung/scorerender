@@ -714,7 +714,6 @@ final public function render()
 /**
  * Output program setting HTML for notation
  *
- * @param string $id ID for input text field
  * @param string $bin_name Name of binary program
  * @param string $setting_name Name of setting used by the binary
  * @param string $title Title for setting entry
@@ -722,9 +721,10 @@ final public function render()
  *
  * @return string HTML for the program setting in admin page
  */
-public static function program_setting_entry ($id, $bin_name, $setting_name, $title = '', $desc = '')
+public static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '')
 {
 	global $sr_options;
+	$id = strtolower ($setting_name);
 
 	$output = "<tr valign='top'>\n"
 		. "<th scope='row'><label for='{$id}'>"

@@ -104,7 +104,7 @@ public static function define_admin_messages (&$adm_msgs)
 public static function program_setting_entry ($output)
 {
 	$output .= parent::program_setting_entry (
-		'lilypond_bin', 'lilypond', 'LILYPOND_BIN');
+		'lilypond', 'LILYPOND_BIN');
 	return $output;
 }
 

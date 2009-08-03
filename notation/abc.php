@@ -104,7 +104,7 @@ public static function define_admin_messages (&$adm_msgs)
 public static function program_setting_entry ($output)
 {
 	$output .= parent::program_setting_entry (
-		'abcm2ps_bin', 'abcm2ps', 'ABCM2PS_BIN');
+		'abcm2ps', 'ABCM2PS_BIN');
 	return $output;
 }
 
