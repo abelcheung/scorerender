@@ -129,14 +129,10 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 		'FRAGMENT_PER_COMMENT' => array ('type' =>  'int', 'value' => 1),
 
 		'CONVERT_BIN'          => array ('type' => 'prog', 'value' => ''),
-		'LILYPOND_BIN'         => array ('type' => 'prog', 'value' => ''),
-		'MUP_BIN'              => array ('type' => 'prog', 'value' => ''),
-		'ABCM2PS_BIN'          => array ('type' => 'prog', 'value' => ''),
-		'PMW_BIN'              => array ('type' => 'prog', 'value' => ''),
 		'MUP_MAGIC_FILE'       => array ('type' => 'path', 'value' => ''),
 	);
 
-	do_action_ref_array ('scorerender_define_var_type', array(&$default_settings));
+	do_action_ref_array ('scorerender_define_setting_type', array(&$default_settings));
 
 	if (TYPES_ONLY == $return_type)
 	{
@@ -473,10 +469,10 @@ function scorerender_init_class ($matches)
 			$render = new $notation['classname'];
 
 			$progs = array();
-			foreach ($notation['progs'] as $progname) {
-				$progs["$progname"] = $sr_options[$progname];
+			foreach (array_keys($notation['progs']) as $setting_name) {
+				$programs[$setting_name] = $sr_options[$setting_name];
 			}
-			$render->set_programs ($progs);
+			$render->set_programs ($programs);
 
 			break;
 		}
@@ -526,8 +522,8 @@ function scorerender_conversion_hook ($content, $is_post)
 	foreach (array_values ($notations) as $notation)
 	{
 		// unfilled program name = disable support
-		foreach ($notation['progs'] as $prog)
-			if (empty ($sr_options[$prog])) continue;
+		foreach (array_keys($notation['progs']) as $setting_name)
+			if (empty ($sr_options[$setting_name])) continue;
 		$regex_list[] = $notation['regex'];
 	};
 

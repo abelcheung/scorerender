@@ -1,3 +1,18 @@
+2009-08-04  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Move default setting definition to each notation file.
+	- (scorerender_get_def_settings) Add hook for defining default
+	  settings.
+	- (scorerender_init_class, scorerender_conversion_hook) Adopt for
+	  change of structure of $notations.
+	* scorerender-class.php:
+	- (set_img_width) Simplify string.
+	* notation/*.php:
+	- (is_notation_usable, program_setting_entry) Adopt for change of
+	  structure of $notations.
+	- (define_setting_type) New func.
+
 2009-08-03  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:
