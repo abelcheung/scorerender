@@ -350,8 +350,7 @@ public function set_img_width ($width)
  */
 private function format_error_msg ($mesg)
 {
-	return sprintf (__('[%s: %s]', TEXTDOMAIN),
-		__('ScoreRender Error', TEXTDOMAIN), $mesg);
+	return sprintf (__('[ScoreRender Error: %s]', TEXTDOMAIN), $mesg);
 }
 
 /**

@@ -77,9 +77,10 @@ public static function is_notation_usable (&$errmsgs, &$opt)
 	global $notations;
 
 	$ok = true;
-	foreach ($notations['lilypond']['progs'] as $prog)
-		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('GNU LilyPond', $opt[$prog], '--version') )
-			$ok = false;
+	foreach ($notations['lilypond']['progs'] as $setting_name => $program)
+		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
+			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
+				$ok = false;
 			
 	if (!$ok) $errmsgs[] = 'lilypond_bin_problem';
 }
@@ -103,22 +104,43 @@ public static function define_admin_messages (&$adm_msgs)
  */
 public static function program_setting_entry ($output)
 {
-	$output .= parent::program_setting_entry (
-		'lilypond', 'LILYPOND_BIN');
+	global $notations;
+
+	foreach ($notations['lilypond']['progs'] as $setting_name => $program)
+		$output .= parent::program_setting_entry (
+			$program['prog_name'], $setting_name);
 	return $output;
+}
+
+/**
+ * Define types of variables used for notation
+ */
+public static function define_setting_type (&$settings)
+{
+	global $notations;
+
+	$settings += $notations['lilypond']['progs'];
 }
 
 } // end of class
 
 
 $notations['lilypond'] = array (
+	'name'        => 'LilyPond',
+	'url'         => 'http://www.lilypond.org/',
 	'regex'       => '~\[lilypond\](.*?)\[/lilypond\]~si',
 	'starttag'    => '[lilypond]',
 	'endtag'      => '[/lilypond]',
 	'classname'   => 'lilypondRender',
-	'progs'       => array ('LILYPOND_BIN'),
-	'url'         => 'http://www.lilypond.org/',
-	'name'        => 'LilyPond',
+	'progs'       => array (
+		'LILYPOND_BIN' => array (
+			'prog_name' => 'lilypond',
+			'type'      => 'prog',
+			'value'     => '',
+			'test_arg'  => '--version',
+			'test_output' => 'GNU LilyPond',
+		),
+	),
 );
 
 
@@ -130,4 +152,7 @@ add_action ('scorerender_check_notation_progs',
 
 add_filter ('scorerender_prog_and_file_loc',
 	array( 'lilypondRender', 'program_setting_entry' ) );
+
+add_filter ('scorerender_define_setting_type',
+	array( 'lilypondRender', 'define_setting_type' ) );
 ?>

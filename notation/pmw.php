@@ -67,9 +67,10 @@ public static function is_notation_usable (&$errmsgs, &$opt)
 	global $notations;
 
 	$ok = true;
-	foreach ($notations['pmw']['progs'] as $prog)
-		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('PMW version', $opt[$prog], '-V') )
-			$ok = false;
+	foreach ($notations['pmw']['progs'] as $setting_name => $program)
+		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
+			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
+				$ok = false;
 			
 	if (!$ok) $errmsgs[] = 'pmw_bin_problem';
 }
@@ -93,22 +94,43 @@ public static function define_admin_messages (&$adm_msgs)
  */
 public static function program_setting_entry ($output)
 {
-	$output .= parent::program_setting_entry (
-		'pmw', 'PMW_BIN');
+	global $notations;
+
+	foreach ($notations['pmw']['progs'] as $setting_name => $program)
+		$output .= parent::program_setting_entry (
+			$program['prog_name'], $setting_name);
 	return $output;
+}
+
+/**
+ * Define types of variables used for notation
+ */
+public static function define_setting_type (&$settings)
+{
+	global $notations;
+
+	$settings += $notations['pmw']['progs'];
 }
 
 } // end of class
 
 
 $notations['pmw'] = array (
+	'name'        => "Philip's Music Writer",
+	'url'         => 'http://www.quercite.com/pmw.html',
 	'regex'       => '~\[pmw\](.*?)\[/pmw\]~si',
 	'starttag'    => '[pmw]',
 	'endtag'      => '[/pmw]',
 	'classname'   => 'pmwRender',
-	'progs'       => array ('PMW_BIN'),
-	'url'         => 'http://www.quercite.com/pmw.html',
-	'name'        => "Philip's Music Writer",
+	'progs'       => array (
+		'PMW_BIN' => array (
+			'prog_name' => 'pmw',
+			'type'      => 'prog',
+			'value'     => '',
+			'test_arg'  => '-V',
+			'test_output' => 'PMW version',
+		),
+	),
 );
 
 
@@ -120,4 +142,7 @@ add_action ('scorerender_check_notation_progs',
 
 add_filter ('scorerender_prog_and_file_loc',
 	array( 'pmwRender', 'program_setting_entry' ) );
+
+add_filter ('scorerender_define_setting_type',
+	array( 'pmwRender', 'define_setting_type' ) );
 ?>

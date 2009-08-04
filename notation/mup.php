@@ -146,9 +146,10 @@ public static function is_notation_usable (&$errmsgs, &$opt)
 	global $notations;
 
 	$ok = true;
-	foreach ($notations['mup']['progs'] as $prog)
-		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('Arkkra Enterprises', $opt[$prog], '-v') )
-			$ok = false;
+	foreach ($notations['mup']['progs'] as $setting_name => $program)
+		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
+			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
+				$ok = false;
 			
 	if (!$ok) $errmsgs[] = 'mup_bin_problem';
 }
@@ -190,8 +191,12 @@ public static function define_admin_messages (&$adm_msgs)
  */
 public static function program_setting_entry ($output)
 {
-	$output .= parent::program_setting_entry (
-		'mup', 'MUP_BIN');
+	global $notations;
+
+	foreach ($notations['mup']['progs'] as $setting_name => $program)
+		$output .= parent::program_setting_entry (
+			$program['prog_name'], $setting_name);
+
 	$output .= parent::program_setting_entry (
 		'', 'MUP_MAGIC_FILE',
 		sprintf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'),
@@ -201,17 +206,35 @@ public static function program_setting_entry ($output)
 	return $output;
 }
 
+/**
+ * Define types of variables used for notation
+ */
+public static function define_setting_type (&$settings)
+{
+	global $notations;
+
+	$settings += $notations['mup']['progs'];
+}
+
 }  // end of class
 
 
 $notations['mup'] = array (
+	'name'        => 'Mup',
+	'url'         => 'http://www.arkkra.com/',
 	'regex'       => '~\[mup\](.*?)\[/mup\]~si',
 	'starttag'    => '[mup]',
 	'endtag'      => '[/mup]',
 	'classname'   => 'mupRender',
-	'progs'       => array ('MUP_BIN'),
-	'url'         => 'http://www.arkkra.com/',
-	'name'        => 'Mup',
+	'progs'       => array (
+		'MUP_BIN' => array (
+			'prog_name' => 'mup',
+			'type'      => 'prog',
+			'value'     => '',
+			'test_arg'  => '-v',
+			'test_output' => 'Arkkra Enterprises',
+		),
+	),
 );
 
 
@@ -223,4 +246,7 @@ add_action ('scorerender_check_notation_progs',
 
 add_filter ('scorerender_prog_and_file_loc',
 	array( 'mupRender', 'program_setting_entry' ) );
+
+add_filter ('scorerender_define_setting_type',
+	array( 'mupRender', 'define_setting_type' ) );
 ?>

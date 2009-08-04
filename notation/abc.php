@@ -77,9 +77,10 @@ public static function is_notation_usable (&$errmsgs, &$opt)
 	global $notations;
 
 	$ok = true;
-	foreach ($notations['abc']['progs'] as $prog)
-		if ( ! empty ($opt[$prog]) && ! parent::is_prog_usable ('abcm2ps', $opt[$prog], '-V') )
-			$ok = false;
+	foreach ($notations['abc']['progs'] as $setting_name => $program)
+		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
+			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
+				$ok = false;
 			
 	if (!$ok) $errmsgs[] = 'abcm2ps_bin_problem';
 }
@@ -103,22 +104,43 @@ public static function define_admin_messages (&$adm_msgs)
  */
 public static function program_setting_entry ($output)
 {
-	$output .= parent::program_setting_entry (
-		'abcm2ps', 'ABCM2PS_BIN');
+	global $notations;
+
+	foreach ($notations['abc']['progs'] as $setting_name => $program)
+		$output .= parent::program_setting_entry (
+			$program['prog_name'], $setting_name);
 	return $output;
+}
+
+/**
+ * Define types of variables used for notation
+ */
+public static function define_setting_type (&$settings)
+{
+	global $notations;
+
+	$settings += $notations['abc']['progs'];
 }
 
 } // end of class
 
 
 $notations['abc'] = array (
+	'name'        => 'ABC',
+	'url'         => 'http://abcnotation.org.uk/',
 	'regex'       => '~\[abc\](.*?)\[/abc\]~si',
 	'starttag'    => '[abc]',
 	'endtag'      => '[/abc]',
 	'classname'   => 'abcRender',
-	'progs'       => array ('ABCM2PS_BIN'),
-	'url'         => 'http://abcnotation.org.uk/',
-	'name'        => 'ABC',
+	'progs'       => array (
+		'ABCM2PS_BIN' => array (
+			'prog_name' => 'abcm2ps',
+			'type'      => 'prog',
+			'value'     => '',
+			'test_arg'  => '-V',
+			'test_output' => 'abcm2ps',
+		),
+	),
 );
 
 
@@ -130,4 +152,7 @@ add_action ('scorerender_check_notation_progs',
 
 add_filter ('scorerender_prog_and_file_loc',
 	array( 'abcRender', 'program_setting_entry' ) );
+
+add_filter ('scorerender_define_setting_type',
+	array( 'abcRender', 'define_setting_type' ) );
 ?>
