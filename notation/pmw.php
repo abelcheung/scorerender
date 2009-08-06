@@ -63,7 +63,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  * @param array $opt Array of ScoreRender options, containing all program paths
  * @uses ScoreRender::is_prog_usable()
  */
-public static function is_notation_usable (&$errmsgs, &$opt)
+public static function is_notation_usable ($errmsgs, $opt)
 {
 	global $notations;
 
@@ -80,7 +80,7 @@ public static function is_notation_usable (&$errmsgs, &$opt)
  * Define any additional error or warning messages if settings for notation
  * has any problem.
  */
-public static function define_admin_messages (&$adm_msgs)
+public static function define_admin_messages ($adm_msgs)
 {
 	global $notations;
 
@@ -106,7 +106,7 @@ public static function program_setting_entry ($output)
 /**
  * Define types of variables used for notation
  */
-public static function define_setting_type (&$settings)
+public static function define_setting_type ($settings)
 {
 	global $notations;
 
