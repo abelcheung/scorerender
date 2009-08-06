@@ -9,6 +9,7 @@
  * @package ScoreRender
 */
 class abcRender extends ScoreRender
+                implements ScoreRender_Notation
 {
 
 private $width;

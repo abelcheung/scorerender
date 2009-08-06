@@ -9,6 +9,7 @@
  * @package ScoreRender
 */
 class guidoRender extends ScoreRender
+                  implements ScoreRender_Notation
 {
 
 /**
@@ -62,17 +63,37 @@ public function is_notation_usable ($args = '')
 }
  */
 
+/**
+ * @ignore
+ */
+public static function is_notation_usable (&$errmsgs, &$opt) {}
+
+/**
+ * @ignore
+ */
+public static function define_admin_messages (&$adm_msgs) {}
+
+/**
+ * @ignore
+ */
+public static function program_setting_entry ($output) {}
+
+/**
+ * @ignore
+ */
+public static function define_setting_type (&$settings) {}
+
 } // end of class
 
 
 $notations['guido'] = array (
+	'name'        => 'GUIDO',
+	'url'         => 'http://www.informatik.tu-darmstadt.de/AFS/GUIDO/',
 	'regex'       => '~\[guido\](.*?)\[/guido\]~si',
 	'starttag'    => '[guido]',
 	'endtag'      => '[/guido]',
 	'classname'   => 'guidoRender',
 	'progs'       => array (),
-	'url'         => 'http://www.informatik.tu-darmstadt.de/AFS/GUIDO/',
-	'name'        => 'GUIDO',
 );
 
 ?>

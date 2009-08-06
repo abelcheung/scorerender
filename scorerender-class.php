@@ -41,61 +41,61 @@ abstract class ScoreRender
  * Dangerous content means special constructs causing
  * inclusion of another file or command execution, etc.
  */
-const ERR_INVALID_INPUT = -1;
+const ERR_INVALID_INPUT = 1;
 
 /**
  * Error constant used when cache directory is not writable.
  */
-const ERR_CACHE_DIRECTORY_NOT_WRITABLE = -2;
+const ERR_CACHE_DIRECTORY_NOT_WRITABLE = 2;
 
 /**
  * Error constant used when temporary working directory is not writable.
  */
-const ERR_TEMP_DIRECTORY_NOT_WRITABLE = -3;
+const ERR_TEMP_DIRECTORY_NOT_WRITABLE = 3;
 
 /**
  * Error constant used when temporary file is not writable.
  *
  * This error is very rare, most usually it's the directory (not file) which is not writable.
  */
-const ERR_TEMP_FILE_NOT_WRITABLE = -4;
+const ERR_TEMP_FILE_NOT_WRITABLE = 4;
 
 /**
  * Error constant used when conversion of rendered image to proper format (PostScript -> PNG) failed.
  */
-const ERR_IMAGE_CONVERT_FAILURE = -5;
+const ERR_IMAGE_CONVERT_FAILURE = 5;
 
 /**
  * Error constant used when any generic error occurred during rendering.
  */
-const ERR_RENDERING_ERROR = -6;
+const ERR_RENDERING_ERROR = 6;
 
 /**
  * Error constant used when length of supplied content exceeds configured limit.
  */
-const ERR_LENGTH_EXCEEDED = -7;
+const ERR_LENGTH_EXCEEDED = 7;
 
 /**
  * Error constant representing internal class error.
  *
  * Currently used when some essential method is not implemented in classes.
  */
-const ERR_INTERNAL_CLASS = -8;
+const ERR_INTERNAL_CLASS = 8;
 
 /**
  * Error constant representing that ImageMagick convert is unusable.
  */
-const ERR_CONVERT_UNUSABLE = -9;
+const ERR_CONVERT_UNUSABLE = 9;
 
 /**
  * Error constant representing final image unreadable.
  */
-const ERR_IMAGE_NOT_VIEWABLE = -10;
+const ERR_IMAGE_NOT_VIEWABLE = 10;
 
 /**
  * Error constant representing web host disabled certain PHP functions
  */
-const ERR_FUNC_DISABLED = -11;
+const ERR_FUNC_DISABLED = 11;
 
 
 /*
@@ -217,7 +217,7 @@ public function set_programs ($progs)
  * @uses $_input
  * @return string The full music content to be rendered, after necessary filtering
  */
-abstract public function get_music_fragment ();
+// abstract public function get_music_fragment ();
 
 /**
  * Returns output message of rendering command.
@@ -719,6 +719,7 @@ final public function render()
  * @param string $desc Optional description, shown under setting entry
  *
  * @return string HTML for the program setting in admin page
+ * @since 0.3.50
  */
 public static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '')
 {
@@ -738,5 +739,35 @@ public static function program_setting_entry ($bin_name, $setting_name, $title =
 }
 
 } // end of class
+
+/**
+ * Interface for every notations used by ScoreRender
+ * @package ScoreRender
+ */
+interface ScoreRender_Notation
+{
+	function set_music_fragment ($input);
+	function set_programs ($progs);
+	function get_music_fragment ();
+	function get_command_output ();
+	function get_notation_name ();
+	function set_imagemagick_path ($path);
+	function set_inverted ($invert);
+	function set_temp_dir ($path);
+	function get_temp_dir ();
+	function set_cache_dir ($path);
+	function get_cache_dir ();
+	function set_max_length ($length);
+	function set_img_width ($width);
+	function get_error_msg ();
+	static function is_web_hosting ();
+	static function is_prog_usable ($match, $prog);
+	function render();
+	static function is_notation_usable ($errmsgs, $opt);
+	static function define_admin_messages ($adm_msgs);
+	static function program_setting_entry ($output);
+	static function define_setting_type ($settings);
+
+} // end of interface
 
 ?>

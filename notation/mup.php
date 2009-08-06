@@ -9,6 +9,7 @@
  * @package ScoreRender
 */
 class mupRender extends ScoreRender
+                implements ScoreRender_Notation
 {
 
 private $width;
