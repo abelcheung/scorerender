@@ -1,3 +1,14 @@
+2009-08-06  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- Use positive numbers for error constants.
+	- Utilize PHP interface to make sure each notation implements all
+	  necessary methods.
+	* notation/*.php:
+	- Utilize PHP interface.
+	* notation/guido.php:
+	- Add all dummy functions necessary for PHP interface.
+
 2009-08-04  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

@@ -9,6 +9,7 @@
  * @package ScoreRender
 */
 class lilypondRender extends ScoreRender
+                     implements ScoreRender_Notation
 {
 
 /**

@@ -9,6 +9,7 @@
  * @package ScoreRender
 */
 class pmwRender extends ScoreRender
+                implements ScoreRender_Notation
 {
 
 /**
