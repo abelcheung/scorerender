@@ -66,12 +66,12 @@ public function is_notation_usable ($args = '')
 /**
  * @ignore
  */
-public static function is_notation_usable (&$errmsgs, &$opt) {}
+public static function is_notation_usable ($errmsgs, $opt) {}
 
 /**
  * @ignore
  */
-public static function define_admin_messages (&$adm_msgs) {}
+public static function define_admin_messages ($adm_msgs) {}
 
 /**
  * @ignore
@@ -81,7 +81,7 @@ public static function program_setting_entry ($output) {}
 /**
  * @ignore
  */
-public static function define_setting_type (&$settings) {}
+public static function define_setting_type ($settings) {}
 
 } // end of class
 

@@ -1,5 +1,10 @@
 2009-08-06  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/*.php:
+	- Fix function declaration.
+
+2009-08-06  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php:
 	- Use positive numbers for error constants.
 	- Utilize PHP interface to make sure each notation implements all
