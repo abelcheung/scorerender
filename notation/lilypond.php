@@ -13,7 +13,8 @@ class lilypondRender extends ScoreRender
 {
 
 /**
- * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
+ * Refer to {@link ScoreRender_Notation::get_music_fragment() interface method}
+ * for more detail.
  */
 public function get_music_fragment ()
 {
@@ -40,7 +41,8 @@ EOD;
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step1() parent method} for more detail.
+ * Refer to {@link ScoreRender::conversion_step1() parent method}
+ * for more detail.
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
@@ -56,7 +58,8 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
+ * Refer to {@link ScoreRender::conversion_step2() parent method}
+ * for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
@@ -67,10 +70,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Check if given program locations are correct and usable
- *
- * @param array $errmsgs An array of messages to be added if program checking failed
- * @param array $opt Array of ScoreRender options, containing all program paths
+ * Refer to {@link ScoreRender_Notation::is_notation_usable() interface method}
+ * for more detail.
  * @uses ScoreRender::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
@@ -87,8 +88,8 @@ public static function is_notation_usable ($errmsgs, $opt)
 }
 
 /**
- * Define any additional error or warning messages if settings for notation
- * has any problem.
+ * Refer to {@link ScoreRender_Notation::define_admin_messages() interface method}
+ * for more detail.
  */
 public static function define_admin_messages ($adm_msgs)
 {
@@ -101,7 +102,8 @@ public static function define_admin_messages ($adm_msgs)
 }
 
 /**
- * Output program setting HTML for notation
+ * Refer to {@link ScoreRender_Notation::program_setting_entry() interface method}
+ * for more detail.
  */
 public static function program_setting_entry ($output)
 {
@@ -114,7 +116,8 @@ public static function program_setting_entry ($output)
 }
 
 /**
- * Define types of variables used for notation
+ * Refer to {@link ScoreRender_Notation::define_setting_type() interface method}
+ * for more detail.
  */
 public static function define_setting_type ($settings)
 {

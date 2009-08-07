@@ -10,7 +10,6 @@
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
  */
 
-//
 // Backported function: sys_get_temp_dir
 // http://www.phpit.net/article/creating-zip-tar-archives-dynamically-php/2/
 //
@@ -40,7 +39,6 @@ if (!function_exists ('sys_get_temp_dir'))
 	}
 }
 
-//
 // Backported function: array_intersect_key
 // http://www.php.net/manual/en/function.array-intersect-key.php#68179
 //
@@ -63,7 +61,11 @@ if (!function_exists ('array_intersect_key'))
 
 // Backported function: wp_parse_str
 // Not available on WP 2.2
+//
 if (!function_exists ('wp_parse_str')) {
+	/**
+	 * @ignore
+	 */
 	function wp_parse_str( $string, &$array ) {
 		parse_str( $string, $array );
 		if ( get_magic_quotes_gpc() )
@@ -90,7 +92,7 @@ function is_windows ()
  * @since 0.3
  * @param string $path The path to be transformed
  * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
- * @uses is_windows
+ * @uses is_windows()
  * @return string $path The resulting path, with appropriate slashes or backslashes
  */
 function get_path_presentation ($path, $is_internal)
@@ -106,6 +108,7 @@ function get_path_presentation ($path, $is_internal)
  * Convenience function: Check if a path is aboslute path
  *
  * @since 0.3
+ * @uses is_windows()
  * @return boolean True if path is absolute, false otherwise.
  */
 function is_absolute_path ($path)
@@ -119,6 +122,8 @@ function is_absolute_path ($path)
  * Create temporary directory
  *
  * Inspired from PHP tempnam documentation comment
+ *
+ * @uses sys_get_temp_dir()
  * @param string $dir Base directory on which temp folder is created
  * @param string $prefix Prefix of temp directory
  * @param integer $mode Access mode of temp directory
@@ -150,8 +155,12 @@ function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
  *
  * @since 0.3
  * @uses get_path_presentation()
- * @param array $setting The settings to be transformed, either from existing setting or from newly submitted setting
- * @param boolean $is_internal Whether to always transform into Unix format, which is used for storing values into database. FALSE means using OS native representation.
+ * @uses scorerender_get_def_settings()
+ * @param array $setting The settings to be transformed, either from
+ * existing setting or from newly submitted setting
+ * @param boolean $is_internal Whether to always transform into Unix format,
+ * which is used for storing values into database.
+ * FALSE means using OS native representation.
  */
 function transform_paths (&$setting, $is_internal)
 {
