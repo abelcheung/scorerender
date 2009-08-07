@@ -93,9 +93,6 @@ require_once('scorerender-utils.php');
  */
 require_once('scorerender-class.php');
 
-/**
- * @ignore
- */
 require_once('notation/abc.php');
 require_once('notation/guido.php');
 require_once('notation/lilypond.php');
@@ -105,7 +102,10 @@ require_once('notation/pmw.php');
 /**
  * Default options used for first-time install. Also contains the type of value,
  * so other actions can be applied depending on setting type.
- * @global array $default_settings
+ *
+ * @uses is_windows() Determine default program path based on operating system
+ * @uses scorerender_get_upload_dir()
+ * @uses sys_get_temp_dir()
  */
 function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 {
@@ -283,6 +283,12 @@ function scorerender_get_upload_dir ()
 	return (array ('path' => $path, 'url' => $url));
 }
 
+/**
+ * Retrieve all default settings and merge them into ScoreRender options
+ *
+ * @uses scorerender_get_def_settings()
+ * @uses $sr_options
+ */
 function scorerender_populate_options ()
 {
 	global $sr_options;
@@ -311,7 +317,7 @@ function scorerender_populate_options ()
  * JUST upgraded), then it also merges old config with new default
  * config and update the options in database.
  *
- * @uses scorerender_get_upload_dir()
+ * @uses scorerender_populate_options()
  * @uses transform_paths()
  */
 function scorerender_get_options ()
@@ -353,9 +359,10 @@ function scorerender_get_options ()
  * Generate HTML content from error message or rendered image
  *
  * @uses ScoreRender::render()
- * @uses ScoreRender::get_notation_name()
- * @uses ScoreRender::get_music_fragment()
- * @uses ScoreRender::get_error_msg()
+ * @uses ScoreRender::get_notation_name() Used when showing original content upon error
+ * @uses ScoreRender::get_music_fragment() Used when showing original content upon error
+ * @uses ScoreRender::get_comment_output() Used when showing error message upon error, and debug is on
+ * @uses ScoreRender::get_error_msg() Used when showing error message upon error, and debug is off
  *
  * @param object $render PHP object created for rendering relevant music fragment
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
@@ -534,6 +541,14 @@ function scorerender_conversion_hook ($content, $is_post)
 	return preg_replace_callback ($regex_list, 'scorerender_init_class', $content, $limit);
 }
 
+/**
+ * Adds transparent PNG support if browser is IE6
+ *
+ * The filter used for transparent PNG image comes from Twinhelix.
+ * This fix first adds CSS class to all images rendered by ScoreRender,
+ * then use IE specific filter to add fake transparency to all images
+ * with such CSS class.
+ */
 function scorerender_add_ie6_style()
 {
 	// FIXME: hardcoded path is not nice

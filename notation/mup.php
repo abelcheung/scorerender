@@ -12,35 +12,38 @@ class mupRender extends ScoreRender
                 implements ScoreRender_Notation
 {
 
-private $width;
-
 /**
  * @var string $magic_file Location of magic file used by Mup
  * @access private
  */
 private $magic_file;
 
+/**
+ * Class constructor, for adding wordpress hook to set magic file required by Mup
+ * @uses set_magic_file_hook()
+ * @access private
+ */
 function __construct ()
 {
 	add_action ('sr_set_class_variable', array (&$this, 'set_magic_file_hook'));
 }
 
 /**
- * Set maximum width of generated images
- *
- * @param integer $width Maximum width of images (in pixel)
- * @since 0.2.50
+ * Refer to {@link ScoreRender::set_img_width() parent method}
+ * for more detail.
+ * For Mup notation, it is more convenient to use inch as unit
  */
 public function set_img_width ($width)
 {
 	parent::set_img_width ($width);
-	$this->width = $this->img_max_width / DPI;
+	$this->img_max_width /= DPI;
 }
 
 /**
  * Set the location of magic file
  *
  * @param string $file Full path of magic file
+ * @uses $magic_file
  * @since 0.2.50
  */
 public function set_magic_file ($file)
@@ -51,7 +54,6 @@ public function set_magic_file ($file)
 /**
  * Checks if given content is invalid or dangerous content
  *
- * @param string $input
  * @return boolean True if content is deemed safe
  */
 protected function is_valid_input ()
@@ -69,7 +71,8 @@ protected function is_valid_input ()
 }
 
 /**
- * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
+ * Refer to {@link ScoreRender_Notation::get_music_fragment() interface method}
+ * for more detail.
  */
 public function get_music_fragment ()
 {
@@ -80,14 +83,19 @@ leftmargin = 0
 rightmargin = 0
 topmargin = 0
 bottommargin = 0
-pagewidth = {$this->width}
+pagewidth = {$this->img_max_width}
 label = ""
 EOD;
 	return $header . "\n" . $this->_input;
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step1() parent method} for more detail.
+ * Refer to {@link ScoreRender::conversion_step1() parent method}
+ * for more detail.
+ *
+ * @uses is_windows()
+ * @uses $temp_dir For storing temporary copy of magic file
+ * @uses $magic_file
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
@@ -136,10 +144,26 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 
 
 /**
- * Check if given program locations are correct and usable
+ * Set the location of magic file
+ * This is not supposed to be called directly; it is used as a
+ * WordPress action hook instead.
  *
- * @param array $errmsgs An array of messages to be added if program checking failed
- * @param array $opt Array of ScoreRender options, containing all program paths
+ * {@internal OK, I cheated. Shouldn't have been leaking external
+ * config option names into class, but this can help saving me
+ * headache in the future}}
+ * @uses set_magic_file()
+ *
+ * @since 0.2.50
+ */
+public function set_magic_file_hook ($options)
+{
+	if (isset ($options['MUP_MAGIC_FILE']))
+		$this->set_magic_file ($options['MUP_MAGIC_FILE']);
+}
+
+/**
+ * Refer to {@link ScoreRender_Notation::is_notation_usable() interface method}
+ * for more detail.
  * @uses ScoreRender::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
@@ -155,27 +179,9 @@ public static function is_notation_usable ($errmsgs, $opt)
 	if (!$ok) $errmsgs[] = 'mup_bin_problem';
 }
 
-
 /**
- * Set the location of magic file
- * This is not supposed to be called directly; it is used as a
- * WordPress action hook instead.
- *
- * {@internal OK, I cheated. Shouldn't have been leaking external
- * config option names into class, but this can help saving me
- * headache in the future}}
- *
- * @since 0.2.50
- */
-public function set_magic_file_hook ($options)
-{
-	if (isset ($options['MUP_MAGIC_FILE']))
-		$this->set_magic_file ($options['MUP_MAGIC_FILE']);
-}
-
-/**
- * Define any additional error or warning messages if settings for notation
- * has any problem.
+ * Refer to {@link ScoreRender_Notation::define_admin_messages() interface method}
+ * for more detail.
  */
 public static function define_admin_messages ($adm_msgs)
 {
@@ -188,7 +194,8 @@ public static function define_admin_messages ($adm_msgs)
 }
 
 /**
- * Output program setting HTML for notation
+ * Refer to {@link ScoreRender_Notation::program_setting_entry() interface method}
+ * for more detail.
  */
 public static function program_setting_entry ($output)
 {
@@ -208,7 +215,8 @@ public static function program_setting_entry ($output)
 }
 
 /**
- * Define types of variables used for notation
+ * Refer to {@link ScoreRender_Notation::define_setting_type() interface method}
+ * for more detail.
  */
 public static function define_setting_type ($settings)
 {

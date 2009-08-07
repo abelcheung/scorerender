@@ -1,19 +1,4 @@
 <?php
-/*
- * Methods implementable by subclasses:
- *
- * Mandatory:
- * - conversion_step1($input_file, $intermediate_image)
- * - get_music_fragment($input)
- * - conversion_step2($intermediate_image, $final_image, $invert)
- *   --- this one most usually invokes parent converting()
- *
- * Optional:
- * - is_valid_input()
- *
- * Please refer to class.*.inc.php for examples.
-*/
-
 /**
  * ScoreRender documentation
  * @package ScoreRender
@@ -25,15 +10,22 @@
  */
 
 /**
- * ScoreRender Class
+ * Base class shared by all notations.
+ * Most mandatory subclass methods are already listed in 
+ * {@link ScoreRender_Notation} interface below, plus one more:
+ *
+ * - {@link conversion_step1()}
+ *
+ * The methods below are optional for subclasses:
+ *
+ * - {@link conversion_step2()}
+ * - {@link is_valid_input()}
+ *
+ * Please refer to class.*.inc.php for examples.
  * @package ScoreRender
  */
 abstract class ScoreRender
 {
-
-/*
- * Error constants
- */
 
 /**
  * Error constant used when content is known to be invalid or dangerous.
@@ -74,13 +66,6 @@ const ERR_RENDERING_ERROR = 6;
  * Error constant used when length of supplied content exceeds configured limit.
  */
 const ERR_LENGTH_EXCEEDED = 7;
-
-/**
- * Error constant representing internal class error.
- *
- * Currently used when some essential method is not implemented in classes.
- */
-const ERR_INTERNAL_CLASS = 8;
 
 /**
  * Error constant representing that ImageMagick convert is unusable.
@@ -205,21 +190,6 @@ public function set_programs ($progs)
 }
 
 /**
- * Outputs music fragment content
- *
- * Most usually user supplied content does not contain correct
- * rendering options like page margin, staff width etc, and
- * each notation has its own requirements. Some also require additional
- * filtering before able to be used by rendering programs.
- * Such conversions are applied on output as well, though original content
- * ($_input) is not modified in any way.
- *
- * @uses $_input
- * @return string The full music content to be rendered, after necessary filtering
- */
-// abstract public function get_music_fragment ();
-
-/**
  * Returns output message of rendering command.
  *
  * @uses $_commandOutput Returns this variable
@@ -234,6 +204,7 @@ public function get_command_output ()
  * Returns notation name, by comparing class name with notation name list.
  *
  * @return string|boolean Return notation name if found, FALSE otherwise.
+ * @uses format_error_msg()
  * @since 0.2
  */
 public function get_notation_name ()
@@ -357,6 +328,7 @@ private function format_error_msg ($mesg)
  * Retrieve error message
  *
  * @uses $error_code Message is generated according to error code
+ * @uses format_error_msg()
  * @return string Localized error message
  * @since 0.3
  */
@@ -385,9 +357,6 @@ public function get_error_msg ()
 	  case ERR_LENGTH_EXCEEDED:
 		return $this->format_error_msg (__('Content length limit exceeded!', TEXTDOMAIN));
 
-	  case ERR_INTERNAL_CLASS:
-		return $this->format_error_msg (__('Internal class initialization error!', TEXTDOMAIN));
-
 	  case ERR_CONVERT_UNUSABLE:
 		return $this->format_error_msg (__('ImageMagick program is unusable!', TEXTDOMAIN));
 
@@ -407,7 +376,8 @@ public function get_error_msg ()
  *
  * @param string $cmd Command to be executed
  * @uses $_commandOutput Command output is stored after execution.
- * @return integer Exit status of the command.
+ * @uses is_windows() Command line is adjusted if under Windows
+ * @return integer Exit status of the command
  * @final
  */
 final protected function _exec ($cmd)
@@ -493,7 +463,8 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
  * Check if certain functions are disabled
  *
  * @since 0.3
- * @return boolean Return TRUE if popen() or pclose() are disabled, FALSE otherwise
+ * @return boolean Return TRUE if {@link popen() popen()} or
+ * {@link pclose() pclose()} are disabled, FALSE otherwise
  */
 public static function is_web_hosting ()
 {
@@ -507,7 +478,10 @@ public static function is_web_hosting ()
  *
  * @since 0.2
  * @uses is_absolute_path()
- * @param mixed $match The string to be searched in program output. Can be an array of strings, in this case all strings must be found. Any non-string element in the array is ignored.
+ * @uses is_web_hosting()
+ * @param mixed $match The string to be searched in program output.
+ * Can be an array of strings, in this case all strings must be found.
+ * Any non-string element in the array is ignored.
  * @param string $prog The program to be checked
  * @param string $args Extra variable arguments supplied to the program (if any)
  * @return boolean Return TRUE if the given program is usable, FALSE otherwise
@@ -517,7 +491,7 @@ public static function is_prog_usable ($match, $prog)
 	if (empty ($prog)) return false;
 
 	// safe guard
-	if (!is_absolute_path ($prog))
+	if (!self::is_absolute_path ($prog))
 		return false;
 
 	$prog = realpath ($prog);
@@ -558,18 +532,19 @@ public static function is_prog_usable ($match, $prog)
  *
  * First it tries to check if image is already rendered, and return
  * existing image file name immediately. Otherwise the music fragment is
- * rendered in 2 passes (with {@link conversion_step1} and {@link conversion_step2},
- * and resulting image is stored in cache folder. Error code will be
- * set appropriately
+ * rendered in 2 passes (with {@link conversion_step1()} and
+ * {@link conversion_step2()}, and resulting image is stored in cache folder.
+ * Error code will be set appropriately.
  *
- * @uses get_music_fragment() Obtain music content from this method
+ * @uses ScoreRender_Notation::get_music_fragment()
  * @uses is_valid_input() Validate content before rendering
  * @uses is_prog_usable() Check if ImageMagick is functional
  * @uses conversion_step1() First pass rendering: Convert input file -> PS
  * @uses conversion_step2() Second pass rendering: Convert PS -> PNG
- * @uses $error_code Type of error encountered is stored here
+ * @uses $_input
+ * @uses $is_inverted
  * @uses $cache_dir
- * @uses $temp_dir
+ * @uses $error_code Type of error encountered is stored here
  * @uses $content_max_length Content length is checked here
  *
  * @return string|boolean Resulting image file name, or FALSE upon error
@@ -582,7 +557,7 @@ final public function render()
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
 		       "sr-" . $this->get_notation_name() . "-$hash.png";
 
-	// Need not check anything if cache exists
+	// If cache exists, short circuit
 	if (is_file ($final_image))
 		if (is_readable ($final_image))
 			return basename ($final_image);
@@ -592,15 +567,7 @@ final public function render()
 			return false;
 		}
 
-	// missing class methods
-	if (! method_exists ($this, 'conversion_step1'  ) ||
-	    ! method_exists ($this, 'get_music_fragment'))
-	{
-		$this->error_code = ERR_INTERNAL_CLASS;
-		return false;
-	}
-
-	// Check for valid code
+	// Check for code validity or security issues
 	if ( empty ($this->_input) ||
 		( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
 	{
@@ -746,26 +713,58 @@ public static function program_setting_entry ($bin_name, $setting_name, $title =
  */
 interface ScoreRender_Notation
 {
-	function set_music_fragment ($input);
-	function set_programs ($progs);
+	/**
+	 * Outputs music fragment content
+	 *
+	 * Most usually user supplied content does not contain correct
+	 * rendering options like page margin, staff width etc, and
+	 * each notation has its own requirements. Some also require additional
+	 * filtering before able to be used by rendering programs.
+	 * Such conversions are applied on output as well, though original content
+	 * ($_input) is not modified in any way.
+	 *
+	 * @return string The full music content to be rendered, after necessary filtering
+	 */
 	function get_music_fragment ();
-	function get_command_output ();
-	function get_notation_name ();
-	function set_imagemagick_path ($path);
-	function set_inverted ($invert);
-	function set_temp_dir ($path);
-	function get_temp_dir ();
-	function set_cache_dir ($path);
-	function get_cache_dir ();
-	function set_max_length ($length);
-	function set_img_width ($width);
-	function get_error_msg ();
-	static function is_web_hosting ();
-	static function is_prog_usable ($match, $prog);
-	function render();
+
+	/**
+	 * Check if given program locations are correct and usable
+	 *
+	 * @param array $errmsgs An array of messages to be added if program checking failed
+	 * @param array $opt Reference of ScoreRender option array, containing all program paths
+	 *
+	 * @since 0.3.50
+	 */
 	static function is_notation_usable ($errmsgs, $opt);
+
+	/**
+	 * Define any additional error or warning messages if settings for notation
+	 * has any problem.
+	 *
+	 * @param array $adm_msgs Array of messages potentially shown in
+	 * admin page if any problem occurs
+	 *
+	 * @since 0.3.50
+	 */
 	static function define_admin_messages ($adm_msgs);
+
+	/**
+	 * Output program setting HTML for notation
+	 *
+	 * @param string $output string containing all HTML output, where extra settings shall be added
+	 * @return string The new HTML output after adding input entries for settings
+	 *
+	 * @since 0.3.50
+	 */
 	static function program_setting_entry ($output);
+
+	/**
+	* Define types of variables used for notation
+	*
+	* @param array $settings Reference of ScoreRender default settings to be modified
+	 *
+	 * @since 0.3.50
+	*/
 	static function define_setting_type ($settings);
 
 } // end of interface

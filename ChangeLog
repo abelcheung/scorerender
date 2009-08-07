@@ -1,3 +1,15 @@
+2009-08-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php:
+	- PHP documentation update.
+	* scorerender-class.php:
+	- Drop ERR_INTERNAL_CLASS, which is no more needed because of PHP
+	  interface restriction.
+	- Drop all method declarations already existed in ScoreRender class.
+	* notation/mup.php, notation/abc.php:
+	- (set_img_width) Use existing $img_max_width directly, instead of
+	  using new variable.
+
 2009-08-06  Abel Cheung  <abelcheung@gmail.com>
 
 	* notation/*.php:

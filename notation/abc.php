@@ -12,31 +12,27 @@ class abcRender extends ScoreRender
                 implements ScoreRender_Notation
 {
 
-private $width;
-
 /**
- * Set maximum width of generated images
+ * Refer to {@link ScoreRender::set_img_width() parent method}
+ * for more detail.
  *
- * @param integer $width Maximum width of images (in pixel)
- * @since 0.2.50
+ * Seems abcm2ps is using something like 120 dpi,
+ * with 72DPI the notes and letters are very thin :(
  */
 public function set_img_width ($width)
 {
 	parent::set_img_width ($width);
-
-	// Seems abcm2ps is using something like 120 dpi,
-	// with 72DPI the notes and letters are very thin :(
-	$this->width = $this->img_max_width / 120;
+	$this->img_max_width /= 120;
 }
 
 /**
- * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
+ * Refer to {@link ScoreRender_Notation::get_music_fragment() interface method} for more detail.
  */
 public function get_music_fragment ()
 {
 	$header = <<<EOT
 %abc
-%%staffwidth {$this->width}in
+%%staffwidth {$this->img_max_width}in
 %%stretchlast no
 %%leftmargin 0.2in
 %abc2mtex: yes
@@ -67,10 +63,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Check if given program locations are correct and usable
- *
- * @param array $errmsgs An array of messages to be added if program checking failed
- * @param array $opt Array of ScoreRender options, containing all program paths
+ * Refer to {@link ScoreRender_Notation::is_notation_usable() interface method}
+ * for more detail.
  * @uses ScoreRender::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
@@ -87,8 +81,8 @@ public static function is_notation_usable ($errmsgs, $opt)
 }
 
 /**
- * Define any additional error or warning messages if settings for notation
- * has any problem.
+ * Refer to {@link ScoreRender_Notation::define_admin_messages() interface method}
+ * for more detail.
  */
 public static function define_admin_messages ($adm_msgs)
 {
@@ -101,7 +95,8 @@ public static function define_admin_messages ($adm_msgs)
 }
 
 /**
- * Output program setting HTML for notation
+ * Refer to {@link ScoreRender_Notation::program_setting_entry() interface method}
+ * for more detail.
  */
 public static function program_setting_entry ($output)
 {
@@ -114,7 +109,8 @@ public static function program_setting_entry ($output)
 }
 
 /**
- * Define types of variables used for notation
+ * Refer to {@link ScoreRender_Notation::define_setting_type() interface method}
+ * for more detail.
  */
 public static function define_setting_type ($settings)
 {

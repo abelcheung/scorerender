@@ -103,6 +103,12 @@ function scorerender_cache_location_match ($path, $url)
  * A warning banner will be shown on top of admin page for each
  * error encountered in various options. In some cases supplied
  * config values will be discarded.
+ *
+ * @uses scorerender_cache_location_match()
+ * @uses transform_paths()
+ * @uses ScoreRender::is_web_hosting()
+ * @uses ScoreRender::is_prog_usable()
+ * @uses scorerender_get_def_settings()
  */
 function scorerender_update_options ()
 {
@@ -417,6 +423,7 @@ function scorerender_admin_section_content ()
 /**
  * Section of admin page about caching options
  *
+ * @uses scorerender_get_num_of_images()
  * @since 0.2
  * @access private
  */
@@ -457,8 +464,8 @@ else
  * Show WordPress admin page
  *
  * It also checks if form button is pressed, and may call
- * {@link scorerender_remove_cache() scorerender_remove_cache()} or
- * {@link scorerender_update_options() scorerender_update_options()} correspondingly.
+ * {@link scorerender_remove_cache()} or
+ * {@link scorerender_update_options()} correspondingly.
  *
  * @uses scorerender_remove_cache() Activated when 'Remove Cache' button is clicked
  * @uses scorerender_update_options() Activate when 'Update Options' button is clicked
@@ -528,6 +535,7 @@ function scorerender_admin_options ()
 /**
  * Append submenu item into WordPress menu
  *
+ * @uses scorerender_admin_add_js()
  * @access private
  */
 function scorerender_admin_menu ()
