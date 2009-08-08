@@ -128,7 +128,6 @@ function scorerender_update_options ()
 		'cache_dir_not_writable'   => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT writable! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_url_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache URL is NOT defined! The plugin will stop working.', TEXTDOMAIN)),
 		'cache_dir_url_unmatch'    => array ('level' => MSG_WARNING, 'content' => __('Cache directory and URL probably do not correspond to the same location.', TEXTDOMAIN)),
-		'wrong_content_length'     => array ('level' => MSG_WARNING, 'content' => __('Content length is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_frag_per_comment'   => array ('level' => MSG_WARNING, 'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_image_max_width'    => array ('level' => MSG_WARNING, 'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
 		'convert_bin_problem'      => array ('level' => MSG_FATAL  , 'content' => __('<tt>convert</tt> program is NOT defined or NOT executable! The plugin will stop working.', TEXTDOMAIN)),
@@ -175,12 +174,6 @@ function scorerender_update_options ()
 	foreach ($var_types as $key => $type)
 		if ($type == 'bool')
 			$newopt[$key] = isset ($newopt[$key]);
-
-	if ( !ctype_digit ($newopt['CONTENT_MAX_LENGTH']) )
-	{
-		$errmsgs[] = 'wrong_content_length';
-		unset ($newopt['CONTENT_MAX_LENGTH']);
-	}
 
 	if ( isset ($newopt['FRAGMENT_PER_COMMENT']) &&
 		!ctype_digit ($newopt['FRAGMENT_PER_COMMENT']) )
@@ -375,13 +368,6 @@ function scorerender_admin_section_content ()
 ?>
 <h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
 <table class="form-table">
-
-<tr valign="top">
-<th scope="row"><label for="content_max_length"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></label></th>
-<td><input type="text" name="ScoreRender[CONTENT_MAX_LENGTH]" id="content_max_length" value="<?php echo $sr_options['CONTENT_MAX_LENGTH']; ?>" class="small-text" />
-<span class="setting-description"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?></span>
-</td>
-</tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>

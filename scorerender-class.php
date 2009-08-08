@@ -63,11 +63,6 @@ const ERR_IMAGE_CONVERT_FAILURE = 5;
 const ERR_RENDERING_ERROR = 6;
 
 /**
- * Error constant used when length of supplied content exceeds configured limit.
- */
-const ERR_LENGTH_EXCEEDED = 7;
-
-/**
  * Error constant representing that ImageMagick convert is unusable.
  */
 const ERR_CONVERT_UNUSABLE = 9;
@@ -117,11 +112,6 @@ protected $temp_dir;
  * @var string $cache_dir Folder for storing cached images
  */
 protected $cache_dir;
-
-/**
- * @var integer $content_max_length Maximum length of score fragment source (in bytes)
- */
-protected $content_max_length = 4096;
 
 /**
  * @var integer $img_max_width Maximum width of generated images
@@ -288,17 +278,6 @@ public function get_cache_dir ()
 }
 
 /**
- * Set maximum allowed length of score fragment source
- *
- * @param integer $length Maximum length of score fragment source (in byte)
- * @since 0.3
- */
-public function set_max_length ($length)
-{
-	$this->content_max_length = $length;
-}
-
-/**
  * Set maximum width of generated images
  *
  * For some notations the unit for width is not pixel; under those situations
@@ -354,14 +333,12 @@ public function get_error_msg ()
 	  case ERR_RENDERING_ERROR:
 		return $this->format_error_msg (__('The external rendering application failed!', TEXTDOMAIN));
 
-	  case ERR_LENGTH_EXCEEDED:
-		return $this->format_error_msg (__('Content length limit exceeded!', TEXTDOMAIN));
-
 	  case ERR_CONVERT_UNUSABLE:
 		return $this->format_error_msg (__('ImageMagick program is unusable!', TEXTDOMAIN));
 
 	  case ERR_IMAGE_NOT_VIEWABLE:
 		return $this->format_error_msg (__('Image is not viewable!', TEXTDOMAIN));
+
 	  case ERR_FUNC_DISABLED:
 		return $this->format_error_msg (__('Some PHP functions are disabled by web host.', TEXTDOMAIN));
 	}
@@ -545,7 +522,6 @@ public static function is_prog_usable ($match, $prog)
  * @uses $is_inverted
  * @uses $cache_dir
  * @uses $error_code Type of error encountered is stored here
- * @uses $content_max_length Content length is checked here
  *
  * @return string|boolean Resulting image file name, or FALSE upon error
  * @final
@@ -572,15 +548,6 @@ final public function render()
 		( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
 	{
 		$this->error_code = ERR_INVALID_INPUT;
-		return false;
-	}
-
-	// Check for content length
-	if ( isset ($this->content_max_length) &&
-	     ($this->content_max_length > 0) &&
-	     (strlen ($this->_input) > $this->content_max_length) )
-	{
-		$this->error_code = ERR_LENGTH_EXCEEDED;
 		return false;
 	}
 

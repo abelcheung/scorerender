@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 13);
+define ('DATABASE_VERSION', 14);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -125,7 +125,6 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 		'COMMENT_ENABLED'      => array ('type' => 'bool', 'value' => false),
 		'ERROR_HANDLING'       => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
 
-		'CONTENT_MAX_LENGTH'   => array ('type' =>  'int', 'value' => 4096),
 		'FRAGMENT_PER_COMMENT' => array ('type' =>  'int', 'value' => 1),
 
 		'CONVERT_BIN'          => array ('type' => 'prog', 'value' => ''),
@@ -456,7 +455,6 @@ function scorerender_process_content ($render)
  * @uses ScoreRender::set_inverted()
  * @uses ScoreRender::set_temp_dir()
  * @uses ScoreRender::set_cache_dir()
- * @uses ScoreRender::set_max_length()
  * @uses ScoreRender::set_img_width()
  * @uses ScoreRender::set_music_fragment()
  *
@@ -490,7 +488,6 @@ function scorerender_init_class ($matches)
 	$render->set_inverted         ($sr_options['INVERT_IMAGE']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
 	$render->set_cache_dir        ($sr_options['CACHE_DIR']);
-	$render->set_max_length       ($sr_options['CONTENT_MAX_LENGTH']);
 	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
 
 	do_action ('sr_set_class_variable', $sr_options);
