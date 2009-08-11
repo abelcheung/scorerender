@@ -468,7 +468,7 @@ public static function is_prog_usable ($match, $prog)
 	if (empty ($prog)) return false;
 
 	// safe guard
-	if (!self::is_absolute_path ($prog))
+	if (!is_absolute_path ($prog))
 		return false;
 
 	$prog = realpath ($prog);
