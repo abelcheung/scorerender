@@ -41,14 +41,39 @@ EOD;
 }
 
 /**
+ * Determine LilyPond version
+ * @param string $lilypond The path of lilypond program
+ * @return string|boolean The version number string if it can be determined, otherwise FALSE 
+ */
+public static function lilypond_version ($lilypond)
+{
+	if ( !function_exists ('exec') ) return FALSE;
+
+	exec ("\"$lilypond\" -v 2>&1", $output, $retval);
+	
+	if ( empty ($output) ) return FALSE;
+	if ( !preg_match('/^gnu lilypond (\d+\.\d+\.\d+)/i', $output[0], $matches) ) return FALSE;
+	return $matches[1];
+}
+
+/**
  * Refer to {@link ScoreRender::conversion_step1() parent method}
  * for more detail.
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	/* lilypond adds .ps extension by itself */
-	$cmd = sprintf ('"%s" --safe --ps --output "%s" "%s"',
+	$safemode = '';
+	/* LilyPond SUCKS unquestionably. On or before 2.8 safe mode is triggered by --safe option,
+	 * on 2.10.x it becomes --safe-mode, and on 2.12.x the option is completely gone!
+	 */
+	if ( false !== ( $lilypond_ver = self::lilypond_version ($this->mainprog) ) )
+		if ( version_compare ($lilypond_ver, '2.11.0', '<') )
+			$safemode = '-s';
+	
+	/* lilypond adds .ps extension by itself, sucks for temp file generation */
+	$cmd = sprintf ('"%s" %s --ps --output "%s" "%s"',
 		$this->mainprog,
+		$safemode,
 		dirname($intermediate_image) . DIRECTORY_SEPARATOR . basename($intermediate_image, ".ps"),
 		$input_file);
 
