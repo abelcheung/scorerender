@@ -1,3 +1,10 @@
+2009-08-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/lilypond.php:
+	- (conversion_step1) Detect lilypond version and adjust command line
+	  accordingly. Even lilypond command line options are unstable.
+	- (lilypond_version) New func.
+
 2009-08-08  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php, wp-scorerender.php, scorerender-class.php:
