@@ -17,7 +17,7 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.3.1
+ * @version 0.3.2
  * @author Abel Cheung <abelcheung at gmail dot com>
  * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
  * @copyright Copyright (C) 2007-09 Abel Cheung

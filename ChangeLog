@@ -1,3 +1,11 @@
+=== ScoreRender 0.3.2 ===
+2009-08-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/lilypond.php (Backport from trunk):
+	- (conversion_step1) Detect lilypond version and adjust command line
+	  accordingly. Even lilypond command line options are unstable.
+	- (lilypond_version) New func.
+
 === ScoreRender 0.3.1 ===
 2009-07-26  Abel Cheung  <abelcheung@gmail.com>
 
