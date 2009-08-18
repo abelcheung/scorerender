@@ -523,6 +523,8 @@ public static function is_prog_usable ($match, $prog)
  * @uses $cache_dir
  * @uses $error_code Type of error encountered is stored here
  *
+ * @todo render image in background, especially for lilypond, which can take
+ * minutes or even hours to finish rendering
  * @return string|boolean Resulting image file name, or FALSE upon error
  * @final
  */
