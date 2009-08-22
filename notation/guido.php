@@ -83,6 +83,11 @@ public static function program_setting_entry ($output) {}
  */
 public static function define_setting_type ($settings) {}
 
+/**
+ * @ignore
+ */
+public static function define_setting_value ($settings) {}
+
 } // end of class
 
 

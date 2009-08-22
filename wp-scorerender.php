@@ -141,61 +141,27 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 	}
 
 	$convert = '';
-	$lilypond = '';
-	$mup = '';
-	$abcm2ps = '';
-	$pmw = '';
 
-	if (is_windows ())
+	if ( is_windows() )
 	{
-		if ( function_exists ('glob') ) // just in case this is disabled
+		$convert = search_path ('convert.exe');
+		if ( !$convert && function_exists ('glob') )
 		{
 			$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
-			$abcm2ps  = glob ('C:\Program Files\*\abcm2ps.exe');
-			$lilypond = glob ('C:\Program Files\Lilypond\usr\bin\lilypond.exe');
-			$mup      = glob ('C:\Program Files\mupmate\mup.exe');
-
-			// PMW doesn't even have public available Win32 binary, perhaps
-			// somebody might be able to compile it with MinGW?
-
-			$convert  = empty($convert)  ? '' : $convert[0];
-			$abcm2ps  = empty($abcm2ps)  ? '' : $abcm2ps[0];
-			$lilypond = empty($lilypond) ? '' : $lilypond[0];
-			$mup      = empty($mup)      ? '' : $mup[0];
-		}
-		else
-		{
-			$convert  = 'C:\Program Files\ImageMagick\convert.exe';
-			$abcm2ps  = 'C:\Program Files\abcm2ps\abcm2ps.exe';
-			$lilypond = 'C:\Program Files\Lilypond\usr\bin\lilypond.exe';
-			$mup      = 'C:\Program Files\mupmate\mup.exe';
+			$convert = empty ($convert)  ? '' : $convert[0];
 		}
 	}
 	else
 	{
 		if ( function_exists ('shell_exec') )
-		{
 			$convert  = shell_exec ('which convert');
-			$abc2mps  = shell_exec ('which abcm2ps');
-			$lilypond = shell_exec ('which lilypond');
-			$mup      = shell_exec ('which mup');
-			$pmw      = shell_exec ('which pmw');
-		}
 		else
-		{
-			$convert  = '/usr/bin/convert';
-			$abcm2ps  = '/usr/bin/abcm2ps';
-			$lilypond = '/usr/bin/lilypond';
-			$mup      = '/usr/local/bin/mup';
-			$pmw      = '/usr/local/bin/pmw';
-		}
+			$convert = search_path ('convert');
 	}
 
-	$default_settings['CONVERT_BIN']['value']  = $convert;
-	$default_settings['LILYPOND_BIN']['value'] = $lilypond;
-	$default_settings['MUP_BIN']['value']      = $mup;
-	$default_settings['ABCM2PS_BIN']['value']  = $abcm2ps;
-	$default_settings['PMW_BIN']['value']      = $pmw;
+	$default_settings['CONVERT_BIN']['value'] = empty ($convert) ? '' : $convert;
+
+	do_action_ref_array ('scorerender_define_setting_value', array(&$default_settings));
 
 	$cachefolder = scorerender_get_upload_dir ();
 	$default_settings['CACHE_DIR']['value'] = $cachefolder['path'];

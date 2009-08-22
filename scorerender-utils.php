@@ -151,6 +151,26 @@ function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
 }
 
 /**
+ * Search program inside path and return location
+ *
+ * @since 0.3.50
+ * @uses is_windows()
+ * @param string $prog The program name to be searched
+ * @return string|boolean Full path of program if it is found, FALSE otherwise
+ */
+function search_path ($prog)
+{
+	foreach ( explode( ( is_windows() ? ';' : ':' ),
+			getenv('PATH')) as $dir ) {
+		if ( file_exists ($dir . DIRECTORY_SEPARATOR . $prog) )
+			return $dir . DIRECTORY_SEPARATOR . $prog;
+	}
+
+	return false;
+}
+
+
+/**
  * Transform all path related options in ScoreRender settings
  *
  * @since 0.3

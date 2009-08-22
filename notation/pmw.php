@@ -120,6 +120,31 @@ public static function define_setting_type ($settings)
 	$settings += $notations['pmw']['progs'];
 }
 
+/**
+ * Refer to {@link ScoreRender_Notation::define_setting_value() interface method}
+ * for more detail.
+ */
+public static function define_setting_value ($settings)
+{
+	global $notations;
+
+	$binary_name = $notations['pmw']['progs']['PMW_BIN']['prog_name'];
+	if ( is_windows() ) $binary_name .= '.exe';
+	$fullpath = '';
+
+	// PMW doesn't even have public available Win32 binary, perhaps
+	// somebody might be able to compile it with MinGW?
+	if ( !is_windows() )
+	{
+		if ( function_exists ('shell_exec') )
+			$fullpath = shell_exec ('which ' . $binary_name);
+		else
+			$fullpath = search_path ($binary_name);
+	}
+
+	$settings['PMW_BIN']['value'] = empty ($fullpath) ? '' : $fullpath;
+}
+
 } // end of class
 
 
@@ -153,4 +178,7 @@ add_filter ('scorerender_prog_and_file_loc',
 
 add_filter ('scorerender_define_setting_type',
 	array( 'pmwRender', 'define_setting_type' ) );
+
+add_filter ('scorerender_define_setting_value',
+	array( 'pmwRender', 'define_setting_value' ) );
 ?>
