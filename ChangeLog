@@ -1,3 +1,15 @@
+2009-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-utils.php:
+	- (search_path) New func, for searching program in PATH environment
+	  variable.
+	* wp-scorerender.php:
+	- (scorerender_get_def_settings) Move notation program searching to
+	  each notation file.
+	* scorerender-class.php, notation/*.php:
+	- (define_setting_value) New func, for detecting notation program
+	  location.
+
 2009-08-13  Abel Cheung  <abelcheung@gmail.com>
 
 	* notation/lilypond.php:

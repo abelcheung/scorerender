@@ -225,6 +225,38 @@ public static function define_setting_type ($settings)
 	$settings += $notations['mup']['progs'];
 }
 
+/**
+ * Refer to {@link ScoreRender_Notation::define_setting_value() interface method}
+ * for more detail.
+ */
+public static function define_setting_value ($settings)
+{
+	global $notations;
+
+	$binary_name = $notations['mup']['progs']['MUP_BIN']['prog_name'];
+	if ( is_windows() ) $binary_name .= '.exe';
+	$fullpath = '';
+
+	if ( is_windows() )
+	{
+		$fullpath = search_path ($binary_name);
+		if ( !$fullpath && function_exists ('glob') )
+		{
+			$fullpath = glob ("C:\\Program Files\\*\\" . $binary_name);
+			$fullpath = empty ($fullpath) ? '' : $fullpath[0];
+		}
+	}
+	else
+	{
+		if ( function_exists ('shell_exec') )
+			$fullpath = shell_exec ('which ' . $binary_name);
+		else
+			$fullpath = search_path ($binary_name);
+	}
+
+	$settings['MUP_BIN']['value'] = empty ($fullpath) ? '' : $fullpath;
+}
+
 }  // end of class
 
 
@@ -258,4 +290,7 @@ add_filter ('scorerender_prog_and_file_loc',
 
 add_filter ('scorerender_define_setting_type',
 	array( 'mupRender', 'define_setting_type' ) );
+
+add_filter ('scorerender_define_setting_value',
+	array( 'mupRender', 'define_setting_value' ) );
 ?>

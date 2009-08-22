@@ -728,13 +728,22 @@ interface ScoreRender_Notation
 	static function program_setting_entry ($output);
 
 	/**
-	* Define types of variables used for notation
-	*
-	* @param array $settings Reference of ScoreRender default settings to be modified
+	 * Define types of variables used for notation
+	 *
+	 * @param array $settings Reference of ScoreRender default settings to be modified
 	 *
 	 * @since 0.3.50
-	*/
+	 */
 	static function define_setting_type ($settings);
+
+	/**
+	 * Define values for variables used for notation, usually program paths
+	 *
+	 * @param array $settings Reference of ScoreRender default settings to be modified
+	 *
+	 * @since 0.3.50
+	 */
+	static function define_setting_value ($settings);
 
 } // end of interface
 
