@@ -1,3 +1,9 @@
+2010-02-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (scorerender_admin_options) Fix incorrectly placed html tags in
+	  admin form, add icon to admin title.
+
 2009-08-22  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-utils.php:
