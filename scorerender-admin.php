@@ -480,10 +480,12 @@ function scorerender_admin_options ()
 	}
 ?>
 
-	<div class="wrap">
+<div class="wrap">
+	<div id="icon-options-general" class="icon32"><br /></div>
+	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
+
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>
-	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
 
 	<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending tag after each notation name. Each music fragment must be enclosed by corresponding pair of tags.', TEXTDOMAIN); ?></p>
 	<ul>
@@ -513,8 +515,8 @@ function scorerender_admin_options ()
 	<input type="submit" name="Submit" class="button-primary" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
 	</p>
 
-	</div>
 	</form>
+</div>
 	<?php
 }
 
