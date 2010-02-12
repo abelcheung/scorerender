@@ -68,11 +68,13 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 {
 	$safemode = '';
 	/* LilyPond SUCKS unquestionably. On or before 2.8 safe mode is triggered by --safe option,
-	 * on 2.10.x it becomes --safe-mode, and on 2.12.x the option is completely gone!
+	 * on 2.10.x it becomes --safe-mode, and on 2.12.x the option that's -dsafe!
 	 */
 	if ( false !== ( $lilypond_ver = self::lilypond_version ($this->mainprog) ) )
 		if ( version_compare ($lilypond_ver, '2.11.0', '<') )
 			$safemode = '-s';
+		elseif ( version_compare ($lilypond_ver, '2.13.0', '<') )
+			$safemode = '-dsafe';
 	
 	/* lilypond adds .ps extension by itself, sucks for temp file generation */
 	$cmd = sprintf ('"%s" %s --ps --output "%s" "%s"',
