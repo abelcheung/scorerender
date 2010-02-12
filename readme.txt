@@ -3,7 +3,7 @@ Contributors: abelcheung
 Tags: music, music notation, music typesetting, score, abc, mup, lilypond, guido, pmw
 Requires at least: 2.2
 Tested up to: 2.9.1
-Stable tag: scorerender-0-3-0
+Stable tag: scorerender-0-3-2
 
 Renders inline sheet music fragments in excerpts, posts, pages and comments.
 
@@ -83,6 +83,18 @@ IE Alpha Fix is released under LGPL v2.1 or later.
 Zero Clipboard is released under LGPL.
 
 == Changelog ==
+
+**Version 0.3.2**
+
+* Fix invocation for LilyPond 2.12.x
+
+**Version 0.3.1**
+
+* Incorporate certain fixes from trunk:
+* Show image dimension in output
+* Fix line break when showing score source code under Windows
+* Better autodetection of program
+* Bug fix in program availability checkinng
 
 **Version 0.3.0**
 
