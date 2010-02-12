@@ -1,5 +1,11 @@
 2010-02-12  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/lilypond.php:
+	- (conversion_step1) Yet another fix for lilypond invocation. Safe
+	  mode is there after all.
+
+2010-02-12  Abel Cheung  <abelcheung@gmail.com>
+
 	* *.php, notation/*.php, misc/showcode.php:
 	- Update copyright, switch to AGPL v3.
 
