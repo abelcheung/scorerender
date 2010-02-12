@@ -1,5 +1,10 @@
 2010-02-12  Abel Cheung  <abelcheung@gmail.com>
 
+	* *.php, notation/*.php, misc/showcode.php:
+	- Update copyright, switch to AGPL v3.
+
+2010-02-12  Abel Cheung  <abelcheung@gmail.com>
+
 	* misc/ZeroClipboard.js:
 	- Use newest upstream release, 1.0.5.
 
