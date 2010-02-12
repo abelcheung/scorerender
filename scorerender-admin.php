@@ -218,8 +218,11 @@ function scorerender_update_options ()
  * @since 0.3
  * @access private
  */
-function scorerender_admin_add_js() {
+function scorerender_admin_head() {
 ?>
+<style type="text/css">
+	.sr-help-icon {vertical-align:middle;border:none;}
+</style>
 <script type="text/javascript">
 //<![CDATA[
 	jQuery(document).ready(function($){
@@ -482,18 +485,20 @@ function scorerender_admin_options ()
 
 <div class="wrap">
 	<div id="icon-options-general" class="icon32"><br /></div>
-	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
+	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo get_bloginfo('url').'/'.PLUGINDIR.'/scorerender/misc/info.png' ?>" width="24" height="24" class="sr-help-icon" /></a></h2>
 
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 
-	<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending tag after each notation name. Each music fragment must be enclosed by corresponding pair of tags.', TEXTDOMAIN); ?></p>
-	<ul>
+	<div id="sr-help-1" class="hidden">
+		<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending tag after each notation name. Each music fragment must be enclosed by corresponding pair of tags.', TEXTDOMAIN); ?></p>
+		<ul>
 <?php	foreach ($notations as $tag => $notation_data) : ?>
-	<li><a target="_blank" href="<?php echo $notation_data['url']; ?>"><?php echo $notation_data['name']; ?></a>
-	(<code><?php echo $notation_data['starttag']; ?></code>, <code><?php echo $notation_data['endtag']; ?></code>)</li>
+		<li><a target="_blank" href="<?php echo $notation_data['url']; ?>"><?php echo $notation_data['name']; ?></a>
+		(<code><?php echo $notation_data['starttag']; ?></code>, <code><?php echo $notation_data['endtag']; ?></code>)</li>
 <?php	endforeach; ?>
-	</ul>
+		</ul>
+	</div>
 
 <?php
 	// path options
@@ -523,13 +528,13 @@ function scorerender_admin_options ()
 /**
  * Append submenu item into WordPress menu
  *
- * @uses scorerender_admin_add_js()
+ * @uses scorerender_admin_head()
  * @access private
  */
 function scorerender_admin_menu ()
 {
 	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
-	add_filter('admin_head-' . $plugin_page, 'scorerender_admin_add_js');
+	add_filter('admin_head-' . $plugin_page, 'scorerender_admin_head');
 }
 
 
