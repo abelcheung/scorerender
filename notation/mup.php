@@ -226,7 +226,8 @@ public static function define_setting_type ($settings)
 {
 	global $notations;
 
-	$settings += $notations['mup']['progs'];
+	foreach ($notations['mup']['progs'] as $key => $value)
+		$settings[$key] = $value;
 }
 
 /**
