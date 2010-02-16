@@ -526,6 +526,24 @@ function scorerender_admin_options ()
 }
 
 /**
+ * Add extra link to entry in global plugin admin page, alongside the
+ * Activate/Deactivate links
+ *
+ * @since 0.3.50
+ * @access private
+ */
+function scorerender_settings_link ($links, $file)
+{
+	if ( $file == 'scorerender/wp-scorerender.php' )
+		if ( function_exists ('admin_url') )
+			$links[] = sprintf ('<a href="%s">%s</a>',
+					admin_url ('options-general.php?page=scorerender'),
+					__('Settings')	// use global WP translation
+				   );
+	return $links;
+}
+
+/**
  * Append submenu item into WordPress menu
  *
  * @uses scorerender_admin_head()
@@ -533,7 +551,7 @@ function scorerender_admin_options ()
  */
 function scorerender_admin_menu ()
 {
-	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 9, __FILE__, 'scorerender_admin_options');
+	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 'manage_options', 'scorerender', 'scorerender_admin_options');
 	add_filter('admin_head-' . $plugin_page, 'scorerender_admin_head');
 }
 
@@ -554,4 +572,5 @@ if ( 0 != get_option('use_balanceTags') )
 
 add_filter ('admin_menu', 'scorerender_admin_menu');
 
+add_filter ('plugin_action_links', 'scorerender_settings_link', 10, 2);
 ?>
