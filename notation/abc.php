@@ -160,7 +160,7 @@ public static function define_setting_value ($settings)
 
 $notations['abc'] = array (
 	'name'        => 'ABC',
-	'url'         => 'http://abcnotation.org.uk/',
+	'url'         => 'http://scorerender.abelcheung.org/demo/demo-abc/',
 	'regex'       => '~\[abc\](.*?)\[/abc\]~si',
 	'starttag'    => '[abc]',
 	'endtag'      => '[/abc]',
