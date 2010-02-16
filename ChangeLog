@@ -1,5 +1,12 @@
 2010-02-16  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-admin.php:
+	- (scorerender_admin_menu): Simplify admin page URL.
+	- (scorerender_settings_link): New func, add 'Settings' link beside
+	  Activate/Deactivate links in plugin admin page.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/*.php:
 	- Point notation links to official page instead.
 
