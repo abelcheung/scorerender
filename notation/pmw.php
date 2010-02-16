@@ -154,7 +154,7 @@ public static function define_setting_value ($settings)
 
 $notations['pmw'] = array (
 	'name'        => "Philip's Music Writer",
-	'url'         => 'http://www.quercite.com/pmw.html',
+	'url'         => 'http://scorerender.abelcheung.org/demo/demo-pmw/',
 	'regex'       => '~\[pmw\](.*?)\[/pmw\]~si',
 	'starttag'    => '[pmw]',
 	'endtag'      => '[/pmw]',
