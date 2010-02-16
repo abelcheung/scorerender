@@ -1,5 +1,10 @@
 2010-02-16  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	- Don't add any hook in admin page.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/lilypond.php:
 	- Precisely determine the version that corresponds to the safe mode
 	  option change.
