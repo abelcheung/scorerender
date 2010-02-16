@@ -120,7 +120,8 @@ public static function define_setting_type ($settings)
 {
 	global $notations;
 
-	$settings += $notations['abc']['progs'];
+	foreach ($notations['abc']['progs'] as $key => $value)
+		$settings[$key] = $value;
 }
 
 /**

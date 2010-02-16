@@ -1,5 +1,11 @@
 2010-02-16  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/{abc,lilypond,mup,pmw}.php:
+	- (define_setting_type): Fix incorrect syntax causing failure during
+	  plugin activation.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-admin.php:
 	- (scorerender_admin_menu): Simplify admin page URL.
 	- (scorerender_settings_link): New func, add 'Settings' link beside

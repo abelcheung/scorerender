@@ -121,7 +121,8 @@ public static function define_setting_type ($settings)
 {
 	global $notations;
 
-	$settings += $notations['pmw']['progs'];
+	foreach ($notations['pmw']['progs'] as $key => $value)
+		$settings[$key] = $value;
 }
 
 /**

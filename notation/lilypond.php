@@ -154,7 +154,8 @@ public static function define_setting_type ($settings)
 {
 	global $notations;
 
-	$settings += $notations['lilypond']['progs'];
+	foreach ($notations['lilypond']['progs'] as $key => $value)
+		$settings[$key] = $value;
 }
 
 /**
