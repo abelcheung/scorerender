@@ -526,9 +526,6 @@ function scorerender_add_ie6_style()
 <?php
 }
 
-if (defined ('WP_ADMIN'))
-	include_once ('scorerender-admin.php');
-
 /*
 Remove tag balancing filter
 
@@ -553,23 +550,28 @@ scorerender_get_options ();
 // initialize translation files
 add_action ('init', 'scorerender_init_textdomain');
 
-// IE6 PNG translucency filter
-if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
-	add_action ('wp_head', 'scorerender_add_ie6_style');
+if (defined ('WP_ADMIN'))
+	include_once ('scorerender-admin.php');
+else
+{
+	// IE6 PNG translucency filter
+	if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
+		add_action ('wp_head', 'scorerender_add_ie6_style');
 
-// earlier than default priority, since
-// smilies conversion and wptexturize() can mess up the content
-add_filter ('the_excerpt' ,
-	create_function ('$content',
-		'return scorerender_conversion_hook ($content, TRUE);'),
-	2);
-add_filter ('the_content' ,
-	create_function ('$content',
-		'return scorerender_conversion_hook ($content, TRUE);'),
-	2);
-add_filter ('comment_text',
-	create_function ('$content',
-		'return scorerender_conversion_hook ($content, FALSE);'),
-	2);
+	// earlier than default priority, since
+	// smilies conversion and wptexturize() can mess up the content
+	add_filter ('the_excerpt' ,
+		create_function ('$content',
+			'return scorerender_conversion_hook ($content, TRUE);'),
+		2);
+	add_filter ('the_content' ,
+		create_function ('$content',
+			'return scorerender_conversion_hook ($content, TRUE);'),
+		2);
+	add_filter ('comment_text',
+		create_function ('$content',
+			'return scorerender_conversion_hook ($content, FALSE);'),
+		2);
+}
 
 ?>
