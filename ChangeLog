@@ -1,5 +1,15 @@
 2010-02-17  Abel Cheung  <abelcheung@gmail.com>
 
+	* MUP magic file setting is replaced by directly entering registration
+	  key.
+	* wp-scorerender.php:
+	- Increase database schema version.
+	* notation/mup.php:
+	- (set_magic_file) Removed.
+	- (set_magic_file_hook) Renamed to more generic set_notation_action().
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-utils.php:
 	- Remove wp_parse_str() backport, as WP 2.2 is no more supported.
 

@@ -17,19 +17,21 @@ class mupRender extends ScoreRender
 {
 
 /**
- * @var string $magic_file Location of magic file used by Mup
+ * Registration key for MUP.
+ *
  * @access private
  */
-private $magic_file;
+private $reg_key;
 
 /**
- * Class constructor, for adding wordpress hook to set magic file required by Mup
- * @uses set_magic_file_hook()
+ * Class constructor, for adding wordpress hook to perform notation specific
+ * setup
+ * @uses set_notation_action()
  * @access private
  */
 function __construct ()
 {
-	add_action ('sr_set_class_variable', array (&$this, 'set_magic_file_hook'));
+	add_action ('sr_set_class_variable', array (&$this, 'set_notation_action'));
 }
 
 /**
@@ -41,18 +43,6 @@ public function set_img_width ($width)
 {
 	parent::set_img_width ($width);
 	$this->img_max_width /= DPI;
-}
-
-/**
- * Set the location of magic file
- *
- * @param string $file Full path of magic file
- * @uses $magic_file
- * @since 0.2.50
- */
-public function set_magic_file ($file)
-{
-	$this->magic_file = $file;
 }
 
 /**
@@ -99,28 +89,23 @@ EOD;
  *
  * @uses is_windows()
  * @uses $temp_dir For storing temporary copy of magic file
- * @uses $magic_file
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	/* Mup requires a magic file before it is usable.
-	   On Unix this file is named ".mup", and must reside in $HOME or current working directory.
-	   On Windows / DOS, it is named "mup.ok" instead, and located in current working directory or same location as mup.exe do.
-	   It must be present even if not registered, otherwise mup refuse to render anything.
-	   Even worse, the exist status in this case is 0, so _exec() succeeds yet no postscript is rendered. */
-
-	if (is_windows())
-		$temp_magic_file = $this->temp_dir . '\mup.ok';
-	else
-		$temp_magic_file = $this->temp_dir . '/.mup';
+	/*
+	 * Mup requires a magic file before it is usable.
+	 * On Unix this file is named ".mup", and must reside in $HOME or
+	 * current working directory.  On Windows/DOS, it is named "mup.ok"
+	 * instead, and located in current working directory or same location
+	 * as mup.exe do.
+	 * It must be present even if not registered, otherwise mup refuse to
+	 * render anything.  Even worse, the exist status in this case is 0,
+	 * so _exec() succeeds yet no postscript is rendered.
+	 */
+	$temp_magic_file = $this->temp_dir . ( is_windows() ? '\mup.ok' : '/.mup' );
 	
-	if (!file_exists($temp_magic_file))
-	{
-		if (is_readable($this->magic_file))
-			copy($this->magic_file, $temp_magic_file);
-		else
-			touch ($temp_magic_file);
-	}
+	if ( ! file_exists ($temp_magic_file) )
+		file_put_contents ( $temp_magic_file, $this->reg_key );
 
 	/* mup forces this kind of crap */
 	putenv ("HOME=" . $this->temp_dir);
@@ -148,21 +133,18 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 
 
 /**
- * Set the location of magic file
- * This is not supposed to be called directly; it is used as a
- * WordPress action hook instead.
+ * Perform any notation specific action
  *
  * {@internal OK, I cheated. Shouldn't have been leaking external
  * config option names into class, but this can help saving me
  * headache in the future}}
- * @uses set_magic_file()
  *
  * @since 0.2.50
  */
-public function set_magic_file_hook ($options)
+public function set_notation_action ($options)
 {
-	if (isset ($options['MUP_MAGIC_FILE']))
-		$this->set_magic_file ($options['MUP_MAGIC_FILE']);
+	if ( isset ( $options['MUP_REG_KEY'] ) )
+		$this->reg_key = $options['MUP_REG_KEY'];
 }
 
 /**
@@ -210,9 +192,9 @@ public static function program_setting_entry ($output)
 			$program['prog_name'], $setting_name);
 
 	$output .= parent::program_setting_entry (
-		'', 'MUP_MAGIC_FILE',
-		sprintf (__('Location of %s magic file:', TEXTDOMAIN), '<code>mup</code>'),
-		sprintf (__('Leave it empty if you have not <a href="%s">registered</a> Mup. This file must be readable by the user account running web server.', TEXTDOMAIN),
+		'', 'MUP_REG_KEY',
+		sprintf (__('%s registration key:', TEXTDOMAIN), '<code>mup</code>'),
+		sprintf (__('Leave it empty if you have not <a href="%s">registered</a> Mup.', TEXTDOMAIN),
 			'http://www.arkkra.com/doc/faq.html#payment')
 	);
 	return $output;
