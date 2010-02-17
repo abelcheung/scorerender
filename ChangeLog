@@ -1,5 +1,12 @@
 2010-02-17  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-admin.php:
+	- Move icon to images/ folder.
+	* wp-scorerender.php, scorerender-admin.php:
+	- Use plugins_url() where applicable.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php, scorerender-class.php:
 	- Rename DEBUG constant to avoid potential name clash.
 

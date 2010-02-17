@@ -369,10 +369,9 @@ function scorerender_process_content ($render)
 	// is most likely multi-line, and some are quite long
 
 	// This idea is taken from LatexRender demo site
-	// FIXME: completely gone berserk if folder containing this plugin is a symlink, plugin_basename() sucks
 	if ($sr_options['SHOW_SOURCE'])
 	{
-		$html = sprintf ("<form target='fragmentpopup' action='%s/%s/%s/misc/showcode.php' method='post'>\n", get_bloginfo ('home'), PLUGINDIR, dirname (plugin_basename (__FILE__)));
+		$html = sprintf ("<form target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
 		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
 			__('Click on image to view source', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
