@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 14);
+define ('DATABASE_VERSION', 15);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -119,7 +119,7 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 		'CACHE_URL'            => array ('type' =>  'url', 'value' => ''),
 
 		'IMAGE_MAX_WIDTH'      => array ('type' =>  'int', 'value' => 360),
-		'INVERT_IMAGE'         => array ('type' => 'bool', 'value' => false),
+		'NOTE_COLOR'           => array ('type' =>  'str', 'value' => '#000000'),
 		'USE_IE6_PNG_ALPHA_FIX'=> array ('type' => 'bool', 'value' => true),
 		'SHOW_SOURCE'          => array ('type' => 'bool', 'value' => false),
 		'COMMENT_ENABLED'      => array ('type' => 'bool', 'value' => false),
@@ -418,7 +418,6 @@ function scorerender_process_content ($render)
  * @uses scorerender_process_content()
  * @uses ScoreRender::set_programs()
  * @uses ScoreRender::set_imagemagick_path()
- * @uses ScoreRender::set_inverted()
  * @uses ScoreRender::set_temp_dir()
  * @uses ScoreRender::set_cache_dir()
  * @uses ScoreRender::set_img_width()
@@ -451,7 +450,6 @@ function scorerender_init_class ($matches)
 	if (empty ($render)) return $input;
 
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
-	$render->set_inverted         ($sr_options['INVERT_IMAGE']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
 	$render->set_cache_dir        ($sr_options['CACHE_DIR']);
 	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);

@@ -94,11 +94,6 @@ protected $_input;
 protected $_commandOutput;
 
 /**
- * @var boolean $is_inverted Whether image should be rendered in white on black.
- */
-protected $is_inverted = false;
-
-/**
  * @var string $imagemagick Full path of ImageMagick convert
  */
 protected $imagemagick;
@@ -220,17 +215,6 @@ public function get_notation_name ()
 public function set_imagemagick_path ($path)
 {
 	$this->imagemagick = $path;
-}
-
-/**
- * Sets whether inverted image shall be generated
- *
- * @param boolean $invert White note is rendered if TRUE, black otherwise.
- * @since 0.3
- */
-public function set_inverted ($invert)
-{
-	$this->is_inverted = $invert;
 }
 
 /**
@@ -403,7 +387,6 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  *
  * @uses _exec()
  * @uses $imagemagick
- * @uses $is_inverted
  * @param string $intermediate_image The rendered PostScript file name
  * @param string $final_image The final PNG image file name
  * @param boolean $ps_has_alpha True if PostScript produced by music rendering program has transparency capability
@@ -418,18 +401,16 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 	// but suddenly it can now, and renders all previous logic broken
 	if ($ps_has_alpha)
 	{
-		$cmd .= sprintf (' %s "%s" "%s"',
-			(($this->is_inverted) ? '-negate' : ''),
+		$cmd .= sprintf (' "%s" "%s"',
 			$intermediate_image, $final_image);
 	}
 	else
 	{
 		// Adding alpha channel and changing alpha value
 		// need separate invocations, can't do in one pass
-		$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx %d png:- "%s"',
+		$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx 0 png:- "%s"',
 			$intermediate_image,
 			$this->imagemagick,
-			(($this->is_inverted)? 1 : 0),
 			$final_image);
 	}
 
@@ -519,7 +500,6 @@ public static function is_prog_usable ($match, $prog)
  * @uses conversion_step1() First pass rendering: Convert input file -> PS
  * @uses conversion_step2() Second pass rendering: Convert PS -> PNG
  * @uses $_input
- * @uses $is_inverted
  * @uses $cache_dir
  * @uses $error_code Type of error encountered is stored here
  *
@@ -530,8 +510,7 @@ public static function is_prog_usable ($match, $prog)
  */
 final public function render()
 {
-	$hash = md5 ($this->_input . $this->is_inverted
-		     . $this->get_notation_name());
+	$hash = md5 (preg_replace ('/\s/', '', $this->_input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
 		       "sr-" . $this->get_notation_name() . "-$hash.png";
 
