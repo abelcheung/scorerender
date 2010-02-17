@@ -1,5 +1,10 @@
 2010-02-17  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-utils.php:
+	- Remove wp_parse_str() backport, as WP 2.2 is no more supported.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
 	* Completely drop 'inverted' setting, introduce 'note_color' setting.
 	  Admin related changes are complete. In the future colored score
 	  fragments are generated on the fly instead of storing multiple copies
