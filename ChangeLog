@@ -1,5 +1,26 @@
 2010-02-17  Abel Cheung  <abelcheung@gmail.com>
 
+	* Completely drop 'inverted' setting, introduce 'note_color' setting.
+	  Admin related changes are complete. In the future colored score
+	  fragments are generated on the fly instead of storing multiple copies
+	  of image with different colors. This requires proper support of alpha
+	  channel in PHP GD extension, which is completely broken in some
+	  platforms, such as Debian / Ubuntu except very recent releases.
+	* Now requires WP 2.6 due to usage of plugin_url().
+	* wp-scorerender.php:
+	- Increase database schema version.
+	* scorerender-admin.php:
+	- (scorerender_admin_head) Add color picker CSS.
+	- (scorerender_admin_footer) New func, move existing JavaScript calls
+	  here, and add Color Picker JavaScript calls.
+	- New WP hook to call scorerender_admin_footer().
+	* scorerender-class.php:
+	- (ScoreRender::render) Only use input data sans whitespace as raw data
+	  for hash calculation, so that whitespace change won't modify hash
+	  value.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
 	* images/*, misc/colorpicker.js, misc/colorpicker.css:
 	- Incorporate jQuery Color Picker by Stefan Petre.
 

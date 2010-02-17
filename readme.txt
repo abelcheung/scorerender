@@ -1,7 +1,7 @@
 === ScoreRender ===
 Contributors: abelcheung
 Tags: music, music notation, music typesetting, score, abc, mup, lilypond, guido, pmw
-Requires at least: 2.2
+Requires at least: 2.6
 Tested up to: 2.9.1
 Stable tag: scorerender-0-3-2
 

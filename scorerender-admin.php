@@ -213,31 +213,70 @@ function scorerender_update_options ()
 
 
 /**
- * Manage certain items with JavaScript on admin page.
+ * WP hook added to admin page header
  *
  * @since 0.3
  * @access private
  */
-function scorerender_admin_head() {
+function scorerender_admin_head()
+{
 ?>
 <style type="text/css">
 	.sr-help-icon {vertical-align:middle;border:none;}
+	#note_color_picker {width:36px; height:36px;}
+	#note_color_picker div {
+		position:relative;
+		top:4px; left:4px;
+		width:28px; height:28px;
+		background:url(<?php echo plugins_url ('scorerender/images/select2.png'); ?>) center;
+	}
 </style>
-<script type="text/javascript">
-//<![CDATA[
-	jQuery(document).ready(function($){
-		$("#comment_enabled").click(function(){
-			if ( $("#comment_enabled").is(":checked") )
-				$("#fragment_per_comment").removeAttr("disabled");
-			else
-				$("#fragment_per_comment").attr('disabled', true);
-		});
-	});
-//]]>
-</script>
+<link rel="stylesheet" media="screen" type="text/css" href="<?php echo plugins_url ('scorerender/misc/colorpicker.css'); ?>" />
 <?php
 }
 
+
+/**
+ * WP hook added to admin page footer
+ *
+ * @since 0.3.50
+ * @access private
+ */
+function scorerender_admin_footer()
+{
+	global $sr_options;
+?>
+<script type="text/javascript">
+//<![CDATA[
+jQuery(document).ready(function($){
+	$("#comment_enabled").click(function(){
+		if ( $("#comment_enabled").is(":checked") )
+			$("#fragment_per_comment").removeAttr("disabled");
+		else
+			$("#fragment_per_comment").attr('disabled', true);
+	});
+	$('#note_color_picker').ColorPicker({
+		eventName: 'mouseover',
+		color: '<?php echo $sr_options['NOTE_COLOR']; ?>',
+		onShow: function (foo) {
+			$(foo).fadeIn (500);
+			return false;
+		},
+		onHide: function (foo) {
+			$(foo).fadeOut (500);
+			return false;
+		},
+		onChange: function (hsb, hex, rgb) {
+			$('#note_color_picker div').css('background-color', '#' + hex);
+			$('#note_color').val('#' + hex);
+		}
+	});
+});
+//]]>
+</script>
+<script type="text/javascript" src="<?php echo plugins_url ('scorerender/misc/colorpicker.js'); ?>"></script>
+<?
+}
 
 /**
  * Section of admin page about path options
@@ -333,23 +372,27 @@ function scorerender_admin_section_image ()
 </tr>
 
 <tr valign="top">
-<th scope="row"><label for="show_input"><?php _e('Clickable image:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><label for="show_input"><?php _e('Show source:', TEXTDOMAIN) ?></label></th>
 <td><label for="show_input"><input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
 <?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('Image post-processing:', TEXTDOMAIN) ?></th>
+<th scope="row"><label for="note_color_picker"><?php _e('Note color:', TEXTDOMAIN) ?></label></th>
 <td>
-<fieldset><legend class="hidden screen-reader-text"><?php _e('Image post-processing:', TEXTDOMAIN) ?></legend>
-<label for="invert_image"><input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $sr_options['INVERT_IMAGE']); ?> />
-<?php _e('White colored notes (default is black)', TEXTDOMAIN); ?></label>
-<br />
+<div id="note_color_picker"><div style="background-color: <?php echo $sr_options['NOTE_COLOR'] ?>"></div></div>
+<div class="setting-description"><?php _e('Move mouse pointer to the colored square above to pick desired color.', TEXTDOMAIN) ?></div>
+<input type="hidden" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo $sr_options['NOTE_COLOR'] ?>" />
+</td>
+</tr>
+
+<tr valign="top">
+<th scope="row"><?php _e('IE Hack:', TEXTDOMAIN) ?></th>
+<td>
 <label for="use_ie6_png_alpha_fix"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', $sr_options['USE_IE6_PNG_ALPHA_FIX']); ?> />
 <?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label>
 <div class="setting-description"><?php printf ('Turning on this option enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6, which is not supported by IE below version 7. This option only affects images rendered by ScoreRender. <strong>Make sure you have NOT installed any plugin with the same functionality before turning on this option, which may conflict with each other.</strong>', 'http://www.twinhelix.com/css/iepngfix/' ); ?></div>
-</fieldset>
 </td>
 </tr>
 
@@ -553,6 +596,7 @@ function scorerender_admin_menu ()
 {
 	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender', 'manage_options', 'scorerender', 'scorerender_admin_options');
 	add_filter('admin_head-' . $plugin_page, 'scorerender_admin_head');
+	add_filter('admin_footer-' . $plugin_page, 'scorerender_admin_footer');
 }
 
 
