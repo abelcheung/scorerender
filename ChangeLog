@@ -1,3 +1,8 @@
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* images/*, misc/colorpicker.js, misc/colorpicker.css:
+	- Incorporate jQuery Color Picker by Stefan Petre.
+
 2010-02-16  Abel Cheung  <abelcheung@gmail.com>
 
 	* notation/{abc,lilypond,mup,pmw}.php:
