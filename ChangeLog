@@ -1,5 +1,10 @@
 2010-02-17  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php, scorerender-class.php:
+	- Rename DEBUG constant to avoid potential name clash.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
 	* MUP magic file setting is replaced by directly entering registration
 	  key.
 	* wp-scorerender.php:
