@@ -365,21 +365,21 @@ function scorerender_admin_section_image ()
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><label for="image_max_width"><?php _e('Max image width (pixel):', TEXTDOMAIN) ?></label></th>
-<td><input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="<?php echo $sr_options['IMAGE_MAX_WIDTH']; ?>" class="small-text" />
+<th scope="row"><?php _e('Max image width:', TEXTDOMAIN) ?></th>
+<td><?php printf(__('%s pixels', TEXTDOMAIN), '<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="' . $sr_options['IMAGE_MAX_WIDTH'] . '" class="small-text" />'); ?>
 <div class="setting-description"><?php _e('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></div>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><label for="show_input"><?php _e('Show source:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><?php _e('Show source:', TEXTDOMAIN) ?></th>
 <td><label for="show_input"><input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
 <?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><label for="note_color_picker"><?php _e('Note color:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><?php _e('Note color:', TEXTDOMAIN) ?></th>
 <td>
 <div id="note_color_picker"><div style="background-color: <?php echo $sr_options['NOTE_COLOR'] ?>"></div></div>
 <div class="setting-description"><?php _e('Move mouse pointer to the colored square above to pick desired color.', TEXTDOMAIN) ?></div>
@@ -463,7 +463,6 @@ function scorerender_admin_section_caching ()
 {
 	global $sr_options;
 ?>
-<fieldset class="options">
 	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
 <?php
 $img_count = scorerender_get_num_of_images();
@@ -487,7 +486,6 @@ else
 	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 	<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
 <?php endif; ?>
-</fieldset>
 <?php
 }
 
@@ -534,7 +532,7 @@ function scorerender_admin_options ()
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 
 	<div id="sr-help-1" class="hidden">
-		<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending tag after each notation name. Each music fragment must be enclosed by corresponding pair of tags.', TEXTDOMAIN); ?></p>
+		<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending shortcode after each notation name. Each music fragment must be enclosed by corresponding pair of shortcodes. Click on the links to read more about each notation.', TEXTDOMAIN); ?></p>
 		<ul>
 <?php	foreach ($notations as $tag => $notation_data) : ?>
 		<li><a target="_blank" href="<?php echo $notation_data['url']; ?>"><?php echo $notation_data['name']; ?></a>
