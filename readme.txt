@@ -76,9 +76,10 @@ Compiling and using PMW on Windows may only be possible through code changes.
 Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for screenshots.
 
 == License ==
-This plugin is released under GNU AGPL v3.
-IE Alpha Fix is released under LGPL v2.1 or later.
-Zero Clipboard is released under LGPL.
+This plugin is licensed under GNU AGPL v3.
+IE Alpha Fix is licensed under LGPL v2.1 or later.
+Zero Clipboard is licensed under LGPL.
+jQuery Color Picker is dual licensed under the MIT and GPL.
 
 == Changelog ==
 
