@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 15);
+define ('DATABASE_VERSION', 16);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -128,7 +128,7 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 		'FRAGMENT_PER_COMMENT' => array ('type' =>  'int', 'value' => 1),
 
 		'CONVERT_BIN'          => array ('type' => 'prog', 'value' => ''),
-		'MUP_MAGIC_FILE'       => array ('type' => 'path', 'value' => ''),
+		'MUP_REG_KEY'          => array ('type' =>  'str', 'value' => ''),
 	);
 
 	do_action_ref_array ('scorerender_define_setting_type', array(&$default_settings));
