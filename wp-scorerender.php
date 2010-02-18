@@ -104,7 +104,6 @@ require_once('notation/pmw.php');
  * so other actions can be applied depending on setting type.
  *
  * @uses is_windows() Determine default program path based on operating system
- * @uses scorerender_get_upload_dir()
  * @uses sys_get_temp_dir()
  */
 function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
@@ -163,9 +162,9 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 
 	do_action_ref_array ('scorerender_define_setting_value', array(&$default_settings));
 
-	$cachefolder = scorerender_get_upload_dir ();
-	$default_settings['CACHE_DIR']['value'] = $cachefolder['path'];
-	$default_settings['CACHE_URL']['value'] = $cachefolder['url'];
+	$cachefolder = wp_upload_dir ();
+	$default_settings['CACHE_DIR']['value'] = $cachefolder['basedir'];
+	$default_settings['CACHE_URL']['value'] = $cachefolder['baseurl'];
 
 	switch ($return_type)
 	{
@@ -196,57 +195,6 @@ function scorerender_init_textdomain ()
 	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
 }
 
-
-/**
- * Guess default upload directory setting from WordPress.
- * 
- * WordPress is inconsistent with upload directory setting across multiple
- * versions. Try to guess to most sensible setting and take that as default
- * value.
- *
- * @since 0.2
- * @uses get_path_presentation()
- * @uses is_absolute_path()
- * @return array Returns array containing both full path ('path' key) and corresponding URL ('url' key)
- */
-function scorerender_get_upload_dir ()
-{
-	$uploads = wp_upload_dir();
-	
-	/* Path setting read order:
-	 * 1. wp_upload_dir()
-	 * 2. upload_path option
-	 * 3. ABSPATH/wp-content/uploads
-	 */
-	if (isset ($uploads['basedir']))
-		$path = $uploads['basedir'];
-	else
-		$path = trim(get_option('upload_path'));
-	
-	if (empty ($path))
-		$path = 'wp-content/uploads';
-
-	if (!is_absolute_path ($path))
-		$path = ABSPATH . $path;
-
-	/* URL setting read order:
-	 * 1. wp_upload_dir()
-	 * 2. upload_url_path option
-	 * 3. $siteurl/wp-content/uploads
-	 */
-	if (isset ($uploads['baseurl']))
-		$url = $uploads['baseurl'];
-	else
-		$url = trim(get_option('upload_url_path'));
-	
-	if (empty ($url))
-		$url = get_option('siteurl') . '/' .
-			str_replace (ABSPATH, '', $path);
-
-	$path = get_path_presentation ($path, FALSE);
-
-	return (array ('path' => $path, 'url' => $url));
-}
 
 /**
  * Retrieve all default settings and merge them into ScoreRender options
