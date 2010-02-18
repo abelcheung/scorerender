@@ -320,10 +320,10 @@ function scorerender_process_content ($render)
 	if ($sr_options['SHOW_SOURCE'])
 	{
 		$html = sprintf ("<form target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
-		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s/%s' />\n",
+		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s' />\n",
 			__('Click on image to view source', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
-			$sr_options['CACHE_URL'], $result);
+			plugins_url ('scorerender/misc/tint-image.php') . '?img=' . $result );
 
 		$name = $render->get_notation_name ();
 
@@ -341,10 +341,10 @@ function scorerender_process_content ($render)
 	else
 	{
 		list ($width, $height, $type, $attr) = getimagesize( $sr_options['CACHE_DIR'].'/'.$result );
-		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s/%s' />\n",
+		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s' />\n",
 			__('Music fragment', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
-			$sr_options['CACHE_URL'], $result);
+			plugins_url ('scorerender/misc/tint-image.php') . '?img=' . $result );
 	}
 
 	return $html;
