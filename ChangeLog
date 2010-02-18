@@ -1,3 +1,9 @@
+2010-02-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_get_upload_dir) Removed, now that WP 2.6 is required
+	  and wp_upload_dir() is pretty much standardized since then.
+
 2010-02-17  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-admin.php:
