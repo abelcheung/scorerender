@@ -1,5 +1,13 @@
 2010-02-18  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	- (scorerender_process_content) Drop useless Exception handling
+	  which can be replaced by normal logic.
+	* scorerender-class.php:
+	- (get_notation_name) Stop throwing useless Excepsion.
+
+2010-02-18  Abel Cheung  <abelcheung@gmail.com>
+
 	* misc/tint-image.php:
 	- New file, to tint score images using color specified by user.
 	* wp-scorerender.php:

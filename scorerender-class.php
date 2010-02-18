@@ -201,8 +201,6 @@ public function get_notation_name ()
 		if ($classname === strtolower ($notation['classname']))
 			return $notationname;
 
-	throw new Exception ( $this->format_error_msg (
-		__('Unknown notation type!', TEXTDOMAIN) ) );
 	return false;
 }
 

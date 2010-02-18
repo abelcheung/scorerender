@@ -294,15 +294,13 @@ function scorerender_process_content ($render)
 			return '';
 
 		  case ON_ERR_SHOW_FRAGMENT:
-			try {
-				$name = $render->get_notation_name ();
-			} catch (Exception $e) {
-				return $e->getMessage();
-			}
-
-			return $notations[$name]['starttag'] . "\n" .
-				$render->get_music_fragment() . "\n" .
-				$notations[$name]['endtag'];
+			if ( false !== ( $name = $render->get_notation_name () ) )
+				return $notations[$name]['starttag'] . "\n" .
+					$render->get_music_fragment() . "\n" .
+					$notations[$name]['endtag'];
+			else
+				return __('[Unknown notation type]') . "\n" .
+					$render->get_music_fragment();
 
 		  default:
 			if (SR_DEBUG)
@@ -325,11 +323,9 @@ function scorerender_process_content ($render)
 			__('Music fragment', TEXTDOMAIN),
 			plugins_url ('scorerender/misc/tint-image.php') . '?img=' . $result );
 
-		$name = $render->get_notation_name ();
-
-		// Shouldn't reach here
-		if (false === $name)
-			return '[ScoreRender Error: Unknown notation type!]';
+		if ( false === ( $name = $render->get_notation_name() )
+			// Shouldn't reach here
+			return __('[Unknown notation type]');
 
 		$content = $notations[$name]['starttag'] . "\r\n" .
 			preg_replace ("/(?<!\r)\n/s", "\r\n", $render->get_music_fragment()) . "\r\n" .
