@@ -323,7 +323,7 @@ function scorerender_process_content ($render)
 			__('Music fragment', TEXTDOMAIN),
 			plugins_url ('scorerender/misc/tint-image.php') . '?img=' . $result );
 
-		if ( false === ( $name = $render->get_notation_name() )
+		if ( false === ( $name = $render->get_notation_name() ) )
 			// Shouldn't reach here
 			return __('[Unknown notation type]');
 
