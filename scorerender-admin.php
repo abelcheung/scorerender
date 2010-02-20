@@ -568,8 +568,8 @@ public function admin_page ()
 ?>
 
 <div class="wrap">
-	<div id="icon-options-general" class="icon32"><br /></div>
-	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/images/info-icon.png'); ?>" width="24" height="24" class="sr-help-icon" /></a></h2>
+	<?php if ( function_exists ('screen_icon') ) screen_icon(); ?>
+	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/images/info-icon.png'); ?>" width="32" height="32" class="sr-help-icon" /></a></h2>
 
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>
