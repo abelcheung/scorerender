@@ -291,9 +291,15 @@ public function admin_footer()
 jQuery(document).ready(function($){
 	$("#comment_enabled").click(function(){
 		if ( $("#comment_enabled").is(":checked") )
+		{
 			$("#fragment_per_comment").removeAttr("disabled");
+			$("#fragment_per_comment").removeClass("disabled");
+		}
 		else
+		{
 			$("#fragment_per_comment").attr('disabled', true);
+			$("#fragment_per_comment").addClass("disabled");
+		}
 	});
 	$('#note_color_picker').ColorPicker({
 		eventName: 'mouseover',
@@ -479,7 +485,7 @@ private function admin_section_content ()
 <tr valign="top">
 <th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
 <td>
-<label for="fragment_per_comment"><input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo $sr_options['FRAGMENT_PER_COMMENT']; ?>" <?php if (1 != $sr_options['COMMENT_ENABLED']) { echo ' disabled="disabled"'; } ?> class="small-text" /></label>
+<label for="fragment_per_comment"><input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo $sr_options['FRAGMENT_PER_COMMENT']; ?>" <?php echo (1 != $sr_options['COMMENT_ENABLED']) ? 'class="small-text disabled" disabled="disabled"' : 'class="small-text"'; ?> /></label>
 <span class="setting-description"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></span>
 </td>
 </tr>

@@ -1,6 +1,12 @@
 2010-02-20  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-admin.php:
+	- (admin_footer, admin_section_content) Properly set disabled css
+	  class for disabled input fields.
+
+2010-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
 	- Encapsulate all functions inside ScoreRenderAdmin class.
 
 2010-02-18  Abel Cheung  <abelcheung@gmail.com>
