@@ -642,6 +642,7 @@ public function register_admin_page ()
 	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender',
 			'manage_options', 'scorerender', array (&$this, 'admin_page'));
 	add_action('admin_head-' . $plugin_page, array (&$this, 'admin_head'));
+	// not using print_scripts hooks, not sanitized until WP 2.8
 	add_action('admin_footer-' . $plugin_page, array (&$this, 'admin_footer'));
 }
 
