@@ -416,13 +416,6 @@ private function admin_section_image ()
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('Show source:', TEXTDOMAIN) ?></th>
-<td><label for="show_input"><input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
-<?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
-</td>
-</tr>
-
-<tr valign="top">
 <th scope="row"><?php _e('Note color:', TEXTDOMAIN) ?></th>
 <td>
 <div id="note_color_picker"><div style="background-color: <?php echo $sr_options['NOTE_COLOR'] ?>"></div></div>
@@ -458,6 +451,13 @@ private function admin_section_content ()
 ?>
 <h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
 <table class="form-table">
+
+<tr valign="top">
+<th scope="row"><?php _e('Show source:', TEXTDOMAIN) ?></th>
+<td><label for="show_input"><input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
+<?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
+</td>
+</tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
