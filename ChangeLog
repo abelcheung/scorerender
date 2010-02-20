@@ -1,5 +1,11 @@
 2010-02-20  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	- (scorerender_get_options) Set default value of note color to
+	  white if 'inverted image' option was turned on.
+
+2010-02-20  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-admin.php:
 	- Move 'show source' setting to contents section.
 

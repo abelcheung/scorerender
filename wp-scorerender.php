@@ -257,6 +257,9 @@ function scorerender_get_options ()
 		{
 			$sr_options['COMMENT_ENABLED'] = true;
 		}
+	if ($sr_options['DB_VERSION'] <= 15)
+		if ( $sr_options['INVERT_IMAGE'] )
+			$sr_options['NOTE_COLOR'] = '#FFFFFF';
 
 	scorerender_populate_options ();
 
