@@ -321,7 +321,7 @@ jQuery(document).ready(function($){
 //]]>
 </script>
 <script type="text/javascript" src="<?php echo plugins_url ('scorerender/misc/colorpicker.js'); ?>"></script>
-<?
+<?php
 }
 
 /**
@@ -529,8 +529,7 @@ else
 <?php else : ?>
 	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 	<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
-<?php endif; ?>
-<?php
+<?php endif;
 }
 
 
