@@ -122,7 +122,7 @@ private function cache_location_match ($path, $url)
  */
 private function update_options ()
 {
-	if ( function_exists ('current_user_can') && !current_user_can ('manage_options') )
+	if ( !current_user_can ('manage_options') )
 		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
 
 	global $sr_options;
@@ -133,15 +133,33 @@ private function update_options ()
 
 	$sr_adm_msgs = array
 	(
-		'temp_dir_not_writable'    => array ('level' => MSG_WARNING, 'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', TEXTDOMAIN)),
-		'cache_dir_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT defined! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
-		'cache_dir_not_writable'   => array ('level' => MSG_FATAL  , 'content' => __('Cache directory is NOT writable! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
-		'cache_url_undefined'      => array ('level' => MSG_FATAL  , 'content' => __('Cache URL is NOT defined! The plugin will stop working.', TEXTDOMAIN)),
-		'cache_dir_url_unmatch'    => array ('level' => MSG_WARNING, 'content' => __('Cache directory and URL probably do not correspond to the same location.', TEXTDOMAIN)),
-		'wrong_frag_per_comment'   => array ('level' => MSG_WARNING, 'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
-		'wrong_image_max_width'    => array ('level' => MSG_WARNING, 'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
-		'convert_bin_problem'      => array ('level' => MSG_FATAL  , 'content' => __('<tt>convert</tt> program is NOT defined or NOT executable! The plugin will stop working.', TEXTDOMAIN)),
-		'prog_check_disabled'      => array ('level' => MSG_WARNING, 'content' => sprintf (__('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN))),
+		'temp_dir_not_writable'  => array (
+			'level'   => MSG_WARNING,
+			'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', TEXTDOMAIN)),
+		'cache_dir_undefined'    => array (
+			'level'   => MSG_FATAL  ,
+			'content' => __('Cache directory is NOT defined! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
+		'cache_dir_not_writable' => array (
+			'level'   => MSG_FATAL  ,
+			'content' => __('Cache directory is NOT writable! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
+		'cache_url_undefined'    => array (
+			'level'   => MSG_FATAL  ,
+			'content' => __('Cache URL is NOT defined! The plugin will stop working.', TEXTDOMAIN)),
+		'cache_dir_url_unmatch'  => array (
+			'level'   => MSG_WARNING,
+			'content' => __('Cache directory and URL probably do not correspond to the same location.', TEXTDOMAIN)),
+		'wrong_frag_per_comment' => array (
+			'level'   => MSG_WARNING,
+			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
+		'wrong_image_max_width'  => array (
+			'level'   => MSG_WARNING,
+			'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
+		'convert_bin_problem'    => array (
+			'level'   => MSG_FATAL  ,
+			'content' => __('<tt>convert</tt> program is NOT defined or NOT executable! The plugin will stop working.', TEXTDOMAIN)),
+		'prog_check_disabled'    => array (
+			'level'   => MSG_WARNING,
+			'content' => sprintf (__('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN))),
 	);
 
 	// error message definition for each notation
@@ -211,9 +229,21 @@ private function update_options ()
 		foreach (array_values ($errmsgs) as $m)
 		{
 			if ($sr_adm_msgs[$m]['level'] == MSG_WARNING)
-				echo '<div id="scorerender-error-' . $sr_adm_msgs[$m] . '" class="updated fade-800000"><p><strong>' . sprintf (__('WARNING: %s', TEXTDOMAIN), $sr_adm_msgs[$m]['content']) . "</strong></p></div>\n";
+			{
+				$class = 'scorerender-warning';
+				$mesg = __('WARNING: %s', TEXTDOMAIN);
+			}
 			elseif ($sr_adm_msgs[$m]['level'] == MSG_FATAL)
-				echo '<div id="scorerender-error-' . $sr_adm_msgs[$m] . '" class="error"><p><strong>' . sprintf (__('ERROR: %s', TEXTDOMAIN), $sr_adm_msgs[$m]['content']) . "</strong></p></div>\n";
+			{
+				$class = 'scorerender-error';
+				$mesg = __('ERROR: %s', TEXTDOMAIN);
+			}
+
+			printf ("<div id='%s' class='error %s'><p><strong>%s</strong></p></div>\n",
+					'sr-err-' . $sr_adm_msgs[$m],
+					$class,
+					sprintf ($mesg, $sr_adm_msgs[$m]['content'])
+			       );
 		}
 	}
 	else
@@ -344,8 +374,6 @@ private function admin_section_prog ()
 
 <h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
 <table class="form-table">
-
-<caption><?php _e('ImageMagick 6.x <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
 
 <tr valign="top">
 <th scope="row"><label for="convert_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></label></th>
@@ -542,6 +570,8 @@ public function admin_page ()
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 
 	<div id="sr-help-1" class="hidden">
+		<p><?php _e('ImageMagick &ge; 6.3.6-2 must be present and working (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></p>
+
 		<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending shortcode after each notation name. Each music fragment must be enclosed by corresponding pair of shortcodes. Click on the links to read more about each notation.', TEXTDOMAIN); ?></p>
 		<ul>
 <?php	foreach ($notations as $tag => $notation_data) : ?>
