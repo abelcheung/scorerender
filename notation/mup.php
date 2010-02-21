@@ -128,7 +128,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 {
 	// FIXME: mind boggling exercise: why ImageMagick identifies PostScript produced by Mup as having
 	// transparency on Windows, yet otherwise on Linux?
-	return parent::conversion_step2 ($intermediate_image, $final_image, is_windows());
+	// FIXME: 2. more exercise: when is it interpreted as having transparency on Linux too?
+	return parent::conversion_step2 ($intermediate_image, $final_image, true);
 }
 
 
