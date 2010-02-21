@@ -45,7 +45,7 @@ EOD;
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	$cmd = sprintf ('"%s" -includefont -o "%s" "%s"',
+	$cmd = sprintf ('"%s" -norc -includefont -o "%s" "%s"',
 			$this->mainprog,
 			$intermediate_image, $input_file);
 	$retval = $this->_exec($cmd);
@@ -64,7 +64,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 	// though, since there is no BoundingBox nor page dimension specified
 	// in PostScript produced by PMW.
 	return parent::conversion_step2 ($intermediate_image,
-		$final_image, FALSE, '-page a3');
+		$final_image, true, '-page a3');
 }
 
 /**
