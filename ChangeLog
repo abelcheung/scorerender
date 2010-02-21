@@ -1,5 +1,11 @@
 2010-02-21  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/pmw.php:
+	- PostScript transparency for recent ImageMagick is properly detected.
+	- Add option to prevent reading config file.
+
+2010-02-21  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/mup.php:
 	- Seems PostScript transparency is properly detected by ImageMagick
 	  on recent Linux too.
