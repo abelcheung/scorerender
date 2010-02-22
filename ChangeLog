@@ -1,3 +1,8 @@
+2010-02-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/tint-image.php:
+	- Accept user supplied color from GET variable.
+
 2010-02-21  Abel Cheung  <abelcheung@gmail.com>
 
 	* notation/pmw.php:
