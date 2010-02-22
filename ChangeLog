@@ -1,3 +1,9 @@
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_get_cache_location) Can return both indexed or
+	  associative array.
+	  
 2010-02-22  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

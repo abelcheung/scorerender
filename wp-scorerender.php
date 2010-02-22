@@ -277,10 +277,13 @@ function scorerender_get_options ()
  * If users manually set cache folder, then user setting is honored; otherwise
  * WordPress default upload directory will be used.
  *
- * @return array Associative array containing both the directory and URL of cache location
+ * @param $arraytype string Type of array, leaving it as default (null) value means
+ * returning an indexed array, or use 'assoc' to return an associative array.
+ * @return array Indexed or associative array containing both the directory and URL
+ * of cache location
  * @since 0.3.50
  */
-function scorerender_get_cache_location ()
+function scorerender_get_cache_location ($arraytype = null)
 {
 	global $sr_options;
 
@@ -296,7 +299,12 @@ function scorerender_get_cache_location ()
 		$url = $data['baseurl'];
 	}
 
-	return array ('dir' => $dir, 'url' => $url);
+	if ( is_null ($arraytype) )
+		return array ($dir, $url);
+	elseif ( 'assoc' === $arraytype )
+		return array ('dir' => $dir, 'url' => $url);
+	else
+		return null;
 }
 
 
