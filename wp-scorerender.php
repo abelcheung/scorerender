@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 16);
+define ('DATABASE_VERSION', 17);
 
 /**
  * Most apps hardcode DPI value to 72 dot per inch
@@ -115,7 +115,6 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 		'DB_VERSION'           => array ('type' => 'none', 'value' => DATABASE_VERSION),
 		'TEMP_DIR'             => array ('type' => 'path', 'value' => sys_get_temp_dir()),
 		'CACHE_DIR'            => array ('type' => 'path', 'value' => ''),
-		'CACHE_URL'            => array ('type' =>  'url', 'value' => ''),
 
 		'IMAGE_MAX_WIDTH'      => array ('type' =>  'int', 'value' => 360),
 		'NOTE_COLOR'           => array ('type' =>  'str', 'value' => '#000000'),
@@ -164,7 +163,6 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 
 	$cachefolder = wp_upload_dir ();
 	$default_settings['CACHE_DIR']['value'] = $cachefolder['basedir'];
-	$default_settings['CACHE_URL']['value'] = $cachefolder['baseurl'];
 
 	switch ($return_type)
 	{
@@ -277,34 +275,20 @@ function scorerender_get_options ()
  * If users manually set cache folder, then user setting is honored; otherwise
  * WordPress default upload directory will be used.
  *
- * @param $arraytype string Type of array, leaving it as default (null) value means
- * returning an indexed array, or use 'assoc' to return an associative array.
- * @return array Indexed or associative array containing both the directory and URL
- * of cache location
+ * @return string Cache folder location
  * @since 0.3.50
  */
-function scorerender_get_cache_location ($arraytype = null)
+function scorerender_get_cache_location ()
 {
 	global $sr_options;
 
 	if ( !empty ($sr_options['CACHE_DIR']) )
-	{
-		$dir = $sr_options['CACHE_DIR'];
-		$url = $sr_options['CACHE_URL'];
-	}
+		return $sr_options['CACHE_DIR'];
 	else
 	{
 		$data = wp_upload_dir ();
-		$dir = $data['basedir'];
-		$url = $data['baseurl'];
+		return $data['basedir'];
 	}
-
-	if ( is_null ($arraytype) )
-		return array ($dir, $url);
-	elseif ( 'assoc' === $arraytype )
-		return array ('dir' => $dir, 'url' => $url);
-	else
-		return null;
 }
 
 
@@ -376,7 +360,7 @@ function scorerender_process_content ($render)
 	}
 	else
 	{
-		list ($dir, $url) = scorerender_get_cache_location();
+		$dir = scorerender_get_cache_location();
 		list ($width, $height, $type, $attr) = getimagesize( $dir.'/'.$result );
 		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s' />\n",
 			__('Music fragment', TEXTDOMAIN),
@@ -436,8 +420,7 @@ function scorerender_init_class ($matches)
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
 	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
-	list ($dir, $url) = scorerender_get_cache_location();
-	$render->set_cache_dir        ($dir);
+	$render->set_cache_dir        (scorerender_get_cache_location());
 
 	do_action ('sr_set_class_variable', $sr_options);
 
