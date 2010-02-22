@@ -266,8 +266,37 @@ function scorerender_get_options ()
 	transform_paths ($sr_options, TRUE);
 	update_option ('scorerender_options', $sr_options);
 	transform_paths ($sr_options, FALSE);
-	
+
 	return;
+}
+
+
+/**
+ * Fetches folder location used for storing cached images
+ *
+ * If users manually set cache folder, then user setting is honored; otherwise
+ * WordPress default upload directory will be used.
+ *
+ * @return array Associative array containing both the directory and URL of cache location
+ * @since 0.3.50
+ */
+function scorerender_get_cache_location ()
+{
+	global $sr_options;
+
+	if ( !empty ($sr_options['CACHE_DIR']) )
+	{
+		$dir = $sr_options['CACHE_DIR'];
+		$url = $sr_options['CACHE_URL'];
+	}
+	else
+	{
+		$data = wp_upload_dir ();
+		$dir = $data['basedir'];
+		$url = $data['baseurl'];
+	}
+
+	return array ('dir' => $dir, 'url' => $url);
 }
 
 
@@ -358,7 +387,7 @@ function scorerender_process_content ($render)
  * all relevant parameters needed for rendering. Afterwards, pass
  * everything to {@link scorerender_process_content()} for rendering.
  *
- * If no PHP class exists corresponding to certain notation, then 
+ * If no PHP class exists corresponding to certain notation, then
  * unconverted content is returned immediately.
  *
  * @uses scorerender_process_content()
