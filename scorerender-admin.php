@@ -29,9 +29,8 @@ class ScoreRenderAdmin
  */
 private function get_num_of_images ()
 {
-	global $sr_options;
-
-	if (false === ($handle = opendir ($sr_options['CACHE_DIR']))) return -1;
+	list ($dir, $url) = scorerender_get_cache_location();
+	if ( false === ( $handle = opendir ($dir) ) ) return -1;
 
 	$count = 0;
 	while (false !== ($file = readdir ($handle)))
@@ -50,14 +49,13 @@ private function get_num_of_images ()
  */
 private function remove_cache ()
 {
-	global $sr_options;
-
-	if (false === ($handle = opendir ($sr_options['CACHE_DIR']))) return;
+	list ($dir, $url) = scorerender_get_cache_location();
+	if ( false === ( $handle = opendir ($dir) ) ) return;
 
 	while (false !== ($file = readdir ($handle)))
 	{
 		if (preg_match (REGEX_CACHE_IMAGE, $file))
-			@unlink ($sr_options['CACHE_DIR'] . DIRECTORY_SEPARATOR . $file);
+			@unlink ($dir . DIRECTORY_SEPARATOR . $file);
 	}
 	closedir ($handle);
 
@@ -136,15 +134,12 @@ private function update_options ()
 		'temp_dir_not_writable'  => array (
 			'level'   => MSG_WARNING,
 			'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', TEXTDOMAIN)),
-		'cache_dir_undefined'    => array (
-			'level'   => MSG_FATAL  ,
-			'content' => __('Cache directory is NOT defined! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_dir_not_writable' => array (
 			'level'   => MSG_FATAL  ,
-			'content' => __('Cache directory is NOT writable! Image can not be placed inside appropriate directory. The plugin will stop working.', TEXTDOMAIN)),
+			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', TEXTDOMAIN)), admin_url('options-misc.php')),
 		'cache_url_undefined'    => array (
 			'level'   => MSG_FATAL  ,
-			'content' => __('Cache URL is NOT defined! The plugin will stop working.', TEXTDOMAIN)),
+			'content' => __('Cache URL is NOT defined! If cache directory is set, then cache URL must also be filled in. The plugin will stop working.', TEXTDOMAIN)),
 		'cache_dir_url_unmatch'  => array (
 			'level'   => MSG_WARNING,
 			'content' => __('Cache directory and URL probably do not correspond to the same location.', TEXTDOMAIN)),
@@ -156,10 +151,10 @@ private function update_options ()
 			'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
 		'convert_bin_problem'    => array (
 			'level'   => MSG_FATAL  ,
-			'content' => __('<tt>convert</tt> program is NOT defined or NOT executable! The plugin will stop working.', TEXTDOMAIN)),
+			'content' => __('Failed to detect usable ImageMagick <tt>convert</tt> program! The plugin will stop working.', TEXTDOMAIN)),
 		'prog_check_disabled'    => array (
 			'level'   => MSG_WARNING,
-			'content' => sprintf (__('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN))),
+			'content' => __('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN)),
 	);
 
 	// error message definition for each notation
@@ -168,27 +163,35 @@ private function update_options ()
 	/*
 	 * general options
 	 */
-	if ( ! empty ($newopt['TEMP_DIR']) &&
+	if ( !empty ($newopt['TEMP_DIR']) &&
 		!is_writable ($newopt['TEMP_DIR']) )
 	{
 		$errmsgs[] = 'temp_dir_not_writable';
 		$newopt['TEMP_DIR'] = '';
 	}
 
-	if ( empty ($newopt['CACHE_DIR']) )
-		$errmsgs[] = 'cache_dir_undefined';
-	elseif ( !is_writable ($newopt['CACHE_DIR']) )
-		$errmsgs[] = 'cache_dir_not_writable';
-
-	if ( empty ($newopt['CACHE_URL']) )
-		$errmsgs[] = 'cache_url_undefined';
-
-	if ( ! in_array ('cache_dir_undefined'   , $errmsgs) &&
-	     ! in_array ('cache_dir_not_writable', $errmsgs) &&
-	     ! in_array ('cache_url_undefined'   , $errmsgs) )
+	if ( !empty ($newopt['CACHE_DIR']) )
 	{
-		if ( ! $this->cache_location_match ($newopt['CACHE_DIR'], $newopt['CACHE_URL']) )
-			$errmsgs[] = 'cache_dir_url_unmatch';
+		if ( !is_writable ($newopt['CACHE_DIR']) )
+			$errmsgs[] = 'cache_dir_not_writable';
+
+		if ( empty ($newopt['CACHE_URL']) )
+			$errmsgs[] = 'cache_url_undefined';
+
+		if ( ! in_array ('cache_dir_not_writable', $errmsgs) &&
+		     ! in_array ('cache_url_undefined'   , $errmsgs) )
+		{
+			if ( ! $this->cache_location_match ($newopt['CACHE_DIR'], $newopt['CACHE_URL']) )
+				$errmsgs[] = 'cache_dir_url_unmatch';
+		}
+	}
+	else
+	{
+		$newopt['CACHE_DIR'] = '';
+		$newopt['CACHE_URL'] = '';
+		list ($dir, $url) = scorerender_get_cache_location();
+		if ( !is_writable ($dir) )
+			$errmsgs[] = 'cache_dir_not_writable';
 	}
 
 	if ( ScoreRender::is_web_hosting() )
@@ -289,8 +292,8 @@ public function admin_footer()
 <script type="text/javascript">
 //<![CDATA[
 jQuery(document).ready(function($){
-	$("#comment_enabled").click(function(){
-		if ( $("#comment_enabled").is(":checked") )
+	$("#comment_enabled").click(function() {
+		if ( $(this).is(":checked") )
 		{
 			$("#fragment_per_comment").removeAttr("disabled");
 			$("#fragment_per_comment").removeClass("disabled");
@@ -299,6 +302,19 @@ jQuery(document).ready(function($){
 		{
 			$("#fragment_per_comment").attr('disabled', true);
 			$("#fragment_per_comment").addClass("disabled");
+		}
+	});
+	$("#cache_dir").keyup(function() {
+		if ( "" === $(this).val() )
+		{
+			$("#cache_url").val("");
+			$("#cache_url").attr('disabled', true);
+			$("#cache_url").addClass("disabled");
+		}
+		else
+		{
+			$("#cache_url").removeAttr("disabled");
+			$("#cache_url").removeClass("disabled");
 		}
 	});
 	$('#note_color_picker').ColorPicker({
@@ -350,15 +366,15 @@ private function admin_section_path ()
 <th scope="row"><label for="cache_dir"><?php _e('Image cache directory:', TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[CACHE_DIR]" type="text" id="cache_dir" value="<?php echo $sr_options['CACHE_DIR']; ?>" class="regular-text code" />
-<div class="setting-description"><?php _e('Must be writable and accessible from web.', TEXTDOMAIN) ?></div>
+<div class="setting-description"><?php _e('Must be writable and accessible from web. WordPress default upload directory is used if left blank.', TEXTDOMAIN) ?></div>
 </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><label for="cache_url"><?php _e('Image cache URL:', TEXTDOMAIN) ?></label></th>
 <td>
-<input name="ScoreRender[CACHE_URL]" type="text" id="cache_url" value="<?php echo $sr_options['CACHE_URL']; ?>" class="regular-text code" /><br />
-<div class="setting-description"><?php _e('Must correspond to the image cache directory above.', TEXTDOMAIN) ?></div>
+<input name="ScoreRender[CACHE_URL]" type="text" id="cache_url" value="<?php echo $sr_options['CACHE_URL']; ?>" <?php echo ( empty ($sr_options['CACHE_DIR']) )? 'class="regular-text code disabled" disabled="disabled"' : 'class="regular-text code"' ?> /><br />
+<div class="setting-description"><?php _e('Must correspond to the image cache directory above, if it is not blank. Otherwise WordPress default upload directory would be used.', TEXTDOMAIN) ?></div>
 </td>
 </tr>
 
@@ -505,30 +521,25 @@ private function admin_section_content ()
  */
 private function admin_section_caching ()
 {
-	global $sr_options;
 ?>
 	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
 <?php
-$img_count = $this->get_num_of_images();
+	$img_count = $this->get_num_of_images();
 
-if ( 0 > $img_count )
-{
-	echo "<font color='red'>" . __('Cache directory is not readable, thus no image count is shown.', TEXTDOMAIN) . "<br />";
-	echo __('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) . "</font>\n";
-}
-else
-{
-	printf (__ngettext("Cache directory contains %d image.\n",
-			   "Cache directory contains %d images.\n",
-			   $img_count, TEXTDOMAIN), $img_count);
-}
+	if ( 0 > $img_count )
+		echo "<font color='red'>" . __('Cache directory is not readable, thus no image count is shown.', TEXTDOMAIN) . "<br />";
+	else
+		printf (__ngettext("Cache directory contains %d image.\n",
+				   "Cache directory contains %d images.\n",
+				   $img_count, TEXTDOMAIN), $img_count);
 
+	list ($dir, $url) = scorerender_get_cache_location();
+	if ( is_writable ($dir) && is_readable ($dir) ) :
 ?>
-<?php if ( is_writable ($sr_options['CACHE_DIR']) ) : ?>
 	<input type="submit" name="clear_cache" class="button-secondary" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 <?php else : ?>
 	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
-	<br /><font color="red"><?php _e('Cache can&#8217;t be cleared because directory is not writable.', TEXTDOMAIN) ?><br /><?php _e('Please change &#8216;Image cache directory&#8217; setting, or fix its permission.', TEXTDOMAIN) ?></font>
+	<br /><font color="red"><?php echo $dir; _e('Cache can&#8217;t be cleared because folder permission is incorrect. It must be both readable and writable by web server.', TEXTDOMAIN) ?></font>
 <?php endif;
 }
 

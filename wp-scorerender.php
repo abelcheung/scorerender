@@ -376,7 +376,8 @@ function scorerender_process_content ($render)
 	}
 	else
 	{
-		list ($width, $height, $type, $attr) = getimagesize( $sr_options['CACHE_DIR'].'/'.$result );
+		list ($dir, $url) = scorerender_get_cache_location();
+		list ($width, $height, $type, $attr) = getimagesize( $dir.'/'.$result );
 		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s' />\n",
 			__('Music fragment', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
@@ -434,8 +435,9 @@ function scorerender_init_class ($matches)
 
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
-	$render->set_cache_dir        ($sr_options['CACHE_DIR']);
 	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
+	list ($dir, $url) = scorerender_get_cache_location();
+	$render->set_cache_dir        ($dir);
 
 	do_action ('sr_set_class_variable', $sr_options);
 
