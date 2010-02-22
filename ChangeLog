@@ -1,5 +1,12 @@
 2010-02-23  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php, scorerender-admin.php:
+	- Now CACHE_DIR and CACHE_URL settings can be empty.
+	- Unanimously use scorerender_get_cache_location() to get cache image
+	  folder.
+	  
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php:
 	- (scorerender_get_cache_location) Can return both indexed or
 	  associative array.
