@@ -458,7 +458,7 @@ function scorerender_conversion_hook ($content, $is_post)
  */
 function scorerender_add_ie6_style()
 {
-	$uri = plugins_url ('/scorerender/misc/iepngfix.php')
+	$uri = plugins_url ('/scorerender/misc/iepngfix.php');
 ?>
 <!--[if lte IE 6]>
 <style type="text/css">
