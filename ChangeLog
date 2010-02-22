@@ -1,6 +1,12 @@
 2010-02-22  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:
+	- (scorerender_get_cache_location) New func, for getting location of
+	  cache folder. Similar to the removed scorerender_get_upload_dir().
+	  
+2010-02-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
 	- (scorerender_add_ie6_style) Further removal of ancient WP support.
 
 2010-02-22  Abel Cheung  <abelcheung@gmail.com>
