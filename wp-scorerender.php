@@ -458,13 +458,11 @@ function scorerender_conversion_hook ($content, $is_post)
  */
 function scorerender_add_ie6_style()
 {
-	// FIXME: hardcoded path is not nice
-	$uri = get_bloginfo('url').'/'.PLUGINDIR.'/scorerender';
-	$path = parse_url ($uri, PHP_URL_PATH);
+	$uri = plugins_url ('/scorerender/misc/iepngfix.php')
 ?>
 <!--[if lte IE 6]>
 <style type="text/css">
-.scorerender-image { behavior: url(<?php echo $path; ?>/misc/iepngfix.php); }
+.scorerender-image { behavior: url(<?php echo $uri; ?>); }
 </style>
 <![endif]-->
 <?php
