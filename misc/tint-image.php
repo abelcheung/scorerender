@@ -40,10 +40,15 @@ else
 if ( !function_exists ('get_option') )
 	exit_and_dump_error ("Crucial Wordpress function not found\n", 2);
 
-$settings = get_option ('scorerender_options');
-if ( !$settings || !array_key_exists ('NOTE_COLOR', $settings) )
-	exit_and_dump_error ("Can't determine color from config\n", 3);
-$hexcolor = strtoupper ($settings['NOTE_COLOR']);
+if ( array_key_exists ('color', $_GET) )
+	$hexcolor = strtoupper (urldecode ($_GET['color']));
+else
+{
+	$settings = get_option ('scorerender_options');
+	if ( !$settings || !array_key_exists ('NOTE_COLOR', $settings) )
+		exit_and_dump_error ("Can't determine color from config\n", 3);
+	$hexcolor = strtoupper ($settings['NOTE_COLOR']);
+}
 
 if ( !preg_match ('/^#?([0-9A-F]{6})$/', $hexcolor, $matches) )
 	exit_and_dump_error ("Incorrect color format\n", 4);
