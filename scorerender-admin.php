@@ -29,8 +29,7 @@ class ScoreRenderAdmin
  */
 private function get_num_of_images ()
 {
-	list ($dir, $url) = scorerender_get_cache_location();
-	if ( false === ( $handle = opendir ($dir) ) ) return -1;
+	if ( false === ( $handle = opendir (scorerender_get_cache_location()) ) ) return -1;
 
 	$count = 0;
 	while (false !== ($file = readdir ($handle)))
@@ -49,8 +48,7 @@ private function get_num_of_images ()
  */
 private function remove_cache ()
 {
-	list ($dir, $url) = scorerender_get_cache_location();
-	if ( false === ( $handle = opendir ($dir) ) ) return;
+	if ( false === ( $handle = opendir (scorerender_get_cache_location()) ) ) return;
 
 	while (false !== ($file = readdir ($handle)))
 	{
@@ -137,12 +135,6 @@ private function update_options ()
 		'cache_dir_not_writable' => array (
 			'level'   => MSG_FATAL  ,
 			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', TEXTDOMAIN)), admin_url('options-misc.php')),
-		'cache_url_undefined'    => array (
-			'level'   => MSG_FATAL  ,
-			'content' => __('Cache URL is NOT defined! If cache directory is set, then cache URL must also be filled in. The plugin will stop working.', TEXTDOMAIN)),
-		'cache_dir_url_unmatch'  => array (
-			'level'   => MSG_WARNING,
-			'content' => __('Cache directory and URL probably do not correspond to the same location.', TEXTDOMAIN)),
 		'wrong_frag_per_comment' => array (
 			'level'   => MSG_WARNING,
 			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
@@ -174,23 +166,11 @@ private function update_options ()
 	{
 		if ( !is_writable ($newopt['CACHE_DIR']) )
 			$errmsgs[] = 'cache_dir_not_writable';
-
-		if ( empty ($newopt['CACHE_URL']) )
-			$errmsgs[] = 'cache_url_undefined';
-
-		if ( ! in_array ('cache_dir_not_writable', $errmsgs) &&
-		     ! in_array ('cache_url_undefined'   , $errmsgs) )
-		{
-			if ( ! $this->cache_location_match ($newopt['CACHE_DIR'], $newopt['CACHE_URL']) )
-				$errmsgs[] = 'cache_dir_url_unmatch';
-		}
 	}
 	else
 	{
 		$newopt['CACHE_DIR'] = '';
-		$newopt['CACHE_URL'] = '';
-		list ($dir, $url) = scorerender_get_cache_location();
-		if ( !is_writable ($dir) )
+		if ( !is_writable ( scorerender_get_cache_location() ) )
 			$errmsgs[] = 'cache_dir_not_writable';
 	}
 
@@ -304,19 +284,6 @@ jQuery(document).ready(function($){
 			$("#fragment_per_comment").addClass("disabled");
 		}
 	});
-	$("#cache_dir").keyup(function() {
-		if ( "" === $(this).val() )
-		{
-			$("#cache_url").val("");
-			$("#cache_url").attr('disabled', true);
-			$("#cache_url").addClass("disabled");
-		}
-		else
-		{
-			$("#cache_url").removeAttr("disabled");
-			$("#cache_url").removeClass("disabled");
-		}
-	});
 	$('#note_color_picker').ColorPicker({
 		eventName: 'mouseover',
 		color: '<?php echo $sr_options['NOTE_COLOR']; ?>',
@@ -367,14 +334,6 @@ private function admin_section_path ()
 <td>
 <input name="ScoreRender[CACHE_DIR]" type="text" id="cache_dir" value="<?php echo $sr_options['CACHE_DIR']; ?>" class="regular-text code" />
 <div class="setting-description"><?php _e('Must be writable and accessible from web. WordPress default upload directory is used if left blank.', TEXTDOMAIN) ?></div>
-</td>
-</tr>
-
-<tr valign="top">
-<th scope="row"><label for="cache_url"><?php _e('Image cache URL:', TEXTDOMAIN) ?></label></th>
-<td>
-<input name="ScoreRender[CACHE_URL]" type="text" id="cache_url" value="<?php echo $sr_options['CACHE_URL']; ?>" <?php echo ( empty ($sr_options['CACHE_DIR']) )? 'class="regular-text code disabled" disabled="disabled"' : 'class="regular-text code"' ?> /><br />
-<div class="setting-description"><?php _e('Must correspond to the image cache directory above, if it is not blank. Otherwise WordPress default upload directory would be used.', TEXTDOMAIN) ?></div>
 </td>
 </tr>
 
@@ -533,7 +492,7 @@ private function admin_section_caching ()
 				   "Cache directory contains %d images.\n",
 				   $img_count, TEXTDOMAIN), $img_count);
 
-	list ($dir, $url) = scorerender_get_cache_location();
+	$dir = scorerender_get_cache_location();
 	if ( is_writable ($dir) && is_readable ($dir) ) :
 ?>
 	<input type="submit" name="clear_cache" class="button-secondary" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
