@@ -1,5 +1,10 @@
 2010-02-23  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-admin.php:
+	- (cache_location_match) Removed, not used anymore.
+
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php, scorerender-admin.php:
 	- Drop CACHE_URL setting completely, now cached images are not accessed
 	  directly via URL.
