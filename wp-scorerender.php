@@ -460,7 +460,7 @@ function scorerender_conversion_hook ($content, $is_post)
 	{
 		// unfilled program name = disable support
 		foreach (array_keys($notation['progs']) as $setting_name)
-			if (empty ($sr_options[$setting_name])) continue;
+			if (empty ($sr_options[$setting_name])) continue 2;
 		$regex_list[] = $notation['regex'];
 	};
 
