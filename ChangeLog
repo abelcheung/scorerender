@@ -18,7 +18,7 @@
 	* notation/pmw.php, notation/mup.php:
 	- PostScript transparency for recent ImageMagick is properly detected.
 	* notation/pmw.php:
-	- Add option to prevent reading config file.
+	- Add command line argument to prevent reading config file.
 
 === ScoreRender 0.3.2 ===
 2009-08-13  Abel Cheung  <abelcheung@gmail.com>
