@@ -65,48 +65,6 @@ private function remove_cache ()
 
 
 /**
- * Check if cache folder and cache URL settings match or not.
- *
- * This is done by creating a temp file with random file name, and
- * see if it is accessible via URL.
- *
- * Note that no error checking is done for path and URL, so make sure
- * their validity are confirmed before using.
- *
- * @since 0.3
- * @param string $path Cache full path
- * @param string $url Cache URL
- * @return boolean Whether both point to the same location.
- */
-private function cache_location_match ($path, $url)
-{
-	$retval = true;
-	/*
-	 * Just a very crude check. Non-existance of URL before file creation
-	 * is not verified; neither does non-existance of URL after file removal
-	 */
-	$tmpfile = tempnam ($path, (string) mt_rand());
-
-	if (false === $tmpfile)
-		$retval = false;
-
-	else
-	{
-		if ( false === strpos ($tmpfile, $path) )
-			$retval = false;
-		elseif ( false === ( $fh = @fopen (
-				trailingslashit($url).basename($tmpfile), 'r') ) )
-			$retval = false;
-		else
-			fclose ($fh);
-
-		unlink ($tmpfile);
-	}
-	return $retval;
-}
-
-
-/**
  * Update ScoreRender options in database with submitted options.
  *
  * A warning banner will be shown on top of admin page for each
