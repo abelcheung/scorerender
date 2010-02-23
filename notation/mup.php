@@ -2,6 +2,10 @@
 /**
  * Implements rendering of Mup notation in ScoreRender.
  * @package ScoreRender
+ * @version 0.3.3
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
 */
 
 /**
@@ -130,7 +134,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 {
 	// FIXME: mind boggling exercise: why ImageMagick identifies PostScript produced by Mup as having
 	// transparency on Windows, yet otherwise on Linux?
-	return parent::conversion_step2 ($intermediate_image, $final_image, is_windows());
+	// FIXME: 2. more exercise: when is it interpreted as having transparency on Linux too?
+	return parent::conversion_step2 ($intermediate_image, $final_image, true);
 }
 
 

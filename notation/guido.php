@@ -2,6 +2,10 @@
 /**
  * Implements rendering of GUIDO notation in ScoreRender.
  * @package ScoreRender
+ * @version 0.3.3
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
 */
 
 /**

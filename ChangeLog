@@ -1,3 +1,25 @@
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* Everything below backported from trunk.
+	* Update copyright, switch to AGPL v3.
+	* scorerender-admin.php:
+	- (scorerender_admin_options) Fix incorrectly placed html tags in
+	  admin form, add icon to admin title.
+	- Move 'show source' setting to contents section.
+	* wp-scorerender.php:
+	- (scorerender_conversion_hook) notation was not deactivated even when
+	  corresponding notation program was unset.
+	* wp-scorerender.php, scorerender-class.php:
+	- Rename DEBUG constant to avoid potential name clash.
+	* notation/lilypond.php:
+	- (conversion_step1) Yet another fix for lilypond invocation. Safe
+	  mode is there after all. Now precise version involving the change
+	  is detected.
+	* notation/pmw.php, notation/mup.php:
+	- PostScript transparency for recent ImageMagick is properly detected.
+	* notation/pmw.php:
+	- Add option to prevent reading config file.
+
 === ScoreRender 0.3.2 ===
 2009-08-13  Abel Cheung  <abelcheung@gmail.com>
 

@@ -1,13 +1,11 @@
 <?php
-/*
- Mostly based on class.lilypondrender.inc.php from FigureRender
- Chris Lamb <chris@chris-lamb.co.uk>
- 10th April 2006
-*/
-
 /**
  * Implements rendering of Lilypond notation in ScoreRender.
  * @package ScoreRender
+ * @version 0.3.3
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
 */
 
 /**
@@ -67,12 +65,14 @@ public static function lilypond_version ($lilypond)
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
 	$safemode = '';
-	/* LilyPond SUCKS unquestionably. On or before 2.8 safe mode is triggered by --safe option,
-	 * on 2.10.x it becomes --safe-mode, and on 2.12.x the option is completely gone!
+	/* LilyPond SUCKS unquestionably. On 2.8 safe mode is triggered by "--safe" option,
+	 * on 2.10.x it becomes "--safe-mode", and on 2.12.x that"s "-dsafe"!
 	 */
 	if ( false !== ( $lilypond_ver = self::lilypond_version ($this->mainprog) ) )
-		if ( version_compare ($lilypond_ver, '2.11.0', '<') )
+		if ( version_compare ($lilypond_ver, '2.11.11', '<') )
 			$safemode = '-s';
+		else
+			$safemode = '-dsafe';
 	
 	/* lilypond adds .ps extension by itself, sucks for temp file generation */
 	$cmd = sprintf ('"%s" %s --ps --output "%s" "%s"',

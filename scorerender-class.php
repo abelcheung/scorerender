@@ -17,11 +17,11 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.3.2
+ * @version 0.3.3
  * @author Abel Cheung <abelcheung at gmail dot com>
  * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- * @copyright Copyright (C) 2007-09 Abel Cheung
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
  */
 
 /**
@@ -429,7 +429,7 @@ public function get_error_msg ()
  */
 final protected function _exec ($cmd)
 {
-	if (DEBUG) { echo '<pre style="overflow: auto">' . $cmd . "</pre>\n"; }
+	if (SR_DEBUG) { echo '<pre style="overflow: auto">' . $cmd . "</pre>\n"; }
 
 	$cmd_output = array();
 
@@ -717,7 +717,7 @@ final public function render()
 	if (!$this->conversion_step1($input_file, $intermediate_image) ||
 	    (filesize ($intermediate_image)) === 0)
 	{
-		if (! DEBUG) {
+		if (! SR_DEBUG) {
 			unlink ($input_file);
 			@rmdir ($temp_working_dir);
 		}
@@ -733,7 +733,7 @@ final public function render()
 	}
 
 	// Cleanup
-	if (! DEBUG) {
+	if (! SR_DEBUG) {
 		unlink ($intermediate_image);
 		unlink ($input_file);
 		@rmdir ($temp_working_dir);

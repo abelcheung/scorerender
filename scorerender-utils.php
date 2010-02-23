@@ -3,11 +3,11 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.3.2
+ * @version 0.3.3
  * @author Abel Cheung <abelcheung at gmail dot com>
  * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- * @copyright Copyright (C) 2007-09 Abel Cheung
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
  */
 
 //

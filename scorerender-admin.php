@@ -3,11 +3,11 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.3.2
+ * @version 0.3.3
  * @author Abel Cheung <abelcheung at gmail dot com>
  * @copyright Copyright (C) 2006 Chris Lamb <chris at chris-lamb dot co dot uk>
- * @copyright Copyright (C) 2007-09 Abel Cheung
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
  */
 
 /**
@@ -476,13 +476,6 @@ function scorerender_admin_section_image ()
 			</td>
 		</tr>
 		<tr valign="top">
-			<th score="row"><?php _e('Clickable image:', TEXTDOMAIN) ?></th>
-			<td>
-				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
-				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
-			</td>
-		</tr>
-		<tr valign="top">
 			<th score="row"><?php _e('Image post-processing', TEXTDOMAIN) ?></th>
 			<td>
 				<p><input type="checkbox" name="ScoreRender[INVERT_IMAGE]" id="invert_image" value="1" <?php checked('1', $sr_options['INVERT_IMAGE']); ?> />
@@ -514,6 +507,13 @@ function scorerender_admin_section_content ()
 		<h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
 
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
+		<tr valign="top">
+			<th score="row"><?php _e('Clickable image:', TEXTDOMAIN) ?></th>
+			<td>
+				<input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
+				<label for="show_input"><?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
+			</td>
+		</tr>
 		<tr valign="top">
 			<th scope="row"><?php _e('Maximum length per fragment:', TEXTDOMAIN) ?></th>
 			<td>
@@ -626,10 +626,12 @@ function scorerender_admin_options ()
 	}
 ?>
 
-	<div class="wrap">
+<div class="wrap">
+	<?php if ( function_exists ('screen_icon') ) screen_icon(); ?>
+	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
+
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>
-	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?></h2>
 
 	<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending tag after each notation name. Each music fragment must be enclosed by corresponding pair of tags.', TEXTDOMAIN); ?></p>
 	<ul>
@@ -659,8 +661,8 @@ function scorerender_admin_options ()
 	<input type="submit" name="Submit" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
 	</p>
 
-	</div>
 	</form>
+</div>
 	<?php
 }
 

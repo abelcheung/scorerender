@@ -78,11 +78,22 @@ Compiling and using PMW on Windows may only be possible through code changes.
 Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for screenshots.
 
 == License ==
-This plugin is released under GPL v2.
+This plugin is released under GNU AGPL v3.
 IE Alpha Fix is released under LGPL v2.1 or later.
 Zero Clipboard is released under LGPL.
 
 == Changelog ==
+
+**Version 0.3.3**
+
+* Change license to AGPL v3.
+* 'Show source' setting is moved to 'Contents' admin section
+* BUG FIX: Admin form html tags incorrectly nested
+* BUG FIX: Notation was not deactivated even when program name is not filled
+* BUG FIX: Restore safe mode for Lilypond, use precise version detection to determine command line argument
+* BUG FIX: PostScript transparency shall be properly detected for PMW and Mup on recent ImageMagick versions
+* BUG FIX: Prevents PMW from reading config file
+* FEATURE: Add icon for admin form title (on recent WP versions)
 
 **Version 0.3.2**
 

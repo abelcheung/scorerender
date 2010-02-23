@@ -2,6 +2,10 @@
 /**
  * Implements rendering of Philip's Music Writer notation in ScoreRender.
  * @package ScoreRender
+ * @version 0.3.3
+ * @author Abel Cheung <abelcheung at gmail dot com>
+ * @copyright Copyright (C) 2008, 2009, 2010 Abel Cheung
+ * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
 */
 
 /**
@@ -33,7 +37,7 @@ EOD;
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	$cmd = sprintf ('"%s" -includefont -o "%s" "%s"',
+	$cmd = sprintf ('"%s" -norc -includefont -o "%s" "%s"',
 			$this->mainprog,
 			$intermediate_image, $input_file);
 	$retval = $this->_exec($cmd);
@@ -52,7 +56,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 	// though, since there is no BoundingBox nor page dimension specified
 	// in PostScript produced by PMW.
 	return parent::conversion_step2 ($intermediate_image,
-		$final_image, FALSE, '-page a3');
+		$final_image, true, '-page a3');
 }
 
 /**
