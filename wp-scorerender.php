@@ -298,8 +298,9 @@ function scorerender_get_cache_location ()
  * @uses ScoreRender::render()
  * @uses ScoreRender::get_notation_name() Used when showing original content upon error
  * @uses ScoreRender::get_music_fragment() Used when showing original content upon error
- * @uses ScoreRender::get_comment_output() Used when showing error message upon error, and debug is on
+ * @uses ScoreRender::get_command_output() Used when showing error message upon error, and debug is on
  * @uses ScoreRender::get_error_msg() Used when showing error message upon error, and debug is off
+ * @uses scorerender_get_cache_location() For getting cached image location and read its size
  *
  * @param object $render PHP object created for rendering relevant music fragment
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.

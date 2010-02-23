@@ -16,6 +16,7 @@
  *
  * @since 0.3.50
  * @package ScoreRender
+ * @access private This class is not supposed to be used beyond ScoreRender
 */
 class ScoreRenderAdmin
 {
@@ -24,6 +25,7 @@ class ScoreRenderAdmin
  * Returns number of cached images inside cache directory
  *
  * @since 0.2
+ * @uses scorerender_get_cache_location() For reading cached image folder and counting images
  * @return integer number of images inside cache directory, or -1 if cache dir can't be read
  * @access private
  */
@@ -44,6 +46,7 @@ private function get_num_of_images ()
  * Remove all cached images in cache directory
  *
  * @since 0.2
+ * @uses scorerender_get_cache_location() For searching cached image folder and deleting images
  * @access private
  */
 private function remove_cache ()
@@ -110,11 +113,12 @@ private function cache_location_match ($path, $url)
  * error encountered in various options. In some cases supplied
  * config values will be discarded.
  *
- * @uses ScoreRenderAdmin::cache_location_match()
  * @uses transform_paths()
  * @uses ScoreRender::is_web_hosting()
- * @uses ScoreRender::is_prog_usable()
+ * @uses ScoreRender::is_prog_usable() Check if ImageMagick is usable
  * @uses scorerender_get_def_settings()
+ * @uses scorerender_get_cache_location() Also checks if cached image folder is writable
+ * @access private
  */
 private function update_options ()
 {
@@ -239,7 +243,6 @@ private function update_options ()
  * WP hook added to admin page header
  *
  * @since 0.3
- * @access private
  */
 public function admin_head()
 {
@@ -262,8 +265,9 @@ public function admin_head()
 /**
  * WP hook added to admin page footer
  *
+ * Mainly include javascripts involved in admin form
+ *
  * @since 0.3.50
- * @access private
  */
 public function admin_footer()
 {
@@ -474,8 +478,9 @@ private function admin_section_content ()
 /**
  * Section of admin page about caching options
  *
- * @uses ScoreRenderAdmin::get_num_of_images()
  * @since 0.2
+ * @uses ScoreRenderAdmin::get_num_of_images() Get and show cached image count
+ * @uses scorerender_get_cache_location() Check if the cached image folder is read-writable
  * @access private
  */
 private function admin_section_caching ()
@@ -517,8 +522,6 @@ private function admin_section_caching ()
  * @uses ScoreRenderAdmin::admin_section_image() Admin page -- image options
  * @uses ScoreRenderAdmin::admin_section_content() Admin page -- content options
  * @uses ScoreRenderAdmin::admin_section_caching() Admin page -- caching administration
- *
- * @access private
  */
 public function admin_page ()
 {
@@ -536,7 +539,6 @@ public function admin_page ()
 		$this->update_options();
 	}
 ?>
-
 <div class="wrap">
 	<?php if ( function_exists ('screen_icon') ) screen_icon(); ?>
 	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/images/info-icon.png'); ?>" width="32" height="32" class="sr-help-icon" /></a></h2>
