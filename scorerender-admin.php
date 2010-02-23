@@ -552,11 +552,10 @@ public function admin_page ()
 public function settings_link ($links, $file)
 {
 	if ( $file == 'scorerender/wp-scorerender.php' )
-		if ( function_exists ('admin_url') )
-			$links[] = sprintf ('<a href="%s">%s</a>',
-					admin_url ('options-general.php?page=scorerender'),
-					__('Settings')	// use global WP translation
-				   );
+		$links[] = sprintf ('<a href="%s">%s</a>',
+				admin_url ('options-general.php?page=scorerender'),
+				__('Settings')	// use global WP translation
+			   );
 	return $links;
 }
 

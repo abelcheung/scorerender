@@ -135,7 +135,7 @@
 	  of image with different colors. This requires proper support of alpha
 	  channel in PHP GD extension, which is completely broken in some
 	  platforms, such as Debian / Ubuntu except very recent releases.
-	* Now requires WP 2.6 due to usage of plugin_url().
+	* Now requires WP 2.6 due to usage of plugins_url().
 	* wp-scorerender.php:
 	- Increase database schema version.
 	* scorerender-admin.php:
