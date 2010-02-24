@@ -9,15 +9,15 @@
 */
 
 /**
- * Inherited from ScoreRender class, for supporting ABC notation.
+ * Inherited from SrNotationBase class, for supporting ABC notation.
  * @package ScoreRender
 */
-class abcRender extends ScoreRender
+class abcRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
 /**
- * Refer to {@link ScoreRender::set_img_width() parent method}
+ * Refer to {@link SrNotationBase::set_img_width() parent method}
  * for more detail.
  *
  * Seems abcm2ps is using something like 120 dpi,
@@ -46,7 +46,7 @@ EOT;
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step1() parent method} for more detail.
+ * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
@@ -59,7 +59,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
+ * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
@@ -69,7 +69,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 /**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
- * @uses ScoreRender::is_prog_usable()
+ * @uses SrNotationBase::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
 {

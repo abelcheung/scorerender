@@ -9,10 +9,10 @@
 */
 
 /**
- * Inherited from ScoreRender class, for supporting Lilypond notation.
+ * Inherited from SrNotationBase class, for supporting Lilypond notation.
  * @package ScoreRender
 */
-class lilypondRender extends ScoreRender
+class lilypondRender extends SrNotationBase
                      implements SrNotationInterface
 {
 
@@ -61,7 +61,7 @@ public static function lilypond_version ($lilypond)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step1() parent method}
+ * Refer to {@link SrNotationBase::conversion_step1() parent method}
  * for more detail.
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
@@ -89,7 +89,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step2() parent method}
+ * Refer to {@link SrNotationBase::conversion_step2() parent method}
  * for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
@@ -103,7 +103,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 /**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
- * @uses ScoreRender::is_prog_usable()
+ * @uses SrNotationBase::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
 {

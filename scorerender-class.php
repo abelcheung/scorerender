@@ -12,7 +12,7 @@
 /**
  * Base class shared by all notations.
  * Most mandatory subclass methods are already listed in
- * {@link ScoreRender_Notation} interface below, plus one more:
+ * {@link SrNotationInterface} interface below, plus one more:
  *
  * - {@link conversion_step1()}
  *
@@ -24,7 +24,7 @@
  * Please refer to class.*.inc.php for examples.
  * @package ScoreRender
  */
-abstract class ScoreRender
+abstract class SrNotationBase
 {
 
 /**
@@ -492,7 +492,7 @@ public static function is_prog_usable ($match, $prog)
  * {@link conversion_step2()}, and resulting image is stored in cache folder.
  * Error code will be set appropriately.
  *
- * @uses ScoreRender_Notation::get_music_fragment()
+ * @uses SrNotationInterface::get_music_fragment()
  * @uses is_valid_input() Validate content before rendering
  * @uses is_prog_usable() Check if ImageMagick is functional
  * @uses conversion_step1() First pass rendering: Convert input file -> PS

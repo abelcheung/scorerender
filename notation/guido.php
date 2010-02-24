@@ -9,15 +9,15 @@
 */
 
 /**
- * Inherited from ScoreRender class, for supporting GUIDO notation.
+ * Inherited from SrNotationBase class, for supporting GUIDO notation.
  * @package ScoreRender
 */
-class guidoRender extends ScoreRender
+class guidoRender extends SrNotationBase
                   implements SrNotationInterface
 {
 
 /**
- * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
+ * Refer to {@link SrNotationBase::get_music_fragment() parent method} for more detail.
  */
 public function get_music_fragment ()
 {
@@ -46,7 +46,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
+ * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {

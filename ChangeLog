@@ -1,3 +1,9 @@
+2010-02-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php:
+	- The abstract class on which notations are based is renamed to
+	  SrNotationBase. 
+
 2010-02-24  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php, notation/*.php:

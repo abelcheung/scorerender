@@ -9,10 +9,10 @@
 */
 
 /**
- * Inherited from ScoreRender class, for supporting Mup notation.
+ * Inherited from SrNotationBase class, for supporting Mup notation.
  * @package ScoreRender
 */
-class mupRender extends ScoreRender
+class mupRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
@@ -35,7 +35,7 @@ function __construct ()
 }
 
 /**
- * Refer to {@link ScoreRender::set_img_width() parent method}
+ * Refer to {@link SrNotationBase::set_img_width() parent method}
  * for more detail.
  * For Mup notation, it is more convenient to use inch as unit
  */
@@ -84,7 +84,7 @@ EOD;
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step1() parent method}
+ * Refer to {@link SrNotationBase::conversion_step1() parent method}
  * for more detail.
  *
  * @uses is_windows()
@@ -122,7 +122,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
+ * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
@@ -151,7 +151,7 @@ public function set_notation_action ($options)
 /**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
- * @uses ScoreRender::is_prog_usable()
+ * @uses SrNotationBase::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
 {
