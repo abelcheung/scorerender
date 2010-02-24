@@ -13,7 +13,7 @@
  * @package ScoreRender
 */
 class mupRender extends ScoreRender
-                implements ScoreRender_Notation
+                implements SrNotationInterface
 {
 
 /**
@@ -65,7 +65,7 @@ protected function is_valid_input ()
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::get_music_fragment() interface method}
+ * Refer to {@link SrNotationInterface::get_music_fragment() interface method}
  * for more detail.
  */
 public function get_music_fragment ()
@@ -103,21 +103,21 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	 * so _exec() succeeds yet no postscript is rendered.
 	 */
 	$temp_magic_file = $this->temp_dir . ( is_windows() ? '\mup.ok' : '/.mup' );
-	
+
 	if ( ! file_exists ($temp_magic_file) )
 		file_put_contents ( $temp_magic_file, $this->reg_key );
 
 	/* mup forces this kind of crap */
 	putenv ("HOME=" . $this->temp_dir);
 	chdir ($this->temp_dir);
-	
+
 	$cmd = sprintf ('"%s" -f "%s" "%s"',
 			$this->mainprog,
 			$intermediate_image, $input_file);
 	$retval = $this->_exec($cmd);
 
 	unlink ($temp_magic_file);
-	
+
 	return (filesize ($intermediate_image) != 0);
 }
 
@@ -149,7 +149,7 @@ public function set_notation_action ($options)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::is_notation_usable() interface method}
+ * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
  * @uses ScoreRender::is_prog_usable()
  */
@@ -162,12 +162,12 @@ public static function is_notation_usable ($errmsgs, $opt)
 		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
 			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
 				$ok = false;
-			
+
 	if (!$ok) $errmsgs[] = 'mup_bin_problem';
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_admin_messages() interface method}
+ * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
  * for more detail.
  */
 public static function define_admin_messages ($adm_msgs)
@@ -181,7 +181,7 @@ public static function define_admin_messages ($adm_msgs)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::program_setting_entry() interface method}
+ * Refer to {@link SrNotationInterface::program_setting_entry() interface method}
  * for more detail.
  */
 public static function program_setting_entry ($output)
@@ -202,7 +202,7 @@ public static function program_setting_entry ($output)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_setting_type() interface method}
+ * Refer to {@link SrNotationInterface::define_setting_type() interface method}
  * for more detail.
  */
 public static function define_setting_type ($settings)
@@ -214,7 +214,7 @@ public static function define_setting_type ($settings)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_setting_value() interface method}
+ * Refer to {@link SrNotationInterface::define_setting_value() interface method}
  * for more detail.
  */
 public static function define_setting_value ($settings)

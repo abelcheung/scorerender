@@ -13,11 +13,11 @@
  * @package ScoreRender
 */
 class lilypondRender extends ScoreRender
-                     implements ScoreRender_Notation
+                     implements SrNotationInterface
 {
 
 /**
- * Refer to {@link ScoreRender_Notation::get_music_fragment() interface method}
+ * Refer to {@link SrNotationInterface::get_music_fragment() interface method}
  * for more detail.
  */
 public function get_music_fragment ()
@@ -40,21 +40,21 @@ public function get_music_fragment ()
 }
 EOD;
 
-	// When does lilypond start hating \r ? 
+	// When does lilypond start hating \r ?
 	return $header . str_replace (chr(13), '', $this->_input);
 }
 
 /**
  * Determine LilyPond version
  * @param string $lilypond The path of lilypond program
- * @return string|boolean The version number string if it can be determined, otherwise FALSE 
+ * @return string|boolean The version number string if it can be determined, otherwise FALSE
  */
 public static function lilypond_version ($lilypond)
 {
 	if ( !function_exists ('exec') ) return FALSE;
 
 	exec ("\"$lilypond\" -v 2>&1", $output, $retval);
-	
+
 	if ( empty ($output) ) return FALSE;
 	if ( !preg_match('/^gnu lilypond (\d+\.\d+\.\d+)/i', $output[0], $matches) ) return FALSE;
 	return $matches[1];
@@ -75,7 +75,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 			$safemode = '-s';
 		else
 			$safemode = '-dsafe';
-	
+
 	/* lilypond adds .ps extension by itself, sucks for temp file generation */
 	$cmd = sprintf ('"%s" %s --ps --output "%s" "%s"',
 		$this->mainprog,
@@ -101,7 +101,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::is_notation_usable() interface method}
+ * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
  * @uses ScoreRender::is_prog_usable()
  */
@@ -114,12 +114,12 @@ public static function is_notation_usable ($errmsgs, $opt)
 		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
 			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
 				$ok = false;
-			
+
 	if (!$ok) $errmsgs[] = 'lilypond_bin_problem';
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_admin_messages() interface method}
+ * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
  * for more detail.
  */
 public static function define_admin_messages ($adm_msgs)
@@ -133,7 +133,7 @@ public static function define_admin_messages ($adm_msgs)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::program_setting_entry() interface method}
+ * Refer to {@link SrNotationInterface::program_setting_entry() interface method}
  * for more detail.
  */
 public static function program_setting_entry ($output)
@@ -147,7 +147,7 @@ public static function program_setting_entry ($output)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_setting_type() interface method}
+ * Refer to {@link SrNotationInterface::define_setting_type() interface method}
  * for more detail.
  */
 public static function define_setting_type ($settings)
@@ -159,7 +159,7 @@ public static function define_setting_type ($settings)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_setting_value() interface method}
+ * Refer to {@link SrNotationInterface::define_setting_value() interface method}
  * for more detail.
  */
 public static function define_setting_value ($settings)

@@ -1,3 +1,8 @@
+2010-02-24  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php, notation/*.php:
+	- Rename ScoreRender_Notation interface to SrNotationInterface.
+	
 2010-02-23  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:
