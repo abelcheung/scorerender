@@ -1,5 +1,11 @@
 2010-02-25  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-shortcode.php:
+	- New file, taken from WP 2.9.2 as a replacement of shortcode API
+	  because 2.6-2.7 one is not good enough to use.
+
+2010-02-25  Abel Cheung  <abelcheung@gmail.com>
+
 	* *.php, notation/*.php:
 	- The abstract class on which notations are based is renamed to
 	  SrNotationBase. 
