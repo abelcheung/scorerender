@@ -295,11 +295,11 @@ function scorerender_get_cache_location ()
 /**
  * Generate HTML content from error message or rendered image
  *
- * @uses ScoreRender::render()
- * @uses ScoreRender::get_notation_name() Used when showing original content upon error
- * @uses ScoreRender::get_music_fragment() Used when showing original content upon error
- * @uses ScoreRender::get_command_output() Used when showing error message upon error, and debug is on
- * @uses ScoreRender::get_error_msg() Used when showing error message upon error, and debug is off
+ * @uses SrNotationBase::render()
+ * @uses SrNotationBase::get_notation_name() Used when showing original content upon error
+ * @uses SrNotationBase::get_music_fragment() Used when showing original content upon error
+ * @uses SrNotationBase::get_command_output() Used when showing error message upon error, and debug is on
+ * @uses SrNotationBase::get_error_msg() Used when showing error message upon error, and debug is off
  * @uses scorerender_get_cache_location() For getting cached image location and read its size
  *
  * @param object $render PHP object created for rendering relevant music fragment
@@ -385,12 +385,12 @@ function scorerender_process_content ($render)
  * unconverted content is returned immediately.
  *
  * @uses scorerender_process_content()
- * @uses ScoreRender::set_programs()
- * @uses ScoreRender::set_imagemagick_path()
- * @uses ScoreRender::set_temp_dir()
- * @uses ScoreRender::set_cache_dir()
- * @uses ScoreRender::set_img_width()
- * @uses ScoreRender::set_music_fragment()
+ * @uses SrNotationBase::set_programs()
+ * @uses SrNotationBase::set_imagemagick_path()
+ * @uses SrNotationBase::set_temp_dir()
+ * @uses SrNotationBase::set_cache_dir()
+ * @uses SrNotationBase::set_img_width()
+ * @uses SrNotationBase::set_music_fragment()
  *
  * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
  * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.

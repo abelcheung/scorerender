@@ -72,8 +72,8 @@ private function remove_cache ()
  * config values will be discarded.
  *
  * @uses transform_paths()
- * @uses ScoreRender::is_web_hosting()
- * @uses ScoreRender::is_prog_usable() Check if ImageMagick is usable
+ * @uses SrNotationBase::is_web_hosting()
+ * @uses SrNotationBase::is_prog_usable() Check if ImageMagick is usable
  * @uses scorerender_get_def_settings()
  * @uses scorerender_get_cache_location() Also checks if cached image folder is writable
  * @access private
@@ -136,10 +136,10 @@ private function update_options ()
 			$errmsgs[] = 'cache_dir_not_writable';
 	}
 
-	if ( ScoreRender::is_web_hosting() )
+	if ( SrNotationBase::is_web_hosting() )
 		$errmsgs[] = 'prog_check_disabled';
 
-	if ( ! ScoreRender::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
+	if ( ! SrNotationBase::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
 		$errmsgs[] = 'convert_bin_problem';
 
 	// Any boolean values set to false would not appear in $_POST

@@ -9,10 +9,10 @@
 */
 
 /**
- * Inherited from ScoreRender class, for supporting Philip's Music Writer notation.
+ * Inherited from SrNotationBase class, for supporting Philip's Music Writer notation.
  * @package ScoreRender
 */
-class pmwRender extends ScoreRender
+class pmwRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
@@ -38,7 +38,7 @@ EOD;
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step1() parent method} for more detail.
+ * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  *
  * @uses $mainprog
  * @uses _exec()
@@ -54,7 +54,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 }
 
 /**
- * Refer to {@link ScoreRender::conversion_step2() parent method} for more detail.
+ * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
