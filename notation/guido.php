@@ -13,7 +13,7 @@
  * @package ScoreRender
 */
 class guidoRender extends ScoreRender
-                  implements ScoreRender_Notation
+                  implements SrNotationInterface
 {
 
 /**

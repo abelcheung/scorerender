@@ -13,7 +13,7 @@
  * @package ScoreRender
 */
 class abcRender extends ScoreRender
-                implements ScoreRender_Notation
+                implements SrNotationInterface
 {
 
 /**
@@ -30,7 +30,7 @@ public function set_img_width ($width)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::get_music_fragment() interface method} for more detail.
+ * Refer to {@link SrNotationInterface::get_music_fragment() interface method} for more detail.
  */
 public function get_music_fragment ()
 {
@@ -67,7 +67,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::is_notation_usable() interface method}
+ * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
  * @uses ScoreRender::is_prog_usable()
  */
@@ -80,12 +80,12 @@ public static function is_notation_usable ($errmsgs, $opt)
 		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
 			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
 				$ok = false;
-			
+
 	if (!$ok) $errmsgs[] = 'abcm2ps_bin_problem';
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_admin_messages() interface method}
+ * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
  * for more detail.
  */
 public static function define_admin_messages ($adm_msgs)
@@ -99,7 +99,7 @@ public static function define_admin_messages ($adm_msgs)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::program_setting_entry() interface method}
+ * Refer to {@link SrNotationInterface::program_setting_entry() interface method}
  * for more detail.
  */
 public static function program_setting_entry ($output)
@@ -113,7 +113,7 @@ public static function program_setting_entry ($output)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_setting_type() interface method}
+ * Refer to {@link SrNotationInterface::define_setting_type() interface method}
  * for more detail.
  */
 public static function define_setting_type ($settings)
@@ -125,7 +125,7 @@ public static function define_setting_type ($settings)
 }
 
 /**
- * Refer to {@link ScoreRender_Notation::define_setting_value() interface method}
+ * Refer to {@link SrNotationInterface::define_setting_value() interface method}
  * for more detail.
  */
 public static function define_setting_value ($settings)

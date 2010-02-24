@@ -11,7 +11,7 @@
 
 /**
  * Base class shared by all notations.
- * Most mandatory subclass methods are already listed in 
+ * Most mandatory subclass methods are already listed in
  * {@link ScoreRender_Notation} interface below, plus one more:
  *
  * - {@link conversion_step1()}
@@ -352,11 +352,11 @@ final protected function _exec ($cmd)
 	// with more than 2 double quotes to run
 	if (is_windows())
 		$cmd = '\: \& ' . $cmd;
-		
+
 	exec ($cmd, $cmd_output, $retval);
 	$this->_commandOutput = implode ("\n", $cmd_output);
 
-	return $retval;	
+	return $retval;
 }
 
 /**
@@ -567,7 +567,7 @@ final public function render()
 		$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
 		return false;
 	}
-	
+
 	$intermediate_image = $input_file . '.ps';
 
 	if (! file_exists ($intermediate_image) )
@@ -657,7 +657,7 @@ public static function program_setting_entry ($bin_name, $setting_name, $title =
  * Interface for every notations used by ScoreRender
  * @package ScoreRender
  */
-interface ScoreRender_Notation
+interface SrNotationInterface
 {
 	/**
 	 * Outputs music fragment content
