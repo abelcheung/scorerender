@@ -6,6 +6,10 @@
 	- (scorerender_shortcode_unsupported) New func.
 	- (scorerender_shortcode_handler) New func.
 	- (scorerender_parse_shortcode) New func.
+	- (scorerender_conversion_hook) Removed, routine merged into
+	  scorerender_parse_shortcode().
+	- (scorerender_init_class) Removed, routine merged into
+	  scorerender_shortcode_handler().
 
 2010-02-25  Abel Cheung  <abelcheung@gmail.com>
 

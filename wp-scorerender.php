@@ -378,65 +378,6 @@ function scorerender_process_content ($render)
 }
 
 
-
-/**
- * Initialize PHP class for corresponding music notation
- *
- * Create PHP object for each kind of matched music notation, and set
- * all relevant parameters needed for rendering. Afterwards, pass
- * everything to {@link scorerender_process_content()} for rendering.
- *
- * If no PHP class exists corresponding to certain notation, then
- * unconverted content is returned immediately.
- *
- * @uses scorerender_process_content()
- * @uses SrNotationBase::set_programs()
- * @uses SrNotationBase::set_imagemagick_path()
- * @uses SrNotationBase::set_temp_dir()
- * @uses SrNotationBase::set_cache_dir()
- * @uses SrNotationBase::set_img_width()
- * @uses SrNotationBase::set_music_fragment()
- *
- * @param array $matches Matched music fragment in posts or comments. This variable must be supplied by {@link preg_match preg_match()} or {@link preg_match_all preg_match_all()}. Alternatively invoke this function with {@link preg_replace_callback preg_replace_callback()}.
- * @return string Either HTML content containing rendered image, or HTML error message in case rendering failed.
- */
-function scorerender_init_class ($matches)
-{
-	global $sr_options, $notations;
-
-	// since preg_replace_callback only accepts single function,
-	// we have to check which regex is matched here and create
-	// corresponding object
-	foreach (array_values ($notations) as $notation)
-		if (preg_match ($notation['regex'], $matches[0]))
-		{
-			$render = new $notation['classname'];
-
-			$progs = array();
-			foreach (array_keys($notation['progs']) as $setting_name) {
-				$programs[$setting_name] = $sr_options[$setting_name];
-			}
-			$render->set_programs ($programs);
-
-			break;
-		}
-
-	if (empty ($render)) return $input;
-
-	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
-	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
-	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
-	$render->set_cache_dir        (scorerender_get_cache_location());
-
-	do_action ('sr_set_class_variable', $sr_options);
-
-	$input = trim (html_entity_decode ($matches[1]));
-	$render->set_music_fragment ($input);
-
-	return scorerender_process_content ($render);
-}
-
-
 /**
  * Shortcode callback for all supported notations
  *
@@ -583,45 +524,6 @@ function scorerender_parse_shortcode ($content, $content_type, $callback)
 	return $content;
 }
 
-
-/**
- * The hook attached to WordPress plugin system.
- *
- * Check if post/comment rendering should be enabled.
- * If yes, then apply {@link scorerender_init_class} function on $content.
- *
- * @uses scorerender_init_class() Initialize class upon regular expression match
- * @param string $content The whole content of blog post / comment
- * @param boolean $is_post TRUE if content comes from post / page, FALSE otherwise
- * @return string Converted blog post / comment content.
- */
-function scorerender_conversion_hook ($content, $is_post)
-{
-	global $sr_options, $notations, $post;
-
-	if (!$is_post && !$sr_options['COMMENT_ENABLED']) return $content;
-
-	if ($is_post)
-	{
-		$author = new WP_User ($post->post_author);
-		if (!$author->has_cap ('unfiltered_html')) return $content;
-	}
-
-	$regex_list = array();
-	foreach (array_values ($notations) as $notation)
-	{
-		// unfilled program name = disable support
-		foreach (array_keys($notation['progs']) as $setting_name)
-			if (empty ($sr_options[$setting_name])) continue 2;
-		$regex_list[] = $notation['regex'];
-	};
-
-	$limit = ($is_post)                                 ? -1 :
-	         ($sr_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 :
-	          $sr_options['FRAGMENT_PER_COMMENT'];
-
-	return preg_replace_callback ($regex_list, 'scorerender_init_class', $content, $limit);
-}
 
 /**
  * Adds transparent PNG support if browser is IE6
