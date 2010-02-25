@@ -93,6 +93,11 @@ require_once('scorerender-utils.php');
  */
 require_once('scorerender-class.php');
 
+/**
+ * Shortcode API replacement
+ */
+require_once('scorerender-shortcode.php');
+
 require_once('notation/abc.php');
 require_once('notation/guido.php');
 require_once('notation/lilypond.php');
@@ -433,6 +438,153 @@ function scorerender_init_class ($matches)
 
 
 /**
+ * Shortcode callback for all supported notations
+ *
+ * Create PHP object for each kind of supported notation, and set
+ * all relevant parameters needed for rendering. Afterwards, pass
+ * everything to scorerender_process_content() for rendering.
+ *
+ * @uses scorerender_process_content()
+ * @uses SrNotationBase::set_programs()
+ * @uses SrNotationBase::set_imagemagick_path()
+ * @uses SrNotationBase::set_temp_dir()
+ * @uses SrNotationBase::set_cache_dir()
+ * @uses SrNotationBase::set_img_width()
+ * @uses SrNotationBase::set_music_fragment()
+ *
+ * @return string Either HTML content containing rendered image, or HTML error message on failure
+ */
+function scorerender_shortcode_handler ($attr, $content = null, $code = "")
+{
+	global $notations, $sr_options;
+
+	$defaults = array (
+		'color' => null,
+		'lang'  => null,
+	);
+
+	// prevents construct like [mup lang="abc"]
+	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
+		$attr['lang'] = $code;
+
+	extract ( shortcode_atts ( $defaults, $attr ) );
+
+	if ( ! array_key_exists ( $lang, $notations ) )
+		return __('[ScoreRender error: notation language unknown]', TEXTDOMAIN);
+
+	// initialize notation class
+	if ( class_exists ( $notations[$lang]['classname'] ) )
+		$render = new $notations[$lang]['classname'];
+
+	// in case something is very wrong... (notation data incorrect, instance creation failure)
+	if ( empty ($render) )
+		return __('[ScoreRender error: class initialization failure]', TEXTDOMAIN);
+
+	$programs = array();
+	foreach ( array_keys ( $notations[$lang]['progs']) as $setting_name )
+	{
+		$programs[$setting_name] = $sr_options[$setting_name];
+	}
+	$render->set_programs         ($programs);
+	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
+	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
+	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
+	$render->set_cache_dir        (scorerender_get_cache_location());
+
+	do_action ('sr_set_class_variable', $sr_options);
+
+	$render->set_music_fragment ( trim ( html_entity_decode ($content) ) );
+
+	return scorerender_process_content ($render);
+}
+
+
+/**
+ * Used as a shortcode callback when certain notation is not supported
+ * on the blog, usually by unsetting corresponding program in admin page
+ *
+ * @param $attr array Array of shortcode attributes, only language name is used here
+ * @param $content string The content enclosed in shortcode, unused in this func
+ * @param $code string Shortcode tag used
+ * @return string Error message mentioning unsupported notation
+ */
+function scorerender_shortcode_unsupported ($attr, $content = null, $code = "")
+{
+	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
+		$attr['lang'] = $code;
+
+	return sprintf (__("[ScoreRender error: '%s' notation is not supported on this blog]", TEXTDOMAIN),
+			$attr['lang']);
+}
+
+
+/**
+ * The main hook attached to WordPress plugin system, converting all shortcodes
+ * and contents enclosed into score image.
+ *
+ * First it determines whether rendering should be enabled through author roles
+ * and blog settings. If everything is fine, register all shortcodes usable
+ * and apply them on the content.
+ *
+ * @uses scorerender_shortcode_unsupported() Use this callback if notation
+ * is not supported
+ * @uses scorerender_do_shortcode() Use this version of shortcode filtering
+ * instead of WP native do_shortcode() if on WP < 2.8 or applying on comment
+ * @param string $content The whole content of blog post / comment
+ * @param string $content_type Either 'post' or 'comment'
+ * @param callable $callback Callback function used for $content_type
+ * @return string Converted blog post / comment content
+ */
+function scorerender_parse_shortcode ($content, $content_type, $callback)
+{
+	global $sr_options, $post, $notations, $shortcode_tags, $wp_version;
+
+	// only handles page, post and comment for now
+	if ( !in_array ( $content_type, array ( 'post', 'comment' ) ) ) return $content;
+
+	if ( ( 'comment' == $content_type ) && !$sr_options['COMMENT_ENABLED']) return $content;
+
+	if ( 'post' == $content_type )
+	{
+		$author = new WP_User ($post->post_author);
+		if (!$author->has_cap ('unfiltered_html')) return $content;
+	}
+
+	$orig_shortcodes = $shortcode_tags;
+	remove_all_shortcodes();
+
+	add_shortcode ('scorerender', $callback);
+	add_shortcode ('score', $callback);
+	foreach ( $notations as $notation_name => $notation_data )
+	{
+		foreach (array_keys($notation_data['progs']) as $setting_name)
+		{
+			// unfilled program name = disable support, thus use stub handler
+			if (empty ($sr_options[$setting_name])) {
+				add_shortcode ($notation_name, 'scorerender_shortcode_unsupported');
+				continue 2;
+			}
+		}
+		add_shortcode ($notation_name, $callback);
+	}
+
+	$limit = ($sr_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : (int)$sr_options['FRAGMENT_PER_COMMENT'];
+
+	// shortcode API in WP < 2.8 is not good enough
+	if ( 'comment' == $content_type )
+		$content = scorerender_do_shortcode ($content, $limit);
+	elseif ( version_compare ( $wp_version, '2.8', '<' ) )
+		$content = scorerender_do_shortcode ($content);
+	else
+		$content = do_shortcode ($content);
+
+	$shortcode_tags = $orig_shortcodes;
+
+	return $content;
+}
+
+
+/**
  * The hook attached to WordPress plugin system.
  *
  * Check if post/comment rendering should be enabled.
@@ -524,17 +676,17 @@ else
 
 	// earlier than default priority, since
 	// smilies conversion and wptexturize() can mess up the content
-	add_filter ('the_excerpt' ,
+	add_filter ('the_excerpt',
 		create_function ('$content',
-			'return scorerender_conversion_hook ($content, TRUE);'),
+			'return scorerender_parse_shortcode ($content, "post", "scorerender_shortcode_handler");'),
 		2);
-	add_filter ('the_content' ,
+	add_filter ('the_content',
 		create_function ('$content',
-			'return scorerender_conversion_hook ($content, TRUE);'),
+			'return scorerender_parse_shortcode ($content, "post", "scorerender_shortcode_handler");'),
 		2);
 	add_filter ('comment_text',
 		create_function ('$content',
-			'return scorerender_conversion_hook ($content, FALSE);'),
+			'return scorerender_parse_shortcode ($content, "comment", "scorerender_shortcode_handler");'),
 		2);
 }
 
