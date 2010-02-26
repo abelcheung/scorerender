@@ -113,9 +113,6 @@ public static function define_setting_value ($settings) {}
 $notations['guido'] = array (
 	'name'        => 'GUIDO',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-guido/',
-	'regex'       => '~\[guido\](.*?)\[/guido\]~si',
-	'starttag'    => '[guido]',
-	'endtag'      => '[/guido]',
 	'classname'   => 'guidoRender',
 	'progs'       => array (),
 );

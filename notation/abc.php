@@ -162,9 +162,6 @@ public static function define_setting_value ($settings)
 $notations['abc'] = array (
 	'name'        => 'ABC',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-abc/',
-	'regex'       => '~\[abc\](.*?)\[/abc\]~si',
-	'starttag'    => '[abc]',
-	'endtag'      => '[/abc]',
 	'classname'   => 'abcRender',
 	'progs'       => array (
 		'ABCM2PS_BIN' => array (

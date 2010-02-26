@@ -196,9 +196,6 @@ public static function define_setting_value ($settings)
 $notations['lilypond'] = array (
 	'name'        => 'LilyPond',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-lilypond/',
-	'regex'       => '~\[lilypond\](.*?)\[/lilypond\]~si',
-	'starttag'    => '[lilypond]',
-	'endtag'      => '[/lilypond]',
 	'classname'   => 'lilypondRender',
 	'progs'       => array (
 		'LILYPOND_BIN' => array (
