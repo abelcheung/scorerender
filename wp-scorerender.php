@@ -367,7 +367,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
 				$imgurl );
 	}
 
-	$html = sprintf ("<form target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
+	$html = sprintf ("<form class='scorerender-form' target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
 	$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s' />\n",
 		__('Click on image to view source', TEXTDOMAIN),
 		__('Music fragment', TEXTDOMAIN),
@@ -559,11 +559,13 @@ function scorerender_parse_shortcode ($content, $content_type, $callback)
 function scorerender_add_ie6_style()
 {
 ?>
+<!-- begin scorerender style -->
 <!--[if lte IE 6]>
 <style type="text/css">
 .scorerender-image { behavior: url(<?php echo plugins_url ('scorerender/misc/iepngfix.php') ?>); }
 </style>
 <![endif]-->
+<!-- end scorerender style -->
 <?php
 }
 
