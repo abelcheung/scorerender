@@ -251,9 +251,6 @@ public static function define_setting_value ($settings)
 $notations['mup'] = array (
 	'name'        => 'Mup',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-mup/',
-	'regex'       => '~\[mup\](.*?)\[/mup\]~si',
-	'starttag'    => '[mup]',
-	'endtag'      => '[/mup]',
 	'classname'   => 'mupRender',
 	'progs'       => array (
 		'MUP_BIN' => array (
