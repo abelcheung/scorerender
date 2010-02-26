@@ -1,5 +1,10 @@
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* misc/tint-image.php:
+	- Don't allocate unused variable to preg_match.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/guido.php:
 	- Use more precise sizing and zoom ratio so that image will
 	  not look blurred.
