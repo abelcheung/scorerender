@@ -109,7 +109,8 @@ require_once('notation/pmw.php');
  * so other actions can be applied depending on setting type.
  *
  * @uses is_windows() Determine default program path based on operating system
- * @uses sys_get_temp_dir()
+ * @uses sys_get_temp_dir() For getting default temp directory
+ * @uses search_path() For searching default programs in system PATH
  */
 function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 {
@@ -117,21 +118,21 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 
 	$default_settings = array
 	(
-		'DB_VERSION'           => array ('type' => 'none', 'value' => DATABASE_VERSION),
-		'TEMP_DIR'             => array ('type' => 'path', 'value' => sys_get_temp_dir()),
-		'CACHE_DIR'            => array ('type' => 'path', 'value' => ''),
+		'DB_VERSION'             => array ('type' => 'none', 'value' => DATABASE_VERSION),
+		'TEMP_DIR'               => array ('type' => 'path', 'value' => sys_get_temp_dir()),
+		'CACHE_DIR'              => array ('type' => 'path', 'value' => ''),
 
-		'IMAGE_MAX_WIDTH'      => array ('type' =>  'int', 'value' => 360),
-		'NOTE_COLOR'           => array ('type' =>  'str', 'value' => '#000000'),
-		'USE_IE6_PNG_ALPHA_FIX'=> array ('type' => 'bool', 'value' => true),
-		'SHOW_SOURCE'          => array ('type' => 'bool', 'value' => false),
-		'COMMENT_ENABLED'      => array ('type' => 'bool', 'value' => false),
-		'ERROR_HANDLING'       => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+		'IMAGE_MAX_WIDTH'        => array ('type' =>  'int', 'value' => 360),
+		'NOTE_COLOR'             => array ('type' =>  'str', 'value' => '#000000'),
+		'USE_IE6_PNG_ALPHA_FIX'  => array ('type' => 'bool', 'value' => true),
 
-		'FRAGMENT_PER_COMMENT' => array ('type' =>  'int', 'value' => 1),
+		'SHOW_SOURCE'            => array ('type' => 'bool', 'value' => false),
+		'COMMENT_ENABLED'        => array ('type' => 'bool', 'value' => false),
+		'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+		'FRAGMENT_PER_COMMENT'   => array ('type' =>  'int', 'value' => 1),
 
-		'CONVERT_BIN'          => array ('type' => 'prog', 'value' => ''),
-		'MUP_REG_KEY'          => array ('type' =>  'str', 'value' => ''),
+		'CONVERT_BIN'            => array ('type' => 'prog', 'value' => ''),
+		'MUP_REG_KEY'            => array ('type' =>  'str', 'value' => ''),
 	);
 
 	do_action_ref_array ('scorerender_define_setting_type', array(&$default_settings));
@@ -203,7 +204,6 @@ function scorerender_init_textdomain ()
  * Retrieve all default settings and merge them into ScoreRender options
  *
  * @uses scorerender_get_def_settings()
- * @uses $sr_options
  */
 function scorerender_populate_options ()
 {
@@ -392,17 +392,17 @@ function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
  * the image and pass the result to other functions for displaying
  * error message or HTML containing image.
  *
- * @uses SrNotationBase::set_programs()
- * @uses SrNotationBase::set_imagemagick_path()
- * @uses SrNotationBase::set_temp_dir()
- * @uses SrNotationBase::set_cache_dir()
+ * @uses SrNotationBase::set_programs() Setting default notation rendering program
+ * @uses SrNotationBase::set_imagemagick_path() Setting ImageMagick `convert` path
+ * @uses SrNotationBase::set_temp_dir() Setting default temp directory
+ * @uses SrNotationBase::set_cache_dir() Setting cache directory used for storing images
  * @uses SrNotationBase::set_img_width()
  * @uses SrNotationBase::set_music_fragment()
  * @uses SrNotationBase::format_error_msg()
  * @uses SrNotationBase::render()
  * @uses scorerender_get_cache_location()
- * @uses scorerender_return_fragment_ok()
- * @uses scorerender_return_fragment_error()
+ * @uses scorerender_return_fragment_ok() Handles the case when image rendering is successful
+ * @uses scorerender_return_fragment_error() Handles the case when image rendering failed
  * @uses extension_loaded() For checking existance of GD extension
  *
  * @return string Either HTML content containing rendered image, or HTML error message on failure
@@ -497,6 +497,7 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "")
  * is not supported
  * @uses scorerender_do_shortcode() Use this version of shortcode filtering
  * instead of WP native do_shortcode() if on WP < 2.8 or applying on comment
+ *
  * @param string $content The whole content of blog post / comment
  * @param string $content_type Either 'post' or 'comment'
  * @param callable $callback Callback function used for $content_type
