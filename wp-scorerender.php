@@ -398,6 +398,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
  * @uses SrNotationBase::set_cache_dir()
  * @uses SrNotationBase::set_img_width()
  * @uses SrNotationBase::set_music_fragment()
+ * @uses SrNotationBase::format_error_msg()
  * @uses SrNotationBase::render()
  * @uses scorerender_get_cache_location()
  * @uses scorerender_return_fragment_ok()
@@ -422,7 +423,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 	extract ( shortcode_atts ( $defaults, $attr ) );
 
 	if ( ! array_key_exists ( $lang, $notations ) )
-		return __('[ScoreRender error: notation language unknown]', TEXTDOMAIN);
+		return SrNotationBase::format_error_msg ( __('notation language unknown', TEXTDOMAIN) );
 
 	// initialize notation class
 	if ( class_exists ( $notations[$lang]['classname'] ) )
@@ -430,7 +431,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 
 	// in case something is very wrong... (notation data incorrect, instance creation failure)
 	if ( empty ($render) )
-		return __('[ScoreRender error: class initialization failure]', TEXTDOMAIN);
+		return SrNotationBase::format_error_msg ( __('class initialization failure', TEXTDOMAIN) );
 
 	$programs = array();
 	foreach ( array_keys ( $notations[$lang]['progs']) as $setting_name )
@@ -453,7 +454,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 		return scorerender_return_fragment_error ( $render, $lang, $sr_options['ERROR_HANDLING'] );
 
 	if ( !extension_loaded ('gd') )
-		return __('[Scorerender error: PHP GD extension is not installed or enabled on this host]');
+		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host') );
 
 	// No errors, so generate HTML
 	// Not nice to show source in alt text or title, since music source
@@ -467,6 +468,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
  * Used as a shortcode callback when certain notation is not supported
  * on the blog, usually by unsetting corresponding program in admin page
  *
+ * @uses SrNotationBase::format_error_msg()
  * @param $attr array Array of shortcode attributes, only language name is used here
  * @param $content string The content enclosed in shortcode, unused in this func
  * @param $code string Shortcode tag used
@@ -477,8 +479,9 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "")
 	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
 		$attr['lang'] = $code;
 
-	return sprintf (__("[ScoreRender error: '%s' notation is not supported on this blog]", TEXTDOMAIN),
-			$attr['lang']);
+	return SrNotationBase::format_error_msg (
+			sprintf (__("'%s' notation is not supported on this blog", TEXTDOMAIN),
+			$attr['lang']) );
 }
 
 

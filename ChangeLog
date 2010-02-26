@@ -1,8 +1,9 @@
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
-	* scorerender-class.php:
-	- (format_error_msg): Make this func public, it can be useful
-	  even when outside class.
+	* scorerender-class.php (format_error_msg):
+	- Make this func public, it can be useful even when outside class.
+	* wp-scorerender.php:
+	- Use it globally.
 
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
