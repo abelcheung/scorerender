@@ -140,6 +140,18 @@ public function set_music_fragment ($input)
 	$this->_input = $input;
 }
 
+
+/**
+ * Output raw fragment content
+ * @since 0.3.50
+ * @return string The raw fragment content without any processing
+ */
+public function get_raw_input ()
+{
+	return $this->_input;
+}
+
+
 /**
  * Set the main program used to render music
  *
@@ -599,7 +611,8 @@ final public function render()
 	    (filesize ($intermediate_image)) === 0)
 	{
 		if (! SR_DEBUG) {
-			unlink ($input_file);
+			@unlink ($input_file);
+			@unlink ($intermediate_image);
 			@rmdir ($temp_working_dir);
 		}
 		$this->error_code = ERR_RENDERING_ERROR;
@@ -615,8 +628,8 @@ final public function render()
 
 	// Cleanup
 	if (! SR_DEBUG) {
-		unlink ($intermediate_image);
-		unlink ($input_file);
+		@unlink ($input_file);
+		@unlink ($intermediate_image);
 		@rmdir ($temp_working_dir);
 	}
 
