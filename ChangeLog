@@ -1,5 +1,11 @@
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-admin.php:
+	- (update_options): Fix incorrect parenthesis enclosing.
+	- (admin_page): More elaborate help, also explaning new shortcode
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* wp-scorerender.php:
 	- (scorerender_shortcode_handler) Also checks existance of GD
 	  extension before result output.
