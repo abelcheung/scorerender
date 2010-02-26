@@ -96,7 +96,7 @@ private function update_options ()
 			'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', TEXTDOMAIN)),
 		'cache_dir_not_writable' => array (
 			'level'   => MSG_FATAL  ,
-			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', TEXTDOMAIN)), admin_url('options-misc.php')),
+			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', TEXTDOMAIN), admin_url('options-misc.php'))),
 		'wrong_frag_per_comment' => array (
 			'level'   => MSG_WARNING,
 			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
@@ -505,15 +505,20 @@ public function admin_page ()
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 
 	<div id="sr-help-1" class="hidden">
-		<p><?php _e('ImageMagick &ge; 6.3.6-2 must be present and working (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></p>
+		<p><?php _e("ImageMagick &ge; 6.3.6-2 must be present and working (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN); ?></p>
 
-		<p><?php _e('The following notations are supported by ScoreRender, along with starting and ending shortcode after each notation name. Each music fragment must be enclosed by corresponding pair of shortcodes. Click on the links to read more about each notation.', TEXTDOMAIN); ?></p>
+		<p><?php _e('Each music fragment must be enclosed by a pair of shortcodes, in the following format:', TEXTDOMAIN) ?></p>
+		<blockquote><code>[score lang="<em>xxxx</em>"]&hellip;&hellip;[/score]</code></blockquote>
+		<p><?php _e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name):', TEXTDOMAIN) ?></p>
 		<ul>
-<?php	foreach ($notations as $tag => $notation_data) : ?>
-		<li><a target="_blank" href="<?php echo $notation_data['url']; ?>"><?php echo $notation_data['name']; ?></a>
-		(<code><?php echo $notation_data['starttag']; ?></code>, <code><?php echo $notation_data['endtag']; ?></code>)</li>
-<?php	endforeach; ?>
+<?php	foreach ($notations as $tag => $notation_data)
+		printf ("<li><a target='_blank' href='%s'>%s</a> (<code>%s</code>)</li>\n",
+				$notation_data['url'], $notation_data['name'], $tag);
+?>
 		</ul>
+		<p><?php printf (__('For example, to add a score fragment in ABC notation, use %s. For compatibility the shorthand %s is also supported but might be discontinued later. Click on the links to read more about each notation, including examples and documentation about the notation.', TEXTDOMAIN),
+				'<code style="white-space: nowrap">[score lang="abc"]&hellip;&hellip;[/score]</code>',
+				'<code style="white-space: nowrap">[<em>xxxx</em>]&hellip;&hellip;[/<em>xxxx</em>]</code>'); ?></p>
 	</div>
 
 <?php
