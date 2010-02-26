@@ -1,5 +1,12 @@
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-class.php:
+	- (get_raw_input): New func, for getting unprocessed music code.
+	- (render): Also remove intermediate file, sometimes those files
+	  exists even when initial rendering step failed.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* misc/tint-image.php:
 	- Don't allocate unused variable to preg_match.
 
