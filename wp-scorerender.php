@@ -298,81 +298,87 @@ function scorerender_get_cache_location ()
 
 
 /**
- * Generate HTML content from error message or rendered image
+ * Generate HTML error message upon rendering failure
  *
- * @uses SrNotationBase::render()
- * @uses SrNotationBase::get_notation_name() Used when showing original content upon error
- * @uses SrNotationBase::get_music_fragment() Used when showing original content upon error
+ * @uses SrNotationBase::get_raw_input() Used when showing raw music code upon error
  * @uses SrNotationBase::get_command_output() Used when showing error message upon error, and debug is on
  * @uses SrNotationBase::get_error_msg() Used when showing error message upon error, and debug is off
- * @uses scorerender_get_cache_location() For getting cached image location and read its size
  *
  * @param object $render PHP object created for rendering relevant music fragment
+ * @return string HTML content containing error message or empty string, depending on setting.
+ */
+function scorerender_return_fragment_error ( $render, $tag, $error_handling )
+{
+	switch ( $error_handling )
+	{
+	  case ON_ERR_SHOW_NOTHING:
+		return '';
+
+	  case ON_ERR_SHOW_FRAGMENT:
+		return "[score lang='$tag']" .
+			htmlentities ( $render->get_raw_input() ) .
+			"[/score]\n";
+	  default:
+		if (SR_DEBUG)
+			return "<div class='scorerender-error'><pre>" . htmlentities ( $render->get_command_output() ) . "</pre></div>";
+		else
+			return "<div class='scorerender-error'><pre>" . htmlentities ( $render->get_error_msg() ) . "</pre></div>";
+	}
+}
+
+
+/**
+ * Generate HTML content from rendered image
+ *
+ * @uses SrNotationBase::get_raw_input() For preparing the code content for clipboard copying
+ * @uses scorerender_get_cache_location() For getting cached image path and reading its size
+ *
+ * @param object $render PHP object created for rendering relevant music fragment
+ * @param string $tag The notation name as a shortcode tag
+ * @param string $imgname The resulting image name upon successful rendering
+ * @param string $color The color used when author specify custom color for certain fragment
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
-function scorerender_process_content ($render)
+function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
 {
-	global $sr_options, $notations;
+	global $sr_options;
 
-	$result = $render->render();
-
-	if (false === $result)
-	{
-		switch ($sr_options['ERROR_HANDLING'])
-		{
-		  case ON_ERR_SHOW_NOTHING:
-			return '';
-
-		  case ON_ERR_SHOW_FRAGMENT:
-			if ( false !== ( $name = $render->get_notation_name () ) )
-				return $notations[$name]['starttag'] . "\n" .
-					$render->get_music_fragment() . "\n" .
-					$notations[$name]['endtag'];
-			else
-				return __('[Unknown notation type]') . "\n" .
-					$render->get_music_fragment();
-
-		  default:
-			if (SR_DEBUG)
-				return $render->get_command_output ();
-			else
-				return $render->get_error_msg ();
-		}
-	}
-
-	// No errors, so generate HTML
-	// Not nice to show source in alt text or title, since music source
-	// is most likely multi-line, and some are quite long
-
-	// This idea is taken from LatexRender demo site
-	if ($sr_options['SHOW_SOURCE'])
-	{
-		$html = sprintf ("<form target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
-		$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s' />\n",
-			__('Click on image to view source', TEXTDOMAIN),
-			__('Music fragment', TEXTDOMAIN),
-			plugins_url ('scorerender/misc/tint-image.php') . '?img=' . $result );
-
-		if ( false === ( $name = $render->get_notation_name() ) )
-			// Shouldn't reach here
-			return __('[Unknown notation type]');
-
-		$content = $notations[$name]['starttag'] . "\r\n" .
-			preg_replace ("/(?<!\r)\n/s", "\r\n", $render->get_music_fragment()) . "\r\n" .
-			$notations[$name]['endtag'];
-
-		$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n",
-			rawurlencode (htmlentities ($content, ENT_NOQUOTES, get_bloginfo ('charset'))));
-	}
+	if ( !is_null ( $color ) )
+		$imgurl = add_query_arg (
+				array (
+					'img' => $imgname,
+					'color' => preg_replace ( '/^#/', '', $color )
+				),
+				plugins_url ('scorerender/misc/tint-image.php')
+		);
 	else
+		$imgurl = add_query_arg ( array ( 'img' => $imgname ),
+				plugins_url ('scorerender/misc/tint-image.php')
+		);
+
+	if ( !$sr_options['SHOW_SOURCE'] )
 	{
-		$dir = scorerender_get_cache_location();
-		list ($width, $height, $type, $attr) = getimagesize( $dir.'/'.$result );
-		$html .= sprintf ("<img class='scorerender-image' $attr title='%s' alt='%s' src='%s' />\n",
-			__('Music fragment', TEXTDOMAIN),
-			__('Music fragment', TEXTDOMAIN),
-			plugins_url ('scorerender/misc/tint-image.php') . '?img=' . $result );
+		list ( $width, $height, $type, $attr ) =
+			getimagesize ( scorerender_get_cache_location() .'/'. $imgname );
+		return sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' />\n",
+				$attr,
+				__('Music fragment', TEXTDOMAIN),
+				__('Music fragment', TEXTDOMAIN),
+				$imgurl );
 	}
+
+	$html = sprintf ("<form target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
+	$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s' />\n",
+		__('Click on image to view source', TEXTDOMAIN),
+		__('Music fragment', TEXTDOMAIN),
+		$imgurl );
+
+	$content = "[score lang='$tag']\r\n" .
+		preg_replace ( "/(?<!\r)\n/s", "\r\n", $render->get_raw_input() ) . "\r\n" .
+		"[/score]\r\n";
+
+	$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n",
+		rawurlencode ( htmlentities ( $content, ENT_NOQUOTES, get_option ('blog_charset') ) ) );
 
 	return $html;
 }
@@ -382,16 +388,21 @@ function scorerender_process_content ($render)
  * Shortcode callback for all supported notations
  *
  * Create PHP object for each kind of supported notation, and set
- * all relevant parameters needed for rendering. Afterwards, pass
- * everything to scorerender_process_content() for rendering.
+ * all relevant parameters needed for rendering. Afterwards, render
+ * the image and pass the result to other functions for displaying
+ * error message or HTML containing image.
  *
- * @uses scorerender_process_content()
  * @uses SrNotationBase::set_programs()
  * @uses SrNotationBase::set_imagemagick_path()
  * @uses SrNotationBase::set_temp_dir()
  * @uses SrNotationBase::set_cache_dir()
  * @uses SrNotationBase::set_img_width()
  * @uses SrNotationBase::set_music_fragment()
+ * @uses SrNotationBase::render()
+ * @uses scorerender_get_cache_location()
+ * @uses scorerender_return_fragment_ok()
+ * @uses scorerender_return_fragment_error()
+ * @uses extension_loaded() For checking existance of GD extension
  *
  * @return string Either HTML content containing rendered image, or HTML error message on failure
  */
@@ -436,7 +447,19 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 
 	$render->set_music_fragment ( trim ( html_entity_decode ($content) ) );
 
-	return scorerender_process_content ($render);
+	$imgname = $render->render();
+
+	if ( !$imgname )
+		return scorerender_return_fragment_error ( $render, $lang, $sr_options['ERROR_HANDLING'] );
+
+	if ( !extension_loaded ('gd') )
+		return __('[Scorerender error: PHP GD extension is not installed or enabled on this host]');
+
+	// No errors, so generate HTML
+	// Not nice to show source in alt text or title, since music source
+	// is most likely multi-line, and can be very long
+	// This idea is taken from LatexRender demo site
+	return scorerender_return_fragment_ok ( $render, $lang, $imgname, $color );
 }
 
 
