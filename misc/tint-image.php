@@ -50,7 +50,7 @@ else
 	$hexcolor = strtoupper ($settings['NOTE_COLOR']);
 }
 
-if ( !preg_match ('/^#?([0-9A-F]{6})$/', $hexcolor, $matches) )
+if ( !preg_match ('/^#?([0-9A-F]{6})$/', $hexcolor) )
 	exit_and_dump_error ("Incorrect color format\n", 4);
 $color = hexdec ($hexcolor);
 
