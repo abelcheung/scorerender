@@ -1,5 +1,15 @@
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php:
+	- (scorerender_shortcode_handler) Also checks existance of GD
+	  extension before result output.
+	- (scorerender_return_fragment_ok) New func.
+	- (scorerender_return_fragment_error) New func.
+	- (scorerender_process_content) Removed, now split into the 2
+	  new funcs above.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php:
 	- (get_raw_input): New func, for getting unprocessed music code.
 	- (render): Also remove intermediate file, sometimes those files
