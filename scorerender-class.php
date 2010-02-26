@@ -201,7 +201,6 @@ public function get_command_output ()
  * Returns notation name, by comparing class name with notation name list.
  *
  * @return string|boolean Return notation name if found, FALSE otherwise.
- * @uses format_error_msg()
  * @since 0.2
  */
 public function get_notation_name ()
@@ -292,7 +291,7 @@ public function set_img_width ($width)
  * @return string Formatted message
  * @since 0.3
  */
-private function format_error_msg ($mesg)
+public static function format_error_msg ($mesg)
 {
 	return sprintf (__('[ScoreRender Error: %s]', TEXTDOMAIN), $mesg);
 }
