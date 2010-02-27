@@ -26,15 +26,16 @@ class ScoreRenderAdmin
  *
  * @since 0.2
  * @uses scorerender_get_cache_location() For reading cached image folder and counting images
- * @return integer number of images inside cache directory, or -1 if cache dir can't be read
+ * @return WP_Error|int Number of images inside cache directory, or WP_Error if directory is unreadable
  * @access private
  */
 private function get_num_of_images ()
 {
-	if ( false === ( $handle = opendir (scorerender_get_cache_location()) ) ) return -1;
+	if ( false === ( $handle = @opendir (scorerender_get_cache_location()) ) )
+		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', TEXTDOMAIN) );
 
 	$count = 0;
-	while (false !== ($file = readdir ($handle)))
+	while (false !== ($file = @readdir ($handle)))
 		if (preg_match (REGEX_CACHE_IMAGE, $file)) $count++;
 
 	closedir ($handle);
@@ -47,20 +48,28 @@ private function get_num_of_images ()
  *
  * @since 0.2
  * @uses scorerender_get_cache_location() For searching cached image folder and deleting images
+ * @return WP_Error|bool WP_Error on failure, true on success
  * @access private
  */
 private function remove_cache ()
 {
-	if ( false === ( $handle = opendir (scorerender_get_cache_location()) ) ) return;
+	$dir = scorerender_get_cache_location();
+	if ( false === ( $handle = @opendir ( $dir ) ) )
+		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', TEXTDOMAIN) );
 
-	while (false !== ($file = readdir ($handle)))
+	$cwd = getcwd();
+	if ( false === @chdir ($dir) )
+		return new WP_Error ( 'sr_chdir_fail', __('Fail to change into cache directory', TEXTDOMAIN) );
+
+	while (false !== ($file = @readdir ($handle)))
 	{
 		if (preg_match (REGEX_CACHE_IMAGE, $file))
-			@unlink ($dir . DIRECTORY_SEPARATOR . $file);
+			@unlink ($file);
 	}
 	closedir ($handle);
+	chdir ($cwd);
 
-	return;
+	return true;
 }
 
 
@@ -168,13 +177,6 @@ private function update_options ()
 	transform_paths ($sr_options, TRUE);
 	update_option ('scorerender_options', $sr_options);
 	transform_paths ($sr_options, FALSE);
-
-	if (SR_DEBUG)
-	{
-		echo '<div id="message" class="updated"><p><pre>$_POST = ' .
-			var_export ($_POST['ScoreRender'], true) .
-			"</pre></p></div>\n";
-	}
 
 	if ( !empty ($errmsgs) )
 	{
@@ -453,14 +455,14 @@ private function admin_section_caching ()
 ?>
 	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
 <?php
-	$img_count = $this->get_num_of_images();
+	$result = $this->get_num_of_images();
 
-	if ( 0 > $img_count )
-		echo "<font color='red'>" . __('Cache directory is not readable, thus no image count is shown.', TEXTDOMAIN) . "<br />";
+	if ( is_wp_error ( $result ) )
+		echo "<font color='red'>" . $result->get_error_message() . "</font><br />";
 	else
 		printf (__ngettext("Cache directory contains %d image.\n",
 				   "Cache directory contains %d images.\n",
-				   $img_count, TEXTDOMAIN), $img_count);
+				   $result, TEXTDOMAIN), $result);
 
 	$dir = scorerender_get_cache_location();
 	if ( is_writable ($dir) && is_readable ($dir) ) :
@@ -468,7 +470,7 @@ private function admin_section_caching ()
 	<input type="submit" name="clear_cache" class="button-secondary" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 <?php else : ?>
 	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
-	<br /><font color="red"><?php echo $dir; _e('Cache can&#8217;t be cleared because folder permission is incorrect. It must be both readable and writable by web server.', TEXTDOMAIN) ?></font>
+	<br /><font color="red"><?php printf (__('Cache folder %s can&#8217;t be cleared because folder permission is incorrect. It must be both readable and writable by web server.', TEXTDOMAIN), $dir) ?></font>
 <?php endif;
 }
 
@@ -492,10 +494,24 @@ public function admin_page ()
 {
 	global $sr_options, $notations;
 
+	if ( SR_DEBUG && !empty ($_POST) )
+	{
+		echo '<div id="sr-admin-form-data" class="updated"><p><pre>$_POST = ' .
+			var_export ($_POST, true) .
+			"</pre></p></div>\n";
+	}
+
 	if ( isset($_POST['clear_cache']) && isset($_POST['ScoreRender']) )
 	{
 		check_admin_referer ('scorerender-update-options');
-		$this->remove_cache();
+		$retval = $this->remove_cache();
+		if ( is_wp_error ( $retval ) )
+		{
+			printf ( "<div id='%s' class='error scorerender-error'><p><strong>" . 
+				__('ERROR: Cache removal failed, error message is: &#8216;%s&#8217;', TEXTDOMAIN) .
+				"</strong></p></div>\n",
+				$retval->get_error_code(), $retval->get_error_message() );
+		}
 	}
 
 	if ( isset($_POST['Submit']) && isset($_POST['ScoreRender']) )
