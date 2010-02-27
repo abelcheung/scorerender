@@ -26,11 +26,6 @@ Author URI: http://me.abelcheung.org/
 define ('DATABASE_VERSION', 17);
 
 /**
- * Most apps hardcode DPI value to 72 dot per inch
- */
-define ('DPI', 72.0);
-
-/**
  * Translation text domain
  */
 define ('TEXTDOMAIN', 'scorerender');

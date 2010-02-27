@@ -102,7 +102,7 @@ private function update_options ()
 			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_image_max_width'  => array (
 			'level'   => MSG_WARNING,
-			'content' => __('Image maximum width must be positive integer >= 72. Value discarded.', TEXTDOMAIN)),
+			'content' => __('Image maximum width must be integer and at least 100. Value discarded.', TEXTDOMAIN)),
 		'convert_bin_problem'    => array (
 			'level'   => MSG_FATAL  ,
 			'content' => __('Failed to detect usable ImageMagick <tt>convert</tt> program! The plugin will stop working.', TEXTDOMAIN)),
@@ -155,7 +155,7 @@ private function update_options ()
 		unset ($newopt['FRAGMENT_PER_COMMENT']);
 	}
 
-	if ( !ctype_digit ($newopt['IMAGE_MAX_WIDTH']) || ($newopt['IMAGE_MAX_WIDTH'] < (1 * DPI)) )
+	if ( !ctype_digit ($newopt['IMAGE_MAX_WIDTH']) || ($newopt['IMAGE_MAX_WIDTH'] < 100) )
 	{
 		$errmsgs[] = 'wrong_image_max_width';
 		unset ($newopt['IMAGE_MAX_WIDTH']);

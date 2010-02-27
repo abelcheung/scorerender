@@ -42,7 +42,7 @@ function __construct ()
 public function set_img_width ($width)
 {
 	parent::set_img_width ($width);
-	$this->img_max_width /= DPI;
+	$this->img_max_width /= 72;
 }
 
 /**

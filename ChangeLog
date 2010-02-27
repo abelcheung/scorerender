@@ -1,5 +1,12 @@
 2010-02-27  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/mup.php, wp-scorerender.php, scorerender-admin.php:
+	- Drop DPI definition which is not widely used.
+	* scorerender-admin.php:
+	- Sets minimum score width to 100px instead.
+
+2010-02-27  Abel Cheung  <abelcheung@gmail.com>
+
 	* misc/tint-image.php:
 	- Always log via error_log() instead of writing custom file.
 	- Fix a bug where cache dir setting is not retrieved if color
