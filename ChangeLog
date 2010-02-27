@@ -1,5 +1,10 @@
 2010-02-27  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-admin.php:
+	- Better error handling and make use of WP_Error.
+
+2010-02-27  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/mup.php, wp-scorerender.php, scorerender-admin.php:
 	- Drop DPI definition which is not widely used.
 	* scorerender-admin.php:
