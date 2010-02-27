@@ -1,3 +1,10 @@
+2010-02-27  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/tint-image.php:
+	- Always log via error_log() instead of writing custom file.
+	- Fix a bug where cache dir setting is not retrieved if color
+	  is given via URL (thus image not found).
+	  
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php (scorerender_get_def_settings):

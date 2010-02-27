@@ -16,16 +16,9 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-define ('SR_DEBUG', false);
-// dump to this file if debug is turned on
-$log = sys_get_temp_dir() . '/sr-tint-image.log';
-
 function exit_and_dump_error ($string, $status)
 {
-	global $log;
-
-	if (SR_DEBUG) file_put_contents ($log,
-			strftime ('%x %X') . "\t" . $string, FILE_APPEND);
+	error_log ('ScoreRender (tint-image.php): ' . $string . "\n");
 	exit ($status);
 }
 
@@ -35,44 +28,47 @@ if (file_exists ('../../../../wp-config.php'))
 elseif (file_exists ('../../../wp-config.php'))
 	require_once ('../../../wp-config.php');
 else
-	exit_and_dump_error ("Failed to locate config\n", 1);
+	exit_and_dump_error ("Failed to locate config", 1);
 
 if ( !function_exists ('get_option') )
-	exit_and_dump_error ("Crucial Wordpress function not found\n", 2);
+	exit_and_dump_error ("Crucial Wordpress function not found", 2);
+
+$settings = get_option ('scorerender_options');
+if ( empty ($settings) )
+	exit_and_dump_error ("Failed to retrieve WP config", 2);
 
 if ( array_key_exists ('color', $_GET) )
 	$hexcolor = strtoupper (urldecode ($_GET['color']));
 else
 {
-	$settings = get_option ('scorerender_options');
-	if ( !$settings || !array_key_exists ('NOTE_COLOR', $settings) )
-		exit_and_dump_error ("Can't determine color from config\n", 3);
+	if ( !array_key_exists ('NOTE_COLOR', $settings) )
+		exit_and_dump_error ("Can't determine color from config", 3);
 	$hexcolor = strtoupper ($settings['NOTE_COLOR']);
 }
 
 if ( !preg_match ('/^#?([0-9A-F]{6})$/', $hexcolor) )
-	exit_and_dump_error ("Incorrect color format\n", 4);
+	exit_and_dump_error ("Incorrect color format: '$hexcolor''", 4);
 $color = hexdec ($hexcolor);
 
 if ( !array_key_exists ('img', $_GET) )
-	exit_and_dump_error ("Image name not supplied\n", 5);
+	exit_and_dump_error ("Image name not supplied", 5);
 
 if ( !preg_match ('/^sr-\w+-[0-9A-Fa-f]{32}\.png$/', $_GET['img']) )
-	exit_and_dump_error ("Image name format incorrect\n", 6);
+	exit_and_dump_error ("Image name format incorrect", 6);
 
 $file = '';
 if ( !empty ($settings['CACHE_DIR']) )
 {
 	$file = $settings['CACHE_DIR'] . '/' . $_GET['img'];
 	if ( !file_exists ($file) )
-		exit_and_dump_error ("Image not found\n", 7);
+		exit_and_dump_error ("Image not found: '$file''", 7);
 }
 else
 {
 	$upload_dir = wp_upload_dir();
 	$file = $upload_dir['basedir'] . '/' . $_GET['img'];
 	if ( !file_exists ($file) )
-		exit_and_dump_error ("Image not found\n", 7);
+		exit_and_dump_error ("Image not found: '$file''", 7);
 }
 
 function convertcolor ( $img, $color )
@@ -97,7 +93,7 @@ function convertcolor ( $img, $color )
 
 $img = imagecreatefrompng ($file);
 if ( !is_resource ($img) )
-	exit_and_dump_error ("Failed to create image resource\n", 8);
+	exit_and_dump_error ("Failed to create image resource", 8);
 
 
 imagealphablending ($img, false);
