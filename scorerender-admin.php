@@ -169,6 +169,13 @@ private function update_options ()
 	update_option ('scorerender_options', $sr_options);
 	transform_paths ($sr_options, FALSE);
 
+	if (SR_DEBUG)
+	{
+		echo '<div id="message" class="updated"><p><pre>$_POST = ' .
+			var_export ($_POST['ScoreRender'], true) .
+			"</pre></p></div>\n";
+	}
+
 	if ( !empty ($errmsgs) )
 	{
 		foreach (array_values ($errmsgs) as $m)
