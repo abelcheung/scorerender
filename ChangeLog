@@ -1,5 +1,10 @@
 2010-02-26  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php (scorerender_get_def_settings):
+	- Make default setting static, so it can be reused later.
+	
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php (format_error_msg):
 	- Make this func public, it can be useful even when outside class.
 	* wp-scorerender.php:

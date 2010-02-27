@@ -115,67 +115,70 @@ require_once('notation/pmw.php');
 function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 {
 	$retval = array();
+	static $default_settings = array();
 
-	$default_settings = array
-	(
-		'DB_VERSION'             => array ('type' => 'none', 'value' => DATABASE_VERSION),
-		'TEMP_DIR'               => array ('type' => 'path', 'value' => sys_get_temp_dir()),
-		'CACHE_DIR'              => array ('type' => 'path', 'value' => ''),
-
-		'IMAGE_MAX_WIDTH'        => array ('type' =>  'int', 'value' => 360),
-		'NOTE_COLOR'             => array ('type' =>  'str', 'value' => '#000000'),
-		'USE_IE6_PNG_ALPHA_FIX'  => array ('type' => 'bool', 'value' => true),
-
-		'SHOW_SOURCE'            => array ('type' => 'bool', 'value' => false),
-		'COMMENT_ENABLED'        => array ('type' => 'bool', 'value' => false),
-		'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
-		'FRAGMENT_PER_COMMENT'   => array ('type' =>  'int', 'value' => 1),
-
-		'CONVERT_BIN'            => array ('type' => 'prog', 'value' => ''),
-		'MUP_REG_KEY'            => array ('type' =>  'str', 'value' => ''),
-	);
-
-	do_action_ref_array ('scorerender_define_setting_type', array(&$default_settings));
-
-	if (TYPES_ONLY == $return_type)
+	if ( empty ($default_settings) )
 	{
-		foreach ($default_settings as $key => $val)
-			$retval += array ($key => $val['type']);
-		return $retval;
-	}
+		$default_settings = array
+		(
+			'DB_VERSION'             => array ('type' => 'none', 'value' => DATABASE_VERSION),
+			'TEMP_DIR'               => array ('type' => 'path', 'value' => sys_get_temp_dir()),
+			'CACHE_DIR'              => array ('type' => 'path', 'value' => ''),
 
-	$convert = '';
+			'IMAGE_MAX_WIDTH'        => array ('type' =>  'int', 'value' => 360),
+			'NOTE_COLOR'             => array ('type' =>  'str', 'value' => '#000000'),
+			'USE_IE6_PNG_ALPHA_FIX'  => array ('type' => 'bool', 'value' => true),
 
-	if ( is_windows() )
-	{
-		$convert = search_path ('convert.exe');
-		if ( !$convert && function_exists ('glob') )
+			'SHOW_SOURCE'            => array ('type' => 'bool', 'value' => false),
+			'COMMENT_ENABLED'        => array ('type' => 'bool', 'value' => false),
+			'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+			'FRAGMENT_PER_COMMENT'   => array ('type' =>  'int', 'value' => 1),
+
+			'CONVERT_BIN'            => array ('type' => 'prog', 'value' => ''),
+			'MUP_REG_KEY'            => array ('type' =>  'str', 'value' => ''),
+		);
+
+		do_action_ref_array ('scorerender_define_setting_type', array(&$default_settings));
+
+		$convert = '';
+
+		if ( is_windows() )
 		{
-			$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
-			$convert = empty ($convert)  ? '' : $convert[0];
+			$convert = search_path ('convert.exe');
+			if ( !$convert && function_exists ('glob') )
+			{
+				$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
+				$convert = empty ($convert)  ? '' : $convert[0];
+			}
 		}
-	}
-	else
-	{
-		if ( function_exists ('shell_exec') )
-			$convert  = shell_exec ('which convert');
 		else
-			$convert = search_path ('convert');
+		{
+			if ( function_exists ('shell_exec') )
+				$convert  = shell_exec ('which convert');
+			else
+				$convert = search_path ('convert');
+		}
+
+		$default_settings['CONVERT_BIN']['value'] = empty ($convert) ? '' : $convert;
+
+		do_action_ref_array ('scorerender_define_setting_value', array(&$default_settings));
+
+		$cachefolder = wp_upload_dir ();
+		$default_settings['CACHE_DIR']['value'] = $cachefolder['basedir'];
 	}
-
-	$default_settings['CONVERT_BIN']['value'] = empty ($convert) ? '' : $convert;
-
-	do_action_ref_array ('scorerender_define_setting_value', array(&$default_settings));
-
-	$cachefolder = wp_upload_dir ();
-	$default_settings['CACHE_DIR']['value'] = $cachefolder['basedir'];
 
 	switch ($return_type)
 	{
+	  case TYPES_ONLY:
+		foreach ($default_settings as $key => $val)
+			$retval += array ($key => $val['type']);
+		return $retval;
+
 	  case VALUES_ONLY:
 		foreach ($default_settings as $key => $val)
 			$retval += array ($key => $val['value']);
 		return $retval;
+
 	  case TYPES_AND_VALUES:
 		return $default_settings;
 	}
