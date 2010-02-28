@@ -318,7 +318,9 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling )
 			"[/score]\n";
 	  default:
 		if (SR_DEBUG)
-			return "<div class='scorerender-error'><pre>" . htmlentities ( $render->get_command_output() ) . "</pre></div>";
+			return "<div class='scorerender-error'>" .
+				"<pre>ERROR: " . htmlentities ( $render->get_error_msg() ) . "</pre><br />" .
+				"<pre>CMD OUTPUT: " . htmlentities ( $render->get_command_output() ) . "</pre></div>";
 		else
 			return "<div class='scorerender-error'><pre>" . htmlentities ( $render->get_error_msg() ) . "</pre></div>";
 	}
