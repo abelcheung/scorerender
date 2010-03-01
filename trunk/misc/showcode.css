@@ -1,0 +1,16 @@
+#code {
+	font-size: 12px;
+	background-color: #FFFFF8;
+	border: 1px solid #900;
+	padding: 8px 5px 8px 5px;
+}
+
+#code pre {
+	font-family: "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+}
+
+#sr_message {
+	padding: 3px 5px 3px 5px;
+	border: 1px solid #900;
+	background-color: #FEE;
+}

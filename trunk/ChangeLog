@@ -1,0 +1,1277 @@
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-utils.php:
+	- (is_midi_file): New func, to check if certain file is a MIDI.
+
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- Adds $imagick_ver for storing detected ImageMagick version
+	- (is_web_hosting) Fix return value.
+	- (is_prog_usable) Overhaul of func, returns WP_Error on error
+	  instead of boolean, adds minimum program version checking,
+	  checks regular expression instead of strings in command output,
+	  and optionally writes detected program version into another var.
+	* notation/{abc,mup,lilypond,pmw}.php:
+	- (is_notation_usable) Adopt the change in is_prog_usable().
+	* scorerender-admin.php:
+	- (update_options) Adopt the change in is_prog_usable(), prints
+	  extra error message returned by is_prog_usable().
+
+2010-02-27  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Better error handling and make use of WP_Error.
+
+2010-02-27  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/mup.php, wp-scorerender.php, scorerender-admin.php:
+	- Drop DPI definition which is not widely used.
+	* scorerender-admin.php:
+	- Sets minimum score width to 100px instead.
+
+2010-02-27  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/tint-image.php:
+	- Always log via error_log() instead of writing custom file.
+	- Fix a bug where cache dir setting is not retrieved if color
+	  is given via URL (thus image not found).
+	  
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php (scorerender_get_def_settings):
+	- Make default setting static, so it can be reused later.
+	
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php (format_error_msg):
+	- Make this func public, it can be useful even when outside class.
+	* wp-scorerender.php:
+	- Use it globally.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (update_options): Fix incorrect parenthesis enclosing.
+	- (admin_page): More elaborate help, also explaning new shortcode
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_shortcode_handler) Also checks existance of GD
+	  extension before result output.
+	- (scorerender_return_fragment_ok) New func.
+	- (scorerender_return_fragment_error) New func.
+	- (scorerender_process_content) Removed, now split into the 2
+	  new funcs above.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- (get_raw_input): New func, for getting unprocessed music code.
+	- (render): Also remove intermediate file, sometimes those files
+	  exists even when initial rendering step failed.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/tint-image.php:
+	- Don't allocate unused variable to preg_match.
+
+2010-02-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/guido.php:
+	- Use more precise sizing and zoom ratio so that image will
+	  not look blurred.
+
+2010-02-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* Initial shortcode support.
+	* Fix comment rendering limitation bug.
+	* wp-scorerender.php:
+	- (scorerender_shortcode_unsupported) New func.
+	- (scorerender_shortcode_handler) New func.
+	- (scorerender_parse_shortcode) New func.
+	- (scorerender_conversion_hook) Removed, routine merged into
+	  scorerender_parse_shortcode().
+	- (scorerender_init_class) Removed, routine merged into
+	  scorerender_shortcode_handler().
+
+2010-02-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-shortcode.php:
+	- New file, taken from WP 2.9.2 as a replacement of shortcode API
+	  because 2.6-2.7 one is not good enough to use.
+
+2010-02-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php:
+	- Rename ScoreRender class to SrNotationBase. 
+
+2010-02-24  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php, notation/*.php:
+	- Rename ScoreRender_Notation interface to SrNotationInterface.
+	
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_conversion_hook) notation was not deactivated even when
+	  corresponding notation program was unset.
+	  
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (cache_location_match) Removed, not used anymore.
+
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Drop CACHE_URL setting completely, now cached images are not accessed
+	  directly via URL.
+	  
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Now CACHE_DIR and CACHE_URL settings can be empty.
+	- Unanimously use scorerender_get_cache_location() to get cache image
+	  folder.
+	  
+2010-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_get_cache_location) Can return both indexed or
+	  associative array.
+	  
+2010-02-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_get_cache_location) New func, for getting location of
+	  cache folder. Similar to the removed scorerender_get_upload_dir().
+	  
+2010-02-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_add_ie6_style) Further removal of ancient WP support.
+
+2010-02-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/tint-image.php:
+	- Accept user supplied color from GET variable.
+
+2010-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/pmw.php:
+	- PostScript transparency for recent ImageMagick is properly detected.
+	- Add option to prevent reading config file.
+
+2010-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/mup.php:
+	- Seems PostScript transparency is properly detected by ImageMagick
+	  on recent Linux too.
+
+2010-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_get_options) Set default value of note color to
+	  white if 'inverted image' option was turned on.
+
+2010-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Move 'show source' setting to contents section.
+
+2010-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (admin_footer, admin_section_content) Properly set disabled css
+	  class for disabled input fields.
+
+2010-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Encapsulate all functions inside ScoreRenderAdmin class.
+
+2010-02-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_process_content) Drop useless Exception handling
+	  which can be replaced by normal logic.
+	* scorerender-class.php:
+	- (get_notation_name) Stop throwing useless Excepsion.
+
+2010-02-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/tint-image.php:
+	- New file, to tint score images using color specified by user.
+	* wp-scorerender.php:
+	- (scorerender_process_content) Always output image using
+	  tint-image.php.
+
+2010-02-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_get_upload_dir) Removed, now that WP 2.6 is required
+	  and wp_upload_dir() is pretty much standardized since then.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Move icon to images/ folder.
+	* wp-scorerender.php, scorerender-admin.php:
+	- Use plugins_url() where applicable.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-class.php:
+	- Rename DEBUG constant to avoid potential name clash.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* MUP magic file setting is replaced by directly entering registration
+	  key.
+	* wp-scorerender.php:
+	- Increase database schema version.
+	* notation/mup.php:
+	- (set_magic_file) Removed.
+	- (set_magic_file_hook) Renamed to more generic set_notation_action().
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-utils.php:
+	- Remove wp_parse_str() backport, as WP 2.2 is no more supported.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* Completely drop 'inverted' setting, introduce 'note_color' setting.
+	  Admin related changes are complete. In the future colored score
+	  fragments are generated on the fly instead of storing multiple copies
+	  of image with different colors. This requires proper support of alpha
+	  channel in PHP GD extension, which is completely broken in some
+	  platforms, such as Debian / Ubuntu except very recent releases.
+	* Now requires WP 2.6 due to usage of plugins_url().
+	* wp-scorerender.php:
+	- Increase database schema version.
+	* scorerender-admin.php:
+	- (scorerender_admin_head) Add color picker CSS.
+	- (scorerender_admin_footer) New func, move existing JavaScript calls
+	  here, and add Color Picker JavaScript calls.
+	- New WP hook to call scorerender_admin_footer().
+	* scorerender-class.php:
+	- (ScoreRender::render) Only use input data sans whitespace as raw data
+	  for hash calculation, so that whitespace change won't modify hash
+	  value.
+
+2010-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* images/*, misc/colorpicker.js, misc/colorpicker.css:
+	- Incorporate jQuery Color Picker by Stefan Petre.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/{abc,lilypond,mup,pmw}.php:
+	- (define_setting_type): Fix incorrect syntax causing failure during
+	  plugin activation.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (scorerender_admin_menu): Simplify admin page URL.
+	- (scorerender_settings_link): New func, add 'Settings' link beside
+	  Activate/Deactivate links in plugin admin page.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/*.php:
+	- Point notation links to official page instead.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Don't add any hook in admin page.
+
+2010-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/lilypond.php:
+	- Precisely determine the version that corresponds to the safe mode
+	  option change.
+
+2010-02-12  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/lilypond.php:
+	- (conversion_step1) Yet another fix for lilypond invocation. Safe
+	  mode is there after all.
+
+2010-02-12  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php, misc/showcode.php:
+	- Update copyright, switch to AGPL v3.
+
+2010-02-12  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/ZeroClipboard.js:
+	- Use newest upstream release, 1.0.5.
+
+2010-02-12  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (scorerender_admin_add_js) Rename to scorerender_admin_head().
+	- Add help icon next to admin page header, and make help text foldable.
+
+2010-02-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (scorerender_admin_options) Fix incorrectly placed html tags in
+	  admin form, add icon to admin title.
+
+2009-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-utils.php:
+	- (search_path) New func, for searching program in PATH environment
+	  variable.
+	* wp-scorerender.php:
+	- (scorerender_get_def_settings) Move notation program searching to
+	  each notation file.
+	* scorerender-class.php, notation/*.php:
+	- (define_setting_value) New func, for detecting notation program
+	  location.
+
+2009-08-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/lilypond.php:
+	- (conversion_step1) Detect lilypond version and adjust command line
+	  accordingly. Even lilypond command line options are unstable.
+	- (lilypond_version) New func.
+
+2009-08-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php, wp-scorerender.php, scorerender-class.php:
+	- Completely remove any variables and admin options to check maximum
+	  length of music fragment. This number is not useful against abuse
+	  nor eases resource usage.
+
+2009-08-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php:
+	- PHP documentation update.
+	* scorerender-class.php:
+	- Drop ERR_INTERNAL_CLASS, which is no more needed because of PHP
+	  interface restriction.
+	- Drop all method declarations already existed in ScoreRender class.
+	* notation/mup.php, notation/abc.php:
+	- (set_img_width) Use existing $img_max_width directly, instead of
+	  using new variable.
+
+2009-08-06  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/*.php:
+	- Fix function declaration.
+
+2009-08-06  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- Use positive numbers for error constants.
+	- Utilize PHP interface to make sure each notation implements all
+	  necessary methods.
+	* notation/*.php:
+	- Utilize PHP interface.
+	* notation/guido.php:
+	- Add all dummy functions necessary for PHP interface.
+
+2009-08-04  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Move default setting definition to each notation file.
+	- (scorerender_get_def_settings) Add hook for defining default
+	  settings.
+	- (scorerender_init_class, scorerender_conversion_hook) Adopt for
+	  change of structure of $notations.
+	* scorerender-class.php:
+	- (set_img_width) Simplify string.
+	* notation/*.php:
+	- (is_notation_usable, program_setting_entry) Adopt for change of
+	  structure of $notations.
+	- (define_setting_type) New func.
+
+2009-08-03  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- scorerender_filter() -> scorerender_init_class(), better reflecting
+	  its actual purpose.
+	- scorerender_do_conversion() -> scorerender_conversion_hook()
+	* scorerender-class.php, notation/*.php:
+	- (program_setting_entry): Drop $id parameter.
+
+2009-08-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php (scorerender_admin_section_prog):
+	- Move program settings in admin page to each notation php.
+	* scorerender-class.php, notation/*.php:
+	- (program_setting_entry) New func for generating HTML fragment for
+	  admin page.
+
+2009-07-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Move notation data to each notation file.
+	* scorerender-class.php:
+	- Mark is_web_hosting() and is_prog_usable() as static function.
+	* scorerender-admin.php (scorerender_update_options):
+	- Move error messages and program checking to each notation file, and
+	  use wordpress hook to execute them.
+	* notation/{abc,lilypond,mup,pmw}.php:
+	- (define_admin_messages): New func.
+	- (is_notation_usable): Reworked to produce error message as well.
+	* notation/guido.php (is_notation_usable):
+	- Disabled for now.
+
+2009-07-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- Fix program checking logic, which fails if desired matching string
+	  is not shown on the first line of program output. 
+
+2009-07-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Tweak admin page to match WP 2.8 style.
+	- (scorerender_get_num_of_images) Restore this func.
+	- (scorerender_remove_cache) Simplify check.
+	- (scorerender_admin_options) Fix typo causing javascript to not
+	  included in admin page, strip redundant description.
+	* wp-scorerender.php:
+	- (transform_paths) Move to scorerender-utils.php.
+	- Also define notation URLs and names.
+
+2009-07-24  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php: Version bump.
+	* wp-scorerender.php:
+	- (scorerender_get_def_settings) Avoid determining program path when
+	  just requesting variable types. 
+
+2009-07-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Drop dashboard widget, which is not very useful.
+	- Only add javascript to ScoreRender option page but not others.
+
+2009-05-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php (scorerender_get_def_settings):
+	- Better auto-detection of binary locations.
+
+2009-05-09  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php (scorerender_process_content):
+	- Also show image dimension in output image tag.
+	- Always use \r\n as line break when showing image code, otherwise
+	  copy and paste can be problematic under Windows.
+	* scorerender-class.php, wp-scorerender.php:
+	- Completely remove transparency option, which is not optional now.
+
+2009-05-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender*.php:
+	- Update copyright and version.
+
+	* scorerender-admin.php:
+	- Drop transparency option in admin page.
+	- Change admin page to match WordPress 2.7 style, and use jQuery.
+
+=== ScoreRender 0.3.0 ===
+2009-04-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, showcode.css:
+	- Completely revamped to utilize Zero Clipboard by jhuckaby.
+	  No more "mozilla not supported" thing.
+	- Move to misc/ subfolder.
+
+	* blank.gif, iepngfix.php:
+	- Move to misc/ subfolder.
+
+	* misc/ZeroClipbard.js, misc/ZeroClipboard.swf:
+	- New files.
+
+	* wp-scorerender.php:
+	- No need to use DIRECTORY_SEPARATOR.
+	- Adopt new path for IE png fix and showcode.php.
+
+	* notation/pmw.php:
+	- Fix to reflect the fact that PostScripts generated by PMW don't
+	  have transparency info.
+
+2009-04-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- Cosmetic word changes.
+
+2009-04-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Drop IE warning option, add IE translucency option instead.
+
+2009-03-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* iepngfix.php, blank.gif:
+	- Incorporate IE PNG Alpha Fix v2.0alpha3 from
+	  http://www.twinhelix.com/css/iepngfix/
+	* wp-scorerender.php (scorerender_add_ie6_style):
+	- Add relevant CSS style for IE <= 6.
+
+2009-03-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php, scorerender-admin.php:
+	- If web host disabled certain PHP process execution functions, just
+	  display warning message instead of running into fatal error.
+
+2009-01-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- (_exec) Replace batch file creation hack with "cmd /c : &" hack,
+	  which is not as fragile as batch file creation and deletion.
+	* notation/mup.php:
+	- (conversion_step1) Adjust temp license file creation routine, since
+	  batch file is no more used.
+
+2008-10-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-utils.php:
+	- (wp_parse_str) Taken from WordPress for backword compat with WP 2.2
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Move all admin related stuff to scorerender-admin.php, and only
+	  include them if WP_ADMIN is defined (inside admin page).
+
+	* wp-scorerender.php:
+	- (scorerender_get_def_settings, scorerender_populate_options) Move
+	  default setting into functions, for some unknown reason global
+	  variables disappear upon plugin activation, thereby rendering
+	  default settings to nil. Fix plugin upgrade.
+
+2008-09-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_filter) Only convert content if user as unfiltered_html
+	  capability and content is not a comment.
+
+2008-09-28  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-class.php:
+	- When notation name is not found, throw exception instead.
+
+2008-09-27  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php (scorerender_filter):
+	* notation/mup.php (set_magic_file_hook):
+	- Instead of hardcoding extra setting for Mup, add wordpress action to
+	  handle any extra settings instead. More scalable, though
+	  that means injecting setting names into class directly.
+
+	* scorerender-class.php:
+	- (scorerender_cache_location_match) New func. Check if cache dir and
+	  cache url matches.
+
+2008-09-24  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php: More phpdoc update.
+
+2008-09-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php, notation/*.php: phpdoc update.
+
+2008-09-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, scorerender-admin.php:
+	- Move WP admin related functions to scorerender-admin.php
+
+2008-09-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/mup.php:
+	- (conversion_step1) Make sure license file is used on Windows.
+	- (conversion_step2) Fix transparency issues on Windows. Holy crap.
+
+2008-09-19  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- (create_temp_dir) Moved to scorerender-utils.php.
+
+2008-09-19  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Code refactoring, move util functions to
+	  scorerender-utils.php
+	* class.scorerender.inc.php -> scorerender-class.php
+	* Other include files moved to notation/ folder
+
+2008-09-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php: Moved to notation/ subdirectory.
+	* wp-scorerender.php: Updated file locations to reflect file move.
+
+2008-09-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_update_options) Fix bug: IE transparency warning option
+	  can't be turned off once it is turned on.
+
+2008-09-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.{pmw,lilypond,abc,mup}.inc.php:
+	- Don't add stderr redirection, let _exec handle that.
+
+	* class.scorerender.inc.php:
+	- (create_temp_dir) Set default argument for 1st argument.
+	- (_exec) Create batch file for Windows before execution, to
+	  circumvent stupid exec bug.
+
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.pmw.inc.php: Fix ImageMagick and PMW command invocation.
+	* wp-scorerender.php, class.scorerender.inc.php: Allows crude debugging.
+
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.pmw.inc.php: New file for Philip's Music Writer support.
+	* wp-scorerender.php: Add changes necessary for PMW support.
+
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php:
+	- (create_temp_dir) Fix usage and parent directory name.
+
+	* class.{guido,scorerender}.inc.php:
+	- Hide unimportant errors.
+
+2008-09-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.{abc,mup,lilypond,scorerender}.inc.php:
+	- Quote command line arguments properly (yes, PHP Win32 does not support
+	  quoting commands at least since 4.3.x)
+
+	* wp-scorerender.php: All sort of Win32 fixes.
+	- (get_path_presentation) New func. Convert slash <-> backslash in paths.
+	- (transform_paths) New func. Convert path slashes in settings.
+	- (is_absolute_path) New func. Self-explanatory.
+	- (get_upload_dir) Rewrite to allow transforming slashes <--> backslashes.
+	- (scorerender_get_options, scorerender_update_options) Convert to backslashes
+	  for displaying paths under Windows, but store Unix style slashes in DB.
+
+	* class.scorerender.php:
+	- (create_temp_dir) New func. Like tempnam, but for directory. Not good to
+	  litter all temp files under $TMP.
+	- (_exec) Rewritten to use popen, so need not assign another variable for output.
+	- (render) Adjusted to use temp dir instead of temp file.
+
+2008-09-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	- Cosmetic changes: indentation
+	- (execute) Rename to conversion_step1()
+	- (convertimg) Rename to conversion_step2()
+
+2008-09-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Eliminate incorrect use of attribute_escape().
+	- (is_windows) New func. Convenient func for determining Windows platform.
+
+2008-09-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, class.scorerender.inc.php:
+	- Move error handling into class.
+	- scorerender_generate_html_error -> ScoreRender::get_error_msg()
+	- ScoreRender::render() only emittes failure instead of returning
+	  error code, since error is retrieved by get_error_msg() instead.
+
+	* class.*.inc.php:
+	- Fix is_notation_usable(), it should be invokable even if no class is
+	  initialized.
+
+2008-09-04  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php: Completely eliminate class constructor.
+
+	* wp-scorerender.php:
+	- (scorerender_do_content, scorerender_do_comment) Dropped.
+	  Replaced by anonymous function in add_action().
+
+	* class.scorerender.inc.php:
+	- (init_options) Dropped. $this->_options truely gone.
+
+2008-09-03  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_process_content) Very minor change in CSS.
+	- (scorerender_filter) Also set program names in class methods.
+
+	* class.scorerender.inc.php:
+	- (set_programs) New func. For specifying programs used for rendering.
+	
+	* class.mup.inc.php:
+	- (set_magic_file) New func. For setting magic file.
+
+	* class.*.inc.php:
+	- Eliminate usage of $this->_options.
+
+2008-09-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php:
+	- (set_imagemagick_path, set_inverted, set_transparency, set_temp_dir,
+	  get_temp_dir, set_cache_dir, get_cache_dir, set_max_length,
+	  set_img_width) New func. Add methods for accessing most config
+	  options, avoid sneaking option directly when creating instance.
+	- (render) Return early if cache exist, without any other checks. Use
+	  sys_get_temp_dir() for fallback temp dir.
+	- (is_imagemagick_usable) Dropped, use is_prog_usable() instead.
+
+	* class.*.inc.php:
+	- Use private variables instead of reading options directly.
+
+	* class.mup.inc.php (is_valid_input):
+	- No need to supply input content as function argument now.
+
+	* wp-scorerender.php:
+	- Variable name change: ERR_PROGRAM_MISSING -> ERR_CONVERT_UNUSABLE
+	- (scorerender_filter) Now most options are supplied via class methods.
+	- function name change:
+	  scorerender_content -> scorerender_do_content,
+	  scorerender_comment -> scorerender_do_comment
+	- (scorerender_do_conversion) New func. Merged from aforementioned 2 funcs.
+	- Allows temp dir to be undefined.
+
+=== ScoreRender 0.2.0 ===
+2008-08-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.abc.inc.php (is_notation_usable), wp-scorerender.php,
+	readme.txt:
+	- Enforce usage and checking of abcm2ps.
+
+	* class.*.inc.php (is_notation_usable):
+	- Accept cgi-like string instead of single variable as input, since
+	other notation may require multiple programs and other configurations.
+
+	* class.scorerender.inc.php (is_prog_usable):
+	- Mandates that programs are given in absolute path.
+
+	* wp-scorerender.php:
+	- Ensures hooks are called very early, to prevent WP braindeadness.
+
+2008-08-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php: Better wording about copy and paste error.
+	* wp-scorerender.php: Fix typo.
+
+2008-08-26  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Configuration form tweaking, look and feel more consistent with WP
+	  2.5 admin form now.
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php (convertimg):
+	- Rewritten to fix all hardcoded edge colors and unantialised edges.
+	- Drop alpha channel when not needed, to reduce image size.
+	- Newer imagemagick required.
+
+	* class.lilypond.inc.php (convertimg):
+	- Call ImageMagick with -equalize, PostScript background is #FEFEFE
+	  instead of #FFFFFF.
+
+	* wp-scorerender.php:
+	- Better description of image width setting.
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	- Move transparency and invert options into class variables properly.
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	- Full class method abstraction / protection.
+
+	* class.lilypond.inc.php, class.mup.inc.php, wp-scorerender.php:
+	- Rename is_*_usable() -> is_notation_usable()
+
+	* wp-scorerender.php:
+	- Move all ImageMagick checking to ScoreRender::is_imagemagick_usable().
+
+	* class.mup.inc.php:
+	- Rename isValidInput() -> is_valid_input()
+
+2008-08-22  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	- Use ImageMagick -alpha option, calling -channel alpha not more
+	creates alpha channel automatically.
+	- Simplify calls to convertimg().
+
+2008-08-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, readme.txt:
+	- Recommend usage of abcm2ps only, instead of any abc2ps compatible
+	  program.
+
+2008-08-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php (execute):
+	- Changing zoom factor to account for Guido server default DPI value.
+
+	* class.abc.inc.php:
+	- (abcRender) Use different DPI value since abcm2ps seems to use
+	  quite large value.
+	- (convertimg) Rewrite, old logic don't work anymore,
+	  due to change in ImageMagick / abcm2ps behaviour.
+
+2008-08-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (get_upload_dir) New func.
+	- (scorerender_get_options) Better guess of Windows program path.
+
+2008-08-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- More hintful image title.
+
+2007-08-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.php:
+	- More consistent function naming.
+	- Removal of $this->_uniqueID, use $this->get_notation_name() instead.
+	- Also check if programs are usable by executing a program and
+	  reading its output.
+	* wp-scorerender.php:
+	- Change cache file name, append "sr-<notation>-" to diffrentiate.
+	- load_plugin_textdomain() also check translation in WP lang dir.
+
+2007-06-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php (getInputFileContent):
+	- Removed, use the method in parent class instead.
+
+	* wp-scorerender.php:
+	- No more enables rendering for each notation or post/comment
+	separately; rendering for posts is always enabled, and rendering for
+	comment is unified in one single option.
+
+2007-06-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php (getInputFileContent):
+	- Implement base method but allows other subclasses to override it.
+
+2007-06-12  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, class.*.php:
+	More complete documentation.
+
+2007-06-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: PHP4 compatibility fix.
+
+2007-06-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, wp-scorerender.php:
+	- Load text domain properly.
+
+2007-06-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- (scorerender_admin_section_caching) Disable 'Clear cache' button if
+	directory not writable.
+	- (scorerender_generate_html_error) Reintroduce this function.
+	- Allow other handling methods upon rendering error.
+
+2007-06-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Better ngettext usage.
+
+2007-06-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	- Drop unneeded input variable in getInputFileContents() and class
+	initialization method.
+
+	* class.scorerender.inc.php, wp-scorerender.php:
+	- Add new error constant.
+
+	* class.scorerender.inc.php (setMusicFragment, getMusicFragment):
+	- New method.
+
+	* wp-scorerender.php (scorerender_process_content):
+	- Drop unneeded input variable.
+
+2007-06-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Set start/end tag, regex etc as static variable
+	instead of computed on the fly.
+
+2007-06-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Add tags when showing fragment source.
+
+2007-05-31  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php: Add support for cut and paste on mozilla/firefox
+	browsers.
+
+2007-05-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Supply the cache dir to scorerender_remove_cache() as argument, so
+	this function becomes more generic.
+	- Also show error in dashboard if cache dir is not readable.
+
+2007-05-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	scorerender_process_result() --> scorerender_process_content(), and
+	drop one redundant parameter.
+
+2007-05-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: More phpdoc comments.
+
+2007-05-29  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, class.*.inc.php:
+	- Add option to limit image width.
+
+	* wp-scorerender.php:
+	- Some phpdoc stuff.
+	- Merge scorerender_generate_html_error() into
+	scorerender_process_result().
+
+2007-05-19  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Add option to allow displaying warning about IE
+	incapable of rendering transparent PNG.
+
+2007-05-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Add nonce protection.
+
+2007-05-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Split admin page into smaller trunks.
+
+2007-05-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Tidy up form label.
+
+2007-05-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, wp-scorerender.php: Replace popup with form
+	opened in new window in order to use $_POST instead, as IE
+	chops $_GET values at 2000 chars.
+
+2007-05-09  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, wp-scorerender.php: Fix for popup window showing
+	plus sign as space.
+
+2007-05-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php, showcode.css: Use CSS.
+	* class.*.inc.php: Rename to lower case class name, for easier string
+	concatenation.
+	* wp-scorerender.php:
+	- Eliminate the need of some define'd constant and hardcoded handling
+	  of various music syntax
+	- scorerender_get_fragment_count(): Impl'd.
+	- scorerender_activity_box(): Add more stat to dashboard.
+
+2007-05-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.css: New file.
+	* showcode.php: Add style sheet.
+
+2007-05-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* showcode.php:
+	New file for showing fragment code in popup window.
+
+	* wp-scorerender.php:
+	Add hook for showing stat in WP dashboard.
+
+2007-05-06  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	scorerender_get_num_of_images(), scorerender_remove_cache() - Provide
+	stat of number of cached images, and add button to remove images.
+
+2007-04-14  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Add PHP 4 compatibility function for array_intersect_key().
+
+2007-04-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Supports restricting number of fragment per comment.
+
+2007-04-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php, class.scorerender.inc.php:
+	Supports restricting maximum length per fragment.
+
+2007-04-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Drop support for configurable markup, people probably don't need that.
+
+=== ScoreRender 0.1.2 ===
+
+2007-03-30  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.php: Add +repage option to imagemagick.
+	* wp-scorerender.php: Minor string change.
+
+=== ScoreRender 0.1.1 ===
+
+2007-03-14  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.lilypond.inc.php, class.scorerender.inc.php:
+	Fix transparency rendering of lilypond fragment.
+	* wp-scorerender.php:
+	Big fat warning about conflict with "automatical XHTML nesting fix"
+	option, instead of removing filter.
+
+=== ScoreRender 0.1 ===
+
+2007-03-13  Abel Cheung  <abelcheung@gmail.com>
+
+	* TODO.txt: Add TODO.
+
+2007-03-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Make error messages more consistent, thus less translation needed.
+
+2007-03-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.lilypond.inc.php:
+	Turn on safe mode again, and use convert -density option instead.
+	* class.mup.inc.php:
+	Fix blacklist tags.
+	* class.scorerender.inc.php:
+	Simplify convert command line.
+
+2007-03-11  Abel Cheung  <abelcheung@gmail.com>
+
+	* README.txt:
+	Minor changes.
+	* wp-scorerender.php:
+	Impl sys_get_temp_dir() for determining temp folder
+	automatically. Don't filter through title, because normally
+	title contains only one line, which is not quite enough for
+	melodies. Minor changes of text within option page.
+
+2007-03-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* README.txt:
+	Update.
+
+2007-03-06  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Also apply filter to title and excerpt.
+
+2007-03-02  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	String and minor layout changes for option page.
+
+2007-03-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php:
+	Invoke convert once instead of twice.
+	* wp-scorerender.php:
+	Minor changes of strings in option page.
+
+2007-03-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Mark some strings as localizable.
+
+2007-02-25  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Factor out repetitive filter functions into replace_content().
+
+2007-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Add ABC notation support.
+	* class.abc.inc.php:
+	New file.
+
+2007-02-23  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.scorerender.inc.php:
+	More precaution -- also make it fail if command returns
+	succeed but didn't render any image.
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Add back mistakenly deleted plugin info.
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* LICENSE: Add info.
+	* wp-scorerender.php, class.scorerender.inc.php:
+	Trivial change of variable and function names.
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php:
+	Tweak ImageMagick option so need not use getimagesize().
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php:
+	Fix small typo that prevent guido support from working.
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Really filters content/comment through guido_filter().
+
+2007-02-21  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Allows update of database structure.
+
+2007-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Add guido support.
+
+2007-02-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.guido.inc.php: New file.
+
+2007-02-17  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	Drop latex support. Now read and write configuration
+	option as an array instead of 20+ independent values.
+	Simpler(?) regex for tag matching.
+
+	* class.*.php:
+	Relevant variable changes.
+	Copyright notices.
+
+2007-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php: Rename parent class function name.
+	* class.mup.inc.php, class.scorerender.inc.php:
+	Don't set density anymore, tune staff size instead.
+
+2007-02-16  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.mup.inc.php, class.lilypond.inc.php:
+	Tune the staff size of mup and lilypond so they both
+	output 16pt staves. Drop safe mode for lilypond,
+	otherwise lilypond can't set staff size at all.
+
+2007-02-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.php: Rename classes.
+
+2007-02-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.mup.inc.php, class.scorerender.inc.php:
+	Change density from 110 to 90.
+
+2007-02-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php: Turn on transparency and turn off
+	"show input source" option by default.
+
+2007-02-15  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php: Rename.
+	* wp-figurerender.php: Rename, and include renamed files.
+
+2007-02-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.*.inc.php:
+	_exec() now just returns the exit status of previous command.
+	Command output is already stored in object variable.
+
+	* class.lilypondrender.inc.php:
+	Drop implicit header added to music fragment that caused
+	rendering error.
+
+2007-02-10  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.muprender.inc.php:
+	Also sets $HOME. Mup mandates it. Grrrrr.
+
+	* class.figurerender.inc.php, class.muprender.inc.php:
+	Use touch instead of opening and closing file.
+
+	* wp-figurerender.php:
+	Change latex tag to [tex] and [/tex] (same as LatexRender).
+	Change lilypond tag to [lilypond] and [/lilypond].
+	figurerender_options_updated() - save options properly
+	instead of calling ugly option.php page, and shows warning
+	messages on top if something is wrong.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-figurerender.php:
+	Raise the content filtering to a higher priority to make sure
+	it won't be preceded by wptexturize() or smiley conversion.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.figurerender.inc.php, class.muprender.inc.php:
+	Implement convertimg().
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.figurerender.inc.php, wp-figurerender.php:
+	Implement transparency option.
+	Catch error if input/output file not creatable.
+	Lower privilege to level 9, instead of level 10 (admin).
+
+	* class.muprender.inc.php:
+	Change default binary location to /usr/local/bin/mup.
+
+	* class.lilypondrender.inc.php:
+	Add --safe option to ghostscript.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* README.txt: New file.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-figurerender.php:
+	Add mup configuration options.
+
+	* class.muprender.inc.php:
+	New file.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.latexrender.inc.php, class.lilypondrender.inc.php:
+	Variable name fix, use UTF-8 encoding instead of latin1.
+
+	* wp-figurerender.php:
+	Add more entities to be converted, some HTML conformance.
+
+	* class.figurerender.inc.php:
+	Use tempnam() instead of generating file name with random number.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* class.figurerender.inc.php, wp-figurerender.php:
+	Avoid class constants, i.e. PHP4 compatibility.
+
+2007-02-08  Abel Cheung  <abelcheung@gmail.com>
+
+	* *.php:
+	First import of FigureRender source.
