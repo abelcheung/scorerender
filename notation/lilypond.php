@@ -16,7 +16,7 @@ class lilypondRender extends SrNotationBase
                      implements SrNotationInterface
 {
 
-private $lilypond_ver;
+protected $lilypond_ver = '';
 
 /**
  * Refer to {@link SrNotationInterface::get_music_fragment() interface method}
@@ -90,28 +90,40 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * @uses SrNotationBase::is_prog_usable()
  */
-public static function is_notation_usable ($errmsgs, $opt)
+public function is_notation_usable ($errmsgs = null, $opt)
 {
 	global $notations;
+	static $ok;
 
-	$ok = true;
-	foreach ($notations['lilypond']['progs'] as $setting_name => $program)
+	if ( !isset ($ok) )
 	{
-		if ( empty ($opt[$setting_name]) )
+		$ok = true;
+		foreach ($notations['lilypond']['progs'] as $setting_name => $program)
 		{
-			$ok = false;
-			break;
+			if ( empty ($opt[$setting_name]) )
+			{
+				$ok = false;
+				break;
+			}
+			$lily_ver = '';
+			$result = parent::is_prog_usable ( $program['test_output'], $opt[$setting_name],
+					$program['test_arg'], $program['min_version'], 1, $lily_ver );
+			if ( is_wp_error ($result) || !$result )
+			{
+				$ok = false;
+				break;
+			}
+			// FIXME: hackish, if more than one program this won't work
+			if ( isset ($this) && get_class ($this) == __CLASS__ )
+				$this->lilypond_ver = $lily_ver;
 		}
-		$result = parent::is_prog_usable ( $program['test_output'], $opt[$setting_name],
-				$program['test_arg'], $program['min_version'], 1, $this->lilypond_ver );
-		if ( is_wp_error ($result) || !$result )
-		{
-			$ok = false;
-			break;
-		}
+
+		if (!$ok)
+			if ( !is_null ($errmsgs) ) $errmsgs[] = 'lilypond_bin_problem';
 	}
 
-	if (!$ok) $errmsgs[] = 'lilypond_bin_problem';
+	if ( isset ($this) && get_class ($this) == __CLASS__ )
+		return $ok;
 }
 
 /**

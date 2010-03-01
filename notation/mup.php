@@ -153,29 +153,37 @@ public function set_notation_action ($options)
  * for more detail.
  * @uses SrNotationBase::is_prog_usable()
  */
-public static function is_notation_usable ($errmsgs, $opt)
+public function is_notation_usable ($errmsgs = null, $opt)
 {
 	global $notations;
+	static $ok;
 
-	$ok = true;
-	foreach ($notations['mup']['progs'] as $setting_name => $program)
+	if ( !isset ($ok) )
 	{
-		if ( empty ($opt[$setting_name]) )
+		$ok = true;
+		foreach ($notations['mup']['progs'] as $setting_name => $program)
 		{
-			$ok = false;
-			break;
-		}
-		$result = parent::is_prog_usable ( $program['test_output'],
-				$opt[$setting_name], $program['test_arg']);
+			if ( empty ($opt[$setting_name]) )
+			{
+				$ok = false;
+				break;
+			}
+			$result = parent::is_prog_usable ( $program['test_output'],
+					$opt[$setting_name], $program['test_arg']);
 
-		if ( is_wp_error ($result) || !$result )
-		{
-			$ok = false;
-			break;
+			if ( is_wp_error ($result) || !$result )
+			{
+				$ok = false;
+				break;
+			}
 		}
+
+		if (!$ok)
+		       if ( !is_null ($errmsgs) ) $errmsgs[] = 'mup_bin_problem';
 	}
 
-	if (!$ok) $errmsgs[] = 'mup_bin_problem';
+	if ( isset ($this) && get_class ($this) == __CLASS__ )
+		return $ok;
 }
 
 /**

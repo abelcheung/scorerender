@@ -62,6 +62,8 @@ const ERR_IMAGE_CONVERT_FAILURE = 5;
  */
 const ERR_RENDERING_ERROR = 6;
 
+const ERR_NOTATION_PROGS_UNUSABLE = 7;
+
 /**
  * Error constant representing that ImageMagick convert is unusable.
  */
@@ -101,7 +103,7 @@ protected $imagemagick;
 /**
  * @var string $imagick_ver Version of ImageMagick installed on host 
  */
-protected $imagick_ver;
+protected $imagick_ver = '';
 
 /**
  * @var string $temp_dir Temporary working directory
@@ -339,6 +341,9 @@ public function get_error_msg ()
 
 	  case ERR_FUNC_DISABLED:
 		return $this->format_error_msg (__('Some PHP functions are disabled by web host.', TEXTDOMAIN));
+
+	  case ERR_NOTATION_PROGS_UNUSABLE:
+		return $this->format_error_msg (__('Rendering application is unusable.', TEXTDOMAIN));
 	}
 }
 
@@ -464,7 +469,7 @@ public static function is_web_hosting ()
  * @return WP_Error|bool TRUE if all regex strings are found in command output,
  * WP_Error otherwise (including unexpected error and unmatched regex)
  */
-public static function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", $verpos = 1, &$realver = null)
+public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", $verpos = 1, &$realver = null)
 {
 	if ( ! file_exists ($prog) ) return new WP_Error
 		( 'sr-prog-notexist', __('Program does not exist.', TEXTDOMAIN));
@@ -558,6 +563,8 @@ public static function is_prog_usable ($regexes, $prog, $args = array(), $minver
  */
 final public function render()
 {
+	global $sr_options;
+
 	$hash = md5 (preg_replace ('/\s/', '', $this->_input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
 		       "sr-" . $this->get_notation_name() . "-$hash.png";
@@ -585,6 +592,13 @@ final public function render()
 	if ( is_wp_error ($result) || !$result )
 	{
 		$this->error_code = ERR_CONVERT_UNUSABLE;
+		return false;
+	}
+
+	$result = $this->is_notation_usable (null, $sr_options);
+	if ( is_wp_error ($result) || !$result )
+	{
+		$this->error_code = ERR_NOTATION_PROGS_UNUSABLE;
 		return false;
 	}
 
@@ -729,12 +743,29 @@ interface SrNotationInterface
 	/**
 	 * Check if given program locations are correct and usable
 	 *
-	 * @param array $errmsgs An array of messages to be added if program checking failed
-	 * @param array $opt Reference of ScoreRender option array, containing all program paths
+	 * It can be called both as static method AND class method.
+	 *
+	 * In the first case, it is used as a WP action hook inside admin page
+	 * as program checker. $errmsgs is used to remember error messages
+	 * that shall be printed in top portion of admin page. No value is
+	 * returned.
+	 *
+	 * In second case, it is executed during rendering phase. $errmsgs
+	 * shall be set to NULL, and the function returns either TRUE or
+	 * FALSE, depending on program checking result.
 	 *
 	 * @since 0.3.50
+	 * @param array $errmsgs An array of messages to be added if program
+	 * checking failed. Only used if this is called as a static method.
+	 * Please refer to description of this function for more detail.
+	 * @param array $opt Reference of ScoreRender option array, containing
+	 * all program paths
+	 *
+	 * @return null|bool NULL if it is called as static method, TRUE/FALSE
+	 * if called from instantiated class object. Please refer to description
+	 * of this function for more detail.
 	 */
-	static function is_notation_usable ($errmsgs, $opt);
+	function is_notation_usable ($errmsgs = null, $opt);
 
 	/**
 	 * Define any additional error or warning messages if settings for notation

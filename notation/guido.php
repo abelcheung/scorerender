@@ -83,9 +83,14 @@ public function is_notation_usable ($args = '')
  */
 
 /**
- * @ignore
+ * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
+ * for more detail.
  */
-public static function is_notation_usable ($errmsgs, $opt) {}
+public function is_notation_usable ($errmsgs = null, $opt)
+{
+	if ( isset ($this) && get_class ($this) == __CLASS__ )
+		return true;
+}
 
 /**
  * @ignore

@@ -1,5 +1,15 @@
 2010-03-01  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-class.php, notation/*.php:
+	- (is_notation_usable, is_prog_usable) Allows calling as both a
+	  static method and from instantiated class object, so that they
+	  can be used both during admin page checking and rendering.
+	- (render) Also check for bad notation program.
+	* notation/lilypond.php:
+	- Stores lilypond version as class property during is_prog_usable().
+
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/lilypond.php:
 	- (lilypond_version) Removed, functionality is already implemented
 	  in the new is_prog_usable().
