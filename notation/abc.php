@@ -77,9 +77,21 @@ public static function is_notation_usable ($errmsgs, $opt)
 
 	$ok = true;
 	foreach ($notations['abc']['progs'] as $setting_name => $program)
-		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
-			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
-				$ok = false;
+	{
+		if ( empty ($opt[$setting_name]) )
+		{
+			$ok = false;
+			break;
+		}
+		$result = parent::is_prog_usable ( $program['test_output'],
+				$opt[$setting_name], $program['test_arg']);
+
+		if ( is_wp_error ($result) || !$result )
+		{
+			$ok = false;
+			break;
+		}
+	}
 
 	if (!$ok) $errmsgs[] = 'abcm2ps_bin_problem';
 }
@@ -169,7 +181,7 @@ $notations['abc'] = array (
 			'type'      => 'prog',
 			'value'     => '',
 			'test_arg'  => '-V',
-			'test_output' => 'abcm2ps',
+			'test_output' => '/^abcm2ps-([\d.]+)/',
 		),
 	),
 );

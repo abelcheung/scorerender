@@ -1,3 +1,18 @@
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- Adds $imagick_ver for storing detected ImageMagick version
+	- (is_web_hosting) Fix return value.
+	- (is_prog_usable) Overhaul of func, returns WP_Error on error
+	  instead of boolean, adds minimum program version checking,
+	  checks regular expression instead of strings in command output,
+	  and optionally writes detected program version into another var.
+	* notation/{abc,mup,lilypond,pmw}.php:
+	- (is_notation_usable) Adopt the change in is_prog_usable().
+	* scorerender-admin.php:
+	- (update_options) Adopt the change in is_prog_usable(), prints
+	  extra error message returned by is_prog_usable().
+
 2010-02-27  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-admin.php:

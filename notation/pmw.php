@@ -78,9 +78,21 @@ public static function is_notation_usable ($errmsgs, $opt)
 
 	$ok = true;
 	foreach ($notations['pmw']['progs'] as $setting_name => $program)
-		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
-			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
-				$ok = false;
+	{
+		if ( empty ($opt[$setting_name]) )
+		{
+			$ok = false;
+			break;
+		}
+		$result = parent::is_prog_usable ( $program['test_output'],
+				$opt[$setting_name], $program['test_arg']);
+
+		if ( is_wp_error ($result) || !$result )
+		{
+			$ok = false;
+			break;
+		}
+	}
 
 	if (!$ok) $errmsgs[] = 'pmw_bin_problem';
 }
@@ -163,7 +175,7 @@ $notations['pmw'] = array (
 			'type'      => 'prog',
 			'value'     => '',
 			'test_arg'  => '-V',
-			'test_output' => 'PMW version',
+			'test_output' => '/^PMW version ([\d.-]+)/',
 		),
 	),
 );

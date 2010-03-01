@@ -16,6 +16,8 @@ class lilypondRender extends SrNotationBase
                      implements SrNotationInterface
 {
 
+private $lilypond_ver;
+
 /**
  * Refer to {@link SrNotationInterface::get_music_fragment() interface method}
  * for more detail.
@@ -101,8 +103,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
- * for more detail.
+ * Refer to {@link SrNotationInterface::is_notation_usable() interface method} * for more detail.
+ *
  * @uses SrNotationBase::is_prog_usable()
  */
 public static function is_notation_usable ($errmsgs, $opt)
@@ -111,9 +113,20 @@ public static function is_notation_usable ($errmsgs, $opt)
 
 	$ok = true;
 	foreach ($notations['lilypond']['progs'] as $setting_name => $program)
-		if ( ! empty ($opt[$setting_name]) && ! parent::is_prog_usable (
-			$program['test_output'], $opt[$setting_name], $program['test_arg']) )
-				$ok = false;
+	{
+		if ( empty ($opt[$setting_name]) )
+		{
+			$ok = false;
+			break;
+		}
+		$result = parent::is_prog_usable ( $program['test_output'], $opt[$setting_name],
+				$program['test_arg'], $program['min_version'] );
+		if ( is_wp_error ($result) || !$result )
+		{
+			$ok = false;
+			break;
+		}
+	}
 
 	if (!$ok) $errmsgs[] = 'lilypond_bin_problem';
 }
@@ -199,11 +212,12 @@ $notations['lilypond'] = array (
 	'classname'   => 'lilypondRender',
 	'progs'       => array (
 		'LILYPOND_BIN' => array (
-			'prog_name' => 'lilypond',
-			'type'      => 'prog',
-			'value'     => '',
-			'test_arg'  => '--version',
-			'test_output' => 'GNU LilyPond',
+			'prog_name'   => 'lilypond',
+			'type'        => 'prog',
+			'value'       => '',
+			'test_arg'    => array ('--version'),
+			'test_output' => '/^GNU LilyPond ([\d.-]+)/',
+			'min_version' => '2.8.1',
 		),
 	),
 );

@@ -99,6 +99,11 @@ protected $_commandOutput;
 protected $imagemagick;
 
 /**
+ * @var string $imagick_ver Version of ImageMagick installed on host 
+ */
+protected $imagick_ver;
+
+/**
  * @var string $temp_dir Temporary working directory
  */
 protected $temp_dir;
@@ -435,62 +440,96 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
  */
 public static function is_web_hosting ()
 {
-	if (!function_exists ('popen') ||
-	    !function_exists ('pclose'))
-		return true;
+	return ( !function_exists ('popen') || !function_exists ('pclose') );
 }
 
 /**
- * Check if given program is usable.
+ * Check if given program is usable, by identifying existance of certain string
+ * in command output, and optionally checking program version requirement as well
  *
  * @since 0.2
- * @uses is_absolute_path()
  * @uses is_web_hosting()
- * @param mixed $match The string to be searched in program output.
- * Can be an array of strings, in this case all strings must be found.
- * Any non-string element in the array is ignored.
+ * @param string|Array $regexes Regular expression (PCRE) to be matched in program output.
+ * Can be an array of regexes, in this case ALL regexes must be matched.
  * @param string $prog The program to be checked
- * @param string $args Extra variable arguments supplied to the program (if any)
- * @return boolean Return TRUE if the given program is usable, FALSE otherwise
+ * @param array $args Array of strings containing extra command line arguments (if any)
+ * @param string $minver Program version to match against. The version of program
+ * to be checked must not be smaller than the version supplied in argument.
+ * Using this argument means only the first string in $regexes is searched.
+ * @param int $verpos Regex position inside $regexes that should contain
+ * version information, default is 1 (first parenthesis). Only used if $minver is
+ * not null or empty.
+ * @param string $realver If version check is performed, then the detected program
+ * version will be written to this variable
+ * @return WP_Error|bool TRUE if all regex strings are found in command output,
+ * WP_Error otherwise (including unexpected error and unmatched regex)
  */
-public static function is_prog_usable ($match, $prog)
+public static function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", $verpos = 1, &$realver = null)
 {
-	if (empty ($prog)) return false;
+	if ( ! file_exists ($prog) ) return new WP_Error
+		( 'sr-prog-notexist', __('Program does not exist.', TEXTDOMAIN));
+
+	if ( ! is_executable ($prog) ) return new WP_Error
+		( 'sr-not-executable', __('Program is not executable.', TEXTDOMAIN) );
 
 	// safe guard
-	if (!is_absolute_path ($prog))
-		return false;
-
 	$prog = realpath ($prog);
-
-	if (! is_executable ($prog)) return false;
+	if ( false === $prog ) return new WP_Error
+		( 'sr-realpath-fail', __("Can't determine real path of program.", TEXTDOMAIN) );
 
 	// short circuit if some funcs are disabled by web host
-	if (self::is_web_hosting())
-		return true;
+	if (self::is_web_hosting()) return new WP_Error
+		( 'sr-webhost-mode', __("Certain PHP functions are disabled by web host, most likely due to security reasons. Therefore program usability will not be checked.", TEXTDOMAIN) );
 
-	$args = func_get_args ();
-	array_shift ($args);
-	array_shift ($args);
+	// TODO: check that elements inside $args are indeed strings
+	$args = (array) $args;
 
-	$cmdline = '"' . $prog . '" ' . implode (' ', $args) . ' 2>&1';
-	if (false == ($handle = popen ($cmdline, 'r'))) return false;
+	$cmd = sprintf ( '"%s" %s 2>&1', $prog, implode (' ', $args) );
+	if (false === ($handle = @popen ($cmd, 'r'))) return new WP_Error
+		( 'sr-popen-fail', __('Failed to execute popen() for running command.', TEXTDOMAIN), $cmd );
 
-	$output = fread ($handle, 2048);
-	$ok = false;
+	while ( ! feof ($handle) )
+		$output .= fread ($handle, 1024);
+	pclose ($handle);
 
-	$needles = (array) $match;
-	foreach ($needles as $needle)
+	if ( ! empty ($minver) )
 	{
-		if (is_string ($needle) && (false !== strpos ($output, $needle)))
+		if ( !is_int ($verpos) || $verpos < 0 )
+			return new WP_Error ( 'sr-verpos-invalid', __('Version position is invalid', TEXTDOMAIN), $verpos );
+
+		if ( is_array ($regexes) ) $regexes = $regexes[0];
+
+		if ( !preg_match ( $regexes, $output, $matches ) )
+			return new WP_Error ( 'sr-prog-regex-notmatch', __('Desired regular expression not found in program output', TEXTDOMAIN), $regexes );
+		else
 		{
-			$ok = true;
-			break;
+			if ( ! is_null ( $realver ) )
+				$realver = $matches[$verpos];
+
+			if ( version_compare ( $matches[$verpos], $minver, '>=' ) )
+				return true;
+
+			// Fail if installed program doesn't fulfill version requirement
+			return new WP_Error ( 'sr-prog-ver-req-unfulfilled',
+					sprintf (__("Program does not meet minimum version requirement, detected version is &#8216;%s&#8217; but &#8216;%s&#8217; is required.", TEXTDOMAIN),
+						$matches[$verpos], $minver),
+					array (
+						'desired' => $minver,
+						'actual'  => $matches[$verpos],
+					)
+			);
 		}
 	}
 
-	pclose ($handle);
-	return $ok;
+	foreach ( (array)$regexes as $regex )
+		if ( !preg_match ( $regex, $output ) )
+			return new WP_Error ( 'sr-prog-regex-notmatch',
+					__('Desired regular expression not found in program output', TEXTDOMAIN),
+					$regexes
+			);
+
+	// no version check performed, and all strings matched
+	return true;
 }
 
 
@@ -541,7 +580,9 @@ final public function render()
 		return false;
 	}
 
-	if ( ! $this->is_prog_usable ('ImageMagick', $this->imagemagick, '-version') )
+	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
+			$this->imagemagick, array('-version'), '6.3.9', 1, $this->imagick_ver);
+	if ( is_wp_error ($result) || !$result )
 	{
 		$this->error_code = ERR_CONVERT_UNUSABLE;
 		return false;

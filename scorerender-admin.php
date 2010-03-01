@@ -148,8 +148,11 @@ private function update_options ()
 	if ( SrNotationBase::is_web_hosting() )
 		$errmsgs[] = 'prog_check_disabled';
 
-	if ( ! SrNotationBase::is_prog_usable ('ImageMagick', $newopt['CONVERT_BIN'], '-version') )
+	$result = SrNotationBase::is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
+			$newopt['CONVERT_BIN'], '-version', '6.3.9');
+	if ( is_wp_error ($result) ) {
 		$errmsgs[] = 'convert_bin_problem';
+	}
 
 	// Any boolean values set to false would not appear in $_POST
 	$var_types = scorerender_get_def_settings (TYPES_ONLY);
@@ -193,11 +196,22 @@ private function update_options ()
 				$mesg = __('ERROR: %s', TEXTDOMAIN);
 			}
 
-			printf ("<div id='%s' class='error %s'><p><strong>%s</strong></p></div>\n",
+			if ( !empty ($result) )
+			{
+				printf ("<div id='%s' class='error %s'><p><strong>%s</strong></p><p>%s</p></div>\n",
+					'sr-err-' . $sr_adm_msgs[$m],
+					$class,
+					sprintf ($mesg, $sr_adm_msgs[$m]['content']),
+					// FIXME: this is temporary hack, very ugly
+					$result->get_error_message()
+				);
+			}
+			else
+				printf ("<div id='%s' class='error %s'><p><strong>%s</strong></p></div>\n",
 					'sr-err-' . $sr_adm_msgs[$m],
 					$class,
 					sprintf ($mesg, $sr_adm_msgs[$m]['content'])
-			       );
+				);
 		}
 	}
 	else
