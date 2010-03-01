@@ -1,5 +1,14 @@
 2010-03-01  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-class.php, scorerender-admin.php:
+	- ImageMagick minimum requirement is 6.3.5-7, not 6.3.6-2 as
+	  documented before (option was wrong too, should be -alpha)
+	* notation/mup.php, notation/pmw.php:
+	- Properly get around a bug fixed in 6.3.9-6 that affects
+	  alpha channel in paletted images.
+
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php, notation/*.php:
 	- (is_notation_usable, is_prog_usable) Allows calling as both a
 	  static method and from instantiated class object, so that they

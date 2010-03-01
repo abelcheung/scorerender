@@ -588,7 +588,7 @@ final public function render()
 	}
 
 	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
-			$this->imagemagick, array('-version'), '6.3.9', 1, $this->imagick_ver);
+			$this->imagemagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
 	if ( is_wp_error ($result) || !$result )
 	{
 		$this->error_code = ERR_CONVERT_UNUSABLE;

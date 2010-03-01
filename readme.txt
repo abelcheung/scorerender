@@ -18,7 +18,7 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 ###Prerequisite###
 
 1. **PHP 5.x** (PHP4 compatibility is dropped since 0.2; please visit [offical site](http://scorerender.abelcheung.org/) if ancient version using PHP4 is needed)
-1. **ImageMagick >= 6.3.6-2** (due to usage of `-flatten` option). Newer version is better, since a bug about detecting PostScript transparency is fixed (updating pending in this area)
+1. **ImageMagick >= 6.3.5-7** (due to usage of `-alpha` option). Version later than 6.3.9-6 is preferred, since a bug about detecting PostScript transparency is fixed.
 1. **Music rendering programs** must also be installed on the same machine web server is running. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Most notations require explicit program to render, except GUIDO notation which fetches remote images instead. Refer to [installation page](http://scorerender.abelcheung.org/installation/) for more detail.
 
 ###New install###

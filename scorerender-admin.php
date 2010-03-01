@@ -149,7 +149,7 @@ private function update_options ()
 		$errmsgs[] = 'prog_check_disabled';
 
 	$result = SrNotationBase::is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
-			$newopt['CONVERT_BIN'], '-version', '6.3.9');
+			$newopt['CONVERT_BIN'], '-version', '6.3.5-7');
 	if ( is_wp_error ($result) ) {
 		$errmsgs[] = 'convert_bin_problem';
 	}
