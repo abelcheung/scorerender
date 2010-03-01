@@ -17,8 +17,10 @@ For latest version, detailed usage instructions and demo cases, please visit [Sc
 
 ###Prerequisite###
 
-1. **PHP 5.x** (PHP4 compatibility is dropped since 0.2; please visit [offical site](http://scorerender.abelcheung.org/) if ancient version using PHP4 is needed)
+1. **WordPress 2.6.x** (due to usage of `plugins_url()`, `admin_url()` etc)
+1. **PHP 5.x with GD extension** (Please visit [offical site](http://scorerender.abelcheung.org/) if ancient version using PHP4 is needed)
 1. **ImageMagick >= 6.3.5-7** (due to usage of `-alpha` option). Version later than 6.3.9-6 is preferred, since a bug about detecting PostScript transparency is fixed.
+1. **GhostScript** (Usually pre-installed on Linux. Under Windows, download prepackaged installer from [official site](http://pages.cs.wisc.edu/~ghost/doc/GPL/index.htm]) )
 1. **Music rendering programs** must also be installed on the same machine web server is running. For example, to support Lilypond fragments, Lilypond >= 2.8.1 must be installed in web server. Most notations require explicit program to render, except GUIDO notation which fetches remote images instead. Refer to [installation page](http://scorerender.abelcheung.org/installation/) for more detail.
 
 ###New install###
@@ -55,15 +57,11 @@ The error code indicates the kind of error in some degree. There are comments in
 
 = Is any ABC notation compatible program also supported? =
 
-Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. This is a design decision. If you **REALLY** want to use other similar programs, you are on your own, though modifying the code to support others is not very hard. Take a look at `is_notation_usable()` method in `notation/abc.php`.
+Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. This is a design decision. If you **REALLY** want to use other similar programs, you are on your own, though modifying the code to support others is not very hard for those who can write program in PHP. Take a look at `notation/abc.php`.
 
 = I want to remove cache for 1 image and re-render, but how can I determine which is which? =
 
 Right now this is still impossible. Management of cache is planned in future, but can't say when.
-
-= Images using Guido notation seems blurred. =
-
-This may not be fully fixable, because setting font attributes may not be possible for all text. After image resizing, they can be rendered smaller / larger than desired.
 
 = How to debug my fragment when posting? =
 
@@ -72,10 +70,11 @@ Long answer: There is no easy method for debugging a fragment yet. If there is n
 
 `	define (SR_DEBUG, FALSE);`
 
-Change `FALSE` to `TRUE`, then resubmit the content again. It has 2 purposes:
+Change `FALSE` to `TRUE`, then resubmit the content again. It has a few purposes:
 
 1. Erraneous fragments are not deleted from server temp folder, and you can try manually rendering the fragment using command line to see what's wrong.
 1. Full command line for rendering is now shown on blog, so that you can check out if command line argument is wrong.
+1. Full content of `$_POST` is shown in admin page upon settings update.
 
 = How can I install Philip's Music Writer? =
 
@@ -83,7 +82,7 @@ Only by downloading source from its official website and compile the program you
 
 Please refer to the documents inside PMW tarball on how to compile its source code.
 
-= I discovered a bug. How can I notify the author? =
+= I discovered a bug or want to have ____ feature implemented. How can I tell the author? =
 
 You can either [submit bug report to Googlecode](http://code.google.com/p/scorerender/issues/list) or [contact the author](http://me.abelcheung.org/aboutme/).
 
