@@ -196,7 +196,7 @@ private function update_options ()
 				$mesg = __('ERROR: %s', TEXTDOMAIN);
 			}
 
-			if ( !empty ($result) )
+			if ( is_wp_error ($result) )
 			{
 				printf ("<div id='%s' class='error %s'><p><strong>%s</strong></p><p>%s</p></div>\n",
 					'sr-err-' . $sr_adm_msgs[$m],
