@@ -1,5 +1,10 @@
 2010-03-01  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-utils.php:
+	- (is_midi_file): New func, to check if certain file is a MIDI.
+
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php:
 	- Adds $imagick_ver for storing detected ImageMagick version
 	- (is_web_hosting) Fix return value.

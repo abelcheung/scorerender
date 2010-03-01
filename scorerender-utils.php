@@ -124,7 +124,7 @@ function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
 	// Not secure indeed. But PHP doesn't provide facility to create temp folder anyway.
 	$chars = str_split ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 	$i = 0;
-	
+
 	do {
 		$path = $dir . $prefix . sprintf ("%s%s%s%s%s%s",
 			$chars[mt_rand(0,51)], $chars[mt_rand(0,51)], $chars[mt_rand(0,51)],
@@ -170,14 +170,38 @@ function search_path ($prog)
 function transform_paths (&$setting, $is_internal)
 {
 	if (!is_array ($setting)) return;
-	
+
 	$default_settings = scorerender_get_def_settings(TYPES_ONLY);
-	
+
 	// Transform path and program settings to unix presentation
 	foreach ($default_settings as $key => $type)
 		if ( ( ($type == 'path') || ($type == 'prog') ) && isset( $setting[$key] ) )
 			$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
 
+}
+
+
+/**
+ * Check if a file is MIDI audio
+ *
+ * Since file info checking functionality is only available on PHP 5.3,
+ * it can't be used here.
+ *
+ * @since 0.3.50
+ * @param string $file File to be checked
+ * @return bool True if file conforms to MIDI format, False otherwise
+ */
+function is_midi_file ($file)
+{
+	// too small
+	if ( filesize ($file) <= 18 ) return false;
+	$data = substr ( file_get_contents ($file), 0, 18 );
+
+	$array = unpack ('a4head/Nhdrlen/nformat/ntracks/ntempo/a4hdrtrk', $data);
+
+	return ( ( $array['head'  ] == "MThd" ) &&
+	         ( $array['hdrlen'] == 6      ) &&
+	         ( $array['hdrtrk'] == "MTrk" ) );
 }
 
 ?>
