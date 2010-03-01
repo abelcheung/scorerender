@@ -1,5 +1,11 @@
 2010-03-01  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/lilypond.php:
+	- (lilypond_version) Removed, functionality is already implemented
+	  in the new is_prog_usable().
+
+2010-03-01  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-utils.php:
 	- (is_midi_file): New func, to check if certain file is a MIDI.
 
