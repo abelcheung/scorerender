@@ -420,6 +420,14 @@ private function admin_section_content ()
 </tr>
 
 <tr valign="top">
+<th scope="row"><?php _e('MIDI generation:', TEXTDOMAIN) ?></th>
+<td><label for="produce_midi"><input type="checkbox" name="ScoreRender[PRODUCE_MIDI]" id="produce_midi" value="1" <?php checked('1', $sr_options['PRODUCE_MIDI']); ?> />
+<?php _e('Also attempt to generate MIDI and provide download link when generating image', TEXTDOMAIN); ?></label>
+<div class="setting-description"><?php echo ('Note that different notations have different ways to generate MIDI. For example, ABC notation requires <code>abc2midi</code> program, while Lilypond, PMW and Mup have built-in support yet triggered in different ways.') ?></div>
+</td>
+</tr>
+
+<tr valign="top">
 <th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
 <td>
 <fieldset><legend class="hidden screen-reader-text"><?php _e('When rendering failed:', TEXTDOMAIN); ?></legend>

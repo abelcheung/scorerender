@@ -67,6 +67,20 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
+ * Refer to {@link SrNotationBase::generate_midi() parent method} for more detail.
+ */
+protected function generate_midi ($input_file, $final_midi)
+{
+	$cmd = sprintf ('"%s" "%s" -v -o "%s"',
+			$this->midiprog,
+			$input_file, $final_midi);
+	$retval = $this->_exec($cmd);
+
+	return ($result['return_val'] == 0);
+}
+
+
+/**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
  * @uses SrNotationBase::is_prog_usable()
@@ -81,6 +95,8 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		$ok = true;
 		foreach ($notations['abc']['progs'] as $setting_name => $program)
 		{
+			if ( 'prog' !== $program['type'] ) continue;
+
 			if ( empty ($opt[$setting_name]) )
 			{
 				$ok = false;
@@ -97,7 +113,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		}
 
 		if (!$ok)
-			if ( !is_null ($errmsgs) ) $errmsgs[] = 'abcm2ps_bin_problem';
+			if ( !is_null ($errmsgs) ) $errmsgs[] = $program['error_code'];
 	}
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
@@ -115,6 +131,10 @@ public static function define_admin_messages ($adm_msgs)
 	$adm_msgs['abcm2ps_bin_problem'] = array (
 		'level' => MSG_WARNING,
 		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['abc']['name'])
+	);
+	$adm_msgs['abc2midi_bin_problem'] = array (
+		'level' => MSG_WARNING,
+		'content' => sprintf (__('MIDI generation for %s notation may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['abc']['name'])
 	);
 }
 
@@ -152,28 +172,31 @@ public static function define_setting_value ($settings)
 {
 	global $notations;
 
-	$binary_name = $notations['abc']['progs']['ABCM2PS_BIN']['prog_name'];
-	if ( is_windows() ) $binary_name .= '.exe';
-	$fullpath = '';
-
-	if ( is_windows() )
+	foreach ( $notations['abc']['progs'] as $setting_name => $progdata )
 	{
-		$fullpath = search_path ($binary_name);
-		if ( !$fullpath && function_exists ('glob') )
+		$binary_name = $progdata['prog_name'];
+		if ( is_windows() ) $binary_name .= '.exe';
+		$fullpath = '';
+
+		if ( is_windows() )
 		{
-			$fullpath = glob ("C:\\Program Files\\*\\" . $binary_name);
-			$fullpath = empty ($fullpath) ? '' : $fullpath[0];
-		}
-	}
-	else
-	{
-		if ( function_exists ('shell_exec') )
-			$fullpath = shell_exec ('which ' . $binary_name);
-		else
 			$fullpath = search_path ($binary_name);
-	}
+			if ( !$fullpath && function_exists ('glob') )
+			{
+				$fullpath = glob ("C:\\Program Files\\*\\" . $binary_name);
+				$fullpath = empty ($fullpath) ? '' : $fullpath[0];
+			}
+		}
+		else
+		{
+			if ( function_exists ('shell_exec') )
+				$fullpath = shell_exec ('which ' . $binary_name);
+			else
+				$fullpath = search_path ($binary_name);
+		}
 
-	$settings['ABCM2PS_BIN']['value'] = empty ($fullpath) ? '' : $fullpath;
+		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
+	}
 }
 
 } // end of class
@@ -185,11 +208,20 @@ $notations['abc'] = array (
 	'classname'   => 'abcRender',
 	'progs'       => array (
 		'ABCM2PS_BIN' => array (
-			'prog_name' => 'abcm2ps',
-			'type'      => 'prog',
-			'value'     => '',
-			'test_arg'  => '-V',
+			'prog_name'   => 'abcm2ps',
+			'type'        => 'prog',
+			'value'       => '',
+			'test_arg'    => '-V',
 			'test_output' => '/^abcm2ps-([\d.]+)/',
+			'error_code'  => 'abcm2ps_bin_problem',
+		),
+		'ABC2MIDI_BIN' => array (
+			'prog_name'   => 'abc2midi',
+			'type'        => 'midiprog',
+			'value'       => '',
+			'test_arg'    => '-h',
+			'test_output' => '/^abc2midi version ([\d.]+)/',
+			'error_code'  => 'abc2midi_bin_problem',
 		),
 	),
 );

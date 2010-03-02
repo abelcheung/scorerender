@@ -100,6 +100,8 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		$ok = true;
 		foreach ($notations['lilypond']['progs'] as $setting_name => $program)
 		{
+			if ( 'prog' !== $program['type'] ) continue;
+
 			if ( empty ($opt[$setting_name]) )
 			{
 				$ok = false;
@@ -119,7 +121,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		}
 
 		if (!$ok)
-			if ( !is_null ($errmsgs) ) $errmsgs[] = 'lilypond_bin_problem';
+			if ( !is_null ($errmsgs) ) $errmsgs[] = $program['error_code'];
 	}
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
@@ -174,28 +176,31 @@ public static function define_setting_value ($settings)
 {
 	global $notations;
 
-	$binary_name = $notations['lilypond']['progs']['LILYPOND_BIN']['prog_name'];
-	if ( is_windows() ) $binary_name .= '.exe';
-	$fullpath = '';
-
-	if ( is_windows() )
+	foreach ( $notations['lilypond']['progs'] as $setting_name => $progdata )
 	{
-		$fullpath = search_path ($binary_name);
-		if ( !$fullpath && function_exists ('glob') )
+		$binary_name = $progdata['prog_name'];
+		if ( is_windows() ) $binary_name .= '.exe';
+		$fullpath = '';
+
+		if ( is_windows() )
 		{
-			$fullpath = glob ("C:\\Program Files\\*\\usr\\bin\\" . $binary_name);
-			$fullpath = empty ($fullpath) ? '' : $fullpath[0];
-		}
-	}
-	else
-	{
-		if ( function_exists ('shell_exec') )
-			$fullpath = shell_exec ('which ' . $binary_name);
-		else
 			$fullpath = search_path ($binary_name);
-	}
+			if ( !$fullpath && function_exists ('glob') )
+			{
+				$fullpath = glob ("C:\\Program Files\\*\\usr\\bin\\" . $binary_name);
+				$fullpath = empty ($fullpath) ? '' : $fullpath[0];
+			}
+		}
+		else
+		{
+			if ( function_exists ('shell_exec') )
+				$fullpath = shell_exec ('which ' . $binary_name);
+			else
+				$fullpath = search_path ($binary_name);
+		}
 
-	$settings['LILYPOND_BIN']['value'] = empty ($fullpath) ? '' : $fullpath;
+		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
+	}
 }
 
 } // end of class
@@ -213,6 +218,7 @@ $notations['lilypond'] = array (
 			'test_arg'    => array ('--version'),
 			'test_output' => '/^GNU LilyPond ([\d.-]+)/',
 			'min_version' => '2.8.1',
+			'error_code'  => 'lilypond_bin_problem',
 		),
 	),
 );

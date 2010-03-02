@@ -88,6 +88,8 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		$ok = true;
 		foreach ($notations['pmw']['progs'] as $setting_name => $program)
 		{
+			if ( 'prog' !== $program['type'] ) continue;
+
 			if ( empty ($opt[$setting_name]) )
 			{
 				$ok = false;
@@ -104,7 +106,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		}
 
 		if (!$ok)
-		       if ( !is_null ($errmsgs) ) $errmsgs[] = 'pmw_bin_problem';
+		       if ( !is_null ($errmsgs) ) $errmsgs[] = $program['error_code'];
 	}
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
@@ -159,21 +161,24 @@ public static function define_setting_value ($settings)
 {
 	global $notations;
 
-	$binary_name = $notations['pmw']['progs']['PMW_BIN']['prog_name'];
-	if ( is_windows() ) $binary_name .= '.exe';
-	$fullpath = '';
-
-	// PMW doesn't even have public available Win32 binary, perhaps
-	// somebody might be able to compile it with MinGW?
-	if ( !is_windows() )
+	foreach ( $notations['pmw']['progs'] as $setting_name => $progdata )
 	{
-		if ( function_exists ('shell_exec') )
-			$fullpath = shell_exec ('which ' . $binary_name);
-		else
-			$fullpath = search_path ($binary_name);
-	}
+		$binary_name = $progdata['prog_name'];
+		if ( is_windows() ) $binary_name .= '.exe';
+		$fullpath = '';
 
-	$settings['PMW_BIN']['value'] = empty ($fullpath) ? '' : $fullpath;
+		// PMW doesn't even have public available Win32 binary, perhaps
+		// somebody might be able to compile it with MinGW?
+		if ( !is_windows() )
+		{
+			if ( function_exists ('shell_exec') )
+				$fullpath = shell_exec ('which ' . $binary_name);
+			else
+				$fullpath = search_path ($binary_name);
+		}
+
+		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
+	}
 }
 
 } // end of class
@@ -190,6 +195,7 @@ $notations['pmw'] = array (
 			'value'     => '',
 			'test_arg'  => '-V',
 			'test_output' => '/^PMW version ([\d.-]+)/',
+			'error_code'  => 'pmw_bin_problem',
 		),
 	),
 );

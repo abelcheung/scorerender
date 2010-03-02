@@ -1,6 +1,24 @@
 2010-03-02  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php:
+	- (set_midi_program) New func.
+	* wp-scorerender.php, scorerender-admin.php:
+	- Add PRODUCE_MIDI setting and checkbox.
+	* wp-scorerender.php:
+	- (scorerender_shortcode_handler) Only call set_programs() for image
+	  rendering programs.
+	- (scorerender_parse_shortcode) Don't disable certain notation if
+	  midi program is missing.
+	* notation/{abc,lilypond,mup,pmw}.php:
+	- (is_notation_usable, define_setting_value) Make them
+	  more generic, allows possibility to unify them.
+	* notation/abc.php:
+	- (generate_midi) New func.
+	- Adds ABC2MIDI_BIN setting for midi support.
+
+2010-03-02  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
 	- All class constants and get_error_msg() removed.
 	- (render) Returns WP_Error on error.
 	* wp-scorerender.php:

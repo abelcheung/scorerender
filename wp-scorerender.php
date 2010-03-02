@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 17);
+define ('DATABASE_VERSION', 18);
 
 /**
  * Translation text domain
@@ -128,6 +128,7 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 			'COMMENT_ENABLED'        => array ('type' => 'bool', 'value' => false),
 			'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
 			'FRAGMENT_PER_COMMENT'   => array ('type' =>  'int', 'value' => 1),
+			'PRODUCE_MIDI'           => array ('type' => 'bool', 'value' => false),
 
 			'CONVERT_BIN'            => array ('type' => 'prog', 'value' => ''),
 			'MUP_REG_KEY'            => array ('type' =>  'str', 'value' => ''),
@@ -435,12 +436,21 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 	if ( empty ($render) )
 		return SrNotationBase::format_error_msg ( __('class initialization failure', TEXTDOMAIN) );
 
-	$programs = array();
-	foreach ( array_keys ( $notations[$lang]['progs']) as $setting_name )
+	$render_progs = array();
+	$midi_progs   = array();
+	foreach ( $notations[$lang]['progs'] as $setting_name => $progdata )
 	{
-		$programs[$setting_name] = $sr_options[$setting_name];
+		switch ( $progdata['type'] )
+		{
+		  case 'prog':
+			$render_progs[$setting_name] = $sr_options[$setting_name];
+			break;
+		  case 'midiprog':
+			$midi_progs[$setting_name]   = $sr_options[$setting_name];
+			break;
+		}
 	}
-	$render->set_programs         ($programs);
+	$render->set_programs         ($render_progs);
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
 	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
@@ -527,8 +537,11 @@ function scorerender_parse_shortcode ($content, $content_type, $callback)
 	add_shortcode ('score', $callback);
 	foreach ( $notations as $notation_name => $notation_data )
 	{
-		foreach (array_keys($notation_data['progs']) as $setting_name)
+		foreach ( $notation_data['progs'] as $setting_name => $progdata )
 		{
+			// ignore progs not used for rendering
+			if ( 'prog' !== $progdata['type'] ) continue;
+
 			// unfilled program name = disable support, thus use stub handler
 			if (empty ($sr_options[$setting_name])) {
 				add_shortcode ($notation_name, 'scorerender_shortcode_unsupported');

@@ -68,6 +68,11 @@ protected $img_max_width = 360;
 protected $mainprog;
 
 /**
+ * @var string $midiprog Program used for generating MIDI
+ */
+protected $midiprog;
+
+/**
  * @var integer $error_code Contains error code about which kind of failure is encountered during rendering
  */
 protected $error_code;
@@ -131,6 +136,20 @@ public function set_programs ($progs)
 		}
 	}
 }
+
+/**
+ * Set the program used to generate MIDI
+ *
+ * @param string $prog The full path of program
+ * @since 0.3.50
+ */
+public function set_midi_program ($prog = null)
+{
+	if ( empty ($prog) ) return;
+	$this->midiprog = $prog;
+	return;
+}
+
 
 /**
  * Returns output message of rendering command.
@@ -331,6 +350,17 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 
 	return (0 === $this->_exec ($cmd));
 }
+
+/**
+ * Reads input content (after necessary conversion),
+ * and converts it to a MIDI file.
+ *
+ * @uses _exec()
+ * @param string $input_file File name of raw input file containing music content
+ * @param string $final_midi File name of MIDI file to be generated
+ * @return boolean TRUE if MIDI is successfully generated, otherwise FALSE
+ */
+//abstract protected function generate_midi ($input_file, $final_midi);
 
 /**
  * Check if certain functions are disabled
