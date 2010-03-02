@@ -1,5 +1,12 @@
 2010-03-02  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/*.php, scorerender.php:
+	- Clean up variable names and debugging.
+	* scorerender.php (get_notation_name):
+	- Don't need to lowercase class name anymore on PHP5.
+
+2010-03-02  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php:
 	- (set_midi_program) New func.
 	* wp-scorerender.php, scorerender-admin.php:

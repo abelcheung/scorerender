@@ -42,7 +42,7 @@ public function get_music_fragment ()
 %abc2mtex: yes
 EOT;
 	// input must not contain any empty line
-	return $header . "\n" . preg_replace ('/^$/m', '%', $this->_input);
+	return $header . "\n" . preg_replace ('/^$/m', '%', $this->input);
 }
 
 /**

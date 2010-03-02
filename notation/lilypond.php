@@ -43,7 +43,7 @@ public function get_music_fragment ()
 EOD;
 
 	// When does lilypond start hating \r ?
-	return $header . str_replace (chr(13), '', $this->_input);
+	return $header . str_replace (chr(13), '', $this->input);
 }
 
 /**

@@ -21,7 +21,7 @@ class guidoRender extends SrNotationBase
  */
 public function get_music_fragment ()
 {
-	return $this->_input;
+	return $this->input;
 }
 
 /**

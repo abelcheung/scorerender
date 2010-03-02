@@ -34,7 +34,7 @@ Magnification 1.5
 
 EOD;
 	// PMW doesn't like \r\n
-	return str_replace ("\r", '', $header . $this->_input);
+	return str_replace ("\r", '', $header . $this->input);
 }
 
 /**

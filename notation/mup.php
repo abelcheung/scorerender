@@ -58,7 +58,7 @@ protected function is_valid_input ()
 	);
 
 	foreach ($blacklist as $pattern)
-		if (preg_match ($pattern, $this->_input))
+		if (preg_match ($pattern, $this->input))
 			return false;
 
 	return true;
@@ -80,7 +80,7 @@ bottommargin = 0
 pagewidth = {$this->img_max_width}
 label = ""
 EOD;
-	return $header . "\n" . $this->_input;
+	return $header . "\n" . $this->input;
 }
 
 /**

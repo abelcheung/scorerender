@@ -28,19 +28,19 @@ abstract class SrNotationBase
 {
 
 /**
- * @var string $_input The music fragment to be rendered.
+ * @var string $input The raw music fragment to be rendered.
  */
-protected $_input;
+protected $input;
 
 /**
- * @var string $_commandOutput Stores output message of rendering command.
+ * @var string $cmd_output Stores output message of rendering command.
  */
-protected $_commandOutput;
+protected $cmd_output;
 
 /**
- * @var string $imagemagick Full path of ImageMagick convert
+ * @var string $imagick Full path of ImageMagick convert
  */
-protected $imagemagick;
+protected $imagick;
 
 /**
  * @var string $imagick_ver Version of ImageMagick installed on host 
@@ -72,23 +72,18 @@ protected $mainprog;
  */
 protected $midiprog;
 
-/**
- * @var integer $error_code Contains error code about which kind of failure is encountered during rendering
- */
-protected $error_code;
-
 
 
 /**
  * Sets music fragment content
  *
  * @since 0.2
- * @uses $_input Stores music fragment content into this variable
+ * @uses $input Stores music fragment content into this variable
  * @param string $input The music fragment content
  */
 public function set_music_fragment ($input)
 {
-	$this->_input = $input;
+	$this->input = $input;
 }
 
 
@@ -99,7 +94,7 @@ public function set_music_fragment ($input)
  */
 public function get_raw_input ()
 {
-	return $this->_input;
+	return $this->input;
 }
 
 
@@ -141,6 +136,7 @@ public function set_programs ($progs)
  * Set the program used to generate MIDI
  *
  * @param string $prog The full path of program
+ * @uses $midiprog Full path of MIDI program is stored here
  * @since 0.3.50
  */
 public function set_midi_program ($prog = null)
@@ -154,12 +150,12 @@ public function set_midi_program ($prog = null)
 /**
  * Returns output message of rendering command.
  *
- * @uses $_commandOutput Returns this variable
+ * @uses $cmd_output Returns output of last executed command
  * @return string
  */
 public function get_command_output ()
 {
-	return $this->_commandOutput;
+	return $this->cmd_output;
 }
 
 /**
@@ -171,10 +167,10 @@ public function get_command_output ()
 public function get_notation_name ()
 {
 	global $notations;
-	$classname = strtolower (get_class ($this));
+	$classname = get_class ($this);
 
 	foreach ($notations as $notationname => $notation)
-		if ($classname === strtolower ($notation['classname']))
+		if ($classname === $notation['classname'])
 			return $notationname;
 
 	return false;
@@ -188,7 +184,7 @@ public function get_notation_name ()
  */
 public function set_imagemagick_path ($path)
 {
-	$this->imagemagick = $path;
+	$this->imagick = $path;
 }
 
 /**
@@ -270,15 +266,13 @@ public static function format_error_msg ($mesg)
  * in order to circumvent an ancient unfixed bug.
  *
  * @param string $cmd Command to be executed
- * @uses $_commandOutput Command output is stored after execution.
+ * @uses $cmd_output Command output is stored after execution.
  * @uses is_windows() Command line is adjusted if under Windows
  * @return integer Exit status of the command
  * @final
  */
 final protected function _exec ($cmd)
 {
-	if (SR_DEBUG) { echo '<pre style="overflow: auto">' . $cmd . "</pre>\n"; }
-
 	$cmd_output = array();
 
 	$retval = 0;
@@ -289,8 +283,10 @@ final protected function _exec ($cmd)
 	if (is_windows())
 		$cmd = '\: \& ' . $cmd;
 
+	if (SR_DEBUG) error_log ("ScoreRender: execute command: " . $cmd);
+
 	exec ($cmd, $cmd_output, $retval);
-	$this->_commandOutput = implode ("\n", $cmd_output);
+	$this->cmd_output = implode ("\n", $cmd_output);
 
 	return $retval;
 }
@@ -320,7 +316,7 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  * are automatically determined within the inherited classes.
  *
  * @uses _exec()
- * @uses $imagemagick
+ * @uses $imagick
  * @param string $intermediate_image The rendered PostScript file name
  * @param string $final_image The final PNG image file name
  * @param boolean $ps_has_alpha True if PostScript produced by music rendering program has transparency capability
@@ -329,7 +325,7 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  */
 protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_alpha = false, $extra_arg = '')
 {
-	$cmd = sprintf ('"%s" %s -trim +repage ', $this->imagemagick, $extra_arg);
+	$cmd = sprintf ('"%s" %s -trim +repage ', $this->imagick, $extra_arg);
 
 	// Damn it, older ImageMagick can't handle transparency in PostScript,
 	// but suddenly it can now, and renders all previous logic broken
@@ -344,7 +340,7 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 		// need separate invocations, can't do in one pass
 		$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx 0 png:- "%s"',
 			$intermediate_image,
-			$this->imagemagick,
+			$this->imagick,
 			$final_image);
 	}
 
@@ -423,6 +419,7 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 		$output .= fread ($handle, 1024);
 	pclose ($handle);
 
+	// Version check
 	if ( ! empty ($minver) )
 	{
 		if ( !is_int ($verpos) || $verpos < 0 )
@@ -432,24 +429,23 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 
 		if ( !preg_match ( $regexes, $output, $matches ) )
 			return new WP_Error ( 'sr-prog-regex-notmatch', __('Desired regular expression not found in program output', TEXTDOMAIN), $regexes );
-		else
-		{
-			if ( ! is_null ( $realver ) )
-				$realver = $matches[$verpos];
 
-			if ( version_compare ( $matches[$verpos], $minver, '>=' ) )
-				return true;
+		// Storing detected version
+		if ( ! is_null ( $realver ) )
+			$realver = $matches[$verpos];
 
-			// Fail if installed program doesn't fulfill version requirement
-			return new WP_Error ( 'sr-prog-ver-req-unfulfilled',
-					sprintf (__("Program does not meet minimum version requirement, detected version is &#8216;%s&#8217; but &#8216;%s&#8217; is required.", TEXTDOMAIN),
-						$matches[$verpos], $minver),
-					array (
-						'desired' => $minver,
-						'actual'  => $matches[$verpos],
-					)
-			);
-		}
+		if ( version_compare ( $matches[$verpos], $minver, '>=' ) )
+			return true;
+
+		// Fail if installed program doesn't fulfill version requirement
+		return new WP_Error ( 'sr-prog-ver-req-unfulfilled',
+				sprintf (__("Program does not meet minimum version requirement, detected version is &#8216;%s&#8217; but &#8216;%s&#8217; is required.", TEXTDOMAIN),
+					$matches[$verpos], $minver),
+				array (
+					'desired' => $minver,
+					'actual'  => $matches[$verpos],
+				)
+		);
 	}
 
 	foreach ( (array)$regexes as $regex )
@@ -478,9 +474,7 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
  * @uses is_prog_usable() Check if ImageMagick is functional
  * @uses conversion_step1() First pass rendering: Convert input file -> PS
  * @uses conversion_step2() Second pass rendering: Convert PS -> PNG
- * @uses $_input
  * @uses $cache_dir
- * @uses $error_code Type of error encountered is stored here
  *
  * @todo render image in background, especially for lilypond, which can take
  * minutes or even hours to finish rendering
@@ -491,7 +485,7 @@ final public function render()
 {
 	global $sr_options;
 
-	$hash = md5 (preg_replace ('/\s/', '', $this->_input));
+	$hash = md5 (preg_replace ('/\s/', '', $this->input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
 		       "sr-" . $this->get_notation_name() . "-$hash.png";
 
@@ -504,14 +498,14 @@ final public function render()
 					__('Image exists but is not readable', TEXTDOMAIN), $final_image );
 
 	// Check for code validity or security issues
-	if ( empty ($this->_input) ||
+	if ( empty ($this->input) ||
 			( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
 		return new WP_Error ( 'sr-content-invalid',
 				__('Content is illegal or poses security concern', TEXTDOMAIN) );
 
 	// Check ImageMagick
 	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
-			$this->imagemagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
+			$this->imagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
 	if ( is_wp_error ($result) || !$result )
 		return new WP_Error ( 'sr-imagick-unusable',
 				__('ImageMagick program is unusable', TEXTDOMAIN), $result );
@@ -638,7 +632,7 @@ interface SrNotationInterface
 	 * each notation has its own requirements. Some also require additional
 	 * filtering before able to be used by rendering programs.
 	 * Such conversions are applied on output as well, though original content
-	 * ($_input) is not modified in any way.
+	 * ($input) is not modified in any way.
 	 *
 	 * @return string The full music content to be rendered, after necessary filtering
 	 */
