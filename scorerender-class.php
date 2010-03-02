@@ -28,64 +28,6 @@ abstract class SrNotationBase
 {
 
 /**
- * Error constant used when content is known to be invalid or dangerous.
- *
- * Dangerous content means special constructs causing
- * inclusion of another file or command execution, etc.
- */
-const ERR_INVALID_INPUT = 1;
-
-/**
- * Error constant used when cache directory is not writable.
- */
-const ERR_CACHE_DIRECTORY_NOT_WRITABLE = 2;
-
-/**
- * Error constant used when temporary working directory is not writable.
- */
-const ERR_TEMP_DIRECTORY_NOT_WRITABLE = 3;
-
-/**
- * Error constant used when temporary file is not writable.
- *
- * This error is very rare, most usually it's the directory (not file) which is not writable.
- */
-const ERR_TEMP_FILE_NOT_WRITABLE = 4;
-
-/**
- * Error constant used when conversion of rendered image to proper format (PostScript -> PNG) failed.
- */
-const ERR_IMAGE_CONVERT_FAILURE = 5;
-
-/**
- * Error constant used when any generic error occurred during rendering.
- */
-const ERR_RENDERING_ERROR = 6;
-
-const ERR_NOTATION_PROGS_UNUSABLE = 7;
-
-/**
- * Error constant representing that ImageMagick convert is unusable.
- */
-const ERR_CONVERT_UNUSABLE = 9;
-
-/**
- * Error constant representing final image unreadable.
- */
-const ERR_IMAGE_NOT_VIEWABLE = 10;
-
-/**
- * Error constant representing web host disabled certain PHP functions
- */
-const ERR_FUNC_DISABLED = 11;
-
-
-/*
- * Variables
- */
-
-
-/**
  * @var string $_input The music fragment to be rendered.
  */
 protected $_input;
@@ -131,9 +73,6 @@ protected $mainprog;
 protected $error_code;
 
 
-/*
- * Methods
- */
 
 /**
  * Sets music fragment content
@@ -303,49 +242,6 @@ public static function format_error_msg ($mesg)
 	return sprintf (__('[ScoreRender Error: %s]', TEXTDOMAIN), $mesg);
 }
 
-/**
- * Retrieve error message
- *
- * @uses $error_code Message is generated according to error code
- * @uses format_error_msg()
- * @return string Localized error message
- * @since 0.3
- */
-public function get_error_msg ()
-{
-	switch ($this->error_code)
-	{
-	  case ERR_INVALID_INPUT:
-		return $this->format_error_msg (__('Content is illegal or poses security concern!', TEXTDOMAIN));
-
-	  case ERR_CACHE_DIRECTORY_NOT_WRITABLE:
-		return $this->format_error_msg (__('Cache directory not writable!', TEXTDOMAIN));
-
-	  case ERR_TEMP_DIRECTORY_NOT_WRITABLE:
-		return $this->format_error_msg (__('Temporary directory not writable!', TEXTDOMAIN));
-
-	  case ERR_TEMP_FILE_NOT_WRITABLE:
-		return $this->format_error_msg (__('Temporary file not writable!', TEXTDOMAIN));
-
-	  case ERR_IMAGE_CONVERT_FAILURE:
-		return $this->format_error_msg (__('Image conversion failure!', TEXTDOMAIN));
-
-	  case ERR_RENDERING_ERROR:
-		return $this->format_error_msg (__('The external rendering application failed!', TEXTDOMAIN));
-
-	  case ERR_CONVERT_UNUSABLE:
-		return $this->format_error_msg (__('ImageMagick program is unusable!', TEXTDOMAIN));
-
-	  case ERR_IMAGE_NOT_VIEWABLE:
-		return $this->format_error_msg (__('Image is not viewable!', TEXTDOMAIN));
-
-	  case ERR_FUNC_DISABLED:
-		return $this->format_error_msg (__('Some PHP functions are disabled by web host.', TEXTDOMAIN));
-
-	  case ERR_NOTATION_PROGS_UNUSABLE:
-		return $this->format_error_msg (__('Rendering application is unusable.', TEXTDOMAIN));
-	}
-}
 
 /**
  * Executes command and stores output message
@@ -574,40 +470,33 @@ final public function render()
 		if (is_readable ($final_image))
 			return basename ($final_image);
 		else
-		{
-			$this->error_code = ERR_IMAGE_NOT_VIEWABLE;
-			return false;
-		}
+			return new WP_Error ( 'sr-image-unreadable',
+					__('Image exists but is not readable', TEXTDOMAIN), $final_image );
 
 	// Check for code validity or security issues
 	if ( empty ($this->_input) ||
-		( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
-	{
-		$this->error_code = ERR_INVALID_INPUT;
-		return false;
-	}
+			( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
+		return new WP_Error ( 'sr-content-invalid',
+				__('Content is illegal or poses security concern', TEXTDOMAIN) );
 
+	// Check ImageMagick
 	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
 			$this->imagemagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
 	if ( is_wp_error ($result) || !$result )
-	{
-		$this->error_code = ERR_CONVERT_UNUSABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-imagick-unusable',
+				__('ImageMagick program is unusable', TEXTDOMAIN), $result );
 
+	// Check notation rendering apps
 	$result = $this->is_notation_usable (null, $sr_options);
 	if ( is_wp_error ($result) || !$result )
-	{
-		$this->error_code = ERR_NOTATION_PROGS_UNUSABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-render-apps-unusable',
+				__('Rendering application is unusable', TEXTDOMAIN), $result );
 
+	// Check cache folder
 	if ( (!is_dir      ($this->cache_dir)) ||
 	     (!is_writable ($this->cache_dir)) )
-	{
-		$this->error_code = ERR_CACHE_DIRECTORY_NOT_WRITABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-cache-dir-unwritable',
+				__('Cache directory not writable', TEXTDOMAIN) );
 
 	// Use fallback tmp dir if original one not working
 	if ( (!is_dir      ($this->temp_dir)) ||
@@ -616,46 +505,33 @@ final public function render()
 
 	if ( (!is_dir      ($this->temp_dir)) ||
 	     (!is_writable ($this->temp_dir)) )
-	{
-		$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-temp-dir-unwritable',
+				__('Temporary directory not writable', TEXTDOMAIN) );
 
 	if ( false === ($temp_working_dir = create_temp_dir ($this->temp_dir, 'sr-')) )
-	{
-		$this->error_code = ERR_TEMP_DIRECTORY_NOT_WRITABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-temp-dir-unwritable',
+				__('Temporary directory not writable', TEXTDOMAIN) );
 
 	if ( false === ($input_file = tempnam ($temp_working_dir,
 		'scorerender-' . $this->get_notation_name() . '-')) )
-	{
-		$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
 
 	$intermediate_image = $input_file . '.ps';
 
-	if (! file_exists ($intermediate_image) )
-	{
-		// Create empty output file first ASAP
-		if (! touch ($intermediate_image) )
-		{
-			$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
-			return false;
-		}
-	}
-	elseif (! is_writable ($intermediate_image) )
-	{
-		$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
-		return false;
-	}
+	if ( file_exists ($intermediate_image) )
+		if ( ! @unlink ( $intermediate_image ) )
+			return new WP_Error ( 'sr-temp-file-create-fail',
+					__('Temporary file creation failure', TEXTDOMAIN) );
+
+	// Create empty output file first ASAP
+	if ( ! @touch ($intermediate_image) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
 
 	if (false === file_put_contents ($input_file, $this->get_music_fragment()))
-	{
-		$this->error_code = ERR_TEMP_FILE_NOT_WRITABLE;
-		return false;
-	}
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
 
 
 	// Render using external application
@@ -669,16 +545,14 @@ final public function render()
 			@unlink ($intermediate_image);
 			@rmdir ($temp_working_dir);
 		}
-		$this->error_code = ERR_RENDERING_ERROR;
-		return false;
+		return new WP_Error ( 'sr-img-render-fail',
+				__('Image rendering process failure', TEXTDOMAIN) );
 	}
 	chdir ($current_dir);
 
 	if (!$this->conversion_step2 ($intermediate_image, $final_image))
-	{
-		$this->error_code = ERR_IMAGE_CONVERT_FAILURE;
-		return false;
-	}
+		return new WP_Error ( 'sr-img-convert-fail',
+				__('Image conversion failure', TEXTDOMAIN) );
 
 	// Cleanup
 	if (! SR_DEBUG) {

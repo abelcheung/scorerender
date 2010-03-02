@@ -1,3 +1,12 @@
+2010-03-02  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- All class constants and get_error_msg() removed.
+	- (render) Returns WP_Error on error.
+	* wp-scorerender.php:
+	- (scorerender_return_fragment_error, scorerender_shortcode_handler)
+	  Adopt the change.
+
 2010-03-01  Abel Cheung  <abelcheung@gmail.com>
 
 	* scorerender-class.php, scorerender-admin.php:

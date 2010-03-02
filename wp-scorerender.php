@@ -300,12 +300,11 @@ function scorerender_get_cache_location ()
  *
  * @uses SrNotationBase::get_raw_input() Used when showing raw music code upon error
  * @uses SrNotationBase::get_command_output() Used when showing error message upon error, and debug is on
- * @uses SrNotationBase::get_error_msg() Used when showing error message upon error, and debug is off
  *
  * @param object $render PHP object created for rendering relevant music fragment
  * @return string HTML content containing error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_error ( $render, $tag, $error_handling )
+function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wperror )
 {
 	switch ( $error_handling )
 	{
@@ -319,10 +318,13 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling )
 	  default:
 		if (SR_DEBUG)
 			return "<div class='scorerender-error'>" .
-				"<pre>ERROR: " . htmlentities ( $render->get_error_msg() ) . "</pre><br />" .
+				"<pre>ERROR: " . htmlentities ( $render->format_error_msg (
+							$wperror->get_error_message() ) ) . "</pre><br />" .
 				"<pre>CMD OUTPUT: " . htmlentities ( $render->get_command_output() ) . "</pre></div>";
 		else
-			return "<div class='scorerender-error'><pre>" . htmlentities ( $render->get_error_msg() ) . "</pre></div>";
+			return "<div class='scorerender-error'><pre>" .
+				htmlentities ( $render->format_error_msg (
+							$wperror->get_error_message() ) ) . "</pre></div>";
 	}
 }
 
@@ -448,19 +450,19 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 
 	$render->set_music_fragment ( trim ( html_entity_decode ($content) ) );
 
-	$imgname = $render->render();
+	$result = $render->render();
 
-	if ( !$imgname )
-		return scorerender_return_fragment_error ( $render, $lang, $sr_options['ERROR_HANDLING'] );
+	if ( is_wp_error ($result) )
+		return scorerender_return_fragment_error ( $render, $lang, $sr_options['ERROR_HANDLING'], $result );
 
 	if ( !extension_loaded ('gd') )
-		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host') );
+		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host', TEXTDOMAIN) );
 
 	// No errors, so generate HTML
 	// Not nice to show source in alt text or title, since music source
 	// is most likely multi-line, and can be very long
 	// This idea is taken from LatexRender demo site
-	return scorerender_return_fragment_ok ( $render, $lang, $imgname, $color );
+	return scorerender_return_fragment_ok ( $render, $lang, $result, $color );
 }
 
 
