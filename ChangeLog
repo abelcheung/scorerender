@@ -1,5 +1,10 @@
 2010-03-02  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/*.php:
+	- Start moving notation data into class.
+
+2010-03-02  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/*.php, scorerender.php:
 	- Clean up variable names and debugging.
 	* scorerender.php (get_notation_name):

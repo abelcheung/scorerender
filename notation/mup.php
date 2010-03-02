@@ -16,6 +16,23 @@ class mupRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
+protected static $notation_data = array (
+	'name'        => 'Mup',
+	'url'         => 'http://scorerender.abelcheung.org/demo/demo-mup/',
+	'classname'   => 'mupRender',
+	'progs'       => array (
+		'MUP_BIN' => array (
+			'prog_name'   => 'mup',
+			'type'        => 'prog',
+			'value'       => '',
+			'test_arg'    => '-v',
+			'test_output' => '/^Mup - Music Publisher\s+Version ([\d.]+)/',
+			'error_code'  => 'mup_bin_problem',
+		),
+	),
+);
+
+
 /**
  * Registration key for MUP.
  *
@@ -156,23 +173,22 @@ public function set_notation_action ($options)
  */
 public function is_notation_usable ($errmsgs = null, $opt)
 {
-	global $notations;
 	static $ok;
 
 	if ( !isset ($ok) )
 	{
 		$ok = true;
-		foreach ($notations['mup']['progs'] as $setting_name => $program)
+		foreach (self::$notation_data['progs'] as $setting_name => $progdata)
 		{
-			if ( 'prog' !== $program['type'] ) continue;
+			if ( 'prog' !== $progdata['type'] ) continue;
 
 			if ( empty ($opt[$setting_name]) )
 			{
 				$ok = false;
 				break;
 			}
-			$result = parent::is_prog_usable ( $program['test_output'],
-					$opt[$setting_name], $program['test_arg']);
+			$result = parent::is_prog_usable ( $progdata['test_output'],
+					$opt[$setting_name], $progdata['test_arg']);
 
 			if ( is_wp_error ($result) || !$result )
 			{
@@ -182,7 +198,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 		}
 
 		if (!$ok)
-		       if ( !is_null ($errmsgs) ) $errmsgs[] = $program['error_code'];
+		       if ( !is_null ($errmsgs) ) $errmsgs[] = $progdata['error_code'];
 	}
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
@@ -195,11 +211,9 @@ public function is_notation_usable ($errmsgs = null, $opt)
  */
 public static function define_admin_messages ($adm_msgs)
 {
-	global $notations;
-
 	$adm_msgs['mup_bin_problem'] = array (
 		'level' => MSG_WARNING,
-		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), $notations['mup']['name'])
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), self::$notation_data['name'])
 	);
 }
 
@@ -209,11 +223,9 @@ public static function define_admin_messages ($adm_msgs)
  */
 public static function program_setting_entry ($output)
 {
-	global $notations;
-
-	foreach ($notations['mup']['progs'] as $setting_name => $program)
+	foreach (self::$notation_data['progs'] as $setting_name => $progdata)
 		$output .= parent::program_setting_entry (
-			$program['prog_name'], $setting_name);
+			$progdata['prog_name'], $setting_name);
 
 	$output .= parent::program_setting_entry (
 		'', 'MUP_REG_KEY',
@@ -230,10 +242,8 @@ public static function program_setting_entry ($output)
  */
 public static function define_setting_type ($settings)
 {
-	global $notations;
-
-	foreach ($notations['mup']['progs'] as $key => $value)
-		$settings[$key] = $value;
+	foreach (self::$notation_data['progs'] as $setting_name => $progdata )
+		$settings[$setting_name] = $progdata;
 }
 
 /**
@@ -242,9 +252,7 @@ public static function define_setting_type ($settings)
  */
 public static function define_setting_value ($settings)
 {
-	global $notations;
-
-	foreach ( $notations['mup']['progs'] as $setting_name => $progdata )
+	foreach ( self::$notation_data['progs'] as $setting_name => $progdata )
 	{
 		$binary_name = $progdata['prog_name'];
 		if ( is_windows() ) $binary_name .= '.exe';

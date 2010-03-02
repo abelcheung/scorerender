@@ -16,6 +16,14 @@ class guidoRender extends SrNotationBase
                   implements SrNotationInterface
 {
 
+protected static $notation_data = array (
+	'name'        => 'GUIDO',
+	'url'         => 'http://scorerender.abelcheung.org/demo/demo-guido/',
+	'classname'   => 'guidoRender',
+	'progs'       => array (),
+);
+
+
 /**
  * Refer to {@link SrNotationBase::get_music_fragment() parent method} for more detail.
  */
