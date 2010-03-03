@@ -169,37 +169,15 @@ public function set_notation_action ($options)
 /**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
  * for more detail.
- * @uses SrNotationBase::is_prog_usable()
+ *
+ * @uses SrNotationBase::is_notation_usable()
  */
 public function is_notation_usable ($errmsgs = null, $opt)
 {
 	static $ok;
 
-	if ( !isset ($ok) )
-	{
-		$ok = true;
-		foreach (self::$notation_data['progs'] as $setting_name => $progdata)
-		{
-			if ( 'prog' !== $progdata['type'] ) continue;
-
-			if ( empty ($opt[$setting_name]) )
-			{
-				$ok = false;
-				break;
-			}
-			$result = parent::is_prog_usable ( $progdata['test_output'],
-					$opt[$setting_name], $progdata['test_arg']);
-
-			if ( is_wp_error ($result) || !$result )
-			{
-				$ok = false;
-				break;
-			}
-		}
-
-		if (!$ok)
-		       if ( !is_null ($errmsgs) ) $errmsgs[] = $progdata['error_code'];
-	}
+	if ( ! isset ($ok) )
+		$ok = parent::is_notation_usable ( &$errmsgs, $opt, self::$notation_data['progs'] );
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
 		return $ok;
@@ -252,31 +230,7 @@ public static function define_setting_type ($settings)
  */
 public static function define_setting_value ($settings)
 {
-	foreach ( self::$notation_data['progs'] as $setting_name => $progdata )
-	{
-		$binary_name = $progdata['prog_name'];
-		if ( is_windows() ) $binary_name .= '.exe';
-		$fullpath = '';
-
-		if ( is_windows() )
-		{
-			$fullpath = search_path ($binary_name);
-			if ( !$fullpath && function_exists ('glob') )
-			{
-				$fullpath = glob ("C:\\Program Files\\*\\" . $binary_name);
-				$fullpath = empty ($fullpath) ? '' : $fullpath[0];
-			}
-		}
-		else
-		{
-			if ( function_exists ('shell_exec') )
-				$fullpath = shell_exec ('which ' . $binary_name);
-			else
-				$fullpath = search_path ($binary_name);
-		}
-
-		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
-	}
+	parent::define_setting_value ( &$settings, self::$notation_data['progs'] );
 }
 
 }  // end of class

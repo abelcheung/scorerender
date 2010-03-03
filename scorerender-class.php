@@ -599,7 +599,7 @@ final public function render()
  * @return string HTML for the program setting in admin page
  * @since 0.3.50
  */
-public static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '')
+protected static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '')
 {
 	global $sr_options;
 	$id = strtolower ($setting_name);
@@ -615,6 +615,103 @@ public static function program_setting_entry ($bin_name, $setting_name, $title =
 
 	return $output;
 }
+
+
+/**
+ * Define values for variables used for notation, usually program paths
+ *
+ * This func is only called by inherited notation classes.
+ *
+ * @param array $settings Reference of ScoreRender default settings to be modified
+ * @param array $notation_prog_data Default values of notation programs
+ * stored in each notation class
+ *
+ * @since 0.3.50
+ * @access protected
+ */
+protected static function define_setting_value ($settings, $notation_prog_data)
+{
+	foreach ( $notation_prog_data as $setting_name => $progdata )
+	{
+		$binary_name = $progdata['prog_name'];
+		if ( is_windows() ) $binary_name .= '.exe';
+		$fullpath = '';
+
+		if ( is_windows() )
+		{
+			$fullpath = search_path ($binary_name);
+			if ( !$fullpath && function_exists ('glob') )
+			{
+				$fullpath = glob ("C:\\Program Files\\*\\" . $binary_name);
+				$fullpath = empty ($fullpath) ? '' : $fullpath[0];
+			}
+		}
+		else
+		{
+			if ( function_exists ('shell_exec') )
+				$fullpath = shell_exec ('which ' . $binary_name);
+			else
+				$fullpath = search_path ($binary_name);
+		}
+
+		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
+	}
+}
+
+
+/**
+ * Check if given program locations are correct and usable
+ *
+ * It can be called both as static method AND class method.
+ *
+ * In the first case, it is used as a WP action hook inside admin page
+ * as program checker. $errmsgs is used to remember error messages
+ * that shall be printed in top portion of admin page. No value is
+ * returned.
+ *
+ * In second case, it is executed during rendering phase. $errmsgs
+ * shall be set to NULL, and the function returns either TRUE or
+ * FALSE, depending on program checking result.
+ *
+ * @since 0.3.50
+ * @param array $errmsgs An array of messages to be added if program
+ * checking failed. Only used if this is called as a static method.
+ * Please refer to description of this function for more detail.
+ * @param array $opt Reference of ScoreRender option array, containing
+ * all program paths
+ *
+ * @return null|bool NULL if it is called as static method, TRUE/FALSE
+ * if called from instantiated class object. Please refer to description
+ * of this function for more detail.
+ */
+protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_data)
+{
+	$ok = true;
+	foreach ( $notation_prog_data as $setting_name => $progdata )
+	{
+		if ( 'prog' !== $progdata['type'] ) continue;
+
+		if ( empty ($opt[$setting_name]) )
+		{
+			$ok = false;
+			break;
+		}
+		$result = self::is_prog_usable ( $progdata['test_output'],
+				$opt[$setting_name], $progdata['test_arg']);
+
+		if ( is_wp_error ($result) || !$result )
+		{
+			$ok = false;
+			break;
+		}
+	}
+
+	if (!$ok)
+		if ( !is_null ($errmsgs) ) $errmsgs[] = $progdata['error_code'];
+
+	if ( isset ($this) ) return $ok;	// called from instantiated class object
+}
+
 
 } // end of class
 
@@ -637,33 +734,6 @@ interface SrNotationInterface
 	 * @return string The full music content to be rendered, after necessary filtering
 	 */
 	function get_music_fragment ();
-
-	/**
-	 * Check if given program locations are correct and usable
-	 *
-	 * It can be called both as static method AND class method.
-	 *
-	 * In the first case, it is used as a WP action hook inside admin page
-	 * as program checker. $errmsgs is used to remember error messages
-	 * that shall be printed in top portion of admin page. No value is
-	 * returned.
-	 *
-	 * In second case, it is executed during rendering phase. $errmsgs
-	 * shall be set to NULL, and the function returns either TRUE or
-	 * FALSE, depending on program checking result.
-	 *
-	 * @since 0.3.50
-	 * @param array $errmsgs An array of messages to be added if program
-	 * checking failed. Only used if this is called as a static method.
-	 * Please refer to description of this function for more detail.
-	 * @param array $opt Reference of ScoreRender option array, containing
-	 * all program paths
-	 *
-	 * @return null|bool NULL if it is called as static method, TRUE/FALSE
-	 * if called from instantiated class object. Please refer to description
-	 * of this function for more detail.
-	 */
-	function is_notation_usable ($errmsgs = null, $opt);
 
 	/**
 	 * Define any additional error or warning messages if settings for notation

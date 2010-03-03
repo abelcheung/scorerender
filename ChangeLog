@@ -1,3 +1,9 @@
+2010-03-03  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/{abc,mup,pmw}.php, scorerender-class.php:
+	- (is_notation_usable, define_setting_value) Move common code
+	  to parent class.
+
 2010-03-02  Abel Cheung  <abelcheung@gmail.com>
 
 	* notation/*.php:

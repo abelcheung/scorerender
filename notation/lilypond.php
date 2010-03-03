@@ -104,7 +104,8 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 }
 
 /**
- * Refer to {@link SrNotationInterface::is_notation_usable() interface method} * for more detail.
+ * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
+ * for more detail.
  *
  * @uses SrNotationBase::is_prog_usable()
  */
