@@ -16,6 +16,8 @@ class pmwRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
+const code = 'pmw';
+
 protected static $notation_data = array (
 	'name'        => "Philip's Music Writer",
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-pmw/',
@@ -150,25 +152,16 @@ public static function define_setting_value ($settings)
 	parent::define_setting_value ( &$settings, self::$notation_data['progs'] );
 }
 
+public static function register_notation_data ($notations)
+{
+	$notations[self::code] = self::$notation_data;
+}
+
 } // end of class
 
 
-$notations['pmw'] = array (
-	'name'        => "Philip's Music Writer",
-	'url'         => 'http://scorerender.abelcheung.org/demo/demo-pmw/',
-	'classname'   => 'pmwRender',
-	'progs'       => array (
-		'PMW_BIN' => array (
-			'prog_name' => 'pmw',
-			'type'      => 'prog',
-			'value'     => '',
-			'test_arg'  => '-V',
-			'test_output' => '/^PMW version ([\d.-]+)/',
-			'error_code'  => 'pmw_bin_problem',
-		),
-	),
-);
-
+add_action ('scorerender_register_notations',
+	array( 'pmwRender', 'register_notation_data' ) );
 
 add_action ('scorerender_define_adm_msgs',
 	array( 'pmwRender', 'define_admin_messages' ) );

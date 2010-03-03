@@ -16,6 +16,8 @@ class mupRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
+const code = 'mup';
+
 protected static $notation_data = array (
 	'name'        => 'Mup',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-mup/',
@@ -156,7 +158,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * {@internal OK, I cheated. Shouldn't have been leaking external
  * config option names into class, but this can help saving me
- * headache in the future}}
+ * headache in the future}
  *
  * @since 0.2.50
  */
@@ -233,25 +235,16 @@ public static function define_setting_value ($settings)
 	parent::define_setting_value ( &$settings, self::$notation_data['progs'] );
 }
 
+public static function register_notation_data ($notations)
+{
+	$notations[self::code] = self::$notation_data;
+}
+
 }  // end of class
 
 
-$notations['mup'] = array (
-	'name'        => 'Mup',
-	'url'         => 'http://scorerender.abelcheung.org/demo/demo-mup/',
-	'classname'   => 'mupRender',
-	'progs'       => array (
-		'MUP_BIN' => array (
-			'prog_name'   => 'mup',
-			'type'        => 'prog',
-			'value'       => '',
-			'test_arg'    => '-v',
-			'test_output' => '/^Mup - Music Publisher\s+Version ([\d.]+)/',
-			'error_code'  => 'mup_bin_problem',
-		),
-	),
-);
-
+add_action ('scorerender_register_notations',
+	array( 'mupRender', 'register_notation_data' ) );
 
 add_action ('scorerender_define_adm_msgs',
 	array( 'mupRender', 'define_admin_messages' ) );

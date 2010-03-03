@@ -16,6 +16,8 @@ class abcRender extends SrNotationBase
                 implements SrNotationInterface
 {
 
+const code = 'abc';
+
 protected static $notation_data = array (
 	'name'        => 'ABC',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-abc/',
@@ -168,33 +170,16 @@ public static function define_setting_value ($settings)
 	parent::define_setting_value ( &$settings, self::$notation_data['progs'] );
 }
 
+public static function register_notation_data ($notations)
+{
+	$notations[self::code] = self::$notation_data;
+}
+
 } // end of class
 
 
-$notations['abc'] = array (
-	'name'        => 'ABC',
-	'url'         => 'http://scorerender.abelcheung.org/demo/demo-abc/',
-	'classname'   => 'abcRender',
-	'progs'       => array (
-		'ABCM2PS_BIN' => array (
-			'prog_name'   => 'abcm2ps',
-			'type'        => 'prog',
-			'value'       => '',
-			'test_arg'    => '-V',
-			'test_output' => '/^abcm2ps-([\d.]+)/',
-			'error_code'  => 'abcm2ps_bin_problem',
-		),
-		'ABC2MIDI_BIN' => array (
-			'prog_name'   => 'abc2midi',
-			'type'        => 'midiprog',
-			'value'       => '',
-			'test_arg'    => '-h',
-			'test_output' => '/^abc2midi version ([\d.]+)/',
-			'error_code'  => 'abc2midi_bin_problem',
-		),
-	),
-);
-
+add_action ('scorerender_register_notations',
+	array( 'abcRender', 'register_notation_data' ) );
 
 add_action ('scorerender_define_adm_msgs',
 	array( 'abcRender', 'define_admin_messages' ) );

@@ -774,6 +774,15 @@ interface SrNotationInterface
 	 */
 	static function define_setting_value ($settings);
 
+	/**
+	 * Register notation and its data necessary for ScoreRender processing
+	 *
+	 * @param array $notations Reference of ScoreRender notation data array
+	 *
+	 * @since 0.3.50
+	 */
+	static function register_notation_data ($notations);
+
 } // end of interface
 
 ?>

@@ -16,6 +16,8 @@ class lilypondRender extends SrNotationBase
                      implements SrNotationInterface
 {
 
+const code = 'lilypond';
+
 protected $lilypond_ver = '';
 
 protected static $notation_data = array (
@@ -213,26 +215,16 @@ public static function define_setting_value ($settings)
 	}
 }
 
+public static function register_notation_data ($notations)
+{
+	$notations[self::code] = self::$notation_data;
+}
+
 } // end of class
 
 
-$notations['lilypond'] = array (
-	'name'        => 'LilyPond',
-	'url'         => 'http://scorerender.abelcheung.org/demo/demo-lilypond/',
-	'classname'   => 'lilypondRender',
-	'progs'       => array (
-		'LILYPOND_BIN' => array (
-			'prog_name'   => 'lilypond',
-			'type'        => 'prog',
-			'value'       => '',
-			'test_arg'    => array ('--version'),
-			'test_output' => '/^GNU LilyPond ([\d.-]+)/',
-			'min_version' => '2.8.1',
-			'error_code'  => 'lilypond_bin_problem',
-		),
-	),
-);
-
+add_action ('scorerender_register_notations',
+	array( 'lilypondRender', 'register_notation_data' ) );
 
 add_action ('scorerender_define_adm_msgs',
 	array( 'lilypondRender', 'define_admin_messages' ) );

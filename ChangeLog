@@ -1,5 +1,14 @@
 2010-03-03  Abel Cheung  <abelcheung@gmail.com>
 
+	* notation/*.php, wp-scorerender.php:
+	- Use WP hook and static methods to register notation data
+	  instead of adding directly to global variable.
+	- (register_notation_data) New func.
+	* scorerender-class.php:
+	- Add register_notation_data() to Interface method.
+
+2010-03-03  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/{abc,mup,pmw}.php, scorerender-class.php:
 	- (is_notation_usable, define_setting_value) Move common code
 	  to parent class.

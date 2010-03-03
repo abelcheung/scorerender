@@ -606,6 +606,9 @@ remove_filter ('pre_comment_content', 'balanceTags', 30);
 remove_filter ('comment_text', 'force_balance_tags', 25);
  */
 
+// Register all notations and their initial data
+do_action_ref_array ( 'scorerender_register_notations', array(&$notations) );
+
 // retrieve plugin options first
 scorerender_get_options ();
 
