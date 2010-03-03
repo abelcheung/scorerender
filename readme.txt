@@ -95,7 +95,7 @@ Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for
 * This plugin is licensed under GNU AGPL v3.
 * IE Alpha Fix is licensed under LGPL v2.1 or later.
 * Zero Clipboard is licensed under LGPL.
-* jQuery Color Picker is dual licensed under MIT and GPL.
+* jscolor is licensed under LGPL.
 
 == Upgrade Notice ==
 

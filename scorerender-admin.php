@@ -202,7 +202,6 @@ private function update_options ()
 					'sr-err-' . $sr_adm_msgs[$m],
 					$class,
 					sprintf ($mesg, $sr_adm_msgs[$m]['content']),
-					// FIXME: this is temporary hack, very ugly
 					$result->get_error_message()
 				);
 			}
@@ -506,7 +505,7 @@ public function admin_page ()
 		$retval = $this->remove_cache();
 		if ( is_wp_error ( $retval ) )
 		{
-			printf ( "<div id='%s' class='error scorerender-error'><p><strong>" . 
+			printf ( "<div id='%s' class='error scorerender-error'><p><strong>" .
 				__('ERROR: Cache removal failed, error message is: &#8216;%s&#8217;', TEXTDOMAIN) .
 				"</strong></p></div>\n",
 				$retval->get_error_code(), $retval->get_error_message() );
