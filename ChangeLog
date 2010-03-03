@@ -1,5 +1,11 @@
 2010-03-03  Abel Cheung  <abelcheung@gmail.com>
 
+	* misc/tint-image.php:
+	- Prints HTTP response code upon error, and appropriate header
+	  for better caching.
+	   
+2010-03-03  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-class.php:
 	- Re-add is_notation_usable() to interface.
 	* scorerender-utils.php (transform_paths):
