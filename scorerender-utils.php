@@ -85,7 +85,7 @@ function get_path_presentation ($path, $is_internal)
 	if (is_windows () && ! $is_internal)
 		return preg_replace ('#/+#', '\\', $path);
 
-	// FIXME: Japanese and Chinese users have to avoid non-UTF8 charsets
+	// TODO: Check how CJK chars are handled in paths
 	return preg_replace ('#\\\\+#', '/', $path);
 }
 

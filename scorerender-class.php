@@ -527,6 +527,7 @@ final public function render()
 	     (!is_writable ($this->temp_dir)) )
 		$this->temp_dir = sys_get_temp_dir ();
 
+	// Check temp folder
 	if ( (!is_dir      ($this->temp_dir)) ||
 	     (!is_writable ($this->temp_dir)) )
 		return new WP_Error ( 'sr-temp-dir-unwritable',
@@ -541,6 +542,8 @@ final public function render()
 		return new WP_Error ( 'sr-temp-file-create-fail',
 				__('Temporary file creation failure', TEXTDOMAIN) );
 
+	// FIXME: Insecure, but is there any better way to force Lilypond to
+	// use the temp file name I want?
 	$intermediate_image = $input_file . '.ps';
 
 	if ( file_exists ($intermediate_image) )
@@ -559,11 +562,12 @@ final public function render()
 
 
 	// Render using external application
-	$current_dir = getcwd();
+	$cwd = getcwd();
 	chdir ($temp_working_dir);
 	if (!$this->conversion_step1($input_file, $intermediate_image) ||
 	    (filesize ($intermediate_image)) === 0)
 	{
+		chdir ($cwd);
 		if (! SR_DEBUG) {
 			@unlink ($input_file);
 			@unlink ($intermediate_image);
@@ -572,7 +576,7 @@ final public function render()
 		return new WP_Error ( 'sr-img-render-fail',
 				__('Image rendering process failure', TEXTDOMAIN) );
 	}
-	chdir ($current_dir);
+	chdir ($cwd);
 
 	if (!$this->conversion_step2 ($intermediate_image, $final_image))
 		return new WP_Error ( 'sr-img-convert-fail',
@@ -655,6 +659,8 @@ protected static function define_setting_value ($settings, $notation_prog_data)
  * FALSE, depending on program checking result.
  *
  * @since 0.3.50
+ * @uses SrNotationBase::is_prog_usable()
+ *
  * @param array $errmsgs An array of messages to be added if program
  * checking failed. Only used if this is called as a static method.
  * Please refer to description of this function for more detail.
@@ -662,7 +668,7 @@ protected static function define_setting_value ($settings, $notation_prog_data)
  * all program paths
  *
  * @return null|bool NULL if it is called as static method, TRUE/FALSE
- * if called from instantiated class object. Please refer to description
+ * if called as class method. Please refer to description
  * of this function for more detail.
  */
 protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_data)
@@ -672,14 +678,17 @@ protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_dat
 	{
 		if ( 'prog' !== $progdata['type'] ) continue;
 
+		// FIXME: for notations using only one program, empty setting means notation
+		// is disabled, thus shouldn't output error; while for notations in multiple
+		// programs, incomplete setting means error
 		if ( empty ($opt[$setting_name]) )
 		{
 			$ok = false;
 			break;
 		}
+
 		$result = self::is_prog_usable ( $progdata['test_output'],
 				$opt[$setting_name], $progdata['test_arg']);
-
 		if ( is_wp_error ($result) || !$result )
 		{
 			$ok = false;
