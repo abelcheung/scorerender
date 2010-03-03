@@ -136,26 +136,8 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 
 		do_action_ref_array ('scorerender_define_setting_type', array(&$default_settings));
 
-		$convert = '';
-
-		if ( is_windows() )
-		{
-			$convert = search_path ('convert.exe');
-			if ( !$convert && function_exists ('glob') )
-			{
-				$convert  = glob ('C:\Program Files\ImageMagick*\convert.exe');
-				$convert = empty ($convert)  ? '' : $convert[0];
-			}
-		}
-		else
-		{
-			if ( function_exists ('shell_exec') )
-				$convert  = shell_exec ('which convert');
-			else
-				$convert = search_path ('convert');
-		}
-
-		$default_settings['CONVERT_BIN']['value'] = empty ($convert) ? '' : $convert;
+		$convert = search_prog ('convert');
+		$default_settings['CONVERT_BIN']['value'] = $convert ? $convert : '';
 
 		do_action_ref_array ('scorerender_define_setting_value', array(&$default_settings));
 

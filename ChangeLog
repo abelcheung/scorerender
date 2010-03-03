@@ -1,5 +1,15 @@
 2010-03-03  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-utils.php:
+	- (search_path) Removed, functionality merged into search_prog().
+	- (search_prog) New func, also searches user specified paths.
+	* wp-scorerender.php (scorerender_get_def_settings),
+	  scorerender-class.php (define_setting_value),
+	  notation/lilypond.php (define_setting_value):
+	- Use search_prog() globally.
+
+2010-03-03  Abel Cheung  <abelcheung@gmail.com>
+
 	* notation/*.php, wp-scorerender.php:
 	- Use WP hook and static methods to register notation data
 	  instead of adding directly to global variable.

@@ -43,7 +43,7 @@ protected $cmd_output;
 protected $imagick;
 
 /**
- * @var string $imagick_ver Version of ImageMagick installed on host 
+ * @var string $imagick_ver Version of ImageMagick installed on host
  */
 protected $imagick_ver = '';
 
@@ -634,27 +634,8 @@ protected static function define_setting_value ($settings, $notation_prog_data)
 	foreach ( $notation_prog_data as $setting_name => $progdata )
 	{
 		$binary_name = $progdata['prog_name'];
-		if ( is_windows() ) $binary_name .= '.exe';
-		$fullpath = '';
-
-		if ( is_windows() )
-		{
-			$fullpath = search_path ($binary_name);
-			if ( !$fullpath && function_exists ('glob') )
-			{
-				$fullpath = glob ("C:\\Program Files\\*\\" . $binary_name);
-				$fullpath = empty ($fullpath) ? '' : $fullpath[0];
-			}
-		}
-		else
-		{
-			if ( function_exists ('shell_exec') )
-				$fullpath = shell_exec ('which ' . $binary_name);
-			else
-				$fullpath = search_path ($binary_name);
-		}
-
-		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
+		$fullpath = search_prog ($binary_name);
+		$settings[$setting_name]['value'] = $fullpath ? $fullpath : '';
 	}
 }
 

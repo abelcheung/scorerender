@@ -191,27 +191,10 @@ public static function define_setting_value ($settings)
 	foreach ( self::$notation_data['progs'] as $setting_name => $progdata )
 	{
 		$binary_name = $progdata['prog_name'];
-		if ( is_windows() ) $binary_name .= '.exe';
-		$fullpath = '';
+		$fullpath = search_prog ( $binary_name,
+			array ("C:\\Program Files\\LilyPond*\\usr\\bin"), array() );
 
-		if ( is_windows() )
-		{
-			$fullpath = search_path ($binary_name);
-			if ( !$fullpath && function_exists ('glob') )
-			{
-				$fullpath = glob ("C:\\Program Files\\*\\usr\\bin\\" . $binary_name);
-				$fullpath = empty ($fullpath) ? '' : $fullpath[0];
-			}
-		}
-		else
-		{
-			if ( function_exists ('shell_exec') )
-				$fullpath = shell_exec ('which ' . $binary_name);
-			else
-				$fullpath = search_path ($binary_name);
-		}
-
-		$settings[$setting_name]['value'] = empty ($fullpath) ? '' : $fullpath;
+		$settings[$setting_name]['value'] = $fullpath ? $fullpath : '';
 	}
 }
 
