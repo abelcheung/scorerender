@@ -726,6 +726,17 @@ interface SrNotationInterface
 	function get_music_fragment ();
 
 	/**
+	 * Check if program locations are correct and usable. Please refer to
+	 * {@link SrNotationBase::is_notation_usable} for more detail.
+	 *
+	 * @param array $errmsgs
+	 * @param array $opt
+	 *
+	 * @since 0.3.50
+	 */
+	function is_notation_usable ($errmsgs = null, $opt);
+
+	/**
 	 * Define any additional error or warning messages if settings for notation
 	 * has any problem.
 	 *

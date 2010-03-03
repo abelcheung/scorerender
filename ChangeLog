@@ -1,5 +1,12 @@
 2010-03-03  Abel Cheung  <abelcheung@gmail.com>
 
+	* scorerender-class.php:
+	- Re-add is_notation_usable() to interface.
+	* scorerender-utils.php (transform_paths):
+	- Handle the case when setting is a MIDI program.
+	
+2010-03-03  Abel Cheung  <abelcheung@gmail.com>
+
 	* scorerender-utils.php:
 	- (search_path) Removed, functionality merged into search_prog().
 	- (search_prog) New func, also searches user specified paths.

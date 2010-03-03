@@ -225,7 +225,7 @@ function transform_paths (&$setting, $is_internal)
 
 	// Transform path and program settings to unix presentation
 	foreach ($default_settings as $key => $type)
-		if ( ( ($type == 'path') || ($type == 'prog') ) && isset( $setting[$key] ) )
+		if ( in_array ( $type, array ('path', 'prog', 'midiprog') ) && isset( $setting[$key] ) )
 			$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
 
 }
