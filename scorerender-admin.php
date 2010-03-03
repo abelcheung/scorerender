@@ -230,15 +230,7 @@ public function admin_head()
 ?>
 <style type="text/css">
 	.sr-help-icon {vertical-align:middle;border:none;}
-	#note_color_picker {width:36px; height:36px;}
-	#note_color_picker div {
-		position:relative;
-		top:4px; left:4px;
-		width:28px; height:28px;
-		background:url(<?php echo plugins_url ('scorerender/images/select2.png'); ?>) center;
-	}
 </style>
-<link rel="stylesheet" media="screen" type="text/css" href="<?php echo plugins_url ('scorerender/misc/colorpicker.css'); ?>" />
 <?php
 }
 
@@ -269,26 +261,10 @@ jQuery(document).ready(function($){
 			$("#fragment_per_comment").addClass("disabled");
 		}
 	});
-	$('#note_color_picker').ColorPicker({
-		eventName: 'mouseover',
-		color: '<?php echo $sr_options['NOTE_COLOR']; ?>',
-		onShow: function (foo) {
-			$(foo).fadeIn (500);
-			return false;
-		},
-		onHide: function (foo) {
-			$(foo).fadeOut (500);
-			return false;
-		},
-		onChange: function (hsb, hex, rgb) {
-			$('#note_color_picker div').css('background-color', '#' + hex);
-			$('#note_color').val('#' + hex);
-		}
-	});
 });
 //]]>
 </script>
-<script type="text/javascript" src="<?php echo plugins_url ('scorerender/misc/colorpicker.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo plugins_url ('scorerender/misc/jscolor/jscolor.js') ?>"></script>
 <?php
 }
 
@@ -378,9 +354,10 @@ private function admin_section_image ()
 <tr valign="top">
 <th scope="row"><?php _e('Note color:', TEXTDOMAIN) ?></th>
 <td>
-<div id="note_color_picker"><div style="background-color: <?php echo $sr_options['NOTE_COLOR'] ?>"></div></div>
-<div class="setting-description"><?php _e('Move mouse pointer to the colored square above to pick desired color.', TEXTDOMAIN) ?></div>
-<input type="hidden" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo $sr_options['NOTE_COLOR'] ?>" />
+<label for="note_color">
+<input type="text" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo $sr_options['NOTE_COLOR'] ?>" class="small-text color {hash:true}" style="width:6em" />
+<em><?php _e('(Click to select color)', TEXTDOMAIN) ?></em>
+</label>
 </td>
 </tr>
 
@@ -544,7 +521,7 @@ public function admin_page ()
 ?>
 <div class="wrap">
 	<?php if ( function_exists ('screen_icon') ) screen_icon(); ?>
-	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/images/info-icon.png'); ?>" width="32" height="32" class="sr-help-icon" /></a></h2>
+	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/misc/info-icon.png'); ?>" width="32" height="32" class="sr-help-icon" /></a></h2>
 
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>

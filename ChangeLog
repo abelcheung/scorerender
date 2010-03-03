@@ -1,5 +1,10 @@
 2010-03-03  Abel Cheung  <abelcheung@gmail.com>
 
+	* Replace jQuery Color Picker with jscolor, which use less
+	  resource and (more important) is more responsive.
+
+2010-03-03  Abel Cheung  <abelcheung@gmail.com>
+
 	* misc/tint-image.php:
 	- Prints HTTP response code upon error, and appropriate header
 	  for better caching.
