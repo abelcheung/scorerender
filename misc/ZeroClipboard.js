@@ -3,7 +3,7 @@
 
 var ZeroClipboard = {
 	
-	version: "1.0.4",
+	version: "1.0.6",
 	clients: {}, // registered upload clients on page, indexed by id
 	moviePath: 'ZeroClipboard.swf', // URL to movie
 	nextId: 1, // ID of next movie
@@ -17,11 +17,20 @@ var ZeroClipboard = {
 			thingy.show = function() { this.style.display = ''; };
 			thingy.addClass = function(name) { this.removeClass(name); this.className += ' ' + name; };
 			thingy.removeClass = function(name) {
-				this.className = this.className.replace( new RegExp("\\s*" + name + "\\s*"), " ").replace(/^\s+/, '').replace(/\s+$/, '');
+				var classes = this.className.split(/\s+/);
+				var idx = -1;
+				for (var k = 0; k < classes.length; k++) {
+					if (classes[k] == name) { idx = k; k = classes.length; }
+				}
+				if (idx > -1) {
+					classes.splice( idx, 1 );
+					this.className = classes.join(' ');
+				}
+				return this;
 			};
 			thingy.hasClass = function(name) {
 				return !!this.className.match( new RegExp("\\s*" + name + "\\s*") );
-			}
+			};
 		}
 		return thingy;
 	},
@@ -44,7 +53,7 @@ var ZeroClipboard = {
 		this.clients[id] = client;
 	},
 	
-	getDOMObjectPosition: function(obj) {
+	getDOMObjectPosition: function(obj, stopObj) {
 		// get absolute coordinates for dom element
 		var info = {
 			left: 0, 
@@ -53,7 +62,7 @@ var ZeroClipboard = {
 			height: obj.height ? obj.height : obj.offsetHeight
 		};
 
-		while (obj) {
+		while (obj && (obj != stopObj)) {
 			info.left += obj.offsetLeft;
 			info.top += obj.offsetTop;
 			obj = obj.offsetParent;
@@ -88,7 +97,7 @@ ZeroClipboard.Client.prototype = {
 	cssEffects: true, // enable CSS mouse effects on dom container
 	handlers: null, // user event handlers
 	
-	glue: function(elem) {
+	glue: function(elem, appendElem, stylesToAdd) {
 		// glue to DOM element
 		// elem can be ID or actual DOM element object
 		this.domElement = ZeroClipboard.$(elem);
@@ -96,11 +105,18 @@ ZeroClipboard.Client.prototype = {
 		// float just above object, or zIndex 99 if dom element isn't set
 		var zIndex = 99;
 		if (this.domElement.style.zIndex) {
-			zIndex = parseInt(this.domElement.style.zIndex) + 1;
+			zIndex = parseInt(this.domElement.style.zIndex, 10) + 1;
+		}
+		
+		if (typeof(appendElem) == 'string') {
+			appendElem = ZeroClipboard.$(appendElem);
+		}
+		else if (typeof(appendElem) == 'undefined') {
+			appendElem = document.getElementsByTagName('body')[0];
 		}
 		
 		// find X/Y position of domElement
-		var box = ZeroClipboard.getDOMObjectPosition(this.domElement);
+		var box = ZeroClipboard.getDOMObjectPosition(this.domElement, appendElem);
 		
 		// create floating DIV above element
 		this.div = document.createElement('div');
@@ -112,10 +128,15 @@ ZeroClipboard.Client.prototype = {
 		style.height = '' + box.height + 'px';
 		style.zIndex = zIndex;
 		
+		if (typeof(stylesToAdd) == 'object') {
+			for (addedStyle in stylesToAdd) {
+				style[addedStyle] = stylesToAdd[addedStyle];
+			}
+		}
+		
 		// style.backgroundColor = '#f00'; // debug
 		
-		var body = document.getElementsByTagName('body')[0];
-		body.appendChild(this.div);
+		appendElem.appendChild(this.div);
 		
 		this.div.innerHTML = this.getHTML( box.width, box.height );
 	},
