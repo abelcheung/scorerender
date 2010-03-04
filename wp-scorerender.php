@@ -33,7 +33,7 @@ define ('TEXTDOMAIN', 'scorerender');
 /**
  * Regular expression for cached images
  */
-define ('REGEX_CACHE_IMAGE', '/^sr-\w+-[0-9A-Fa-f]{32}\.png$/');
+define ('REGEX_CACHE_IMAGE', '/^sr-(\w+)-([0-9A-Fa-f]{32})\.png$/');
 
 /**
  * Debugging purpose
@@ -327,7 +327,9 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wp
 function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
 {
 	global $sr_options;
+	static $count = 0;
 
+	$count++;
 	if ( !is_null ( $color ) )
 		$imgurl = add_query_arg (
 				array (
@@ -341,29 +343,40 @@ function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
 				plugins_url ('scorerender/misc/tint-image.php')
 		);
 
-	if ( !$sr_options['SHOW_SOURCE'] )
-	{
-		list ( $width, $height, $type, $attr ) =
-			getimagesize ( scorerender_get_cache_location() .'/'. $imgname );
-		return sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' />\n",
-				$attr,
-				__('Music fragment', TEXTDOMAIN),
-				__('Music fragment', TEXTDOMAIN),
-				$imgurl );
-	}
+	$content = "[score lang=\"$tag\"]\n" .
+		preg_replace ( "/[\r\n]+/s", "\n", $render->get_raw_input() ) . "\n[/score]";
 
-	$html = sprintf ("<form class='scorerender-form' target='fragmentpopup' action='%s' method='post'>\n", plugins_url ('scorerender/misc/showcode.php'));
-	$html .= sprintf ("<input type='image' name='music_image' class='scorerender-image' title='%s' alt='%s' src='%s' />\n",
-		__('Click on image to view source', TEXTDOMAIN),
-		__('Music fragment', TEXTDOMAIN),
-		$imgurl );
+	$id = preg_replace ( REGEX_CACHE_IMAGE, 'sr-$2', $imgname);
 
-	$content = "[score lang='$tag']\r\n" .
-		preg_replace ( "/(?<!\r)\n/s", "\r\n", $render->get_raw_input() ) . "\r\n" .
-		"[/score]\r\n";
+	// esc_js() does nothing but messing up line breaks
+	// Even worse is, wpautop() continue to insert breaks and <p>s everywhere (including
+	// inside HTML tag!) and destroy the content, thus convert linebreak into entity
+	// to avoid conversion
+	$html .= sprintf ("<input type='hidden' name='code' value='%s' id='code-%s' >\n",
+		preg_replace ( '/\n/', '&#10;', htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
+		$id );
 
-	$html .= sprintf ("<input type='hidden' name='code' value='%s'>\n</form>\n",
-		rawurlencode ( htmlentities ( $content, ENT_NOQUOTES, get_option ('blog_charset') ) ) );
+	list ( $width, $height, $type, $attr ) =
+		getimagesize ( scorerender_get_cache_location() .'/'. $imgname );
+
+	// TODO: Add visual feedback after copying to clipboard is done
+	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />\n",
+			$attr,
+			__('Click to copy to clipboard', TEXTDOMAIN),
+			__('Music fragment', TEXTDOMAIN),
+			$imgurl, $id );
+
+	// in jquery.copyable action is always bound to mousedown
+	add_action ('wp_footer',
+			create_function ( '$a', 'echo "
+<script type=\'text/javascript\'>
+jQuery(\'#' . $id . '\').copyable(function(e, clip) {
+	clip.setText(jQuery(\'#code-' . $id . '\').val());
+});
+</script>
+";'
+			)
+	);
 
 	return $html;
 }
@@ -604,6 +617,17 @@ else
 	// IE6 PNG translucency filter
 	if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
 		add_action ('wp_head', 'scorerender_add_ie6_style');
+
+	wp_enqueue_script ( 'zeroclipboard'  , plugins_url ( 'scorerender/misc/ZeroClipboard.js'   ),
+			array(), '1.0.6', true );
+	wp_enqueue_script ( 'jquery-copyable', plugins_url ( 'scorerender/misc/jquery.copyable.js' ),
+			array('jquery', 'zeroclipboard'), '0.0', true );
+
+	add_action ('wp_footer', create_function ( '$a',
+		'echo "<script type=\'text/javascript\'>ZeroClipboard.setMoviePath( \'' .
+			plugins_url ( 'scorerender/misc/ZeroClipboard.swf' ) .
+			'\' );</script>\n";')
+	);
 
 	// earlier than default priority, since
 	// smilies conversion and wptexturize() can mess up the content

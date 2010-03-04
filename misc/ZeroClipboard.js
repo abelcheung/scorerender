@@ -3,7 +3,7 @@
 
 var ZeroClipboard = {
 	
-	version: "1.0.5",
+	version: "1.0.6",
 	clients: {}, // registered upload clients on page, indexed by id
 	moviePath: 'ZeroClipboard.swf', // URL to movie
 	nextId: 1, // ID of next movie
@@ -17,7 +17,16 @@ var ZeroClipboard = {
 			thingy.show = function() { this.style.display = ''; };
 			thingy.addClass = function(name) { this.removeClass(name); this.className += ' ' + name; };
 			thingy.removeClass = function(name) {
-				this.className = this.className.replace( new RegExp("(^|\\s+)" + name + "(\\s+|$)"), "").replace(/^\s+|\s+$/g, '');
+				var classes = this.className.split(/\s+/);
+				var idx = -1;
+				for (var k = 0; k < classes.length; k++) {
+					if (classes[k] == name) { idx = k; k = classes.length; }
+				}
+				if (idx > -1) {
+					classes.splice( idx, 1 );
+					this.className = classes.join(' ');
+				}
+				return this;
 			};
 			thingy.hasClass = function(name) {
 				return !!this.className.match( new RegExp("\\s*" + name + "\\s*") );

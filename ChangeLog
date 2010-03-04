@@ -1,3 +1,12 @@
+2010-03-04  Abel Cheung  <abelcheung@gmail.com>
+
+	* Update ZeroClipboard to newest version (1.0.6).
+	* Incorporate jquery.copyable, which transforms ZeroClipboard
+	  into jQuery plugin.
+	* wp-scorerender.php:
+	- Instead of showing music source through showcode.php, now
+	  ZeroClipboard flash is directly overlayed onto image.
+
 2010-03-03  Abel Cheung  <abelcheung@gmail.com>
 
 	* Replace jQuery Color Picker with jscolor, which use less
