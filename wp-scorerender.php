@@ -348,12 +348,22 @@ function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
 
 	$id = preg_replace ( REGEX_CACHE_IMAGE, 'sr-$2', $imgname);
 
+	// Convert some more chars to avoid various problems
+	//
+	// linebreak conversion is for avoiding wpautop(), which continue
+	// to insert breaks and <p>s everywhere (including inside HTML tag!)
+	// brakcet conversion is there for avoiding re-evaluation of shortcode
+	// in resulting HTML, more trustful than the purported [[shortcode]] syntax
+	$repl_chars = array (
+		'/\n/' => '&#10;',
+		'/\[/' => '&#91;',
+		'/\]/' => '&#93;',
+	);
+
 	// esc_js() does nothing but messing up line breaks
-	// Even worse is, wpautop() continue to insert breaks and <p>s everywhere (including
-	// inside HTML tag!) and destroy the content, thus convert linebreak into entity
-	// to avoid conversion
 	$html .= sprintf ("<input type='hidden' name='code' value='%s' id='code-%s' >\n",
-		preg_replace ( '/\n/', '&#10;', htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
+		preg_replace ( array_keys ($repl_chars), array_values($repl_chars),
+			htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
 		$id );
 
 	list ( $width, $height, $type, $attr ) =

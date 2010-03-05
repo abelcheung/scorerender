@@ -1,32 +1,19 @@
-/*
-Requirements:
-This script requires the jquery.includeMany plugin and ZeroClipboard.
-
-Example:
-
-$("#elementToClickOn").copyable(function(e, clip) {
-	clip.setText($("#elementWithText").html());
-});
-
-*/
-
 jQuery.fn.copyable = function(getTextFunction) {
 	var self = this;
 
 	self.each(function() {
-		var copyable = $(this);
+		var copyable = this;
 
 		if (jQuery.browser.msie) {
-			
-			var clip = copyable.data('clip');
+			var clip = jQuery(copyable).data('clip');
 			if (clip === undefined) {
 				clip = new Object();
-				copyable.data('clip', clip);
+				jQuery(copyable).data('clip', clip);
 			}
 			clip.setText = function(data) {
 				window.clipboardData.setData('Text', data);
 			};
-			copyable.mousedown(function(e) {
+			jQuery(copyable).mousedown(function(e) {
 				getTextFunction(e, clip);
 			});
 			
@@ -62,8 +49,6 @@ jQuery.fn.copyable = function(getTextFunction) {
 				jQuery(copyable).trigger("mouseup", client);
 			});
 		}
-
 	});
-
 	return self;
 };

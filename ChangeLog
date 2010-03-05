@@ -1,3 +1,11 @@
+2010-03-05  Abel Cheung  <abelcheung@gmail.com>
+
+	* misc/jquery.copyable.js:
+	- Also fix calling of jQuery for IE (fix for other browsers
+	  is already done upon first import)
+	* wp-scorerender.php:
+	- Fix shortcode being re-evaluated inside output.
+
 2010-03-04  Abel Cheung  <abelcheung@gmail.com>
 
 	* Update ZeroClipboard to newest version (1.0.6).
