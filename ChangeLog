@@ -5,6 +5,7 @@
 	  file name are stored inside class properties.
 	* wp-scorerender.php:
 	- (scorerender_return_fragment_ok) Eliminate unnecessary argument.
+	- Provide (ugly) visual feedback after clicking on image.
 
 2010-03-05  Abel Cheung  <abelcheung@gmail.com>
 

@@ -353,7 +353,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $color )
 	);
 
 	// esc_js() does nothing but messing up line breaks
-	$html .= sprintf ("<input type='hidden' name='code' value='%s' id='code-%s' >\n",
+	$html .= sprintf ("<input type='hidden' name='code' value='%s' id='%s-code'>",
 		preg_replace ( array_keys ($repl_chars), array_values($repl_chars),
 			htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
 		$id );
@@ -361,24 +361,21 @@ function scorerender_return_fragment_ok ( $render, $tag, $color )
 	list ( $width, $height, $type, $attr ) =
 		getimagesize ( scorerender_get_cache_location() .'/'. $render->final_image );
 
-	// TODO: Add visual feedback after copying to clipboard is done
-	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />\n",
+	// TODO: create new setting for disabling clipboard
+	// TODO: message is not aligned vertically, cf. http://www.jakpsatweb.cz/css/css-vertical-center-solution.html
+	$html .= sprintf ("<div id='%s-div' style='position:relative; width:%spx; height:%spx; display:inline; overflow:hidden;'>",
+			$id, $width, $height
+			);
+	$html .= sprintf ("<div id='%s-message' style='position:absolute; width:%spx; height:%spx; display:none; background:inherit; text-align:center;'>%s</div>",
+			$id, ($width >= 300) ? $width : '300', $height,
+			__('Music code copied to clipboard', TEXTDOMAIN)
+			);
+	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />",
 			$attr,
 			__('Click to copy to clipboard', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN),
 			$imgurl, $id );
-
-	// in jquery.copyable action is always bound to mousedown
-	add_action ('wp_footer',
-			create_function ( '$a', 'echo "
-<script type=\'text/javascript\'>
-jQuery(\'#' . $id . '\').copyable(function(e, clip) {
-	clip.setText(jQuery(\'#code-' . $id . '\').val());
-});
-</script>
-";'
-			)
-	);
+	$html .= "</div>";
 
 	return $html;
 }
@@ -423,7 +420,8 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 	extract ( shortcode_atts ( $defaults, $attr ) );
 
 	if ( ! array_key_exists ( $lang, $notations ) )
-		return SrNotationBase::format_error_msg ( __('notation language unknown', TEXTDOMAIN) );
+		return SrNotationBase::format_error_msg ( sprintf (
+			__('unknown notation language "%s"', TEXTDOMAIN), $lang ) );
 
 	// initialize notation class
 	if ( class_exists ( $notations[$lang]['classname'] ) )
@@ -625,12 +623,22 @@ else
 	wp_enqueue_script ( 'jquery-copyable', plugins_url ( 'scorerender/misc/jquery.copyable.js' ),
 			array('jquery', 'zeroclipboard'), '0.0', true );
 
+	// Set ZeroClipboard path, as well as fading effect for all images
 	add_action ('wp_footer', create_function ( '$a',
-		'echo "<script type=\'text/javascript\'>ZeroClipboard.setMoviePath( \'' .
-			plugins_url ( 'scorerender/misc/ZeroClipboard.swf' ) .
-			'\' );</script>\n";')
+			'echo "<script type=\'text/javascript\'>
+ZeroClipboard.setMoviePath( \'' . plugins_url ( 'scorerender/misc/ZeroClipboard.swf' ) . '\' );
+jQuery(\'.scorerender-image\').copyable(function(e, clip) {
+	clip.setText(jQuery(\'#\'+this.id+\'-code\').val());
+	var messageid = this.id + \'-message\';
+	jQuery(this).fadeOut(\'slow\');
+	jQuery(\'#\' + messageid).fadeIn(\'slow\');
+	jQuery(this).fadeIn(2000);
+	jQuery(\'#\' + messageid).fadeOut(2000);
+});
+</script>
+";'
+			)
 	);
-
 	// earlier than default priority, since
 	// smilies conversion and wptexturize() can mess up the content
 	add_filter ('the_excerpt',
