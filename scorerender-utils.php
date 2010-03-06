@@ -13,7 +13,7 @@
 // Backported function: sys_get_temp_dir
 // http://www.phpit.net/article/creating-zip-tar-archives-dynamically-php/2/
 //
-if (!function_exists ('sys_get_temp_dir'))
+if (!function_exists ('sys_get_temp_dir')) /* {{{ */
 {
 	/**
 	 * @ignore
@@ -37,12 +37,12 @@ if (!function_exists ('sys_get_temp_dir'))
 			return realpath( dirname($temp_file) );
 		}
 	}
-}
+} /* }}} */
 
 // Backported function: array_intersect_key
 // http://www.php.net/manual/en/function.array-intersect-key.php#68179
 //
-if (!function_exists ('array_intersect_key'))
+if (!function_exists ('array_intersect_key')) /* {{{ */
 {
 	/**
 	 * @ignore
@@ -57,7 +57,7 @@ if (!function_exists ('array_intersect_key'))
 					unset ($result[$key]);
 		return $result;
 	}
-}
+} /* }}} */
 
 /**
  * Convenience function: Check if OS is Windows
@@ -80,14 +80,14 @@ function is_windows ()
  * @uses is_windows()
  * @return string $path The resulting path, with appropriate slashes or backslashes
  */
-function get_path_presentation ($path, $is_internal)
+function get_path_presentation ($path, $is_internal) /* {{{ */
 {
 	if (is_windows () && ! $is_internal)
 		return preg_replace ('#/+#', '\\', $path);
 
 	// TODO: Check how CJK chars are handled in paths
 	return preg_replace ('#\\\\+#', '/', $path);
-}
+} /* }}} */
 
 /**
  * Convenience function: Check if a path is aboslute path
@@ -96,12 +96,12 @@ function get_path_presentation ($path, $is_internal)
  * @uses is_windows()
  * @return boolean True if path is absolute, false otherwise.
  */
-function is_absolute_path ($path)
+function is_absolute_path ($path) /* {{{ */
 {
 	// FIXME: How about network shares on Windows?
 	return ( (!is_windows() && (substr ($path, 0, 1) == '/')) ||
 	         ( is_windows() && preg_match ('/^[A-Za-z]:/', $path) ) );
-}
+} /* }}} */
 
 /**
  * Create temporary directory
@@ -114,7 +114,7 @@ function is_absolute_path ($path)
  * @param integer $mode Access mode of temp directory
  * @return string Full path of created temp directory, or FALSE on failure
  */
-function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
+function create_temp_dir ($dir = '', $prefix = '', $mode = 0700) /* {{{ */
 {
 	if ( !is_dir ($dir) || !is_writable ($dir) )
 		$dir = sys_get_temp_dir ();
@@ -133,7 +133,7 @@ function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
 	while (!@mkdir ($path, $mode) && (++$i < 100));
 
 	return ($i < 100) ? $path : FALSE;
-}
+} /* }}} */
 
 
 /**
@@ -154,7 +154,7 @@ function create_temp_dir ($dir = '', $prefix = '', $mode = 0700)
  *
  * @return string|boolean Full path of program if it is found, FALSE otherwise
  */
-function search_prog ($binary_name, $extra_win_paths = array(), $extra_unix_paths = array())
+function search_prog ($binary_name, $extra_win_paths = array(), $extra_unix_paths = array()) /* {{{ */
 {
 	if ( is_windows() ) $binary_name .= '.exe';
 
@@ -203,7 +203,7 @@ function search_prog ($binary_name, $extra_win_paths = array(), $extra_unix_path
 		}
 	}
 	return false;
-}
+} /* }}} */
 
 /**
  * Transform all path related options in ScoreRender settings
@@ -217,7 +217,7 @@ function search_prog ($binary_name, $extra_win_paths = array(), $extra_unix_path
  * which is used for storing values into database.
  * FALSE means using OS native representation.
  */
-function transform_paths (&$setting, $is_internal)
+function transform_paths (&$setting, $is_internal) /* {{{ */
 {
 	if (!is_array ($setting)) return;
 
@@ -228,7 +228,7 @@ function transform_paths (&$setting, $is_internal)
 		if ( in_array ( $type, array ('path', 'prog', 'midiprog') ) && isset( $setting[$key] ) )
 			$setting[$key] = get_path_presentation ($setting[$key], $is_internal);
 
-}
+} /* }}} */
 
 
 /**
@@ -241,7 +241,7 @@ function transform_paths (&$setting, $is_internal)
  * @param string $file File to be checked
  * @return bool True if file conforms to MIDI format, False otherwise
  */
-function is_midi_file ($file)
+function is_midi_file ($file) /* {{{ */
 {
 	// too small
 	if ( filesize ($file) <= 18 ) return false;
@@ -252,6 +252,7 @@ function is_midi_file ($file)
 	return ( ( $array['head'  ] == "MThd" ) &&
 	         ( $array['hdrlen'] == 6      ) &&
 	         ( $array['hdrtrk'] == "MTrk" ) );
-}
+} /* }}} */
 
+/* vim: set cindent foldmethod=marker : */
 ?>
