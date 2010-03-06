@@ -1,3 +1,11 @@
+2010-03-06  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php:
+	- (render) Returns status instead of file name; image and midi
+	  file name are stored inside class properties.
+	* wp-scorerender.php:
+	- (scorerender_return_fragment_ok) Eliminate unnecessary argument.
+
 2010-03-05  Abel Cheung  <abelcheung@gmail.com>
 
 	* misc/jquery.copyable.js:

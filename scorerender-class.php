@@ -72,6 +72,17 @@ protected $mainprog;
  */
 protected $midiprog;
 
+/**
+ * @var string $final_image Generated image file full path,
+ * null if uninitialized, FALSE if not successfully generated
+ */
+public $final_image = null;
+
+/**
+ * @var string $final_midi Generated MIDI file full path,
+ * null if uninitialized, FALSE if not successfully generated
+ */
+public $final_midi = null;
 
 
 /**
@@ -461,13 +472,14 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 
 
 /**
- * Render music fragment into images
+ * Render music fragment into images, and optionally generate MIDI
  *
  * First it tries to check if image is already rendered, and return
  * existing image file name immediately. Otherwise the music fragment is
  * rendered in 2 passes (with {@link conversion_step1()} and
- * {@link conversion_step2()}, and resulting image is stored in cache folder.
- * Error code will be set appropriately.
+ * {@link conversion_step2()}. Resulting image is stored in cache folder,
+ * while its name is stored in $final_image. Finally, generate MIDI
+ * file and store its name in $final_midi.
  *
  * @uses SrNotationInterface::get_music_fragment()
  * @uses is_valid_input() Validate content before rendering
@@ -478,21 +490,31 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
  *
  * @todo render image in background, especially for lilypond, which can take
  * minutes or even hours to finish rendering
- * @return string|boolean Resulting image file name, or FALSE upon error
+ * @return boolean|WP_Error WP_Error upon image rendering error, FALSE if
+ * non-critical error occurred (such as midi generation error), TRUE if all ok
  * @final
  */
 final public function render()
 {
 	global $sr_options;
+	$ok = true;
 
 	$hash = md5 (preg_replace ('/\s/', '', $this->input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
-		       "sr-" . $this->get_notation_name() . "-$hash.png";
+			"sr-" . $this->get_notation_name() . "-$hash.png";
+	$final_midi = $this->cache_dir. DIRECTORY_SEPARATOR .
+			"sr-" . $this->get_notation_name() . "-$hash.mid";
+
+	// first presume generation failed, modify later if turn out ok
+	$this->final_image = false;
 
 	// If cache exists, short circuit
 	if (is_file ($final_image))
 		if (is_readable ($final_image))
-			return basename ($final_image);
+		{
+			$this->final_image = basename ($final_image);
+			return true;
+		}
 		else
 			return new WP_Error ( 'sr-image-unreadable',
 					__('Image exists but is not readable', TEXTDOMAIN), $final_image );
@@ -582,6 +604,16 @@ final public function render()
 		return new WP_Error ( 'sr-img-convert-fail',
 				__('Image conversion failure', TEXTDOMAIN) );
 
+	$this->final_image = basename ($final_image);
+
+	if ( method_exists ($this, 'generate_midi') )
+	{
+		if ( true === ($ok = $this->generate_midi($input_file, $final_midi) ) )
+			$this->final_midi = $final_midi;
+		else
+			$this->final_midi = false;
+	}
+
 	// Cleanup
 	if (! SR_DEBUG) {
 		@unlink ($input_file);
@@ -589,7 +621,7 @@ final public function render()
 		@rmdir ($temp_working_dir);
 	}
 
-	return basename ($final_image);
+	return $ok;
 }
 
 /**

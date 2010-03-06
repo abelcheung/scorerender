@@ -320,33 +320,25 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wp
  *
  * @param object $render PHP object created for rendering relevant music fragment
  * @param string $tag The notation name as a shortcode tag
- * @param string $imgname The resulting image name upon successful rendering
  * @param string $color The color used when author specify custom color for certain fragment
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
+function scorerender_return_fragment_ok ( $render, $tag, $color )
 {
 	global $sr_options;
 	static $count = 0;
 
 	$count++;
-	if ( !is_null ( $color ) )
-		$imgurl = add_query_arg (
-				array (
-					'img' => $imgname,
-					'color' => preg_replace ( '/^#/', '', $color )
-				),
-				plugins_url ('scorerender/misc/tint-image.php')
-		);
-	else
-		$imgurl = add_query_arg ( array ( 'img' => $imgname ),
-				plugins_url ('scorerender/misc/tint-image.php')
-		);
+
+	$args = array ( 'img' => $render->final_image );
+	if ( !is_null ( $color ) ) $args['color'] = preg_replace ( '/^#/', '', $color );
+
+	$imgurl = add_query_arg ( $args, plugins_url ('scorerender/misc/tint-image.php') );
 
 	$content = "[score lang=\"$tag\"]\n" .
 		preg_replace ( "/[\r\n]+/s", "\n", $render->get_raw_input() ) . "\n[/score]";
 
-	$id = preg_replace ( REGEX_CACHE_IMAGE, 'sr-$2', $imgname);
+	$id = preg_replace ( REGEX_CACHE_IMAGE, 'sr-$2', $render->final_image);
 
 	// Convert some more chars to avoid various problems
 	//
@@ -367,7 +359,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $imgname, $color )
 		$id );
 
 	list ( $width, $height, $type, $attr ) =
-		getimagesize ( scorerender_get_cache_location() .'/'. $imgname );
+		getimagesize ( scorerender_get_cache_location() .'/'. $render->final_image );
 
 	// TODO: Add visual feedback after copying to clipboard is done
 	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />\n",
@@ -477,7 +469,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 	// Not nice to show source in alt text or title, since music source
 	// is most likely multi-line, and can be very long
 	// This idea is taken from LatexRender demo site
-	return scorerender_return_fragment_ok ( $render, $lang, $result, $color );
+	return scorerender_return_fragment_ok ( $render, $lang, $color );
 }
 
 
