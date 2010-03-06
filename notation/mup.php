@@ -18,7 +18,7 @@ class mupRender extends SrNotationBase
 
 const code = 'mup';
 
-protected static $notation_data = array (
+protected static $notation_data = array ( /* {{{ */
 	'name'        => 'Mup',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-mup/',
 	'classname'   => 'mupRender',
@@ -32,7 +32,7 @@ protected static $notation_data = array (
 			'error_code'  => 'mup_bin_problem',
 		),
 	),
-);
+); /* }}} */
 
 
 /**
@@ -69,7 +69,7 @@ public function set_img_width ($width)
  *
  * @return boolean True if content is deemed safe
  */
-protected function is_valid_input ()
+protected function is_valid_input () /* {{{ */
 {
 	$blacklist = array
 	(
@@ -81,13 +81,13 @@ protected function is_valid_input ()
 			return false;
 
 	return true;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::get_music_fragment() interface method}
  * for more detail.
  */
-public function get_music_fragment ()
+public function get_music_fragment () /* {{{ */
 {
 	$header = <<<EOD
 //!Mup-Arkkra-5.0
@@ -100,7 +100,7 @@ pagewidth = {$this->img_max_width}
 label = ""
 EOD;
 	return $header . "\n" . $this->input;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step1() parent method}
@@ -109,7 +109,7 @@ EOD;
  * @uses is_windows()
  * @uses $temp_dir For storing temporary copy of magic file
  */
-protected function conversion_step1 ($input_file, $intermediate_image)
+protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 {
 	/*
 	 * Mup requires a magic file before it is usable.
@@ -138,7 +138,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	unlink ($temp_magic_file);
 
 	return (filesize ($intermediate_image) != 0);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
@@ -174,7 +174,7 @@ public function set_notation_action ($options)
  *
  * @uses SrNotationBase::is_notation_usable()
  */
-public function is_notation_usable ($errmsgs = null, $opt)
+public function is_notation_usable ($errmsgs = null, $opt) /* {{{ */
 {
 	static $ok;
 
@@ -183,7 +183,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
 		return $ok;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
@@ -201,7 +201,7 @@ public static function define_admin_messages ($adm_msgs)
  * Refer to {@link SrNotationInterface::program_setting_entry() interface method}
  * for more detail.
  */
-public static function program_setting_entry ($output)
+public static function program_setting_entry ($output) /* {{{ */
 {
 	foreach (self::$notation_data['progs'] as $setting_name => $progdata)
 		$output .= parent::program_setting_entry (
@@ -214,7 +214,7 @@ public static function program_setting_entry ($output)
 			'http://www.arkkra.com/doc/faq.html#payment')
 	);
 	return $output;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::define_setting_type() interface method}
@@ -247,21 +247,12 @@ public static function register_notation_data ($notations)
 }  // end of class
 
 
-add_action ('scorerender_register_notations',
-	array( 'mupRender', 'register_notation_data' ) );
+add_action ('scorerender_register_notations'  , array( 'mupRender', 'register_notation_data' ) );
+add_action ('scorerender_define_adm_msgs'     , array( 'mupRender', 'define_admin_messages'  ) );
+add_action ('scorerender_check_notation_progs', array( 'mupRender', 'is_notation_usable'     ), 10, 2 );
+add_filter ('scorerender_prog_and_file_loc'   , array( 'mupRender', 'program_setting_entry'  ) );
+add_filter ('scorerender_define_setting_type' , array( 'mupRender', 'define_setting_type'    ) );
+add_filter ('scorerender_define_setting_value', array( 'mupRender', 'define_setting_value'   ) );
 
-add_action ('scorerender_define_adm_msgs',
-	array( 'mupRender', 'define_admin_messages' ) );
-
-add_action ('scorerender_check_notation_progs',
-	array( 'mupRender', 'is_notation_usable' ), 10, 2 );
-
-add_filter ('scorerender_prog_and_file_loc',
-	array( 'mupRender', 'program_setting_entry' ) );
-
-add_filter ('scorerender_define_setting_type',
-	array( 'mupRender', 'define_setting_type' ) );
-
-add_filter ('scorerender_define_setting_value',
-	array( 'mupRender', 'define_setting_value' ) );
+/* vim: set cindent foldmethod=marker : */
 ?>

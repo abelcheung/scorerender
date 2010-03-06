@@ -44,7 +44,7 @@ public function get_music_fragment ()
  * @param string $intermediate_image File name of rendered PostScript file
  * @return boolean Whether image can be downloaded from GUIDO server
  */
-protected function conversion_step1 ($input_file, $intermediate_image)
+protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 {
 	/*
 	 * Staff height (px) = zoom*40-1; under this zoom ratio,
@@ -60,12 +60,12 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 			rawurlencode (file_get_contents ($input_file)));
 
 	return (@copy ($url, $intermediate_image));
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image)
+protected function conversion_step2 ($intermediate_image, $final_image) /* {{{ */
 {
 	/*
 	 * The conversion from non-transparent GIF to transparent PNG was
@@ -78,7 +78,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 	 */
 	return parent::conversion_step2 ( $intermediate_image,
 			$final_image, FALSE, '-colorspace cmyk -shave 1x1' );
-}
+} /* }}} */
 
 /**
  * Check if file access functions can handle URL.
@@ -136,4 +136,5 @@ public static function register_notation_data ($notations)
 add_action ('scorerender_register_notations',
 	array( 'guidoRender', 'register_notation_data' ) );
 
+/* vim: set cindent foldmethod=marker : */
 ?>

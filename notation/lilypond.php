@@ -20,7 +20,7 @@ const code = 'lilypond';
 
 protected $lilypond_ver = '';
 
-protected static $notation_data = array (
+protected static $notation_data = array ( /* {{{ */
 	'name'        => 'LilyPond',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-lilypond/',
 	'classname'   => 'lilypondRender',
@@ -35,14 +35,14 @@ protected static $notation_data = array (
 			'error_code'  => 'lilypond_bin_problem',
 		),
 	),
-);
+); /* }}} */
 
 
 /**
  * Refer to {@link SrNotationInterface::get_music_fragment() interface method}
  * for more detail.
  */
-public function get_music_fragment ()
+public function get_music_fragment () /* {{{ */
 {
 	$header = <<<EOD
 \\version "2.8.1"
@@ -64,13 +64,13 @@ EOD;
 
 	// When does lilypond start hating \r ?
 	return $header . str_replace (chr(13), '', $this->input);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step1() parent method}
  * for more detail.
  */
-protected function conversion_step1 ($input_file, $intermediate_image)
+protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 {
 	$safemode = '';
 	/* LilyPond SUCKS unquestionably. On 2.8 safe mode is triggered by "--safe" option,
@@ -91,7 +91,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	$retval = $this->_exec ($cmd);
 
 	return ($retval == 0);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method}
@@ -111,7 +111,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * @uses SrNotationBase::is_prog_usable()
  */
-public function is_notation_usable ($errmsgs = null, $opt)
+public function is_notation_usable ($errmsgs = null, $opt) /* {{{ */
 {
 	static $ok;
 
@@ -146,7 +146,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
 		return $ok;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
@@ -186,7 +186,7 @@ public static function define_setting_type ($settings)
  * Refer to {@link SrNotationInterface::define_setting_value() interface method}
  * for more detail.
  */
-public static function define_setting_value ($settings)
+public static function define_setting_value ($settings) /* {{{ */
 {
 	foreach ( self::$notation_data['progs'] as $setting_name => $progdata )
 	{
@@ -196,7 +196,7 @@ public static function define_setting_value ($settings)
 
 		$settings[$setting_name]['value'] = $fullpath ? $fullpath : '';
 	}
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::register_notation_data() interface method}
@@ -210,21 +210,12 @@ public static function register_notation_data ($notations)
 } // end of class
 
 
-add_action ('scorerender_register_notations',
-	array( 'lilypondRender', 'register_notation_data' ) );
+add_action ('scorerender_register_notations'  , array( 'lilypondRender', 'register_notation_data' ) );
+add_action ('scorerender_define_adm_msgs'     , array( 'lilypondRender', 'define_admin_messages'  ) );
+add_action ('scorerender_check_notation_progs', array( 'lilypondRender', 'is_notation_usable'     ), 10, 2 );
+add_filter ('scorerender_prog_and_file_loc'   , array( 'lilypondRender', 'program_setting_entry'  ) );
+add_filter ('scorerender_define_setting_type' , array( 'lilypondRender', 'define_setting_type'    ) );
+add_filter ('scorerender_define_setting_value', array( 'lilypondRender', 'define_setting_value'   ) );
 
-add_action ('scorerender_define_adm_msgs',
-	array( 'lilypondRender', 'define_admin_messages' ) );
-
-add_action ('scorerender_check_notation_progs',
-	array( 'lilypondRender', 'is_notation_usable' ), 10, 2 );
-
-add_filter ('scorerender_prog_and_file_loc',
-	array( 'lilypondRender', 'program_setting_entry' ) );
-
-add_filter ('scorerender_define_setting_type',
-	array( 'lilypondRender', 'define_setting_type' ) );
-
-add_filter ('scorerender_define_setting_value',
-	array( 'lilypondRender', 'define_setting_value' ) );
+/* vim: set cindent foldmethod=marker : */
 ?>

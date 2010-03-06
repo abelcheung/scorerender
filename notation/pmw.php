@@ -18,7 +18,7 @@ class pmwRender extends SrNotationBase
 
 const code = 'pmw';
 
-protected static $notation_data = array (
+protected static $notation_data = array ( /* {{{ */
 	'name'        => "Philip's Music Writer",
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-pmw/',
 	'classname'   => 'pmwRender',
@@ -32,7 +32,7 @@ protected static $notation_data = array (
 			'error_code'  => 'pmw_bin_problem',
 		),
 	),
-);
+); /* }}} */
 
 
 /**
@@ -42,7 +42,7 @@ protected static $notation_data = array (
  * @uses $img_max_width
  * @uses $_input
  */
-public function get_music_fragment ()
+public function get_music_fragment () /* {{{ */
 {
 	// If page size is changed here, it must also be changed
 	// under conversion_step2().
@@ -54,7 +54,7 @@ Magnification 1.5
 EOD;
 	// PMW doesn't like \r\n
 	return str_replace ("\r", '', $header . $this->input);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
@@ -62,7 +62,7 @@ EOD;
  * @uses $mainprog
  * @uses _exec()
  */
-protected function conversion_step1 ($input_file, $intermediate_image)
+protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 {
 	$cmd = sprintf ('"%s" -norc -includefont -o "%s" "%s"',
 			$this->mainprog,
@@ -70,12 +70,12 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	$retval = $this->_exec($cmd);
 
 	return ($result['return_val'] == 0);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image)
+protected function conversion_step2 ($intermediate_image, $final_image) /* {{{ */
 {
 	/*
 	 * ImageMagick mistakenly identify all PostScript produced by PMW as
@@ -90,7 +90,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 	return parent::conversion_step2 ($intermediate_image, $final_image,
 			version_compare ( $this->imagick_ver, '6.3.9-6', '>=' ),
 			'-page a3');
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}
@@ -98,7 +98,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * @uses SrNotationBase::is_notation_usable()
  */
-public function is_notation_usable ($errmsgs = null, $opt)
+public function is_notation_usable ($errmsgs = null, $opt) /* {{{ */
 {
 	static $ok;
 
@@ -107,7 +107,7 @@ public function is_notation_usable ($errmsgs = null, $opt)
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
 		return $ok;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
@@ -164,21 +164,12 @@ public static function register_notation_data ($notations)
 } // end of class
 
 
-add_action ('scorerender_register_notations',
-	array( 'pmwRender', 'register_notation_data' ) );
+add_action ('scorerender_register_notations'  , array( 'pmwRender', 'register_notation_data' ) );
+add_action ('scorerender_define_adm_msgs'     , array( 'pmwRender', 'define_admin_messages'  ) );
+add_action ('scorerender_check_notation_progs', array( 'pmwRender', 'is_notation_usable'     ), 10, 2 );
+add_filter ('scorerender_prog_and_file_loc'   , array( 'pmwRender', 'program_setting_entry'  ) );
+add_filter ('scorerender_define_setting_type' , array( 'pmwRender', 'define_setting_type'    ) );
+add_filter ('scorerender_define_setting_value', array( 'pmwRender', 'define_setting_value'   ) );
 
-add_action ('scorerender_define_adm_msgs',
-	array( 'pmwRender', 'define_admin_messages' ) );
-
-add_action ('scorerender_check_notation_progs',
-	array( 'pmwRender', 'is_notation_usable' ), 10, 2 );
-
-add_filter ('scorerender_prog_and_file_loc',
-	array( 'pmwRender', 'program_setting_entry' ) );
-
-add_filter ('scorerender_define_setting_type',
-	array( 'pmwRender', 'define_setting_type' ) );
-
-add_filter ('scorerender_define_setting_value',
-	array( 'pmwRender', 'define_setting_value' ) );
+/* vim: set cindent foldmethod=marker : */
 ?>

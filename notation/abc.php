@@ -18,7 +18,7 @@ class abcRender extends SrNotationBase
 
 const code = 'abc';
 
-protected static $notation_data = array (
+protected static $notation_data = array ( /* {{{ */
 	'name'        => 'ABC',
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-abc/',
 	'classname'   => 'abcRender',
@@ -40,7 +40,7 @@ protected static $notation_data = array (
 			'error_code'  => 'abc2midi_bin_problem',
 		),
 	),
-);
+); /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::set_img_width() parent method}
@@ -58,7 +58,7 @@ public function set_img_width ($width)
 /**
  * Refer to {@link SrNotationInterface::get_music_fragment() interface method} for more detail.
  */
-public function get_music_fragment ()
+public function get_music_fragment () /* {{{ */
 {
 	$header = <<<EOT
 %abc
@@ -69,12 +69,12 @@ public function get_music_fragment ()
 EOT;
 	// input must not contain any empty line
 	return $header . "\n" . preg_replace ('/^$/m', '%', $this->input);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  */
-protected function conversion_step1 ($input_file, $intermediate_image)
+protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 {
 	$cmd = sprintf ('"%s" "%s" -O "%s"',
 			$this->mainprog,
@@ -82,7 +82,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 	$retval = $this->_exec($cmd);
 
 	return ($result['return_val'] == 0);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
@@ -95,7 +95,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
 /**
  * Refer to {@link SrNotationBase::generate_midi() parent method} for more detail.
  */
-protected function generate_midi ($input_file, $final_midi)
+protected function generate_midi ($input_file, $final_midi) /* {{{ */
 {
 	$cmd = sprintf ('"%s" "%s" -v -o "%s"',
 			$this->midiprog,
@@ -103,7 +103,7 @@ protected function generate_midi ($input_file, $final_midi)
 	$retval = $this->_exec($cmd);
 
 	return ($result['return_val'] == 0);
-}
+} /* }}} */
 
 
 /**
@@ -112,7 +112,7 @@ protected function generate_midi ($input_file, $final_midi)
  *
  * @uses SrNotationBase::is_notation_usable()
  */
-public function is_notation_usable ($errmsgs = null, $opt)
+public function is_notation_usable ($errmsgs = null, $opt) /* {{{ */
 {
 	static $ok;
 
@@ -121,13 +121,13 @@ public function is_notation_usable ($errmsgs = null, $opt)
 
 	if ( isset ($this) && get_class ($this) == __CLASS__ )
 		return $ok;
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::define_admin_messages() interface method}
  * for more detail.
  */
-public static function define_admin_messages ($adm_msgs)
+public static function define_admin_messages ($adm_msgs) /* {{{ */
 {
 	$adm_msgs['abcm2ps_bin_problem'] = array (
 		'level' => MSG_WARNING,
@@ -137,7 +137,7 @@ public static function define_admin_messages ($adm_msgs)
 		'level' => MSG_WARNING,
 		'content' => sprintf (__('MIDI generation for %s notation may not work, because dependent program failed checking.', TEXTDOMAIN), self::$notation_data['name'])
 	);
-}
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::program_setting_entry() interface method}
@@ -182,21 +182,12 @@ public static function register_notation_data ($notations)
 } // end of class
 
 
-add_action ('scorerender_register_notations',
-	array( 'abcRender', 'register_notation_data' ) );
+add_action ('scorerender_register_notations'  , array( 'abcRender', 'register_notation_data' ) );
+add_action ('scorerender_define_adm_msgs'     , array( 'abcRender', 'define_admin_messages'  ) );
+add_action ('scorerender_check_notation_progs', array( 'abcRender', 'is_notation_usable'     ), 10, 2 );
+add_filter ('scorerender_prog_and_file_loc'   , array( 'abcRender', 'program_setting_entry'  ) );
+add_filter ('scorerender_define_setting_type' , array( 'abcRender', 'define_setting_type'    ) );
+add_filter ('scorerender_define_setting_value', array( 'abcRender', 'define_setting_value'   ) );
 
-add_action ('scorerender_define_adm_msgs',
-	array( 'abcRender', 'define_admin_messages' ) );
-
-add_action ('scorerender_check_notation_progs',
-	array( 'abcRender', 'is_notation_usable' ), 10, 2 );
-
-add_filter ('scorerender_prog_and_file_loc',
-	array( 'abcRender', 'program_setting_entry' ) );
-
-add_filter ('scorerender_define_setting_type',
-	array( 'abcRender', 'define_setting_type' ) );
-
-add_filter ('scorerender_define_setting_value',
-	array( 'abcRender', 'define_setting_value' ) );
+/* vim: set cindent foldmethod=marker : */
 ?>
