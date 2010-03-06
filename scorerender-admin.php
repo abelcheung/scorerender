@@ -16,7 +16,7 @@
  *
  * @since 0.3.50
  * @package ScoreRender
- * @access private This class is not supposed to be used beyond ScoreRender
+ * @access private
 */
 class ScoreRenderAdmin
 {
@@ -29,7 +29,7 @@ class ScoreRenderAdmin
  * @return WP_Error|int Number of images inside cache directory, or WP_Error if directory is unreadable
  * @access private
  */
-private function get_num_of_images ()
+private function get_num_of_images () /* {{{ */
 {
 	if ( false === ( $handle = @opendir (scorerender_get_cache_location()) ) )
 		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', TEXTDOMAIN) );
@@ -40,7 +40,7 @@ private function get_num_of_images ()
 
 	closedir ($handle);
 	return $count;
-}
+} /* }}} */
 
 
 /**
@@ -51,7 +51,7 @@ private function get_num_of_images ()
  * @return WP_Error|bool WP_Error on failure, true on success
  * @access private
  */
-private function remove_cache ()
+private function remove_cache () /* {{{ */
 {
 	$dir = scorerender_get_cache_location();
 	if ( false === ( $handle = @opendir ( $dir ) ) )
@@ -70,7 +70,7 @@ private function remove_cache ()
 	chdir ($cwd);
 
 	return true;
-}
+} /* }}} */
 
 
 /**
@@ -87,7 +87,7 @@ private function remove_cache ()
  * @uses scorerender_get_cache_location() Also checks if cached image folder is writable
  * @access private
  */
-private function update_options ()
+private function update_options () /* {{{ */
 {
 	if ( !current_user_can ('manage_options') )
 		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
@@ -216,7 +216,7 @@ private function update_options ()
 	else
 		echo '<div id="message" class="updated fade"><p><strong>' .
 			__('Options saved.', TEXTDOMAIN) . "</strong></p></div>\n";
-}
+} /* }}} */
 
 
 /**
@@ -241,7 +241,7 @@ public function admin_head()
  *
  * @since 0.3.50
  */
-public function admin_footer()
+public function admin_footer() /* {{{ */
 {
 	global $sr_options;
 ?>
@@ -265,7 +265,7 @@ jQuery(document).ready(function($){
 </script>
 <script type="text/javascript" src="<?php echo plugins_url ('scorerender/misc/jscolor/jscolor.js') ?>"></script>
 <?php
-}
+} /* }}} */
 
 /**
  * Section of admin page about path options
@@ -273,7 +273,7 @@ jQuery(document).ready(function($){
  * @since 0.2
  * @access private
  */
-private function admin_section_path ()
+private function admin_section_path () /* {{{ */
 {
 	global $sr_options;
 ?>
@@ -299,7 +299,7 @@ private function admin_section_path ()
 
 </table>
 <?php
-}
+} /* }}} */
 
 
 /**
@@ -308,7 +308,7 @@ private function admin_section_path ()
  * @since 0.2
  * @access private
  */
-private function admin_section_prog ()
+private function admin_section_prog () /* {{{ */
 {
 	global $sr_options;
 ?>
@@ -328,7 +328,7 @@ private function admin_section_prog ()
 
 </table>
 <?php
-}
+} /* }}} */
 
 /**
  * Section of admin page about image options
@@ -336,7 +336,7 @@ private function admin_section_prog ()
  * @since 0.2
  * @access private
  */
-private function admin_section_image ()
+private function admin_section_image () /* {{{ */
 {
 	global $sr_options;
 ?>
@@ -371,7 +371,7 @@ private function admin_section_image ()
 
 </table>
 <?php
-}
+} /* }}} */
 
 
 
@@ -381,7 +381,7 @@ private function admin_section_image ()
  * @since 0.2
  * @access private
  */
-private function admin_section_content ()
+private function admin_section_content () /* {{{ */
 {
 	global $sr_options;
 ?>
@@ -436,7 +436,7 @@ private function admin_section_content ()
 
 </table>
 <?php
-}
+} /* }}} */
 
 
 
@@ -448,7 +448,7 @@ private function admin_section_content ()
  * @uses scorerender_get_cache_location() Check if the cached image folder is read-writable
  * @access private
  */
-private function admin_section_caching ()
+private function admin_section_caching () /* {{{ */
 {
 ?>
 	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
@@ -470,7 +470,7 @@ private function admin_section_caching ()
 	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
 	<br /><font color="red"><?php printf (__('Cache folder %s can&#8217;t be cleared because folder permission is incorrect. It must be both readable and writable by web server.', TEXTDOMAIN), $dir) ?></font>
 <?php endif;
-}
+} /* }}} */
 
 
 /**
@@ -488,7 +488,7 @@ private function admin_section_caching ()
  * @uses ScoreRenderAdmin::admin_section_content() Admin page -- content options
  * @uses ScoreRenderAdmin::admin_section_caching() Admin page -- caching administration
  */
-public function admin_page ()
+public function admin_page () /* {{{ */
 {
 	global $sr_options, $notations;
 
@@ -565,7 +565,7 @@ public function admin_page ()
 	</form>
 </div>
 	<?php
-}
+} /* }}} */
 
 /**
  * Add 'Settings' link to entry in global plugin admin page, alongside the
@@ -575,7 +575,7 @@ public function admin_page ()
  * @param string $file Part of plugin file name under plugin dir
  * @since 0.3.50
  */
-public function settings_link ($links, $file)
+public function settings_link ($links, $file) /* {{{ */
 {
 	if ( $file == 'scorerender/wp-scorerender.php' )
 		$links[] = sprintf ('<a href="%s">%s</a>',
@@ -583,7 +583,7 @@ public function settings_link ($links, $file)
 				__('Settings')	// use global WP translation
 			   );
 	return $links;
-}
+} /* }}} */
 
 /**
  * Append submenu item into WordPress menu
@@ -592,14 +592,14 @@ public function settings_link ($links, $file)
  * @uses ScoreRenderAdmin::admin_footer()
  * @uses ScoreRenderAdmin::admin_page()
  */
-public function register_admin_page ()
+public function register_admin_page () /* {{{ */
 {
 	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender',
 			'manage_options', 'scorerender', array (&$this, 'admin_page'));
 	add_action('admin_head-' . $plugin_page, array (&$this, 'admin_head'));
 	// not using print_scripts hooks, not sanitized until WP 2.8
 	add_action('admin_footer-' . $plugin_page, array (&$this, 'admin_footer'));
-}
+} /* }}} */
 
 /**
  * Output warning to tell users to turn off 'correct invalidly nested
@@ -620,18 +620,19 @@ public function turn_off_balance_tags()
  * @uses ScoreRenderAdmin::turn_off_balance_tags()
  * @access private
  */
-public function __construct ()
+public function __construct () /* {{{ */
 {
 	add_action ('admin_menu',            array (&$this, 'register_admin_page'));
 	add_filter ('plugin_action_links',   array (&$this, 'settings_link'), 10, 2);
 	if ( 0 != get_option('use_balanceTags') )
 		add_action ('admin_notices', array (&$this, 'turn_off_balance_tags'));
 
-}
+} /* }}} */
 
 } // end class
 
 global $sr_admin;
 $sr_admin = new ScoreRenderAdmin();
 
+/* vim: set cindent foldmethod=marker : */
 ?>

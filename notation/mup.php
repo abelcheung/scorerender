@@ -158,7 +158,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * {@internal OK, I cheated. Shouldn't have been leaking external
  * config option names into class, but this can help saving me
- * headache in the future}
+ * headache in the future}}
  *
  * @since 0.2.50
  */
@@ -235,6 +235,10 @@ public static function define_setting_value ($settings)
 	parent::define_setting_value ( &$settings, self::$notation_data['progs'] );
 }
 
+/**
+ * Refer to {@link SrNotationInterface::register_notation_data() interface method}
+ * for more detail.
+ */
 public static function register_notation_data ($notations)
 {
 	$notations[self::code] = self::$notation_data;

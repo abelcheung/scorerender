@@ -22,7 +22,8 @@
  * @param int $limit Maximum number of shortcode replacements, default is no limit
  * @return string Content with shortcodes filtered out.
  */
-function scorerender_do_shortcode($content, $limit = -1) {
+function scorerender_do_shortcode($content, $limit = -1) /* {{{ */
+{
 	global $shortcode_tags;
 
 	if (empty($shortcode_tags) || !is_array($shortcode_tags))
@@ -31,7 +32,7 @@ function scorerender_do_shortcode($content, $limit = -1) {
 	$pattern = scorerender_get_shortcode_regex();
 	$limit = (int)$limit;
 	return preg_replace_callback('/'.$pattern.'/s', 'scorerender_do_shortcode_tag', $content, $limit);
-}
+} /* }}} */
 
 /**
  * Retrieve the shortcode regular expression for searching.
@@ -52,13 +53,14 @@ function scorerender_do_shortcode($content, $limit = -1) {
  *
  * @return string The shortcode search regular expression
  */
-function scorerender_get_shortcode_regex() {
+function scorerender_get_shortcode_regex() /* {{{ */
+{
 	global $shortcode_tags;
 	$tagnames = array_keys($shortcode_tags);
 	$tagregexp = join( '|', array_map('preg_quote', $tagnames) );
 
 	return '(.?)\[('.$tagregexp.')\b(.*?)(?:(\/))?\](?:(.+?)\[\/\2\])?(.?)';
-}
+} /* }}} */
 
 /**
  * Regular Expression callable for do_shortcode() for calling shortcode hook.
@@ -71,7 +73,8 @@ function scorerender_get_shortcode_regex() {
  * @param array $m Regular expression match array
  * @return mixed False on failure.
  */
-function scorerender_do_shortcode_tag($m) {
+function scorerender_do_shortcode_tag($m) /* {{{ */
+{
 	global $shortcode_tags;
 
 	// allow [[foo]] syntax for escaping a tag
@@ -89,7 +92,7 @@ function scorerender_do_shortcode_tag($m) {
 		// self-closing tag
 		return $m[1] . call_user_func($shortcode_tags[$tag], $attr, NULL, $m[2]) . $m[6];
 	}
-}
+} /* }}} */
 
 /**
  * Retrieve all attributes from the shortcodes tag.
@@ -103,7 +106,8 @@ function scorerender_do_shortcode_tag($m) {
  * @param string $text
  * @return array List of attributes and their value.
  */
-function scorerender_shortcode_parse_atts($text) {
+function scorerender_shortcode_parse_atts($text) /* {{{ */
+{
 	$atts = array();
 	$pattern = '/(\w+)\s*=\s*"([^"]*)"(?:\s|$)|(\w+)\s*=\s*\'([^\']*)\'(?:\s|$)|(\w+)\s*=\s*([^\s\'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|(\S+)(?:\s|$)/';
 	$text = preg_replace("/[\x{00a0}\x{200b}]+/u", " ", $text);
@@ -124,6 +128,7 @@ function scorerender_shortcode_parse_atts($text) {
 		$atts = ltrim($text);
 	}
 	return $atts;
-}
+} /* }}} */
 
+/* vim: set cindent foldmethod=marker : */
 ?>

@@ -107,7 +107,7 @@ require_once('notation/pmw.php');
  * @uses sys_get_temp_dir() For getting default temp directory
  * @uses search_path() For searching default programs in system PATH
  */
-function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
+function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ */
 {
 	$retval = array();
 	static $default_settings = array();
@@ -160,7 +160,7 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
 	  case TYPES_AND_VALUES:
 		return $default_settings;
 	}
-};
+} /* }}} */
 
 
 /**
@@ -172,13 +172,13 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES)
  *   - theme translation path (wp-content/languages or wp-includes/languages)
  * @since 0.2
  */
-function scorerender_init_textdomain ()
+function scorerender_init_textdomain () /* {{{ */
 {
 	// load_textdomain() already does file existance checking
 	load_plugin_textdomain (TEXTDOMAIN, PLUGINDIR.'/'.plugin_basename (dirname (__FILE__)));
 	load_plugin_textdomain (TEXTDOMAIN);
 	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
-}
+} /* }}} */
 
 
 /**
@@ -186,7 +186,7 @@ function scorerender_init_textdomain ()
  *
  * @uses scorerender_get_def_settings()
  */
-function scorerender_populate_options ()
+function scorerender_populate_options () /* {{{ */
 {
 	global $sr_options;
 
@@ -204,7 +204,7 @@ function scorerender_populate_options ()
 		$sr_options = array_merge ($defaults, $sr_options);
 		$sr_options['DB_VERSION'] = DATABASE_VERSION;
 	}
-}
+} /* }}} */
 
 /**
  * Retrieve ScoreRender options from database.
@@ -217,7 +217,7 @@ function scorerender_populate_options ()
  * @uses scorerender_populate_options()
  * @uses transform_paths()
  */
-function scorerender_get_options ()
+function scorerender_get_options () /* {{{ */
 {
 	global $sr_options;
 
@@ -252,7 +252,7 @@ function scorerender_get_options ()
 	transform_paths ($sr_options, FALSE);
 
 	return;
-}
+} /* }}} */
 
 
 /**
@@ -264,7 +264,7 @@ function scorerender_get_options ()
  * @return string Cache folder location
  * @since 0.3.50
  */
-function scorerender_get_cache_location ()
+function scorerender_get_cache_location () /* {{{ */
 {
 	global $sr_options;
 
@@ -275,7 +275,7 @@ function scorerender_get_cache_location ()
 		$data = wp_upload_dir ();
 		return $data['basedir'];
 	}
-}
+} /* }}} */
 
 
 /**
@@ -285,9 +285,12 @@ function scorerender_get_cache_location ()
  * @uses SrNotationBase::get_command_output() Used when showing error message upon error, and debug is on
  *
  * @param object $render PHP object created for rendering relevant music fragment
+ * @param string $lang 
+ * @param int $error_handling
+ * @param WP_Error $wperror
  * @return string HTML content containing error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wperror )
+function scorerender_return_fragment_error ( $render, $lang, $error_handling, $wperror ) /* {{{ */
 {
 	switch ( $error_handling )
 	{
@@ -295,9 +298,9 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wp
 		return '';
 
 	  case ON_ERR_SHOW_FRAGMENT:
-		return "[score lang='$tag']" .
+		return "&#91;score lang='$lang'&#93;" .
 			htmlentities ( $render->get_raw_input() ) .
-			"[/score]\n";
+			"&#91;/score&#93;";
 	  default:
 		if (SR_DEBUG)
 			return "<div class='scorerender-error'>" .
@@ -309,7 +312,7 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wp
 				htmlentities ( $render->format_error_msg (
 							$wperror->get_error_message() ) ) . "</pre></div>";
 	}
-}
+} /* }}} */
 
 
 /**
@@ -323,7 +326,7 @@ function scorerender_return_fragment_error ( $render, $tag, $error_handling, $wp
  * @param string $color The color used when author specify custom color for certain fragment
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_ok ( $render, $tag, $color )
+function scorerender_return_fragment_ok ( $render, $tag, $color ) /* {{{ */
 {
 	global $sr_options;
 	static $count = 0;
@@ -365,20 +368,19 @@ function scorerender_return_fragment_ok ( $render, $tag, $color )
 	// TODO: message is not aligned vertically, cf. http://www.jakpsatweb.cz/css/css-vertical-center-solution.html
 	$html .= sprintf ("<div id='%s-div' style='position:relative; width:%spx; height:%spx; display:inline; overflow:hidden;'>",
 			$id, $width, $height
-			);
+	);
 	$html .= sprintf ("<div id='%s-message' style='position:absolute; width:%spx; height:%spx; display:none; background:inherit; text-align:center;'>%s</div>",
 			$id, ($width >= 300) ? $width : '300', $height,
 			__('Music code copied to clipboard', TEXTDOMAIN)
-			);
+	);
 	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />",
-			$attr,
-			__('Click to copy to clipboard', TEXTDOMAIN),
-			__('Music fragment', TEXTDOMAIN),
-			$imgurl, $id );
+			$attr, __('Click to copy to clipboard', TEXTDOMAIN),
+			__('Music fragment', TEXTDOMAIN), $imgurl, $id
+	);
 	$html .= "</div>";
 
 	return $html;
-}
+} /* }}} */
 
 
 /**
@@ -388,6 +390,10 @@ function scorerender_return_fragment_ok ( $render, $tag, $color )
  * all relevant parameters needed for rendering. Afterwards, render
  * the image and pass the result to other functions for displaying
  * error message or HTML containing image.
+ *
+ * @param array $attr Shortcode attributes
+ * @param string $content Music source content
+ * @param string $code Shortcode tag name
  *
  * @uses SrNotationBase::set_programs() Setting default notation rendering program
  * @uses SrNotationBase::set_imagemagick_path() Setting ImageMagick `convert` path
@@ -404,7 +410,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $color )
  *
  * @return string Either HTML content containing rendered image, or HTML error message on failure
  */
-function scorerender_shortcode_handler ($attr, $content = null, $code = "")
+function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {{{ */
 {
 	global $notations, $sr_options;
 
@@ -468,7 +474,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
 	// is most likely multi-line, and can be very long
 	// This idea is taken from LatexRender demo site
 	return scorerender_return_fragment_ok ( $render, $lang, $color );
-}
+} /* }}} */
 
 
 /**
@@ -476,12 +482,12 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "")
  * on the blog, usually by unsetting corresponding program in admin page
  *
  * @uses SrNotationBase::format_error_msg()
- * @param $attr array Array of shortcode attributes, only language name is used here
- * @param $content string The content enclosed in shortcode, unused in this func
- * @param $code string Shortcode tag used
+ * @param array $attr Array of shortcode attributes, only language name is used here
+ * @param string $content The content enclosed in shortcode, unused in this func
+ * @param string $code Shortcode tag used
  * @return string Error message mentioning unsupported notation
  */
-function scorerender_shortcode_unsupported ($attr, $content = null, $code = "")
+function scorerender_shortcode_unsupported ($attr, $content = null, $code = "") /* {{{ */
 {
 	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
 		$attr['lang'] = $code;
@@ -489,7 +495,7 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "")
 	return SrNotationBase::format_error_msg (
 			sprintf (__("'%s' notation is not supported on this blog", TEXTDOMAIN),
 			$attr['lang']) );
-}
+} /* }}} */
 
 
 /**
@@ -510,7 +516,7 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "")
  * @param callable $callback Callback function used for $content_type
  * @return string Converted blog post / comment content
  */
-function scorerender_parse_shortcode ($content, $content_type, $callback)
+function scorerender_parse_shortcode ($content, $content_type, $callback) /* {{{ */
 {
 	global $sr_options, $post, $notations, $shortcode_tags, $wp_version;
 
@@ -559,7 +565,7 @@ function scorerender_parse_shortcode ($content, $content_type, $callback)
 	$shortcode_tags = $orig_shortcodes;
 
 	return $content;
-}
+} /* }}} */
 
 
 /**
@@ -570,7 +576,7 @@ function scorerender_parse_shortcode ($content, $content_type, $callback)
  * then use IE specific filter to add fake transparency to all images
  * with such CSS class.
  */
-function scorerender_add_ie6_style()
+function scorerender_add_ie6_style() /* {{{ */
 {
 ?>
 <!-- begin scorerender style -->
@@ -581,7 +587,7 @@ function scorerender_add_ie6_style()
 <![endif]-->
 <!-- end scorerender style -->
 <?php
-}
+} /* }}} */
 
 /*
 Remove tag balancing filter
@@ -655,4 +661,5 @@ jQuery(\'.scorerender-image\').copyable(function(e, clip) {
 		2);
 }
 
+/* vim: set cindent foldmethod=marker : */
 ?>

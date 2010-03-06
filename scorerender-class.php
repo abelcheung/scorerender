@@ -117,7 +117,7 @@ public function get_raw_input ()
  * @todo For some notations like PMX/MusiXTeX, multiple programs must be set, currently this function can only handle one.
  * @since 0.3
  */
-public function set_programs ($progs)
+public function set_programs ($progs) /* {{{ */
 {
 	if (is_string ($progs))
 	{
@@ -141,7 +141,7 @@ public function set_programs ($progs)
 			break;
 		}
 	}
-}
+} /* }}} */
 
 /**
  * Set the program used to generate MIDI
@@ -150,12 +150,12 @@ public function set_programs ($progs)
  * @uses $midiprog Full path of MIDI program is stored here
  * @since 0.3.50
  */
-public function set_midi_program ($prog = null)
+public function set_midi_program ($prog = null) /* {{{ */
 {
 	if ( empty ($prog) ) return;
 	$this->midiprog = $prog;
 	return;
-}
+} /* }}} */
 
 
 /**
@@ -175,7 +175,7 @@ public function get_command_output ()
  * @return string|boolean Return notation name if found, FALSE otherwise.
  * @since 0.2
  */
-public function get_notation_name ()
+public function get_notation_name () /* {{{ */
 {
 	global $notations;
 	$classname = get_class ($this);
@@ -185,7 +185,7 @@ public function get_notation_name ()
 			return $notationname;
 
 	return false;
-}
+} /* }}} */
 
 /**
  * Sets path of ImageMagick convert
@@ -282,7 +282,7 @@ public static function format_error_msg ($mesg)
  * @return integer Exit status of the command
  * @final
  */
-final protected function _exec ($cmd)
+final protected function _exec ($cmd) /* {{{ */
 {
 	$cmd_output = array();
 
@@ -300,7 +300,7 @@ final protected function _exec ($cmd)
 	$this->cmd_output = implode ("\n", $cmd_output);
 
 	return $retval;
-}
+} /* }}} */
 
 /**
  * First step of rendering process: execute the real command
@@ -334,7 +334,7 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  * @param string $extra_arg Extra arguments supplied to ImageMagick convert
  * @return boolean Whether PostScript -> PNG conversion is successful and PNG file is successfully generated in cache folder
  */
-protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_alpha = false, $extra_arg = '')
+protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_alpha = false, $extra_arg = '') /* {{{ */
 {
 	$cmd = sprintf ('"%s" %s -trim +repage ', $this->imagick, $extra_arg);
 
@@ -356,7 +356,7 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
 	}
 
 	return (0 === $this->_exec ($cmd));
-}
+} /* }}} */
 
 /**
  * Reads input content (after necessary conversion),
@@ -402,7 +402,7 @@ public static function is_web_hosting ()
  * @return WP_Error|bool TRUE if all regex strings are found in command output,
  * WP_Error otherwise (including unexpected error and unmatched regex)
  */
-public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", $verpos = 1, &$realver = null)
+public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", $verpos = 1, &$realver = null) /* {{{ */
 {
 	if ( ! file_exists ($prog) ) return new WP_Error
 		( 'sr-prog-notexist', __('Program does not exist.', TEXTDOMAIN));
@@ -468,7 +468,7 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 
 	// no version check performed, and all strings matched
 	return true;
-}
+} /* }}} */
 
 
 /**
@@ -494,7 +494,7 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
  * non-critical error occurred (such as midi generation error), TRUE if all ok
  * @final
  */
-final public function render()
+final public function render() /* {{{ */
 {
 	global $sr_options;
 	$ok = true;
@@ -622,7 +622,7 @@ final public function render()
 	}
 
 	return $ok;
-}
+} /* }}} */
 
 /**
  * Output program setting HTML for notation
@@ -635,7 +635,7 @@ final public function render()
  * @return string HTML for the program setting in admin page
  * @since 0.3.50
  */
-protected static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '')
+protected static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '') /* {{{ */
 {
 	global $sr_options;
 	$id = strtolower ($setting_name);
@@ -650,7 +650,7 @@ protected static function program_setting_entry ($bin_name, $setting_name, $titl
 		. "</td>\n</tr>\n";
 
 	return $output;
-}
+} /* }}} */
 
 
 /**
@@ -665,7 +665,7 @@ protected static function program_setting_entry ($bin_name, $setting_name, $titl
  * @since 0.3.50
  * @access protected
  */
-protected static function define_setting_value ($settings, $notation_prog_data)
+protected static function define_setting_value ($settings, $notation_prog_data) /* {{{ */
 {
 	foreach ( $notation_prog_data as $setting_name => $progdata )
 	{
@@ -673,7 +673,7 @@ protected static function define_setting_value ($settings, $notation_prog_data)
 		$fullpath = search_prog ($binary_name);
 		$settings[$setting_name]['value'] = $fullpath ? $fullpath : '';
 	}
-}
+} /* }}} */
 
 
 /**
@@ -703,7 +703,7 @@ protected static function define_setting_value ($settings, $notation_prog_data)
  * if called as class method. Please refer to description
  * of this function for more detail.
  */
-protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_data)
+protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_data) /* {{{ */
 {
 	$ok = true;
 	foreach ( $notation_prog_data as $setting_name => $progdata )
@@ -732,7 +732,7 @@ protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_dat
 		if ( !is_null ($errmsgs) ) $errmsgs[] = $progdata['error_code'];
 
 	if ( isset ($this) ) return $ok;	// called from instantiated class object
-}
+} /* }}} */
 
 
 } // end of class
@@ -741,7 +741,7 @@ protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_dat
  * Interface for every notations used by ScoreRender
  * @package ScoreRender
  */
-interface SrNotationInterface
+interface SrNotationInterface /* {{{ */
 {
 	/**
 	 * Outputs music fragment content
@@ -816,6 +816,7 @@ interface SrNotationInterface
 	 */
 	static function register_notation_data ($notations);
 
-} // end of interface
+} /* }}} */ // end of interface
 
+/* vim: set cindent foldmethod=marker : */
 ?>

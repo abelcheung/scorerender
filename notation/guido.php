@@ -122,6 +122,10 @@ public static function define_setting_type ($settings) {}
  */
 public static function define_setting_value ($settings) {}
 
+/**
+ * Refer to {@link SrNotationInterface::register_notation_data() interface method}
+ * for more detail.
+ */
 public static function register_notation_data ($notations)
 {
 	$notations[self::code] = self::$notation_data;
