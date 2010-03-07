@@ -285,7 +285,7 @@ function scorerender_get_cache_location () /* {{{ */
  * @uses SrNotationBase::get_command_output() Used when showing error message upon error, and debug is on
  *
  * @param object $render PHP object created for rendering relevant music fragment
- * @param string $lang 
+ * @param string $lang
  * @param int $error_handling
  * @param WP_Error $wperror
  * @return string HTML content containing error message or empty string, depending on setting.
@@ -322,23 +322,24 @@ function scorerender_return_fragment_error ( $render, $lang, $error_handling, $w
  * @uses scorerender_get_cache_location() For getting cached image path and reading its size
  *
  * @param object $render PHP object created for rendering relevant music fragment
- * @param string $tag The notation name as a shortcode tag
- * @param string $color The color used when author specify custom color for certain fragment
+ * @param array $attr Shortcode attributes
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_ok ( $render, $tag, $color ) /* {{{ */
+function scorerender_return_fragment_ok ( $render, $attr ) /* {{{ */
 {
 	global $sr_options;
 	static $count = 0;
-
 	$count++;
 
+	extract ($attr);
+
 	$args = array ( 'img' => $render->final_image );
-	if ( !is_null ( $color ) ) $args['color'] = preg_replace ( '/^#/', '', $color );
+	if ( !is_null ( $color ) ) $args['color'] =
+		preg_replace ( '/^#/', '', $color );
 
 	$imgurl = add_query_arg ( $args, plugins_url ('scorerender/misc/tint-image.php') );
 
-	$content = "[score lang=\"$tag\"]\n" .
+	$content = "[score lang=\"{$lang}\"]\n" .
 		preg_replace ( "/[\r\n]+/s", "\n", $render->get_raw_input() ) . "\n[/score]";
 
 	$id = preg_replace ( REGEX_CACHE_IMAGE, 'sr-$2', $render->final_image);
@@ -361,7 +362,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $color ) /* {{{ */
 			htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
 		$id );
 
-	list ( $width, $height, $type, $attr ) =
+	list ( $width, $height, $type, $htmlattr ) =
 		getimagesize ( scorerender_get_cache_location() .'/'. $render->final_image );
 
 	// TODO: create new setting for disabling clipboard
@@ -374,7 +375,7 @@ function scorerender_return_fragment_ok ( $render, $tag, $color ) /* {{{ */
 			__('Music code copied to clipboard', TEXTDOMAIN)
 	);
 	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />",
-			$attr, __('Click to copy to clipboard', TEXTDOMAIN),
+			$htmlattr, __('Click to copy to clipboard', TEXTDOMAIN),
 			__('Music fragment', TEXTDOMAIN), $imgurl, $id
 	);
 	$html .= "</div>";
@@ -423,7 +424,8 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
 		$attr['lang'] = $code;
 
-	extract ( shortcode_atts ( $defaults, $attr ) );
+	$attr = shortcode_atts ( $defaults, $attr );
+	extract ($attr);
 
 	if ( ! array_key_exists ( $lang, $notations ) )
 		return SrNotationBase::format_error_msg ( sprintf (
@@ -473,7 +475,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	// Not nice to show source in alt text or title, since music source
 	// is most likely multi-line, and can be very long
 	// This idea is taken from LatexRender demo site
-	return scorerender_return_fragment_ok ( $render, $lang, $color );
+	return scorerender_return_fragment_ok ( $render, $attr );
 } /* }}} */
 
 
