@@ -1,7 +1,12 @@
 2010-03-07  Abel Cheung  <abelcheung@gmail.com>
 
+	* wp-scorerender.php, scorerender-admin.php:
+	- 'Show source' option becomes 'Enable clipboard' option.
 	* wp-scorerender.php:
 	- (scorerender_return_fragment_ok) Simplify function arguments.
+	- Default temp folder and cached image folder is now null.
+	- ZeroClipboard functionality can be toggled individually using
+	  'clipboard="true/false"' shortcode attribute.  
 
 2010-03-06  Abel Cheung  <abelcheung@gmail.com>
 

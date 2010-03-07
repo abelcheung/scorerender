@@ -23,7 +23,7 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 18);
+define ('DATABASE_VERSION', 19);
 
 /**
  * Translation text domain
@@ -117,14 +117,14 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ *
 		$default_settings = array
 		(
 			'DB_VERSION'             => array ('type' => 'none', 'value' => DATABASE_VERSION),
-			'TEMP_DIR'               => array ('type' => 'path', 'value' => sys_get_temp_dir()),
+			'TEMP_DIR'               => array ('type' => 'path', 'value' => ''),
 			'CACHE_DIR'              => array ('type' => 'path', 'value' => ''),
 
 			'IMAGE_MAX_WIDTH'        => array ('type' =>  'int', 'value' => 360),
 			'NOTE_COLOR'             => array ('type' =>  'str', 'value' => '#000000'),
 			'USE_IE6_PNG_ALPHA_FIX'  => array ('type' => 'bool', 'value' => true),
 
-			'SHOW_SOURCE'            => array ('type' => 'bool', 'value' => false),
+			'ENABLE_CLIPBOARD'       => array ('type' => 'bool', 'value' => false),
 			'COMMENT_ENABLED'        => array ('type' => 'bool', 'value' => false),
 			'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
 			'FRAGMENT_PER_COMMENT'   => array ('type' =>  'int', 'value' => 1),
@@ -140,9 +140,6 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ *
 		$default_settings['CONVERT_BIN']['value'] = $convert ? $convert : '';
 
 		do_action_ref_array ('scorerender_define_setting_value', array(&$default_settings));
-
-		$cachefolder = wp_upload_dir ();
-		$default_settings['CACHE_DIR']['value'] = $cachefolder['basedir'];
 	}
 
 	switch ($return_type)
@@ -233,7 +230,7 @@ function scorerender_get_options () /* {{{ */
 	}
 
 	// Special handling for certain versions
-	if ($sr_options['DB_VERSION'] <= 9)
+	if ( $sr_options['DB_VERSION'] < 10 )
 		if ( $sr_options['LILYPOND_COMMENT_ENABLED'] ||
 		     $sr_options['MUP_COMMENT_ENABLED']      ||
 		     $sr_options['ABC_COMMENT_ENABLED']      ||
@@ -241,17 +238,16 @@ function scorerender_get_options () /* {{{ */
 		{
 			$sr_options['COMMENT_ENABLED'] = true;
 		}
-	if ($sr_options['DB_VERSION'] <= 15)
-		if ( $sr_options['INVERT_IMAGE'] )
-			$sr_options['NOTE_COLOR'] = '#FFFFFF';
+	if ( $sr_options['DB_VERSION'] < 16 )
+		if ( $sr_options['INVERT_IMAGE'] ) $sr_options['NOTE_COLOR'] = '#FFFFFF';
+	if ( $sr_options['DB_VERSION'] < 19 )
+		$sr_options['ENABLE_CLIPBOARD'] = $sr_options['SHOW_SOURCE'];
 
 	scorerender_populate_options ();
 
 	transform_paths ($sr_options, TRUE);
 	update_option ('scorerender_options', $sr_options);
 	transform_paths ($sr_options, FALSE);
-
-	return;
 } /* }}} */
 
 
@@ -356,30 +352,40 @@ function scorerender_return_fragment_ok ( $render, $attr ) /* {{{ */
 		'/\]/' => '&#93;',
 	);
 
-	// esc_js() does nothing but messing up line breaks
-	$html .= sprintf ("<input type='hidden' name='code' value='%s' id='%s-code'>",
-		preg_replace ( array_keys ($repl_chars), array_values($repl_chars),
-			htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
-		$id );
-
 	list ( $width, $height, $type, $htmlattr ) =
 		getimagesize ( scorerender_get_cache_location() .'/'. $render->final_image );
 
-	// TODO: create new setting for disabling clipboard
-	// TODO: message is not aligned vertically, cf. http://www.jakpsatweb.cz/css/css-vertical-center-solution.html
-	$html .= sprintf ("<div id='%s-div' style='position:relative; width:%spx; height:%spx; display:inline; overflow:hidden;'>",
-			$id, $width, $height
-	);
-	$html .= sprintf ("<div id='%s-message' style='position:absolute; width:%spx; height:%spx; display:none; background:inherit; text-align:center;'>%s</div>",
-			$id, ($width >= 300) ? $width : '300', $height,
-			__('Music code copied to clipboard', TEXTDOMAIN)
-	);
-	$html .= sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />",
-			$htmlattr, __('Click to copy to clipboard', TEXTDOMAIN),
-			__('Music fragment', TEXTDOMAIN), $imgurl, $id
-	);
-	$html .= "</div>";
+	$title = sprintf ( __('Music fragment in "%s" notation', TEXTDOMAIN), $lang );
 
+	$turn_on_clipboard = ( !is_null ($clipboard) ) ? $clipboard : $sr_options['ENABLE_CLIPBOARD'];
+
+	if ( $turn_on_clipboard )
+	{
+		// esc_js() does nothing but messing up line breaks
+		$html = sprintf ("<input type='hidden' name='code' value='%s' id='%s-code'>",
+				preg_replace ( array_keys ($repl_chars), array_values($repl_chars),
+					htmlentities ( $content, ENT_QUOTES, get_option ('blog_charset') ) ),
+				$id );
+
+		// TODO: message is not aligned vertically, cf. http://www.jakpsatweb.cz/css/css-vertical-center-solution.html
+		$html .= sprintf ("<div id='%s-div' style='position:relative; width:%spx; height:%spx; display:inline; overflow:hidden;'>",
+				$id, $width, $height );
+
+		$html .= sprintf ("<div id='%s-message' style='position:absolute; width:%spx; height:%spx; display:none; background:inherit; text-align:center;'>%s</div>",
+				$id, ($width >= 300) ? $width : '300', $height,
+				__('Music code copied to clipboard', TEXTDOMAIN) );
+
+		$html .= sprintf ("<img class='scorerender-image scorerender-clip' %s title='%s' alt='%s' src='%s' id='%s' />",
+				$htmlattr, __('Click on image to copy music code to clipboard', TEXTDOMAIN),
+				$title, $imgurl, $id );
+
+		$html .= "</div>";
+	}
+	else
+	{
+		$html = sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />",
+				$htmlattr, $title, $title, $imgurl, $id );
+	}
 	return $html;
 } /* }}} */
 
@@ -416,9 +422,17 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	global $notations, $sr_options;
 
 	$defaults = array (
-		'color' => null,
-		'lang'  => null,
+		'color'     => null,
+		'lang'      => null,
+		'clipboard' => null,
 	);
+
+	// transform shortcode attributes to boolean values whenever appropriate
+	foreach ( $attr as $key => $value )
+	{
+		if     ( 'false' === $attr[$key] ) $attr[$key] = false;
+		elseif ( 'true'  === $attr[$key] ) $attr[$key] = true;
+	}
 
 	// prevents construct like [mup lang="abc"]
 	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
@@ -635,7 +649,7 @@ else
 	add_action ('wp_footer', create_function ( '$a',
 			'echo "<script type=\'text/javascript\'>
 ZeroClipboard.setMoviePath( \'' . plugins_url ( 'scorerender/misc/ZeroClipboard.swf' ) . '\' );
-jQuery(\'.scorerender-image\').copyable(function(e, clip) {
+jQuery(\'.scorerender-clip\').copyable(function(e, clip) {
 	clip.setText(jQuery(\'#\'+this.id+\'-code\').val());
 	var messageid = this.id + \'-message\';
 	jQuery(this).fadeOut(\'slow\');

@@ -357,6 +357,7 @@ private function admin_section_image () /* {{{ */
 <input type="text" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo $sr_options['NOTE_COLOR'] ?>" class="small-text color {hash:true}" style="width:6em" />
 <em><?php _e('(Click to select color)', TEXTDOMAIN) ?></em>
 </label>
+<div class="setting-description"><?php echo ('This feature can be toggled in each music fragment. Please refer to help for detail.') ?></div>
 </td>
 </tr>
 
@@ -390,8 +391,9 @@ private function admin_section_content () /* {{{ */
 
 <tr valign="top">
 <th scope="row"><?php _e('Show source:', TEXTDOMAIN) ?></th>
-<td><label for="show_input"><input type="checkbox" name="ScoreRender[SHOW_SOURCE]" id="show_input" value="1" <?php checked('1', $sr_options['SHOW_SOURCE']); ?> />
-<?php _e('Show music source in new browser window/tab when image is clicked', TEXTDOMAIN); ?></label>
+<td><label for="show_input"><input type="checkbox" name="ScoreRender[ENABLE_CLIPBOARD]" id="show_input" value="1" <?php checked('1', $sr_options['ENABLE_CLIPBOARD']); ?> />
+<?php _e('Copy music source content to clipboard when image is clicked', TEXTDOMAIN); ?></label>
+<div class="setting-description"><?php echo ('This feature can be toggled in each music fragment. Please refer to help for detail.') ?></div>
 </td>
 </tr>
 
