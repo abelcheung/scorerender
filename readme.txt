@@ -11,13 +11,13 @@ Renders inline sheet music fragments in excerpts, posts, pages and comments.
 
 ScoreRender is a Wordpress plugin for rendering sheet music fragments into images.  It supports converting fragments in excerpts, posts, pages and (optionally) comments.  Currently it supports 5 music notations: ABC, Guido, Lilypond, Mup and Philip's Music Writer.
 
-For latest version, detailed usage instructions and demo cases, please visit [ScoreRender official site](http://scorerender.abelcheung.org/). Requires PHP5, ImageMagick and various programs to generate music score.
+For latest version, detailed usage instructions and demo cases, please visit [ScoreRender official site](http://scorerender.abelcheung.org/). Requires PHP5 with GD extension, ImageMagick and various programs to generate music score.
 
 == Installation ==
 
 ###Prerequisite###
 
-1. **WordPress 2.6.x** (due to usage of `plugins_url()`, `admin_url()` etc)
+1. **WordPress 2.6.x** (due to usage of `plugins_url()`, `admin_url()` etc which do not exist before 2.6)
 1. **PHP 5.x with GD extension** (Please visit [offical site](http://scorerender.abelcheung.org/) if ancient version using PHP4 is needed)
 1. **ImageMagick >= 6.3.5-7** (due to usage of `-alpha` option). Version later than 6.3.9-6 is preferred, since a bug about detecting PostScript transparency is fixed.
 1. **GhostScript** (Usually pre-installed on Linux. Under Windows, download prepackaged installer from [official site](http://pages.cs.wisc.edu/~ghost/doc/GPL/index.htm]) )
@@ -59,14 +59,14 @@ The error code indicates the kind of error in some degree. There are comments in
 
 Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. This is a design decision. If you **REALLY** want to use other similar programs, you are on your own, though modifying the code to support others is not very hard for those who can write program in PHP. Take a look at `notation/abc.php`.
 
-= I want to remove cache for 1 image and re-render, but how can I determine which is which? =
+= I want to remove some specific cached image and re-render, but how can I determine which is which? =
 
-Right now this is still impossible. Management of cache is planned in future, but can't say when.
+Right now this is still impossible. Management of cache is planned in future, but can't say when it would be finished.
 
 = How to debug my fragment when posting? =
 
 Simply answer: don't do that if possible. The best way is render it privately in your computer first, then post the content, rather than needlessly spending lots of time on trial and error.
-Long answer: There is no easy method for debugging a fragment yet. If there is no choice but perform trial and error, please search for this line in `wp-scorerender.php`:
+Long answer: There is no easy method for debugging a fragment yet. If there is no choice but perform trial and error, you can search for this line in `wp-scorerender.php`:
 
 `	define (SR_DEBUG, FALSE);`
 
@@ -113,59 +113,59 @@ Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for
 
 = 0.3.3 =
 
-* Change license to AGPL v3.
-* 'Show source' setting is moved to 'Contents' admin section.
-* BUG FIX: Admin form html tags incorrectly nested.
-* BUG FIX: Notation was not deactivated even when program name is not filled.
-* BUG FIX: Restore safe mode for Lilypond, use precise version detection to determine command line argument.
-* BUG FIX: PostScript transparency shall be properly detected for PMW and Mup on recent ImageMagick versions.
-* BUG FIX: Prevents PMW from reading config file.
-* FEATURE: Add icon for admin form title (on recent WP versions).
+* CHG: Change license to AGPL v3.
+* CHG: 'Show source' setting is moved to 'Contents' admin section.
+* BUG: Admin form html tags incorrectly nested.
+* BUG: Notation was not deactivated even when program name is not filled.
+* BUG: Restore safe mode for Lilypond, use precise version detection to determine command line argument.
+* BUG: PostScript transparency shall be properly detected for PMW and Mup on recent ImageMagick versions.
+* BUG: Prevents PMW from reading config file.
+* FEAT: Add icon for admin form title (on recent WP versions).
 
 = 0.3.2 =
 
-* BUG FIX: Fix invocation for LilyPond 2.12.x
+* BUG: Fix invocation for LilyPond 2.12.x
 
 = 0.3.1 =
 
-* FEATURE: Show image dimension in output.
-* BUG FIX: Fix line break when showing score source code under Windows.
-* FEATURE: Better autodetection of program.
-* BUG FIX: program availability checking.
+* FEAT: Show image dimension in output.
+* BUG: Fix line break when showing score source code under Windows.
+* FEAT: Better autodetection of program.
+* BUG: program availability checking.
 
 = 0.3.0 =
 
-* FEATURE: Philip's Music Writer notation support.
-* FEATURE: IE Alpha fix has been incorporated, which provides translucent PNG support for IE 5.5 / 6.x. Thus drop IE PNG transparency warning altogether. 
-* FEATURE: Zero Clipboard has been incorporated, which provides cross platform copy and paste via flash. Warning about non-IE browser during copy and paste is removed.
-* FEATURE: Better support of installation on web hosting, where disabling certain PHP functions is common practise.
+* FEAT: Philip's Music Writer notation support.
+* FEAT: IE Alpha fix has been incorporated, which provides translucent PNG support for IE 5.5 / 6.x. Thus drop IE PNG transparency warning altogether. 
+* FEAT: Zero Clipboard has been incorporated, which provides cross platform copy and paste via flash. Warning about non-IE browser during copy and paste is removed.
+* FEAT: Better support of installation on web hosting, where disabling certain PHP functions is common practise.
 * Rendering or not also depends on 'unfiltered_html' WordPress capability.
 * Refactor functions and files, so admin page is only included when needed, and PHP class no longer access global variables.
 
 = 0.2.1 =
 
-* BUG FIX: Toggling IE PNG transparency warning option was ineffective.
+* BUG: Toggling IE PNG transparency warning option was ineffective.
 
 = 0.2.0 =
 
-* Revamp admin page and simplify options.
-* Allows limiting number of score fragments and length of fragment.
-* Allows showing music source code when image is clicked.
-* Better Windows support.
-* Mandates abcm2ps must be used for ABC notation support.
+* CHG: Revamp admin page and simplify options.
+* FEAT: Allows limiting number of score fragments and length of fragment.
+* FEAT: Allows showing music source code when image is clicked.
+* FEAT: Better Windows support.
+* CHG: Mandates abcm2ps must be used for ABC notation support.
 
 = 0.1.3 =
 
-* Add WordPress nonce protection.
+* FEAT: Add WordPress nonce protection.
 
 = 0.1.2 =
 
-* Fix image rendering during ImageMagick conversion process.
+* BUG: Fix image rendering during ImageMagick conversion process.
 
 = 0.1.1 =
 
-* Fix transparency of images generated by Lilypond.
-* Issue warning if *correct invalidly nested XHTML automatically* option is checked, instead of turning the option off.
+* BUG: Fix transparency of images generated by Lilypond.
+* CHG: Issue warning if *correct invalidly nested XHTML automatically* option is checked, instead of turning the option off.
 
 = 0.1.0 =
 
