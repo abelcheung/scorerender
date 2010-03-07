@@ -35,10 +35,17 @@ public function get_music_fragment ()
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	// 1.125 = 72/64; guido server use 64pixel per cm
+	/*
+	 * Staff height (px) = zoom*40-1; under this zoom ratio,
+	 * so-called '1cm' = 30px in the image, and staff height = 24px.
+	 * Under this setting the staff line is more solid.
+	 * Besides, 1cm is used for left and right margin (already counted
+	 * in page width), while left margin is occupied in advertising clause,
+	 * right margin would be cropped later, thus add 1am to the width.
+	 */
 	$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
 			'http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl',
-			$this->img_max_width / DPI * 2.54, 100.0, 1.125,
+			$this->img_max_width / 30 + 1, 100.0, 0.625,
 			rawurlencode (file_get_contents ($input_file)));
 
 	return (@copy ($url, $intermediate_image));
@@ -49,9 +56,17 @@ protected function conversion_step1 ($input_file, $intermediate_image)
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
-	// Under Windows, percent sign must be escaped
-	return parent::conversion_step2 ($intermediate_image, $final_image, FALSE,
-		(is_windows())? '-shave 1x1 -geometry 56%%' : '-shave 1x1 -geometry 56%');
+	/*
+	 * The conversion from non-transparent GIF to transparent PNG was
+	 * successful if there were a resizing as it was done in earlier
+	 * version of ScoreRender. But now without resizing transparency
+	 * is not enabled in pixels despite the -alpha option. Therefore
+	 * some other operations must be performed to re-enable transparency
+	 * in pixels; changing colorspace is one of them (but only selected
+	 * few colorspaces!)
+	 */
+	return parent::conversion_step2 ( $intermediate_image,
+			$final_image, FALSE, '-colorspace cmyk -shave 1x1' );
 }
 
 /**

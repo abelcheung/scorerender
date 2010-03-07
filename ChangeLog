@@ -1,3 +1,9 @@
+2010-03-07  Abel Cheung  <abelcheung@gmail.com>
+
+	* notation/guido.php:
+	- Use more precise sizing and zoom ratio so that image will
+	  not look blurred.
+
 2010-03-04  Abel Cheung  <abelcheung@gmail.com>
 
 	* Update ZeroClipboard to newest version (1.0.6).

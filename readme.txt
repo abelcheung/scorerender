@@ -62,10 +62,6 @@ Since 0.2, [abcm2ps](http://moinejf.free.fr/) will be the only one supported. Th
   
 Right now this is still impossible. Management of cache is planned in future, but can't say when it would be finished.
 
-= Images using Guido notation seems blurred. =
-
-This may not be fully fixable, because setting font attributes may not be possible for all text. After image resizing, they can be rendered smaller / larger than desired.
-
 = How to debug my fragment when posting? =
 
 Simply answer: don't do that if possible. The best way is render it privately in your computer first, then post the content, rather than needlessly spending lots of time on trial and error.
@@ -100,6 +96,10 @@ Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for
 
 == Upgrade Notice ==
 
+= 0.3.4 =
+
+* Image fetched from Guido notation server will not look blurred now.
+
 = 0.3.3 =
 
 * Safe mode for Lilypond notation is once again usable.
@@ -111,6 +111,11 @@ Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for
 * Users of Lilypond 2.12.x should upgrade due to broken command line invocation.
 
 == Changelog ==
+
+= 0.3.4 =
+
+* CHG: Update ZeroClipboard to 1.0.6 which contains some bug fixes.
+* BUG: Image fetched from Guido notation server will not look blurred now.
 
 = 0.3.3 =
 
