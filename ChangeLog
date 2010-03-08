@@ -2,6 +2,8 @@
 
 	* wp-scorerender.php:
 	- WP < 2.8 compatibility when calling wp_enqueue_script().
+	* notation/guido.php:
+	- (conversion_step1) Try verifying retrieved data is really GIF.
 
 2010-03-07  Abel Cheung  <abelcheung@gmail.com>
 
