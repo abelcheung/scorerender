@@ -48,7 +48,18 @@ protected function conversion_step1 ($input_file, $intermediate_image)
 			$this->img_max_width / 30 + 1, 100.0, 0.625,
 			rawurlencode (file_get_contents ($input_file)));
 
-	return (@copy ($url, $intermediate_image));
+	@copy ($url, $intermediate_image);
+
+	// half-assed verification that retrieved content is really GIF,
+	// not HTML login form, for example.
+	$im = @imagecreatefromgif ($intermediate_image);
+	if ( !$im )
+		return false;
+	else
+	{
+		imagedestroy ($im);
+		return true;
+	}
 }
 
 /**
