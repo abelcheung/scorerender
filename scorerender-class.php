@@ -114,10 +114,11 @@ public function get_raw_input ()
  *
  * @param mixed $progs A single program or array of programs to be used
  * @uses $mainprog Full path is stored in this variable
- * @todo For some notations like PMX/MusiXTeX, multiple programs must be set, currently this function can only handle one.
+ * @todo Needs cleaner implementation; for some notations like PMX/MusiXTeX,
+ * multiple programs must be set, currently this function can only handle one.
  * @since 0.3
  */
-public function set_programs ($progs) /* {{{ */
+public function set_img_progs ($progs) /* {{{ */
 {
 	if (is_string ($progs))
 	{
@@ -142,6 +143,42 @@ public function set_programs ($progs) /* {{{ */
 		}
 	}
 } /* }}} */
+
+
+/**
+ * Set the main program used to generate MIDI
+ *
+ * @param mixed $progs A single program or array of programs to be used
+ * @uses $midiprog Full path is stored in this variable
+ * @todo Needs cleaner implementation, generally only at most one program is used
+ * @since 0.3.50
+ */
+public function set_midi_progs ($progs) /* {{{ */
+{
+	if (is_string ($progs))
+	{
+		$this->midiprog = $progs;
+		return;
+	}
+	elseif (!is_array ($progs) || empty ($progs))
+		return;
+	else
+	{
+		switch (count ($progs))
+		{
+		  case 1:
+			$v = array_values ($progs);
+			$this->midiprog = $v[0];
+			break;
+		  default:
+			// Only picks the first element
+			list ($k) = array_keys ($progs);
+			$this->midiprog = $progs[$k];
+			break;
+		}
+	}
+} /* }}} */
+
 
 /**
  * Set the program used to generate MIDI
@@ -606,6 +643,9 @@ final public function render() /* {{{ */
 
 	$this->final_image = basename ($final_image);
 
+	/* TODO: If cached image already exist but not for MIDI, then MIDI
+	 * is not re-generated at all
+	 */
 	if ( method_exists ($this, 'generate_midi') )
 	{
 		if ( true === ($ok = $this->generate_midi($input_file, $final_midi) ) )

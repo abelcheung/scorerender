@@ -1,3 +1,15 @@
+2010-03-09  Abel Cheung  <abelcheung@gmail.com>
+
+	* Rudimentary MIDI support done.
+	* wp-scorerender.php:
+	- (scorerender_return_fragment_error) Dump command output into
+	  error log, instead of on webpage.
+	- (scorerender_return_fragment_ok) Add argument, to check for
+	  failure during MIDI generation.
+	* scorerender-class.php:
+	- (set_programs) Rename to set_img_progs().
+	- (set_midi_progs) New func.
+
 2010-03-08  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:

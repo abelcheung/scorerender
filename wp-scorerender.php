@@ -297,16 +297,14 @@ function scorerender_return_fragment_error ( $render, $lang, $error_handling, $w
 		return "&#91;score lang='$lang'&#93;" .
 			htmlentities ( $render->get_raw_input() ) .
 			"&#91;/score&#93;";
+
 	  default:
 		if (SR_DEBUG)
-			return "<div class='scorerender-error'>" .
-				"<pre>ERROR: " . htmlentities ( $render->format_error_msg (
-							$wperror->get_error_message() ) ) . "</pre><br />" .
-				"<pre>CMD OUTPUT: " . htmlentities ( $render->get_command_output() ) . "</pre></div>";
-		else
-			return "<div class='scorerender-error'><pre>" .
-				htmlentities ( $render->format_error_msg (
-							$wperror->get_error_message() ) ) . "</pre></div>";
+			error_log ("ScoreRender: command error, output is:\n" . $render->get_command_output() );
+
+		return "<div class='scorerender-error'><pre>" .
+			htmlentities ( $render->format_error_msg (
+				$wperror->get_error_message() ) ) . "</pre></div>";
 	}
 } /* }}} */
 
@@ -321,7 +319,7 @@ function scorerender_return_fragment_error ( $render, $lang, $error_handling, $w
  * @param array $attr Shortcode attributes
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_ok ( $render, $attr ) /* {{{ */
+function scorerender_return_fragment_ok ( $render, $attr, $result ) /* {{{ */
 {
 	global $sr_options;
 	static $count = 0;
@@ -375,6 +373,7 @@ function scorerender_return_fragment_ok ( $render, $attr ) /* {{{ */
 				$id, ($width >= 300) ? $width : '300', $height,
 				__('Music code copied to clipboard', TEXTDOMAIN) );
 
+		// Note that all images with clipboard use 'scorerender-clip' class
 		$html .= sprintf ("<img class='scorerender-image scorerender-clip' %s title='%s' alt='%s' src='%s' id='%s' />",
 				$htmlattr, __('Click on image to copy music code to clipboard', TEXTDOMAIN),
 				$title, $imgurl, $id );
@@ -386,6 +385,15 @@ function scorerender_return_fragment_ok ( $render, $attr ) /* {{{ */
 		$html = sprintf ("<img class='scorerender-image' %s title='%s' alt='%s' src='%s' id='%s' />",
 				$htmlattr, $title, $title, $imgurl, $id );
 	}
+
+	if ( $sr_options['PRODUCE_MIDI'] )
+	{
+		if ( $result )
+			$html .= " <a href='$render->final_midi'>(midi download)</a>";
+		else
+			$html .= " (midi generation failed)";
+	}
+
 	return $html;
 } /* }}} */
 
@@ -402,7 +410,8 @@ function scorerender_return_fragment_ok ( $render, $attr ) /* {{{ */
  * @param string $content Music source content
  * @param string $code Shortcode tag name
  *
- * @uses SrNotationBase::set_programs() Setting default notation rendering program
+ * @uses SrNotationBase::set_img_progs() Setting default notation rendering program
+ * @uses SrNotationBase::set_midi_progs() Setting default MIDI generation program
  * @uses SrNotationBase::set_imagemagick_path() Setting ImageMagick `convert` path
  * @uses SrNotationBase::set_temp_dir() Setting default temp directory
  * @uses SrNotationBase::set_cache_dir() Setting cache directory used for storing images
@@ -468,7 +477,8 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 			break;
 		}
 	}
-	$render->set_programs         ($render_progs);
+	$render->set_img_progs        ($render_progs);
+	$render->set_midi_progs       ($midi_progs);
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
 	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
@@ -486,11 +496,8 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	if ( !extension_loaded ('gd') )
 		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host', TEXTDOMAIN) );
 
-	// No errors, so generate HTML
-	// Not nice to show source in alt text or title, since music source
-	// is most likely multi-line, and can be very long
-	// This idea is taken from LatexRender demo site
-	return scorerender_return_fragment_ok ( $render, $attr );
+	// TODO: if $result is false, have to check for midi generation problem etc
+	return scorerender_return_fragment_ok ( $render, $attr, $result );
 } /* }}} */
 
 
