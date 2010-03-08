@@ -636,14 +636,26 @@ if (defined ('WP_ADMIN'))
 	include_once ('scorerender-admin.php');
 else
 {
+	global $wp_version;
+
 	// IE6 PNG translucency filter
 	if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
 		add_action ('wp_head', 'scorerender_add_ie6_style');
 
-	wp_enqueue_script ( 'zeroclipboard'  , plugins_url ( 'scorerender/misc/ZeroClipboard.js'   ),
-			array(), '1.0.6', true );
-	wp_enqueue_script ( 'jquery-copyable', plugins_url ( 'scorerender/misc/jquery.copyable.js' ),
-			array('jquery', 'zeroclipboard'), '0.0', true );
+	if ( version_compare ( $wp_version, '2.8', '>=' ) )
+	{
+		wp_enqueue_script ( 'zeroclipboard'  , plugins_url ( 'scorerender/misc/ZeroClipboard.js'   ),
+				array(), '1.0.6', true );
+		wp_enqueue_script ( 'jquery-copyable', plugins_url ( 'scorerender/misc/jquery.copyable.js' ),
+				array('jquery', 'zeroclipboard'), '0.0', true );
+	}
+	else
+	{
+		wp_enqueue_script ( 'zeroclipboard'  , plugins_url ( 'scorerender/misc/ZeroClipboard.js'   ),
+				array(), '1.0.6', );
+		wp_enqueue_script ( 'jquery-copyable', plugins_url ( 'scorerender/misc/jquery.copyable.js' ),
+				array('jquery', 'zeroclipboard'), '0.0', );
+	}
 
 	// Set ZeroClipboard path, as well as fading effect for all images
 	add_action ('wp_footer', create_function ( '$a',
