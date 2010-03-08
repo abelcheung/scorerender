@@ -653,9 +653,9 @@ else
 	else
 	{
 		wp_enqueue_script ( 'zeroclipboard'  , plugins_url ( 'scorerender/misc/ZeroClipboard.js'   ),
-				array(), '1.0.6', );
+				array(), '1.0.6' );
 		wp_enqueue_script ( 'jquery-copyable', plugins_url ( 'scorerender/misc/jquery.copyable.js' ),
-				array('jquery', 'zeroclipboard'), '0.0', );
+				array('jquery', 'zeroclipboard'), '0.0' );
 	}
 
 	// Set ZeroClipboard path, as well as fading effect for all images
