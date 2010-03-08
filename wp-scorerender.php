@@ -428,11 +428,12 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	);
 
 	// transform shortcode attributes to boolean values whenever appropriate
-	foreach ( $attr as $key => $value )
-	{
-		if     ( 'false' === $attr[$key] ) $attr[$key] = false;
-		elseif ( 'true'  === $attr[$key] ) $attr[$key] = true;
-	}
+	if ( !empty ($attr) )
+		foreach ( $attr as $key => $value )
+		{
+			if     ( 'false' === $attr[$key] ) $attr[$key] = false;
+			elseif ( 'true'  === $attr[$key] ) $attr[$key] = true;
+		}
 
 	// prevents construct like [mup lang="abc"]
 	if ( ( 'score' != $code ) && ( 'scorerender' != $code ) )
