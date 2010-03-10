@@ -389,9 +389,20 @@ function scorerender_return_fragment_ok ( $render, $attr, $result ) /* {{{ */
 	if ( $sr_options['PRODUCE_MIDI'] )
 	{
 		if ( $result )
-			$html .= " <a href='$render->final_midi'>(midi download)</a>";
+		{
+			if ( !is_null ($render->final_midi) )
+			{
+				$midiurl = add_query_arg ( array ('file' => $render->final_midi),
+					plugins_url ('scorerender/misc/get-midi.php') );
+				$mesg = "<a href='{$midiurl}'>(midi download)</a>";
+			}
+			else
+				$mesg = "(no midi download)";
+		}
 		else
-			$html .= " (midi generation failed)";
+			$mesg = "(midi generation failed)";
+
+		$html .= " <span class='scorerender-midi'>$mesg</span>";
 	}
 
 	return $html;

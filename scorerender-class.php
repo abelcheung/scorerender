@@ -546,10 +546,23 @@ final public function render() /* {{{ */
 	$this->final_image = false;
 
 	// If cache exists, short circuit
+	if ( is_file ($final_midi) )
+	{
+		if ( is_readable ($final_midi) )
+			$this->final_midi = basename ($final_midi);
+		else
+			$this->final_midi = false;
+	}
+
 	if (is_file ($final_image))
 		if (is_readable ($final_image))
 		{
 			$this->final_image = basename ($final_image);
+			// FIXME: During first time of rendering process, generate_midi() is executed
+			// so one knows if MIDI generation fails. However if cached image already
+			// exists, function call is skipped so there's no way to know if it's a 
+			// failure or simply not done at all. Maybe should move generate_midi() out
+			// of this func and execute independently.
 			return true;
 		}
 		else
@@ -601,7 +614,7 @@ final public function render() /* {{{ */
 		return new WP_Error ( 'sr-temp-file-create-fail',
 				__('Temporary file creation failure', TEXTDOMAIN) );
 
-	// FIXME: Insecure, but is there any better way to force Lilypond to
+	// Insecure, but is there any better way to force Lilypond to
 	// use the temp file name I want?
 	$intermediate_image = $input_file . '.ps';
 
@@ -646,10 +659,10 @@ final public function render() /* {{{ */
 	/* TODO: If cached image already exist but not for MIDI, then MIDI
 	 * is not re-generated at all
 	 */
-	if ( method_exists ($this, 'generate_midi') )
+	if ( is_null ( $this->final_midi ) && method_exists ($this, 'generate_midi') )
 	{
 		if ( true === ($ok = $this->generate_midi($input_file, $final_midi) ) )
-			$this->final_midi = $final_midi;
+			$this->final_midi = basename ($final_midi);
 		else
 			$this->final_midi = false;
 	}
