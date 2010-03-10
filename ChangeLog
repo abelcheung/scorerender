@@ -1,9 +1,13 @@
 2010-03-10  Abel Cheung  <abelcheung@gmail.com>
 
-	* wp-scorerender.php (scorerender_return_fragment_ok),
-	  scorerender-class.php (render):
+	* wp-scorerender.php (scorerender_return_fragment_ok):
+	- Always supply color value to tint-image.php.
+	* scorerender-class.php (render):
 	- Return correct MIDI link.
 	* misc/get-midi.php: New file.
+	* misc/scorerender-ext-scripts.inc:
+	- New file. Shared funcs from tint-image.php and
+	  get-midi.php are moved here.
 
 2010-03-09  Abel Cheung  <abelcheung@gmail.com>
 

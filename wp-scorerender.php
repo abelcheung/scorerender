@@ -328,8 +328,8 @@ function scorerender_return_fragment_ok ( $render, $attr, $result ) /* {{{ */
 	extract ($attr);
 
 	$args = array ( 'img' => $render->final_image );
-	if ( !is_null ( $color ) ) $args['color'] =
-		preg_replace ( '/^#/', '', $color );
+	$args['color'] = preg_replace ( '/^#/', '',
+	   !is_null ($color) ? $color : $sr_options['NOTE_COLOR']	);
 
 	$imgurl = add_query_arg ( $args, plugins_url ('scorerender/misc/tint-image.php') );
 

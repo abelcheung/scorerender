@@ -16,12 +16,13 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function exit_and_dump_error ($string, $httpstatus)
-{
-	error_log ('ScoreRender (tint-image.php): ' . $string . "\n");
-	header ( 'x', true, $httpstatus);
-	exit (1);
-}
+include_once ('scorerender-ext-scripts.inc');
+
+check_param ( array (
+	'color' => '/^#?([0-9A-Fa-f]{6})$/',
+	'img'   => '/^sr-\w+-[0-9A-Fa-f]{32}\.png$/',
+) );
+$color = hexdec ( urldecode ($_GET['color']) );
 
 // this file must be either 3 or 4 levels from WP top dir
 if (file_exists ('../../../../wp-config.php'))
@@ -29,46 +30,23 @@ if (file_exists ('../../../../wp-config.php'))
 elseif (file_exists ('../../../wp-config.php'))
 	require_once ('../../../wp-config.php');
 else
-	exit_and_dump_error ("Failed to locate config", 204);
+	exit_and_dump_error ("Failed to locate config");
 
 if ( !function_exists ('get_option') )
-	exit_and_dump_error ("Crucial Wordpress function not found", 204);
+	exit_and_dump_error ("Crucial Wordpress function not found");
 
-$settings = get_option ('scorerender_options');
-if ( empty ($settings) )
-	exit_and_dump_error ("Failed to retrieve WP config", 204);
+$sr_settings = get_option ('scorerender_options');
+if ( empty ($sr_settings) )
+	exit_and_dump_error ("Failed to retrieve WP config");
 
-if ( array_key_exists ('color', $_GET) )
-	$hexcolor = strtoupper (urldecode ($_GET['color']));
-else
-{
-	if ( !array_key_exists ('NOTE_COLOR', $settings) )
-		exit_and_dump_error ("Can't determine color from config", 204);
-	$hexcolor = strtoupper ($settings['NOTE_COLOR']);
-}
-
-if ( !preg_match ('/^#?([0-9A-F]{6})$/', $hexcolor) )
-	exit_and_dump_error ("Incorrect color format: '$hexcolor''", 204);
-$color = hexdec ($hexcolor);
-
-if ( !array_key_exists ('img', $_GET) )
-	exit_and_dump_error ("Image name not supplied", 204);
-
-if ( !preg_match ('/^sr-\w+-[0-9A-Fa-f]{32}\.png$/', $_GET['img']) )
-	exit_and_dump_error ("Image name format incorrect", 204);
-
-if ( !empty ($settings['CACHE_DIR']) )
-	$file = $settings['CACHE_DIR'] . '/' . $_GET['img'];
+if ( !empty ($sr_settings['CACHE_DIR']) )
+	$file = $sr_settings['CACHE_DIR'] . '/' . $_GET['img'];
 else
 {
 	$upload_dir = wp_upload_dir();
 	$file = $upload_dir['basedir'] . '/' . $_GET['img'];
 }
-if ( !file_exists ($file) )
-	exit_and_dump_error ("Image not found: '$file''", 404);
-
-if ( !is_readable ($file) )
-	exit_and_dump_error ("Image not readable: '$file''", 403);
+check_file_existance ($file);
 
 // short circuit for better caching
 // TODO: check etag too
@@ -101,7 +79,7 @@ function convertcolor ( $img, $color )
 
 $img = imagecreatefrompng ($file);
 if ( !is_resource ($img) )
-	exit_and_dump_error ("Failed to create image resource", 204);
+	exit_and_dump_error ("Failed to create image resource");
 
 
 imagealphablending ($img, false);

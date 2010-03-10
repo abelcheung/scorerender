@@ -16,12 +16,12 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function exit_and_dump_error ($string, $httpstatus = 204)
-{
-	error_log ('ScoreRender (get-midi.php): ' . $string . "\n");
-	header ( 'x', true, $httpstatus);
-	exit (1);
-}
+include_once ('scorerender-ext-scripts.inc');
+
+check_param ( array(
+	'file' => '/^sr-\w+-[0-9A-Fa-f]{32}\.mid$/',
+) );
+$file = $_GET['file'];
 
 // this file must be either 3 or 4 levels from WP top dir
 if (file_exists ('../../../../wp-config.php'))
@@ -34,33 +34,23 @@ else
 if ( !function_exists ('get_option') )
 	exit_and_dump_error ("Crucial Wordpress function not found");
 
-$settings = get_option ('scorerender_options');
-if ( empty ($settings) )
+$sr_settings = get_option ('scorerender_options');
+if ( empty ($sr_settings) )
 	exit_and_dump_error ("Failed to retrieve WP config");
 
-if ( !array_key_exists ('file', $_GET) )
-	exit_and_dump_error ("MIDI file name not supplied");
-
-if ( !preg_match ('/^sr-\w+-[0-9A-Fa-f]{32}\.mid$/', $_GET['file']) )
-	exit_and_dump_error ("MIDI file name format incorrect");
-
-if ( !empty ($settings['CACHE_DIR']) )
-	$dir = $settings['CACHE_DIR'];
+if ( !empty ($sr_settings['CACHE_DIR']) )
+	$dir = $sr_settings['CACHE_DIR'];
 else
 {
 	$upload_dir = wp_upload_dir();
 	$dir = $upload_dir['basedir'];
 }
-$file = $dir . '/' . $_GET['file'];
-if ( !file_exists ($file) )
-	exit_and_dump_error ("File not found: '$file'", 404);
-
-if ( !is_readable ($file) )
-	exit_and_dump_error ("File not readable: '$file'", 403);
+$fullpath = $dir . '/' . $file;
+check_file_existance ($fullpath);
 
 // short circuit for better caching
 // TODO: check etag too
-$mtime = filemtime ( $file );
+$mtime = filemtime ( $fullpath );
 if ( @strtotime ( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) == $mtime )
 {
 	header ('x', true, 304);
@@ -68,12 +58,12 @@ if ( @strtotime ( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) == $mtime )
 }
 
 header ("Content-type: audio/midi");
-header ("Content-Disposition: attachment; filename=" . basename ($file));
+header ("Content-Disposition: attachment; filename=" . basename ($fullpath));
 header ("Content-Transfer-Encoding: binary");
 header ("Cache-Control: public");
-header ("Content-Length: " . filesize ($file) );
+header ("Content-Length: " . filesize ($fullpath) );
 // TODO: print etag header too
-header ("Last-modified: " . date ('D, d M Y H:i:s T', filemtime ($file)));
+header ("Last-modified: " . date ('D, d M Y H:i:s T', filemtime ($fullpath)));
 
-readfile ($file);
+readfile ($fullpath);
 ?>
