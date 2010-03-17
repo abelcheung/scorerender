@@ -1,3 +1,9 @@
+2010-03-18  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-admin.php:
+	- (print_description) New func, handle the continually changing
+	  ways of printing setting descriptions.
+
 2010-03-10  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php (scorerender_return_fragment_ok):

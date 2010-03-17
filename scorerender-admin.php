@@ -235,6 +235,29 @@ public function admin_head()
 
 
 /**
+ * Handle different ways of printing setting description in
+ * various WP versions.
+ *
+ * @since 0.3.50
+ */
+public static function print_description ($mesg, $echo = true)
+{
+	global $wp_version;
+
+	if ( version_compare ( $wp_version, '2.7', '>=' ) )
+	{
+		if ( version_compare ( $wp_version, '2.8', '<' ) )
+			$mesg = '<span class="setting-description">' . $mesg . "</span>\n";
+		else
+			$mesg = '<span class="description">' . $mesg . "</span>\n";
+	}
+
+	if ($echo) echo $mesg;
+	else return $mesg;
+}
+
+
+/**
  * WP hook added to admin page footer
  *
  * Mainly include javascripts involved in admin form
@@ -282,18 +305,18 @@ private function admin_section_path () /* {{{ */
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><label for="temp_dir"><?php _e('Temporary directory:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><label for="temp_dir"><?php _e('Temporary folder:', TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[TEMP_DIR]" type="text" id="temp_dir" value="<?php echo $sr_options['TEMP_DIR']; ?>" class="regular-text code" />
-<div class="setting-description"><?php _e('Must be writable and ideally <strong>NOT</strong> accessible from web. System default will be used if left blank.', TEXTDOMAIN) ?></div>
+<?php self::print_description ( __('All rendering will be performed inside this folder before copying to cache folder. System default will be used if left blank.', TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><label for="cache_dir"><?php _e('Image cache directory:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><label for="cache_dir"><?php _e('Cache folder:', TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[CACHE_DIR]" type="text" id="cache_dir" value="<?php echo $sr_options['CACHE_DIR']; ?>" class="regular-text code" />
-<div class="setting-description"><?php _e('Must be writable and accessible from web. WordPress default upload directory is used if left blank.', TEXTDOMAIN) ?></div>
+<?php self::print_description ( __('Stores rendered image and MIDI for faster access. WordPress default upload directory will be used if left blank. Need NOT be web accessible.', TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -314,6 +337,9 @@ private function admin_section_prog () /* {{{ */
 ?>
 
 <h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
+
+<p><?php _e("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; 6.3.5-7 (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN); ?></p>
+
 <table class="form-table">
 
 <tr valign="top">
@@ -345,8 +371,8 @@ private function admin_section_image () /* {{{ */
 
 <tr valign="top">
 <th scope="row"><?php _e('Max image width:', TEXTDOMAIN) ?></th>
-<td><?php printf(__('%s pixels', TEXTDOMAIN), '<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="' . $sr_options['IMAGE_MAX_WIDTH'] . '" class="small-text" />'); ?>
-<div class="setting-description"><?php _e('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ?></div>
+<td><?php printf(__('%s pixels', TEXTDOMAIN), '<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="' . $sr_options['IMAGE_MAX_WIDTH'] . '" class="small-text" />'); ?><br />
+<?php self::print_description ( __('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -356,8 +382,8 @@ private function admin_section_image () /* {{{ */
 <label for="note_color">
 <input type="text" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo $sr_options['NOTE_COLOR'] ?>" class="small-text color {hash:true}" style="width:6em" />
 <em><?php _e('(Click to select color)', TEXTDOMAIN) ?></em>
-</label>
-<div class="setting-description"><?php echo ('This feature can be toggled in each music fragment. Please refer to help for detail.') ?></div>
+</label><br />
+<?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.') ) ?>
 </td>
 </tr>
 
@@ -365,8 +391,8 @@ private function admin_section_image () /* {{{ */
 <th scope="row"><?php _e('IE Hack:', TEXTDOMAIN) ?></th>
 <td>
 <label for="use_ie6_png_alpha_fix"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', $sr_options['USE_IE6_PNG_ALPHA_FIX']); ?> />
-<?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label>
-<div class="setting-description"><?php printf ('Turning on this option enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6, which is not supported by IE below version 7. This option only affects images rendered by ScoreRender. <strong>Make sure you have NOT installed any plugin with the same functionality before turning on this option, which may conflict with each other.</strong>', 'http://www.twinhelix.com/css/iepngfix/' ); ?></div>
+<?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label><br />
+<?php self::print_description ( sprintf ( __('Enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6.x . This option only affects images rendered by ScoreRender, and only when user is using IE5/6 browser. <strong>If any WordPress plugin with such functionality is used on the same site, please turn this option OFF.</strong>', TEXTDOMAIN), 'http://www.twinhelix.com/css/iepngfix/' ) ) ?></div>
 </td>
 </tr>
 
@@ -392,16 +418,16 @@ private function admin_section_content () /* {{{ */
 <tr valign="top">
 <th scope="row"><?php _e('Show source:', TEXTDOMAIN) ?></th>
 <td><label for="show_input"><input type="checkbox" name="ScoreRender[ENABLE_CLIPBOARD]" id="show_input" value="1" <?php checked('1', $sr_options['ENABLE_CLIPBOARD']); ?> />
-<?php _e('Copy music source content to clipboard when image is clicked', TEXTDOMAIN); ?></label>
-<div class="setting-description"><?php echo ('This feature can be toggled in each music fragment. Please refer to help for detail.') ?></div>
+<?php _e('Copy music source content to clipboard when image is clicked', TEXTDOMAIN); ?></label><br />
+<?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.', TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
 <tr valign="top">
 <th scope="row"><?php _e('MIDI generation:', TEXTDOMAIN) ?></th>
 <td><label for="produce_midi"><input type="checkbox" name="ScoreRender[PRODUCE_MIDI]" id="produce_midi" value="1" <?php checked('1', $sr_options['PRODUCE_MIDI']); ?> />
-<?php _e('Also attempt to generate MIDI and provide download link when generating image', TEXTDOMAIN); ?></label>
-<div class="setting-description"><?php echo ('Note that different notations have different ways to generate MIDI. For example, ABC notation requires <code>abc2midi</code> program, while Lilypond, PMW and Mup have built-in support yet triggered in different ways.') ?></div>
+<?php _e('Also attempt to generate MIDI and provide download link when generating image', TEXTDOMAIN); ?></label><br />
+<?php self::print_description ( __('Note that different notations have different ways to generate MIDI. For example, ABC notation requires <code>abc2midi</code> program, while Lilypond, PMW and Mup have built-in support yet triggered in different ways.') ) ?>
 </td>
 </tr>
 
@@ -423,8 +449,8 @@ private function admin_section_content () /* {{{ */
 <th scope="row"><?php _e('Comment rendering:', TEXTDOMAIN) ?></th>
 <td>
 <label for="comment_enabled"><input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', $sr_options['COMMENT_ENABLED']); ?> />
-<?php _e('Enable rendering for comments', TEXTDOMAIN) ?></label>
-<div class="setting-description" style="color: red;"><?php _e('Only turn on if commenters are trusted', TEXTDOMAIN) ?></div>
+<?php _e('Enable rendering for comments', TEXTDOMAIN) ?></label><br />
+<?php self::print_description ( __('Only turn on if commenters are trusted', TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -432,7 +458,7 @@ private function admin_section_content () /* {{{ */
 <th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
 <td>
 <label for="fragment_per_comment"><input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo $sr_options['FRAGMENT_PER_COMMENT']; ?>" <?php echo (1 != $sr_options['COMMENT_ENABLED']) ? 'class="small-text disabled" disabled="disabled"' : 'class="small-text"'; ?> /></label>
-<span class="setting-description"><?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php printf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN)); ?></span>
+<?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php self::print_description ( sprintf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN) ) ) ?>
 </td>
 </tr>
 
@@ -528,8 +554,6 @@ public function admin_page () /* {{{ */
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 
 	<div id="sr-help-1" class="hidden">
-		<p><?php _e("ImageMagick &ge; 6.3.6-2 must be present and working (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN); ?></p>
-
 		<p><?php _e('Each music fragment must be enclosed by a pair of shortcodes, in the following format:', TEXTDOMAIN) ?></p>
 		<blockquote><code>[score lang="<em>xxxx</em>"]&hellip;&hellip;[/score]</code></blockquote>
 		<p><?php _e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name):', TEXTDOMAIN) ?></p>
