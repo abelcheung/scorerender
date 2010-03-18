@@ -38,7 +38,7 @@ define ('REGEX_CACHE_IMAGE', '/^sr-(\w+)-([0-9A-Fa-f]{32})\.png$/');
 /**
  * Debugging purpose
  */
-define (SR_DEBUG, FALSE);
+define (SR_DEBUG, true);
 
 /*
  * How error is handled when rendering failed
@@ -281,20 +281,21 @@ function scorerender_get_cache_location () /* {{{ */
  * @uses SrNotationBase::get_command_output() Used when showing error message upon error, and debug is on
  *
  * @param object $render PHP object created for rendering relevant music fragment
- * @param string $lang
- * @param int $error_handling
+ * @param array $attr Shortcode attributes
  * @param WP_Error $wperror
  * @return string HTML content containing error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_error ( $render, $lang, $error_handling, $wperror ) /* {{{ */
+function scorerender_return_img_error ( $render, $attr, $wperror ) /* {{{ */
 {
-	switch ( $error_handling )
+	global $sr_options;
+
+	switch ( $sr_options['ERROR_HANDLING'] )
 	{
 	  case ON_ERR_SHOW_NOTHING:
 		return '';
 
 	  case ON_ERR_SHOW_FRAGMENT:
-		return "&#91;score lang='$lang'&#93;" .
+		return "&#91;score lang='{$attr['lang']}'&#93;" .
 			htmlentities ( $render->get_raw_input() ) .
 			"&#91;/score&#93;";
 
@@ -302,9 +303,15 @@ function scorerender_return_fragment_error ( $render, $lang, $error_handling, $w
 		if (SR_DEBUG)
 			error_log ("ScoreRender: command error, output is:\n" . $render->get_command_output() );
 
+		if ( is_wp_error ($wperror) )
+			$mesg = $wperror->get_error_message();
+		elseif ( is_string ($wperror) )
+			$mesg = $wperror;
+		else
+			$mesg = __('Unknown error', TEXTDOMAIN);
+
 		return "<div class='scorerender-error'><pre>" .
-			htmlentities ( $render->format_error_msg (
-				$wperror->get_error_message() ) ) . "</pre></div>";
+			htmlentities ( $render->format_error_msg ($mesg) ) . "</pre></div>";
 	}
 } /* }}} */
 
@@ -319,7 +326,7 @@ function scorerender_return_fragment_error ( $render, $lang, $error_handling, $w
  * @param array $attr Shortcode attributes
  * @return string HTML content containing image if successful, otherwise may display error message or empty string, depending on setting.
  */
-function scorerender_return_fragment_ok ( $render, $attr, $result ) /* {{{ */
+function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 {
 	global $sr_options;
 	static $count = 0;
@@ -431,8 +438,8 @@ function scorerender_return_fragment_ok ( $render, $attr, $result ) /* {{{ */
  * @uses SrNotationBase::format_error_msg()
  * @uses SrNotationBase::render()
  * @uses scorerender_get_cache_location()
- * @uses scorerender_return_fragment_ok() Handles the case when image rendering is successful
- * @uses scorerender_return_fragment_error() Handles the case when image rendering failed
+ * @uses scorerender_return_img_ok() Handles the case when image rendering is successful
+ * @uses scorerender_return_img_error() Handles the case when image rendering failed
  * @uses extension_loaded() For checking existance of GD extension
  *
  * @return string Either HTML content containing rendered image, or HTML error message on failure
@@ -440,6 +447,10 @@ function scorerender_return_fragment_ok ( $render, $attr, $result ) /* {{{ */
 function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {{{ */
 {
 	global $notations, $sr_options;
+
+	// short circuit for empty content
+	$content = trim ( html_entity_decode ($content) );
+	if ( empty ($content) ) return '';
 
 	$defaults = array (
 		'color'     => null,
@@ -474,21 +485,21 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	if ( empty ($render) )
 		return SrNotationBase::format_error_msg ( __('class initialization failure', TEXTDOMAIN) );
 
-	$render_progs = array();
+	$img_progs = array();
 	$midi_progs   = array();
 	foreach ( $notations[$lang]['progs'] as $setting_name => $progdata )
 	{
 		switch ( $progdata['type'] )
 		{
 		  case 'prog':
-			$render_progs[$setting_name] = $sr_options[$setting_name];
+			$img_progs[$setting_name] = $sr_options[$setting_name];
 			break;
 		  case 'midiprog':
 			$midi_progs[$setting_name]   = $sr_options[$setting_name];
 			break;
 		}
 	}
-	$render->set_img_progs        ($render_progs);
+	$render->set_img_progs        ($img_progs);
 	$render->set_midi_progs       ($midi_progs);
 	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
 	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
@@ -497,18 +508,21 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 
 	do_action ('sr_set_class_variable', $sr_options);
 
-	$render->set_music_fragment ( trim ( html_entity_decode ($content) ) );
+	$render->set_music_fragment ($content);
 
 	$result = $render->render();
+	// $result2 = $render->get_midi();
 
-	if ( is_wp_error ($result) )
-		return scorerender_return_fragment_error ( $render, $lang, $sr_options['ERROR_HANDLING'], $result );
+	if ( !SR_DEBUG ) $render->cleanup();
 
 	if ( !extension_loaded ('gd') )
 		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host', TEXTDOMAIN) );
 
+	if ( is_wp_error ($result) )
+		return scorerender_return_img_error ( $render, $attr, $result );
+
 	// TODO: if $result is false, have to check for midi generation problem etc
-	return scorerender_return_fragment_ok ( $render, $attr, $result );
+	return scorerender_return_img_ok ( $render, $attr, $result );
 } /* }}} */
 
 

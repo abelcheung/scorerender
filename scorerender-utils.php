@@ -254,5 +254,29 @@ function is_midi_file ($file) /* {{{ */
 	         ( $array['hdrtrk'] == "MTrk" ) );
 } /* }}} */
 
+/**
+ * Convert linebreak to appropriate one depending on OS
+ *
+ * @since 0.3.50
+ * @uses is_windows()
+ * @param string $content Original content to be converted
+ * @return string Content with appropriate linebreak
+ */
+function normalize_linebreak ($content) /* {{{ */
+{
+	if ( is_windows() )
+	{
+		$content = preg_replace ("/(?<!\r)\n/", "\r\n", $content);
+		$content = preg_replace ("/\r(?!\n)/", "\r\n", $content);
+	}
+	else
+	{
+		$content = preg_replace ("/\r\n/", "\n", $content);
+		$content = preg_replace ("/\r/", "\n", $content);
+	}
+
+	return $content;
+} /* }}} */
+
 /* vim: set cindent foldmethod=marker : */
 ?>

@@ -67,42 +67,49 @@ public function get_music_fragment () /* {{{ */
 %%leftmargin 0.2in
 %abc2mtex: yes
 EOT;
-	// input must not contain any empty line
-	return $header . "\n" . preg_replace ('/^$/m', '%', $this->input);
+
+	return normalize_linebreak ($header . "\n" . $this->input);
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  */
-protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
+protected function conversion_step1 () /* {{{ */
 {
-	$cmd = sprintf ('"%s" "%s" -O "%s"',
-			$this->mainprog,
-			$input_file, $intermediate_image);
+	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
+	$cmd = sprintf ('"%s" -O "%s" "%s"',
+			$this->mainprog, $intermediate_image, $this->input_file);
 	$retval = $this->_exec($cmd);
 
-	return ($result['return_val'] == 0);
+	return ( 0 === $retval ) ? $intermediate_image : $retval;
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image)
+protected function conversion_step2 ($intermediate_image)
 {
-	return parent::conversion_step2 ($intermediate_image, $final_image, TRUE, '-density 96');
+	return parent::conversion_step2 ($intermediate_image, TRUE, '-density 96');
 }
 
 /**
- * Refer to {@link SrNotationBase::generate_midi() parent method} for more detail.
+ * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
  */
-protected function generate_midi ($input_file, $final_midi) /* {{{ */
+protected function get_midi () /* {{{ */
 {
+	if ( false === ( $temp_midifile = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
 	$cmd = sprintf ('"%s" "%s" -v -o "%s"',
 			$this->midiprog,
-			$input_file, $final_midi);
+			$this->input_file, $temp_midifile);
 	$retval = $this->_exec($cmd);
 
-	return ($result['return_val'] == 0);
+	return ( 0 === $retval ) ? $temp_midifile : $retval;
 } /* }}} */
 
 

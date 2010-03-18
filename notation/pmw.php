@@ -18,6 +18,8 @@ class pmwRender extends SrNotationBase
 
 const code = 'pmw';
 
+private $midi_file = null;
+
 protected static $notation_data = array ( /* {{{ */
 	'name'        => "Philip's Music Writer",
 	'url'         => 'http://scorerender.abelcheung.org/demo/demo-pmw/',
@@ -52,30 +54,39 @@ Linelength {$this->img_max_width}
 Magnification 1.5
 
 EOD;
-	// PMW doesn't like \r\n
-	return str_replace ("\r", '', $header . $this->input);
+
+	return normalize_linebreak ($header . "\n" . $this->input);
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
- *
- * @uses $mainprog
- * @uses _exec()
  */
-protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
+protected function conversion_step1 () /* {{{ */
 {
-	$cmd = sprintf ('"%s" -norc -includefont -o "%s" "%s"',
-			$this->mainprog,
-			$intermediate_image, $input_file);
+	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
+	if ( false === ( $this->midi_file = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
+	/*
+	 * Unlike Mup, PMW doesn't allow generating MIDI alone; getting MIDI file
+	 * means also generating PostScript. Therefore generate MIDI here and only
+	 * check for its existance in get_midi().
+	 */
+	$cmd = sprintf ('"%s" -norc -includefont -o "%s" -midi "%s" "%s"',
+			$this->mainprog, $intermediate_image, $this->midi_file, $this->input_file);
 	$retval = $this->_exec($cmd);
 
-	return ($result['return_val'] == 0);
+	return ( 0 === $retval ) ? $intermediate_image : $retval;
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image) /* {{{ */
+protected function conversion_step2 ($intermediate_image) /* {{{ */
 {
 	/*
 	 * ImageMagick mistakenly identify all PostScript produced by PMW as
@@ -87,9 +98,17 @@ protected function conversion_step2 ($intermediate_image, $final_image) /* {{{ *
 	 * A bug involving alpha channel in paletted PNG was fixed in 6.3.9-6;
 	 * seems it affects any paletted image and level 1 PostScript too?
 	 */
-	return parent::conversion_step2 ($intermediate_image, $final_image,
+	return parent::conversion_step2 ($intermediate_image,
 			version_compare ( $this->imagick_ver, '6.3.9-6', '>=' ),
 			'-page a3');
+} /* }}} */
+
+/**
+ * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
+ */
+protected function get_midi () /* {{{ */
+{
+	return filesize ($this->midi_file) ? $this->midi_file : false;
 } /* }}} */
 
 /**

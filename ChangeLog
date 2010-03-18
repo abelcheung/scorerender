@@ -1,8 +1,37 @@
 2010-03-18  Abel Cheung  <abelcheung@gmail.com>
 
+	* MIDI support for other notations basically complete.
 	* scorerender-admin.php:
 	- (print_description) New func, handle the continually changing
 	  ways of printing setting descriptions.
+	* wp-scorerender.php:
+	- (scorerender_return_fragment_error) -> scorerender_return_img_error
+	- (scorerender_return_fragment_ok) -> scorerender_return_img_ok
+	- (scorerender_return_img_ok) Return early for empty content.
+	* scorerender-utils.php:
+	- (normalize_linebreak) New func, for converting linebreaks.
+	* scorerender-class.php, notation/*.php:
+	- (conversion_step1, conversion_step2) Strip unneeded arguments,
+	  Output resulting file name within function instead of pre-determine
+	  it before executing function.
+	- (get_midi) New func, for generating or checking for MIDI file.
+	* notation/*.php:
+	- (get_music_fragment) Use normalize_linebreak() to fix line break
+	  handling problems.
+	* notation/mup.php:
+	- (set_notation_action) -> set_notation_variable
+	- (conversion_step1) Fix reg key file location.
+	* notation/pmw.php:
+	- Store MIDI file name inside class, as it has to be be pre-generated
+	  at the same time as getting PostScript.
+	* scorerender-class.php:
+	- Store input file name as class property.
+	- (render) Completely refactored, and splitted out some independent
+	  functions.
+	- (perform_checks) New func, for all kinds of pre-validation.
+	- (create_input_file) New func, for creation of input file.
+	- (cleanup, cleanup_dir) New func, for removing working dir after
+	  processing.
 
 2010-03-10  Abel Cheung  <abelcheung@gmail.com>
 
@@ -17,7 +46,7 @@
 
 2010-03-09  Abel Cheung  <abelcheung@gmail.com>
 
-	* Rudimentary MIDI support done.
+	* Rudimentary MIDI support done for ABC notation.
 	* wp-scorerender.php:
 	- (scorerender_return_fragment_error) Dump command output into
 	  error log, instead of on webpage.

@@ -62,15 +62,17 @@ public function get_music_fragment () /* {{{ */
 }
 EOD;
 
-	// When does lilypond start hating \r ?
-	return $header . str_replace (chr(13), '', $this->input);
+	// Basically impossible to judge the place to add \midi{} block,
+	// it has to be placed within \score{} block AND after some
+	// music content (placing it immediately after \score result in
+	// syntax error). Thus no automatic adding of \midi{}.
+	return normalize_linebreak ($header . "\n" . $this->input);
 } /* }}} */
 
 /**
- * Refer to {@link SrNotationBase::conversion_step1() parent method}
- * for more detail.
+ * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  */
-protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
+protected function conversion_step1 () /* {{{ */
 {
 	$safemode = '';
 	/* LilyPond SUCKS unquestionably. On 2.8 safe mode is triggered by "--safe" option,
@@ -81,29 +83,49 @@ protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 	else
 		$safemode = '-dsafe';
 
-	/* lilypond adds .ps extension by itself, sucks for temp file generation */
-	$cmd = sprintf ('"%s" %s --ps --output "%s" "%s"',
-		$this->mainprog,
-		$safemode,
-		dirname($intermediate_image) . DIRECTORY_SEPARATOR . basename($intermediate_image, ".ps"),
-		$input_file);
+	// lilypond insists adding .ps extension by itself, pointless for temp file
+	// generation here
+	$cmd = sprintf ('"%s" %s --ps "%s"',
+		$this->mainprog, $safemode, $this->input_file);
 
 	$retval = $this->_exec ($cmd);
 
-	return ($retval == 0);
+	if ( 0 !== $retval ) return $retval;
+
+	// CAVEAT: Temp files are created with .tmp suffix on Windows.
+	// Lilypond outputs file name with ".tmp" replaced by ".ps" .
+	// This is not a problem on Unix because temp files have no suffix.
+	if ( is_windows() )
+		$file = sprintf ( "%s/%s.ps", dirname ($this->input_file), basename ($this->input_file, '.tmp') );
+	else
+		$file = $this->input_file.'.ps';
+
+	return file_exists ($file) ? $file : -1;
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method}
  * for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image)
+protected function conversion_step2 ($intermediate_image)
 {
 	// default staff size for lilypond is 20px, expected 24px, a ratio of 1.2:1
 	// and 72*1.2 = 86.4
-	return parent::conversion_step2 ($intermediate_image, $final_image, TRUE,
-		'-equalize -density 86');
+	return parent::conversion_step2 ($intermediate_image, TRUE, '-equalize -density 86');
 }
+
+/**
+ * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
+ */
+protected function get_midi () /* {{{ */
+{
+	/* Once correct \midi block is inserted, lilypond UNCONDITIONALLY generate MIDI
+	 * file regardless of settings or command line options or whatever. Therefore
+	 * it must be cached upon first rendering, there is no way to get MIDI file afterwards.
+	 */
+	$midifile = $this->input_file . ".midi";
+	return file_exists ($midifile) ? $midifile : false;
+} /* }}} */
 
 /**
  * Refer to {@link SrNotationInterface::is_notation_usable() interface method}

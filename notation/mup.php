@@ -45,12 +45,12 @@ private $reg_key;
 /**
  * Class constructor, for adding wordpress hook to perform notation specific
  * setup
- * @uses set_notation_action()
+ * @uses set_notation_variable()
  * @access private
  */
 function __construct ()
 {
-	add_action ('sr_set_class_variable', array (&$this, 'set_notation_action'));
+	add_action ('sr_set_class_variable', array (&$this, 'set_notation_variable'));
 }
 
 /**
@@ -99,18 +99,22 @@ bottommargin = 0
 pagewidth = {$this->img_max_width}
 label = ""
 EOD;
-	return $header . "\n" . $this->input;
+
+	return normalize_linebreak ($header . "\n" . $this->input);
 } /* }}} */
 
 /**
- * Refer to {@link SrNotationBase::conversion_step1() parent method}
- * for more detail.
+ * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  *
- * @uses is_windows()
- * @uses $temp_dir For storing temporary copy of magic file
+ * @uses is_windows() For determining the registration key file name
+ * @uses $temp_dir For storing temporary copy of registration key
  */
-protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
+protected function conversion_step1 () /* {{{ */
 {
+	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
 	/*
 	 * Mup requires a magic file before it is usable.
 	 * On Unix this file is named ".mup", and must reside in $HOME or
@@ -121,36 +125,56 @@ protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 	 * render anything.  Even worse, the exist status in this case is 0,
 	 * so _exec() succeeds yet no postscript is rendered.
 	 */
-	$temp_magic_file = $this->temp_dir . ( is_windows() ? '\mup.ok' : '/.mup' );
+	$magic_file = is_windows() ? 'mup.ok' : '.mup';
 
-	if ( ! file_exists ($temp_magic_file) )
-		file_put_contents ( $temp_magic_file, $this->reg_key );
+	if ( false === @file_put_contents ( $magic_file, $this->reg_key, LOCK_EX ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
 
 	/* mup forces this kind of crap */
-	putenv ("HOME=" . $this->temp_dir);
-	chdir ($this->temp_dir);
+	putenv ( "HOME=" . getcwd() );
 
 	$cmd = sprintf ('"%s" -f "%s" "%s"',
-			$this->mainprog,
-			$intermediate_image, $input_file);
+			$this->mainprog, $intermediate_image, $this->input_file);
 	$retval = $this->_exec($cmd);
 
-	unlink ($temp_magic_file);
-
-	return (filesize ($intermediate_image) != 0);
+	// Mup return status can't be fully trusted
+	if ( ( 0 !== $retval ) || !filesize ($intermediate_image) )
+		return $retval;
+	else
+		return $intermediate_image;
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image)
+protected function conversion_step2 ($intermediate_image)
 {
 	// A bug involving alpha channel in paletted PNG was fixed in 6.3.9-6;
 	// seems it affects any paletted image and level 1 PostScript too?
-	return parent::conversion_step2 ($intermediate_image, $final_image,
-			version_compare ( $this->imagick_ver, '6.3.9-6', '>=' )
-	);
+	return parent::conversion_step2 ($intermediate_image,
+			version_compare ( $this->imagick_ver, '6.3.9-6', '>=' ));
 }
+
+
+/**
+ * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
+ */
+protected function get_midi () /* {{{ */
+{
+	if ( false === ( $temp_midifile = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
+	$cmd = sprintf ('"%s" -m "%s" "%s"',
+			$this->mainprog, $temp_midifile, $this->input_file);
+	$retval = $this->_exec($cmd);
+
+	if ( ( 0 !== $retval ) || !filesize ($temp_midifile) )
+		return $retval;
+	else
+		return $temp_midifile;
+} /* }}} */
 
 
 /**
@@ -162,7 +186,7 @@ protected function conversion_step2 ($intermediate_image, $final_image)
  *
  * @since 0.2.50
  */
-public function set_notation_action ($options)
+public function set_notation_variable ($options)
 {
 	if ( isset ( $options['MUP_REG_KEY'] ) )
 		$this->reg_key = $options['MUP_REG_KEY'];

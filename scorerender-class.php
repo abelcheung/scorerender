@@ -84,6 +84,11 @@ public $final_image = null;
  */
 public $final_midi = null;
 
+/**
+ * @var string $input_file File name containing post-processed music
+ * fragment content
+ */
+protected $input_file = null;
 
 /**
  * Sets music fragment content
@@ -343,14 +348,15 @@ final protected function _exec ($cmd) /* {{{ */
  * First step of rendering process: execute the real command
  *
  * The command reads input content (after necessary conversion),
- * and converts it to a PostScript file.
+ * and converts it to an intermediate file, most usually PostScript.
  *
  * @uses _exec()
- * @param string $input_file File name of raw input file containing music content
- * @param string $intermediate_image File name of rendered PostScript file
- * @return boolean Whether rendering is successful or not
+ * @uses SrNotationBase::$input_file File containing post-processed music code
+ * @return WP_Error|int|string File name of intermediate image upon success,
+ * return value of command upon command failure, and WP_Error upon other failures
+ * not related to rendering command execution
  */
-abstract protected function conversion_step1 ($input_file, $intermediate_image);
+abstract protected function conversion_step1 ();
 
 /**
  * Second step of rendering process: Convert rendered PostScript page into PNG format
@@ -364,35 +370,38 @@ abstract protected function conversion_step1 ($input_file, $intermediate_image);
  * are automatically determined within the inherited classes.
  *
  * @uses _exec()
- * @uses $imagick
+ * @uses SrNotationBase::$imagick
  * @param string $intermediate_image The rendered PostScript file name
- * @param string $final_image The final PNG image file name
- * @param boolean $ps_has_alpha True if PostScript produced by music rendering program has transparency capability
+ * @param boolean $ps_has_alpha True if PostScript produced by music
+ * rendering program has transparency capability
  * @param string $extra_arg Extra arguments supplied to ImageMagick convert
- * @return boolean Whether PostScript -> PNG conversion is successful and PNG file is successfully generated in cache folder
+ * @return int|string File name of PNG image generated if successful,
+ * otherwise return the exit status of command
  */
-protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_alpha = false, $extra_arg = '') /* {{{ */
+protected function conversion_step2 ($intermediate_image, $ps_has_alpha = false, $extra_arg = '') /* {{{ */
 {
+	if ( false === ( $tempimage = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
 	$cmd = sprintf ('"%s" %s -trim +repage ', $this->imagick, $extra_arg);
 
 	// Damn it, older ImageMagick can't handle transparency in PostScript,
 	// but suddenly it can now, and renders all previous logic broken
 	if ($ps_has_alpha)
-	{
-		$cmd .= sprintf (' "%s" "%s"',
-			$intermediate_image, $final_image);
-	}
+		$cmd .= sprintf (' "%s" "png:%s"', $intermediate_image, $tempimage);
 	else
-	{
 		// Adding alpha channel and changing alpha value
 		// need separate invocations, can't do in one pass
-		$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx 0 png:- "%s"',
-			$intermediate_image,
-			$this->imagick,
-			$final_image);
-	}
+		$cmd .= sprintf ('-alpha activate "%s" png:- | "%s" -channel alpha -fx "1-intensity" -channel rgb -fx 0 png:- "png:%s"',
+			$intermediate_image, $this->imagick, $tempimage);
 
-	return (0 === $this->_exec ($cmd));
+	$retval = $this->_exec ($cmd);
+
+	if ( ( 0 !== $retval ) || !filesize ($tempimage) )
+		return $retval;
+	else
+		return $tempimage;
 } /* }}} */
 
 /**
@@ -400,11 +409,12 @@ protected function conversion_step2 ($intermediate_image, $final_image, $ps_has_
  * and converts it to a MIDI file.
  *
  * @uses _exec()
- * @param string $input_file File name of raw input file containing music content
- * @param string $final_midi File name of MIDI file to be generated
- * @return boolean TRUE if MIDI is successfully generated, otherwise FALSE
+ * @uses $midiprog
+ * @uses $input_file
+ * @return string|int MIDI file name if successfully generated, otherwise
+ * return error status of the command executed
  */
-//abstract protected function generate_midi ($input_file, $final_midi);
+abstract protected function get_midi ();
 
 /**
  * Check if certain functions are disabled
@@ -508,6 +518,116 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 } /* }}} */
 
 
+final protected function perform_checks() /* {{{ */
+{
+	global $sr_options;
+
+	// Check for code validity or security issues
+	if ( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() )
+		return new WP_Error ( 'sr-content-invalid',
+				__('Content is illegal or poses security concern', TEXTDOMAIN) );
+
+	// Check ImageMagick
+	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
+			$this->imagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
+	if ( is_wp_error ($result) || !$result )
+		return new WP_Error ( 'sr-imagick-unusable',
+				__('ImageMagick program is unusable', TEXTDOMAIN), $result );
+
+	// Check cache folder
+	if ( (!is_dir      ($this->cache_dir)) ||
+	     (!is_writable ($this->cache_dir)) )
+		return new WP_Error ( 'sr-cache-dir-unwritable',
+				__('Cache directory not writable', TEXTDOMAIN) );
+
+	// Use fallback tmp dir if original one not working
+	if ( (!is_dir      ($this->temp_dir)) ||
+	     (!is_writable ($this->temp_dir)) )
+		$this->temp_dir = sys_get_temp_dir ();
+
+	// Check temp folder
+	if ( (!is_dir      ($this->temp_dir)) ||
+	     (!is_writable ($this->temp_dir)) )
+		return new WP_Error ( 'sr-temp-dir-unwritable',
+				__('Temporary directory not writable', TEXTDOMAIN) );
+
+	// Check notation rendering apps
+	$result = $this->is_notation_usable (null, $sr_options);
+	if ( is_wp_error ($result) || !$result )
+		return new WP_Error ( 'sr-render-apps-unusable',
+				__('Rendering application is unusable', TEXTDOMAIN), $result );
+
+	return true;
+} /* }}} */
+
+
+final protected function create_input_file () /* {{{ */
+{
+	if ( false === ($temp_folder = create_temp_dir ($this->temp_dir, 'sr-')) )
+		return new WP_Error ( 'sr-temp-dir-unwritable',
+				__('Temporary directory not writable', TEXTDOMAIN) );
+
+	if ( false === ($this->input_file = tempnam ($temp_folder,
+		'scorerender-' . $this->get_notation_name() . '-')) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
+	do_action ('scorerender_before_create_input_file');
+
+	if (false === file_put_contents ($this->input_file, $this->get_music_fragment()))
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
+	do_action ('scorerender_after_create_input_file');
+
+	return true;
+} /* }}} */
+
+
+/**
+ * Recursively remove directory, aka deltree on Windows and
+ * rm -rf on Unix. This function performs no check of current
+ * working folder so should be executed outside the folder
+ * to be deleted.
+ *
+ * @param string $dir The folder to be removed
+ * @return bool|WP_Error
+ */
+final static protected function cleanup_dir ($dir) /* {{{ */
+{
+	if ( false === ( $handle = @opendir ($dir) ) )
+		return false;
+//		return new WP_Error ( 'sr_opendir_fail', __('Fail to open directory', TEXTDOMAIN) );
+
+	$ok = true;
+
+	while (false !== ($file = @readdir ($handle)))
+	{
+		if ( ( '.' == $file ) || ( '..' == $file ) ) continue;
+		if ( is_dir ($dir.'/'.$file) )
+			$ok = $ok & self::cleanup_dir($dir.'/'.$file);
+		else
+			unlink ($dir.'/'.$file);
+	}
+
+	closedir ($handle);
+	$ok = $ok & @rmdir ($dir);
+	return $ok;
+} /* }}} */
+
+
+/**
+ * Perform final cleanup action after all rendering finished
+ *
+ * @uses SrNotationBase::cleanup_dir()
+ */
+final public function cleanup ()
+{
+	chdir ('/');
+	$this->cleanup_dir ( dirname ( $this->input_file ) );
+}
+
+
 /**
  * Render music fragment into images, and optionally generate MIDI
  *
@@ -534,7 +654,6 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 final public function render() /* {{{ */
 {
 	global $sr_options;
-	$ok = true;
 
 	$hash = md5 (preg_replace ('/\s/', '', $this->input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
@@ -558,10 +677,10 @@ final public function render() /* {{{ */
 		if (is_readable ($final_image))
 		{
 			$this->final_image = basename ($final_image);
-			// FIXME: During first time of rendering process, generate_midi() is executed
+			// FIXME: During first time of rendering process, get_midi() is executed
 			// so one knows if MIDI generation fails. However if cached image already
-			// exists, function call is skipped so there's no way to know if it's a 
-			// failure or simply not done at all. Maybe should move generate_midi() out
+			// exists, function call is skipped so there's no way to know if it's a
+			// failure or simply not done at all. Maybe should move get_midi() out
 			// of this func and execute independently.
 			return true;
 		}
@@ -569,113 +688,64 @@ final public function render() /* {{{ */
 			return new WP_Error ( 'sr-image-unreadable',
 					__('Image exists but is not readable', TEXTDOMAIN), $final_image );
 
-	// Check for code validity or security issues
-	if ( empty ($this->input) ||
-			( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() ) )
-		return new WP_Error ( 'sr-content-invalid',
-				__('Content is illegal or poses security concern', TEXTDOMAIN) );
+	$result = $this->perform_checks();
+	if ( is_wp_error ($result) ) return $result;
 
-	// Check ImageMagick
-	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
-			$this->imagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
-	if ( is_wp_error ($result) || !$result )
-		return new WP_Error ( 'sr-imagick-unusable',
-				__('ImageMagick program is unusable', TEXTDOMAIN), $result );
+	$result = $this->create_input_file();
+	if ( is_wp_error ($result) ) return $result;
 
-	// Check notation rendering apps
-	$result = $this->is_notation_usable (null, $sr_options);
-	if ( is_wp_error ($result) || !$result )
-		return new WP_Error ( 'sr-render-apps-unusable',
-				__('Rendering application is unusable', TEXTDOMAIN), $result );
+	$temp_working_dir = dirname ($this->input_file);
 
-	// Check cache folder
-	if ( (!is_dir      ($this->cache_dir)) ||
-	     (!is_writable ($this->cache_dir)) )
-		return new WP_Error ( 'sr-cache-dir-unwritable',
-				__('Cache directory not writable', TEXTDOMAIN) );
-
-	// Use fallback tmp dir if original one not working
-	if ( (!is_dir      ($this->temp_dir)) ||
-	     (!is_writable ($this->temp_dir)) )
-		$this->temp_dir = sys_get_temp_dir ();
-
-	// Check temp folder
-	if ( (!is_dir      ($this->temp_dir)) ||
-	     (!is_writable ($this->temp_dir)) )
-		return new WP_Error ( 'sr-temp-dir-unwritable',
-				__('Temporary directory not writable', TEXTDOMAIN) );
-
-	if ( false === ($temp_working_dir = create_temp_dir ($this->temp_dir, 'sr-')) )
-		return new WP_Error ( 'sr-temp-dir-unwritable',
-				__('Temporary directory not writable', TEXTDOMAIN) );
-
-	if ( false === ($input_file = tempnam ($temp_working_dir,
-		'scorerender-' . $this->get_notation_name() . '-')) )
-		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
-
-	// Insecure, but is there any better way to force Lilypond to
-	// use the temp file name I want?
-	$intermediate_image = $input_file . '.ps';
-
-	if ( file_exists ($intermediate_image) )
-		if ( ! @unlink ( $intermediate_image ) )
-			return new WP_Error ( 'sr-temp-file-create-fail',
-					__('Temporary file creation failure', TEXTDOMAIN) );
-
-	// Create empty output file first ASAP
-	if ( ! @touch ($intermediate_image) )
-		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
-
-	if (false === file_put_contents ($input_file, $this->get_music_fragment()))
-		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
-
-
-	// Render using external application
-	$cwd = getcwd();
 	chdir ($temp_working_dir);
-	if (!$this->conversion_step1($input_file, $intermediate_image) ||
-	    (filesize ($intermediate_image)) === 0)
-	{
-		chdir ($cwd);
-		if (! SR_DEBUG) {
-			@unlink ($input_file);
-			@unlink ($intermediate_image);
-			@rmdir ($temp_working_dir);
-		}
+
+	// Start rendering image
+	$result = $this->conversion_step1();
+	if ( is_wp_error ($result) )
+		return $result;
+	elseif ( is_numeric ($result) )
 		return new WP_Error ( 'sr-img-render-fail',
 				__('Image rendering process failure', TEXTDOMAIN) );
-	}
-	chdir ($cwd);
 
-	if (!$this->conversion_step2 ($intermediate_image, $final_image))
+	$intermediate_image = $result;
+
+	$result = $this->conversion_step2($intermediate_image);
+	if ( is_wp_error ($result) )
+		return $result;
+	elseif ( is_numeric ($result) )
 		return new WP_Error ( 'sr-img-convert-fail',
 				__('Image conversion failure', TEXTDOMAIN) );
 
+	if ( SR_DEBUG ) error_log ("ScoreRender: move file: $result -> $final_image");
+
+	// Shouldn't happen, as temp image is guaranteed to exist
+	// at this point, and cache dir is writable in pre-check
+	if ( ! @rename ( $result, $final_image ) )
+		return new WP_Error ( 'sr-cache-file-internal-error',
+				__('Cache image creation internal error', TEXTDOMAIN) );
+
 	$this->final_image = basename ($final_image);
 
-	/* TODO: If cached image already exist but not for MIDI, then MIDI
-	 * is not re-generated at all
-	 */
-	if ( is_null ( $this->final_midi ) && method_exists ($this, 'generate_midi') )
-	{
-		if ( true === ($ok = $this->generate_midi($input_file, $final_midi) ) )
-			$this->final_midi = basename ($final_midi);
-		else
-			$this->final_midi = false;
-	}
+	$ok = true;
 
-	// Cleanup
-	if (! SR_DEBUG) {
-		@unlink ($input_file);
-		@unlink ($intermediate_image);
-		@rmdir ($temp_working_dir);
+	// Then generate midi
+	if ( is_null ( $this->final_midi ) && method_exists ($this, 'get_midi') )
+	{
+		$result = $this->get_midi();
+
+		if ( is_string ($result) )
+		{
+			if ( @rename ( $result, $final_midi ) )
+				$this->final_midi = basename ($final_midi);
+			else
+				$this->final_midi = false;
+		}
+		else
+			$this->final_midi = $ok = false;
 	}
 
 	return $ok;
 } /* }}} */
+
 
 /**
  * Output program setting HTML for notation
@@ -699,7 +769,7 @@ protected static function program_setting_entry ($bin_name, $setting_name, $titl
 		. "</label></th>\n"
 		. "<td><input name='ScoreRender[{$setting_name}]' type='text' id='{$id}' "
 		. "value='{$sr_options[$setting_name]}' class='regular-text code' />"
-		. ( empty ($desc) ? '' : "<div class='setting-description'>{$desc}</div>\n" )
+		. ( empty ($desc) ? '' : ScoreRenderAdmin::print_description ($desc, false) )
 		. "</td>\n</tr>\n";
 
 	return $output;

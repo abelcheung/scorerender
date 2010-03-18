@@ -35,17 +35,14 @@ public function get_music_fragment ()
 }
 
 /**
- * Retrieve score fragment image from GUIDO server.
- *
- * Though retrieved image is in GIF format, it is still named 'xxx.ps'
- * for simplicity (and luckily ImageMagick doesn't care source image extension)
- *
- * @param string $input_file File name of raw input file containing music content
- * @param string $intermediate_image File name of rendered PostScript file
- * @return boolean Whether image can be downloaded from GUIDO server
+ * Refer to {@link SrNotationBase::conversion_step1() parent method} for more detail.
  */
-protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
+protected function conversion_step1 () /* {{{ */
 {
+	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
+		return new WP_Error ( 'sr-temp-file-create-fail',
+				__('Temporary file creation failure', TEXTDOMAIN) );
+
 	/*
 	 * Staff height (px) = zoom*40-1; under this zoom ratio,
 	 * so-called '1cm' = 30px in the image, and staff height = 24px.
@@ -57,26 +54,29 @@ protected function conversion_step1 ($input_file, $intermediate_image) /* {{{ */
 	$url = sprintf ('%s?defpw=%fcm;defph=%fcm;zoom=%f;crop=yes;gmndata=%s',
 			'http://clef.cs.ubc.ca/scripts/salieri/gifserv.pl',
 			$this->img_max_width / 30 + 1, 100.0, 0.625,
-			rawurlencode (file_get_contents ($input_file)));
+			rawurlencode (file_get_contents ($this->input_file)));
 
-	@copy ($url, $intermediate_image);
+	if ( ! @copy ($url, $intermediate_image) )
+		return new WP_Error ( 'sr-guido-server-problem',
+			__('Failed to retrieve image from GUIDO notation server', TEXTDOMAIN) );
 
 	// half-assed verification that retrieved content is really GIF,
 	// not HTML login form, for example.
 	$im = @imagecreatefromgif ($intermediate_image);
 	if ( !$im )
-		return false;
+		return new WP_Error ( 'sr-guido-server-problem',
+			__('Failed to retrieve image from GUIDO notation server', TEXTDOMAIN) );
 	else
 	{
 		imagedestroy ($im);
-		return true;
+		return $intermediate_image;
 	}
 } /* }}} */
 
 /**
  * Refer to {@link SrNotationBase::conversion_step2() parent method} for more detail.
  */
-protected function conversion_step2 ($intermediate_image, $final_image) /* {{{ */
+protected function conversion_step2 ($intermediate_image) /* {{{ */
 {
 	/*
 	 * The conversion from non-transparent GIF to transparent PNG was
@@ -87,8 +87,7 @@ protected function conversion_step2 ($intermediate_image, $final_image) /* {{{ *
 	 * in pixels; changing colorspace is one of them (but only selected
 	 * few colorspaces!)
 	 */
-	return parent::conversion_step2 ( $intermediate_image,
-			$final_image, FALSE, '-colorspace cmyk -shave 1x1' );
+	return parent::conversion_step2 ( $intermediate_image, FALSE, '-colorspace cmyk -shave 1x1' );
 } /* }}} */
 
 /**
@@ -132,6 +131,11 @@ public static function define_setting_type ($settings) {}
  * @ignore
  */
 public static function define_setting_value ($settings) {}
+
+/**
+ * @ignore
+ */
+protected function get_midi() {}
 
 /**
  * Refer to {@link SrNotationInterface::register_notation_data() interface method}
