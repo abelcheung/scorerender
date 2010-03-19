@@ -38,7 +38,7 @@ define ('REGEX_CACHE_IMAGE', '/^sr-(\w+)-([0-9A-Fa-f]{32})\.png$/');
 /**
  * Debugging purpose
  */
-define (SR_DEBUG, true);
+define (SR_DEBUG, FALSE);
 
 /*
  * How error is handled when rendering failed
