@@ -21,25 +21,38 @@
 class ScoreRenderAdmin
 {
 
+const MSG_WARNING = 1;
+const MSG_FATAL   = 2;
+
+public static $imagick_check = array (
+	'test_arg'    => array ('-version'),
+	'test_output' => '/^Version: ImageMagick ([\d.-]+)/',
+	'min_version' => '6.3.5-7',
+);
+
 /**
- * Returns number of cached images inside cache directory
+ * Returns number of cached files inside cache directory
  *
  * @since 0.2
- * @uses scorerender_get_cache_location() For reading cached image folder and counting images
- * @return WP_Error|int Number of images inside cache directory, or WP_Error if directory is unreadable
+ * @uses scorerender_get_cache_location() For reading cache folder and counting images
+ * @return WP_Error|array Associative array containing number of images/midi
+ * inside cache folder, or WP_Error if directory is unreadable
  * @access private
  */
-private function get_num_of_images () /* {{{ */
+private function get_cache_stat () /* {{{ */
 {
 	if ( false === ( $handle = @opendir (scorerender_get_cache_location()) ) )
 		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', TEXTDOMAIN) );
 
-	$count = 0;
-	while (false !== ($file = @readdir ($handle)))
-		if (preg_match (REGEX_CACHE_IMAGE, $file)) $count++;
+	$imgcount = $midicount = 0;
+	while ( false !== ( $file = @readdir ($handle) ) )
+	{
+		if     ( preg_match (REGEX_CACHE_IMAGE, $file) ) $imgcount++;
+		elseif ( preg_match (REGEX_CACHE_MIDI,  $file) ) $midicount++;
+	}
 
 	closedir ($handle);
-	return $count;
+	return array ('img' => $imgcount, 'midi' => $midicount);
 } /* }}} */
 
 
@@ -63,7 +76,8 @@ private function remove_cache () /* {{{ */
 
 	while (false !== ($file = @readdir ($handle)))
 	{
-		if (preg_match (REGEX_CACHE_IMAGE, $file))
+		if ( preg_match (REGEX_CACHE_IMAGE, $file) ||
+		     preg_match (REGEX_CACHE_MIDI , $file) )
 			@unlink ($file);
 	}
 	closedir ($handle);
@@ -101,22 +115,22 @@ private function update_options () /* {{{ */
 	$sr_adm_msgs = array
 	(
 		'temp_dir_not_writable'  => array (
-			'level'   => MSG_WARNING,
+			'level'   => self::MSG_WARNING,
 			'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', TEXTDOMAIN)),
 		'cache_dir_not_writable' => array (
-			'level'   => MSG_FATAL  ,
+			'level'   => self::MSG_FATAL  ,
 			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', TEXTDOMAIN), admin_url('options-misc.php'))),
 		'wrong_frag_per_comment' => array (
-			'level'   => MSG_WARNING,
+			'level'   => self::MSG_WARNING,
 			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
 		'wrong_image_max_width'  => array (
-			'level'   => MSG_WARNING,
+			'level'   => self::MSG_WARNING,
 			'content' => __('Image maximum width must be integer and at least 100. Value discarded.', TEXTDOMAIN)),
 		'convert_bin_problem'    => array (
-			'level'   => MSG_FATAL  ,
+			'level'   => self::MSG_FATAL  ,
 			'content' => __('Failed to detect usable ImageMagick <tt>convert</tt> program! The plugin will stop working.', TEXTDOMAIN)),
 		'prog_check_disabled'    => array (
-			'level'   => MSG_WARNING,
+			'level'   => self::MSG_WARNING,
 			'content' => __('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN)),
 	);
 
@@ -148,8 +162,12 @@ private function update_options () /* {{{ */
 	if ( SrNotationBase::is_web_hosting() )
 		$errmsgs[] = 'prog_check_disabled';
 
-	$result = SrNotationBase::is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
-			$newopt['CONVERT_BIN'], '-version', '6.3.5-7');
+	$result = SrNotationBase::is_prog_usable (
+		self::$imagick_check['test_output'],
+		$newopt['CONVERT_BIN'],
+		self::$imagick_check['test_arg'],
+		self::$imagick_check['min_version']);
+
 	if ( is_wp_error ($result) ) {
 		$errmsgs[] = 'convert_bin_problem';
 	}
@@ -185,12 +203,12 @@ private function update_options () /* {{{ */
 	{
 		foreach (array_values ($errmsgs) as $m)
 		{
-			if ($sr_adm_msgs[$m]['level'] == MSG_WARNING)
+			if ($sr_adm_msgs[$m]['level'] == self::MSG_WARNING)
 			{
 				$class = 'scorerender-warning';
 				$mesg = __('WARNING: %s', TEXTDOMAIN);
 			}
-			elseif ($sr_adm_msgs[$m]['level'] == MSG_FATAL)
+			elseif ($sr_adm_msgs[$m]['level'] == self::MSG_FATAL)
 			{
 				$class = 'scorerender-error';
 				$mesg = __('ERROR: %s', TEXTDOMAIN);
@@ -338,7 +356,7 @@ private function admin_section_prog () /* {{{ */
 
 <h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
 
-<p><?php _e("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; 6.3.5-7 (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN); ?></p>
+<p><?php printf ( __("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN), self::$imagick_check['min_version'] ) ?></p>
 
 <table class="form-table">
 
@@ -416,7 +434,7 @@ private function admin_section_content () /* {{{ */
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><?php _e('Show source:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('Enable clipboard:', TEXTDOMAIN) ?></th>
 <td><label for="show_input"><input type="checkbox" name="ScoreRender[ENABLE_CLIPBOARD]" id="show_input" value="1" <?php checked('1', $sr_options['ENABLE_CLIPBOARD']); ?> />
 <?php _e('Copy music source content to clipboard when image is clicked', TEXTDOMAIN); ?></label><br />
 <?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.', TEXTDOMAIN) ) ?>
@@ -472,7 +490,7 @@ private function admin_section_content () /* {{{ */
  * Section of admin page about caching options
  *
  * @since 0.2
- * @uses ScoreRenderAdmin::get_num_of_images() Get and show cached image count
+ * @uses ScoreRenderAdmin::get_cache_stat() Get and show cached image count
  * @uses scorerender_get_cache_location() Check if the cached image folder is read-writable
  * @access private
  */
@@ -481,14 +499,30 @@ private function admin_section_caching () /* {{{ */
 ?>
 	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
 <?php
-	$result = $this->get_num_of_images();
+	$result = $this->get_cache_stat();
 
 	if ( is_wp_error ( $result ) )
 		echo "<font color='red'>" . $result->get_error_message() . "</font><br />";
 	else
-		printf (__ngettext("Cache directory contains %d image.\n",
-				   "Cache directory contains %d images.\n",
-				   $result, TEXTDOMAIN), $result);
+	{
+		$imgpart  = sprintf ( __ngettext ( __("%d image" , TEXTDOMAIN),
+		                                   __("%d images", TEXTDOMAIN),
+		                                   $result['img'] ),
+		                      $result['img'] );
+		$midipart = sprintf ( __ngettext ( __("%d midi file" , TEXTDOMAIN),
+		                                   __("%d midi files", TEXTDOMAIN),
+					 					  $result['midi'] ),
+		                      $result['midi'] );
+
+		if     ( ( 0 === $result['midi'] ) && ( 0 === $result['img'] ) )
+			_e("Cache directory is empty.\n", TEXTDOMAIN);
+		elseif     ( 0 === $result['midi'] )
+			printf ( __("Cache directory contains %s.\n", TEXTDOMAIN), $imgpart );
+		elseif ( 0 === $result['img'] )
+			printf ( __("Cache directory contains %s.\n", TEXTDOMAIN), $midipart );
+		else
+			printf ( __("Cache directory contains %s and %s.\n", TEXTDOMAIN), $imgpart, $midipart );
+	}
 
 	$dir = scorerender_get_cache_location();
 	if ( is_writable ($dir) && is_readable ($dir) ) :

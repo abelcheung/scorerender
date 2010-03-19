@@ -528,8 +528,13 @@ final protected function perform_checks() /* {{{ */
 				__('Content is illegal or poses security concern', TEXTDOMAIN) );
 
 	// Check ImageMagick
-	$result = $this->is_prog_usable ('/^Version: ImageMagick ([\d.-]+)/',
-			$this->imagick, array('-version'), '6.3.5-7', 1, $this->imagick_ver);
+	$result = $this->is_prog_usable (
+		ScoreRenderAdmin::$imagick_check['test_output'],
+		$this->imagick,
+		ScoreRenderAdmin::$imagick_check['test_arg'],
+		ScoreRenderAdmin::$imagick_check['min_version'],
+		1, $this->imagick_ver);
+
 	if ( is_wp_error ($result) || !$result )
 		return new WP_Error ( 'sr-imagick-unusable',
 				__('ImageMagick program is unusable', TEXTDOMAIN), $result );

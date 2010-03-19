@@ -34,11 +34,12 @@ define ('TEXTDOMAIN', 'scorerender');
  * Regular expression for cached images
  */
 define ('REGEX_CACHE_IMAGE', '/^sr-(\w+)-([0-9A-Fa-f]{32})\.png$/');
+define ('REGEX_CACHE_MIDI' , '/^sr-(\w+)-([0-9A-Fa-f]{32})\.mid$/');
 
 /**
  * Debugging purpose
  */
-define (SR_DEBUG, FALSE);
+define ('SR_DEBUG', FALSE);
 
 /*
  * How error is handled when rendering failed
@@ -46,9 +47,6 @@ define (SR_DEBUG, FALSE);
 define ('ON_ERR_SHOW_MESSAGE' , '1');
 define ('ON_ERR_SHOW_FRAGMENT', '2');
 define ('ON_ERR_SHOW_NOTHING' , '3');
-
-define ('MSG_WARNING', 1);
-define ('MSG_FATAL'  , 2);
 
 define ('TYPES_AND_VALUES', 0);
 define ('TYPES_ONLY'      , 1);

@@ -1,3 +1,14 @@
+2010-03-20  Abel Cheung  <abelcheung@gmail.com>
+
+	* scorerender-class.php, scorerender-admin.php:
+	- Only store one copy of ImageMagick requirement check data.
+	* wp-scorerender.php, scorerender-admin.php:
+	- Move admin related constants to scorerender-admin.php .
+	- Define regex for midi and delete midi too when cleaning cache.
+	* scorerender-admin.php:
+	- (get_num_of_images) -> get_cache_stat
+	- (admin_section_caching) Some wording touches.
+
 2010-03-19  Abel Cheung  <abelcheung@gmail.com>
 
 	* wp-scorerender.php:
