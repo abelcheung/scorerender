@@ -394,21 +394,16 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 	$turn_on_midi = ( !is_null ($midi) ) ? $midi : $sr_options['PRODUCE_MIDI'];
 	if ( $turn_on_midi )
 	{
-		if ( $result )
+		if ( !is_null ($render->final_midi) )
 		{
-			if ( !is_null ($render->final_midi) )
-			{
-				$midiurl = add_query_arg ( array ('file' => $render->final_midi),
-					plugins_url ('scorerender/misc/get-midi.php') );
-				$mesg = "<a href='{$midiurl}'>(midi download)</a>";
-			}
-			else
-				$mesg = "(no midi download)";
+			$midiurl = add_query_arg ( array ('file' => $render->final_midi),
+				plugins_url ('scorerender/misc/get-midi.php') );
+			$mesg = "<a href='{$midiurl}'>(midi download)</a>";
 		}
 		else
-			$mesg = "(midi generation failed)";
+			$mesg = "(no midi download)";
 
-		$html .= " <span class='scorerender-midi'>$mesg</span>";
+		$html .= " <span class='scorerender-midi-link'>$mesg</span>";
 	}
 
 	return $html;

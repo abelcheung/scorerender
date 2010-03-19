@@ -8,6 +8,11 @@
 	* scorerender-admin.php:
 	- (get_num_of_images) -> get_cache_stat
 	- (admin_section_caching) Some wording touches.
+	* wp-scorerender.php:
+	- (scorerender_return_img_ok) Don't differentiate between MIDI
+	  generation failure and file not found, as generation failure is only
+	  triggered on first image rendering, and later they are virtually
+	  undistinguishable, especially for certain notations.
 
 2010-03-19  Abel Cheung  <abelcheung@gmail.com>
 
