@@ -90,6 +90,12 @@ public $final_midi = null;
  */
 protected $input_file = null;
 
+public static $imagick_check = array (
+	'test_arg'    => array ('-version'),
+	'test_output' => '/^Version: ImageMagick ([\d.-]+)/',
+	'min_version' => '6.3.5-7',
+);
+
 /**
  * Sets music fragment content
  *
@@ -529,10 +535,10 @@ final protected function perform_checks() /* {{{ */
 
 	// Check ImageMagick
 	$result = $this->is_prog_usable (
-		ScoreRenderAdmin::$imagick_check['test_output'],
+		self::$imagick_check['test_output'],
 		$this->imagick,
-		ScoreRenderAdmin::$imagick_check['test_arg'],
-		ScoreRenderAdmin::$imagick_check['min_version'],
+		self::$imagick_check['test_arg'],
+		self::$imagick_check['min_version'],
 		1, $this->imagick_ver);
 
 	if ( is_wp_error ($result) || !$result )

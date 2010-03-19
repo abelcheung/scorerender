@@ -24,12 +24,6 @@ class ScoreRenderAdmin
 const MSG_WARNING = 1;
 const MSG_FATAL   = 2;
 
-public static $imagick_check = array (
-	'test_arg'    => array ('-version'),
-	'test_output' => '/^Version: ImageMagick ([\d.-]+)/',
-	'min_version' => '6.3.5-7',
-);
-
 /**
  * Returns number of cached files inside cache directory
  *
@@ -163,10 +157,10 @@ private function update_options () /* {{{ */
 		$errmsgs[] = 'prog_check_disabled';
 
 	$result = SrNotationBase::is_prog_usable (
-		self::$imagick_check['test_output'],
+		SrNotationBase::$imagick_check['test_output'],
 		$newopt['CONVERT_BIN'],
-		self::$imagick_check['test_arg'],
-		self::$imagick_check['min_version']);
+		SrNotationBase::$imagick_check['test_arg'],
+		SrNotationBase::$imagick_check['min_version']);
 
 	if ( is_wp_error ($result) ) {
 		$errmsgs[] = 'convert_bin_problem';
@@ -356,7 +350,7 @@ private function admin_section_prog () /* {{{ */
 
 <h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
 
-<p><?php printf ( __("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN), self::$imagick_check['min_version'] ) ?></p>
+<p><?php printf ( __("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN), SrNotationBase::$imagick_check['min_version'] ) ?></p>
 
 <table class="form-table">
 
