@@ -393,7 +393,8 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 				$htmlattr, $title, $title, $imgurl, $id );
 	}
 
-	if ( $sr_options['PRODUCE_MIDI'] )
+	$turn_on_midi = ( !is_null ($midi) ) ? $midi : $sr_options['PRODUCE_MIDI'];
+	if ( $turn_on_midi )
 	{
 		if ( $result )
 		{
@@ -456,6 +457,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 		'color'     => null,
 		'lang'      => null,
 		'clipboard' => null,
+		'midi'      => null,
 	);
 
 	// transform shortcode attributes to boolean values whenever appropriate

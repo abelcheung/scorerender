@@ -1,3 +1,8 @@
+2010-03-19  Abel Cheung  <abelcheung@gmail.com>
+
+	* wp-scorerender.php:
+	- Allows midi generation to be overridden in shortcode.
+
 2010-03-18  Abel Cheung  <abelcheung@gmail.com>
 
 	* MIDI support for other notations basically complete.
