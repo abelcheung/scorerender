@@ -178,6 +178,7 @@ public static function define_setting_value ($settings)
 public static function register_notation_data ($notations)
 {
 	$notations[self::code] = self::$notation_data;
+	return $notations;
 }
 
 } // end of class

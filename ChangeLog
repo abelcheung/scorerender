@@ -13,8 +13,11 @@
 	  generation failure and file not found, as generation failure is only
 	  triggered on first image rendering, and later they are virtually
 	  undistinguishable, especially for certain notations.
+	- Use filter instead of action to register notations.
 	* scorerender-class.php, scorerender-admin.php wp-scorerender.php:
-	- Move global ScoreRender options into SrNotationBase class.
+	- Move global ScoreRender options and notation data into SrNotationBase class.
+	* scorerender-class.php, notation/*.php:
+	- (register_notation_data) Return new notation data.
 
 2010-03-19  Abel Cheung  <abelcheung@gmail.com>
 

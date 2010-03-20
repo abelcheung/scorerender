@@ -539,8 +539,6 @@ private function admin_section_caching () /* {{{ */
  */
 public function admin_page () /* {{{ */
 {
-	global $notations;
-
 	if ( SR_DEBUG && !empty ($_POST) )
 	{
 		echo '<div id="sr-admin-form-data" class="updated"><p><pre>$_POST = ' .
@@ -579,7 +577,7 @@ public function admin_page () /* {{{ */
 		<blockquote><code>[score lang="<em>xxxx</em>"]&hellip;&hellip;[/score]</code></blockquote>
 		<p><?php _e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name):', TEXTDOMAIN) ?></p>
 		<ul>
-<?php	foreach ($notations as $tag => $notation_data)
+<?php	foreach (SrNotationBase::$notations as $tag => $notation_data)
 		printf ("<li><a target='_blank' href='%s'>%s</a> (<code>%s</code>)</li>\n",
 				$notation_data['url'], $notation_data['name'], $tag);
 ?>

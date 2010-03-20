@@ -39,6 +39,11 @@ public static $imagick_check = array (
 public static $sr_opt = array ();
 
 /**
+ * Array of supported music notation syntax and relevant attributes.
+ */
+public static $notations = array();
+
+/**
  * @var string $input The raw music fragment to be rendered.
  */
 protected $input;
@@ -230,11 +235,10 @@ public function get_command_output ()
  */
 public function get_notation_name () /* {{{ */
 {
-	global $notations;
 	$classname = get_class ($this);
 
-	foreach ($notations as $notationname => $notation)
-		if ($classname === $notation['classname'])
+	foreach ( self::$notations as $notationname => $notation )
+		if ( $classname === $notation['classname'] )
 			return $notationname;
 
 	return false;

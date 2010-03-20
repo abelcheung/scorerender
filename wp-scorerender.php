@@ -57,20 +57,6 @@ define ('VALUES_ONLY'     , 2);
  */
 
 /**
- * Array of supported music notation syntax and relevant attributes.
- *
- * Array keys are names of the music notations, in lower case.
- * Their values are arrays themselves, containing:
- * - regular expression matching relevant notation
- * - start tag and end tag
- * - class file and class name for corresponding notation
- * - programs necessary for that notation to work
- *
- * @global array $notations
- */
-$notations = array();
-
-/**
  * Utility functions used by ScoreRender
  */
 require_once('scorerender-utils.php');
@@ -425,8 +411,6 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
  */
 function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {{{ */
 {
-	global $notations;
-
 	// short circuit for empty content
 	$content = trim ( html_entity_decode ($content) );
 	if ( empty ($content) ) return '';
@@ -453,13 +437,13 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	$attr = shortcode_atts ( $defaults, $attr );
 	extract ($attr);
 
-	if ( ! array_key_exists ( $lang, $notations ) )
+	if ( ! array_key_exists ( $lang, SrNotationBase::$notations ) )
 		return SrNotationBase::format_error_msg ( sprintf (
 			__('unknown notation language "%s"', TEXTDOMAIN), $lang ) );
 
 	// initialize notation class
-	if ( class_exists ( $notations[$lang]['classname'] ) )
-		$render = new $notations[$lang]['classname'];
+	if ( class_exists ( SrNotationBase::$notations[$lang]['classname'] ) )
+		$render = new SrNotationBase::$notations[$lang]['classname'];
 
 	// in case something is very wrong... (notation data incorrect, instance creation failure)
 	if ( empty ($render) )
@@ -467,7 +451,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 
 	$img_progs = array();
 	$midi_progs   = array();
-	foreach ( $notations[$lang]['progs'] as $setting_name => $progdata )
+	foreach ( SrNotationBase::$notations[$lang]['progs'] as $setting_name => $progdata )
 	{
 		switch ( $progdata['type'] )
 		{
@@ -547,7 +531,7 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "") 
  */
 function scorerender_parse_shortcode ($content, $content_type, $callback) /* {{{ */
 {
-	global $post, $notations, $shortcode_tags, $wp_version;
+	global $post, $shortcode_tags, $wp_version;
 
 	// only handles page, post and comment for now
 	if ( !in_array ( $content_type, array ( 'post', 'comment' ) ) ) return $content;
@@ -565,7 +549,7 @@ function scorerender_parse_shortcode ($content, $content_type, $callback) /* {{{
 
 	add_shortcode ('scorerender', $callback);
 	add_shortcode ('score', $callback);
-	foreach ( $notations as $notation_name => $notation_data )
+	foreach ( SrNotationBase::$notations as $notation_name => $notation_data )
 	{
 		foreach ( $notation_data['progs'] as $setting_name => $progdata )
 		{
@@ -638,7 +622,7 @@ remove_filter ('comment_text', 'force_balance_tags', 25);
  */
 
 // Register all notations and their initial data
-do_action_ref_array ( 'scorerender_register_notations', array(&$notations) );
+SrNotationBase::$notations = apply_filters ( 'scorerender_register_notations', SrNotationBase::$notations );
 
 // retrieve plugin options first
 scorerender_get_options ();

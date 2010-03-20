@@ -144,6 +144,7 @@ protected function get_midi() {}
 public static function register_notation_data ($notations)
 {
 	$notations[self::code] = self::$notation_data;
+	return $notations;
 }
 
 } // end of class
