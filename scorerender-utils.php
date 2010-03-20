@@ -221,7 +221,7 @@ function transform_paths (&$setting, $is_internal) /* {{{ */
 {
 	if (!is_array ($setting)) return;
 
-	$default_settings = scorerender_get_def_settings(TYPES_ONLY);
+	$default_settings = scorerender_get_def_settings(SrNotationBase::TYPES_ONLY);
 
 	// Transform path and program settings to unix presentation
 	foreach ($default_settings as $key => $type)

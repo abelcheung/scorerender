@@ -27,6 +27,29 @@
 abstract class SrNotationBase
 {
 
+/**
+ * Regular expression for cached images
+ */
+const REGEX_CACHE_IMAGE = '/^sr-(\w+)-([0-9A-Fa-f]{32})\.png$/';
+
+/**
+ * Regular expression for cached midi
+ */
+const REGEX_CACHE_MIDI  = '/^sr-(\w+)-([0-9A-Fa-f]{32})\.mid$/';
+
+// How error is handled when rendering failed
+const ON_ERR_SHOW_MESSAGE   = 1;
+const ON_ERR_SHOW_FRAGMENT  = 2;
+const ON_ERR_SHOW_NOTHING   = 3;
+
+// What kind of data should be returned when retrieving default setting
+const TYPES_AND_VALUES  = 1;
+const TYPES_ONLY        = 2;
+const VALUES_ONLY       = 3;
+
+/**
+ * ImageMagick requirement check related data
+ */
 public static $imagick_check = array (
 	'test_arg'    => array ('-version'),
 	'test_output' => '/^Version: ImageMagick ([\d.-]+)/',
@@ -322,7 +345,7 @@ public function set_img_width ($width)
  */
 public static function format_error_msg ($mesg)
 {
-	return sprintf (__('[ScoreRender Error: %s]', TEXTDOMAIN), $mesg);
+	return sprintf (__('[ScoreRender Error: %s]', SR_TEXTDOMAIN), $mesg);
 }
 
 
@@ -397,7 +420,7 @@ protected function conversion_step2 ($intermediate_image, $ps_has_alpha = false,
 {
 	if ( false === ( $tempimage = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	$cmd = sprintf ('"%s" %s -trim +repage ', $this->imagick, $extra_arg);
 
@@ -467,26 +490,26 @@ public static function is_web_hosting ()
 public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", $verpos = 1, &$realver = null) /* {{{ */
 {
 	if ( ! file_exists ($prog) ) return new WP_Error
-		( 'sr-prog-notexist', __('Program does not exist.', TEXTDOMAIN));
+		( 'sr-prog-notexist', __('Program does not exist.', SR_TEXTDOMAIN));
 
 	if ( ! is_executable ($prog) ) return new WP_Error
-		( 'sr-not-executable', __('Program is not executable.', TEXTDOMAIN) );
+		( 'sr-not-executable', __('Program is not executable.', SR_TEXTDOMAIN) );
 
 	// safe guard
 	$prog = realpath ($prog);
 	if ( false === $prog ) return new WP_Error
-		( 'sr-realpath-fail', __("Can't determine real path of program.", TEXTDOMAIN) );
+		( 'sr-realpath-fail', __("Can't determine real path of program.", SR_TEXTDOMAIN) );
 
 	// short circuit if some funcs are disabled by web host
 	if (self::is_web_hosting()) return new WP_Error
-		( 'sr-webhost-mode', __("Certain PHP functions are disabled by web host, most likely due to security reasons. Therefore program usability will not be checked.", TEXTDOMAIN) );
+		( 'sr-webhost-mode', __("Certain PHP functions are disabled by web host, most likely due to security reasons. Therefore program usability will not be checked.", SR_TEXTDOMAIN) );
 
 	// TODO: check that elements inside $args are indeed strings
 	$args = (array) $args;
 
 	$cmd = sprintf ( '"%s" %s 2>&1', $prog, implode (' ', $args) );
 	if (false === ($handle = @popen ($cmd, 'r'))) return new WP_Error
-		( 'sr-popen-fail', __('Failed to execute popen() for running command.', TEXTDOMAIN), $cmd );
+		( 'sr-popen-fail', __('Failed to execute popen() for running command.', SR_TEXTDOMAIN), $cmd );
 
 	while ( ! feof ($handle) )
 		$output .= fread ($handle, 1024);
@@ -496,12 +519,12 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 	if ( ! empty ($minver) )
 	{
 		if ( !is_int ($verpos) || $verpos < 0 )
-			return new WP_Error ( 'sr-verpos-invalid', __('Version position is invalid', TEXTDOMAIN), $verpos );
+			return new WP_Error ( 'sr-verpos-invalid', __('Version position is invalid', SR_TEXTDOMAIN), $verpos );
 
 		if ( is_array ($regexes) ) $regexes = $regexes[0];
 
 		if ( !preg_match ( $regexes, $output, $matches ) )
-			return new WP_Error ( 'sr-prog-regex-notmatch', __('Desired regular expression not found in program output', TEXTDOMAIN), $regexes );
+			return new WP_Error ( 'sr-prog-regex-notmatch', __('Desired regular expression not found in program output', SR_TEXTDOMAIN), $regexes );
 
 		// Storing detected version
 		if ( ! is_null ( $realver ) )
@@ -512,7 +535,7 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 
 		// Fail if installed program doesn't fulfill version requirement
 		return new WP_Error ( 'sr-prog-ver-req-unfulfilled',
-				sprintf (__("Program does not meet minimum version requirement, detected version is &#8216;%s&#8217; but &#8216;%s&#8217; is required.", TEXTDOMAIN),
+				sprintf (__("Program does not meet minimum version requirement, detected version is &#8216;%s&#8217; but &#8216;%s&#8217; is required.", SR_TEXTDOMAIN),
 					$matches[$verpos], $minver),
 				array (
 					'desired' => $minver,
@@ -524,7 +547,7 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 	foreach ( (array)$regexes as $regex )
 		if ( !preg_match ( $regex, $output ) )
 			return new WP_Error ( 'sr-prog-regex-notmatch',
-					__('Desired regular expression not found in program output', TEXTDOMAIN),
+					__('Desired regular expression not found in program output', SR_TEXTDOMAIN),
 					$regexes
 			);
 
@@ -538,7 +561,7 @@ final protected function perform_checks() /* {{{ */
 	// Check for code validity or security issues
 	if ( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() )
 		return new WP_Error ( 'sr-content-invalid',
-				__('Content is illegal or poses security concern', TEXTDOMAIN) );
+				__('Content is illegal or poses security concern', SR_TEXTDOMAIN) );
 
 	// Check ImageMagick
 	$result = $this->is_prog_usable (
@@ -550,13 +573,13 @@ final protected function perform_checks() /* {{{ */
 
 	if ( is_wp_error ($result) || !$result )
 		return new WP_Error ( 'sr-imagick-unusable',
-				__('ImageMagick program is unusable', TEXTDOMAIN), $result );
+				__('ImageMagick program is unusable', SR_TEXTDOMAIN), $result );
 
 	// Check cache folder
 	if ( (!is_dir      ($this->cache_dir)) ||
 	     (!is_writable ($this->cache_dir)) )
 		return new WP_Error ( 'sr-cache-dir-unwritable',
-				__('Cache directory not writable', TEXTDOMAIN) );
+				__('Cache directory not writable', SR_TEXTDOMAIN) );
 
 	// Use fallback tmp dir if original one not working
 	if ( (!is_dir      ($this->temp_dir)) ||
@@ -567,13 +590,13 @@ final protected function perform_checks() /* {{{ */
 	if ( (!is_dir      ($this->temp_dir)) ||
 	     (!is_writable ($this->temp_dir)) )
 		return new WP_Error ( 'sr-temp-dir-unwritable',
-				__('Temporary directory not writable', TEXTDOMAIN) );
+				__('Temporary directory not writable', SR_TEXTDOMAIN) );
 
 	// Check notation rendering apps
 	$result = $this->is_notation_usable (null, self::$sr_opt);
 	if ( is_wp_error ($result) || !$result )
 		return new WP_Error ( 'sr-render-apps-unusable',
-				__('Rendering application is unusable', TEXTDOMAIN), $result );
+				__('Rendering application is unusable', SR_TEXTDOMAIN), $result );
 
 	return true;
 } /* }}} */
@@ -583,18 +606,18 @@ final protected function create_input_file () /* {{{ */
 {
 	if ( false === ($temp_folder = create_temp_dir ($this->temp_dir, 'sr-')) )
 		return new WP_Error ( 'sr-temp-dir-unwritable',
-				__('Temporary directory not writable', TEXTDOMAIN) );
+				__('Temporary directory not writable', SR_TEXTDOMAIN) );
 
 	if ( false === ($this->input_file = tempnam ($temp_folder,
 		'scorerender-' . $this->get_notation_name() . '-')) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	do_action ('scorerender_before_create_input_file');
 
 	if (false === file_put_contents ($this->input_file, $this->get_music_fragment()))
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	do_action ('scorerender_after_create_input_file');
 
@@ -615,7 +638,7 @@ final static protected function cleanup_dir ($dir) /* {{{ */
 {
 	if ( false === ( $handle = @opendir ($dir) ) )
 		return false;
-//		return new WP_Error ( 'sr_opendir_fail', __('Fail to open directory', TEXTDOMAIN) );
+//		return new WP_Error ( 'sr_opendir_fail', __('Fail to open directory', SR_TEXTDOMAIN) );
 
 	$ok = true;
 
@@ -702,7 +725,7 @@ final public function render() /* {{{ */
 		}
 		else
 			return new WP_Error ( 'sr-image-unreadable',
-					__('Image exists but is not readable', TEXTDOMAIN), $final_image );
+					__('Image exists but is not readable', SR_TEXTDOMAIN), $final_image );
 
 	$result = $this->perform_checks();
 	if ( is_wp_error ($result) ) return $result;
@@ -720,7 +743,7 @@ final public function render() /* {{{ */
 		return $result;
 	elseif ( is_numeric ($result) )
 		return new WP_Error ( 'sr-img-render-fail',
-				__('Image rendering process failure', TEXTDOMAIN) );
+				__('Image rendering process failure', SR_TEXTDOMAIN) );
 
 	$intermediate_image = $result;
 
@@ -729,7 +752,7 @@ final public function render() /* {{{ */
 		return $result;
 	elseif ( is_numeric ($result) )
 		return new WP_Error ( 'sr-img-convert-fail',
-				__('Image conversion failure', TEXTDOMAIN) );
+				__('Image conversion failure', SR_TEXTDOMAIN) );
 
 	if ( SR_DEBUG ) error_log ("ScoreRender: move file: $result -> $final_image");
 
@@ -737,7 +760,7 @@ final public function render() /* {{{ */
 	// at this point, and cache dir is writable in pre-check
 	if ( ! @rename ( $result, $final_image ) )
 		return new WP_Error ( 'sr-cache-file-internal-error',
-				__('Cache image creation internal error', TEXTDOMAIN) );
+				__('Cache image creation internal error', SR_TEXTDOMAIN) );
 
 	$this->final_image = basename ($final_image);
 
@@ -780,7 +803,7 @@ protected static function program_setting_entry ($bin_name, $setting_name, $titl
 
 	$output = "<tr valign='top'>\n"
 		. "<th scope='row'><label for='{$id}'>"
-		. ( empty ($title) ? sprintf (__('Location of %s binary:', TEXTDOMAIN), '<code>'.$bin_name.'</code>') : $title )
+		. ( empty ($title) ? sprintf (__('Location of %s binary:', SR_TEXTDOMAIN), '<code>'.$bin_name.'</code>') : $title )
 		. "</label></th>\n"
 		. "<td><input name='ScoreRender[{$setting_name}]' type='text' id='{$id}' "
 		. "value='" . self::$sr_opt[$setting_name] . "' class='regular-text code' />"

@@ -36,13 +36,13 @@ const MSG_FATAL   = 2;
 private function get_cache_stat () /* {{{ */
 {
 	if ( false === ( $handle = @opendir (scorerender_get_cache_location()) ) )
-		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', TEXTDOMAIN) );
+		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', SR_TEXTDOMAIN) );
 
 	$imgcount = $midicount = 0;
 	while ( false !== ( $file = @readdir ($handle) ) )
 	{
-		if     ( preg_match (REGEX_CACHE_IMAGE, $file) ) $imgcount++;
-		elseif ( preg_match (REGEX_CACHE_MIDI,  $file) ) $midicount++;
+		if     ( preg_match (SrNotationBase::REGEX_CACHE_IMAGE, $file) ) $imgcount++;
+		elseif ( preg_match (SrNotationBase::REGEX_CACHE_MIDI,  $file) ) $midicount++;
 	}
 
 	closedir ($handle);
@@ -62,16 +62,16 @@ private function remove_cache () /* {{{ */
 {
 	$dir = scorerender_get_cache_location();
 	if ( false === ( $handle = @opendir ( $dir ) ) )
-		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', TEXTDOMAIN) );
+		return new WP_Error ( 'sr_opendir_fail', __('Fail to open cache directory', SR_TEXTDOMAIN) );
 
 	$cwd = getcwd();
 	if ( false === @chdir ($dir) )
-		return new WP_Error ( 'sr_chdir_fail', __('Fail to change into cache directory', TEXTDOMAIN) );
+		return new WP_Error ( 'sr_chdir_fail', __('Fail to change into cache directory', SR_TEXTDOMAIN) );
 
 	while (false !== ($file = @readdir ($handle)))
 	{
-		if ( preg_match (REGEX_CACHE_IMAGE, $file) ||
-		     preg_match (REGEX_CACHE_MIDI , $file) )
+		if ( preg_match (SrNotationBase::REGEX_CACHE_IMAGE, $file) ||
+		     preg_match (SrNotationBase::REGEX_CACHE_MIDI , $file) )
 			@unlink ($file);
 	}
 	closedir ($handle);
@@ -98,7 +98,7 @@ private function remove_cache () /* {{{ */
 private function update_options () /* {{{ */
 {
 	if ( !current_user_can ('manage_options') )
-		wp_die (__('Cheatin&#8217; uh?', TEXTDOMAIN));
+		wp_die (__('Cheatin&#8217; uh?', SR_TEXTDOMAIN));
 
 	$newopt = (array) $_POST['ScoreRender'];
 	transform_paths ($newopt, TRUE);
@@ -108,22 +108,22 @@ private function update_options () /* {{{ */
 	(
 		'temp_dir_not_writable'  => array (
 			'level'   => self::MSG_WARNING,
-			'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', TEXTDOMAIN)),
+			'content' => __('Temporary directory is NOT writable! Will fall back to system default setting.', SR_TEXTDOMAIN)),
 		'cache_dir_not_writable' => array (
 			'level'   => self::MSG_FATAL  ,
-			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', TEXTDOMAIN), admin_url('options-misc.php'))),
+			'content' => sprintf (__('Cache directory is NOT writable! If default value is used, please go to <a href="%s">WordPress file upload setting</a> and check default upload directory; otherwise please make sure the cache directory you specified can be accessed by web server. The plugin will stop working.', SR_TEXTDOMAIN), admin_url('options-misc.php'))),
 		'wrong_frag_per_comment' => array (
 			'level'   => self::MSG_WARNING,
-			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', TEXTDOMAIN)),
+			'content' => __('Fragment per comment is not a non-negative integer. Value discarded.', SR_TEXTDOMAIN)),
 		'wrong_image_max_width'  => array (
 			'level'   => self::MSG_WARNING,
-			'content' => __('Image maximum width must be integer and at least 100. Value discarded.', TEXTDOMAIN)),
+			'content' => __('Image maximum width must be integer and at least 100. Value discarded.', SR_TEXTDOMAIN)),
 		'convert_bin_problem'    => array (
 			'level'   => self::MSG_FATAL  ,
-			'content' => __('Failed to detect usable ImageMagick <tt>convert</tt> program! The plugin will stop working.', TEXTDOMAIN)),
+			'content' => __('Failed to detect usable ImageMagick <tt>convert</tt> program! The plugin will stop working.', SR_TEXTDOMAIN)),
 		'prog_check_disabled'    => array (
 			'level'   => self::MSG_WARNING,
-			'content' => __('Some PHP functions are disabled due to security reasons. Program validation will not be done.', TEXTDOMAIN)),
+			'content' => __('Some PHP functions are disabled due to security reasons. Program validation will not be done.', SR_TEXTDOMAIN)),
 	);
 
 	// error message definition for each notation
@@ -165,7 +165,7 @@ private function update_options () /* {{{ */
 	}
 
 	// Any boolean values set to false would not appear in $_POST
-	$var_types = scorerender_get_def_settings (TYPES_ONLY);
+	$var_types = scorerender_get_def_settings (SrNotationBase::TYPES_ONLY);
 	foreach ($var_types as $key => $type)
 		if ($type == 'bool')
 			$newopt[$key] = isset ($newopt[$key]);
@@ -198,12 +198,12 @@ private function update_options () /* {{{ */
 			if ($sr_adm_msgs[$m]['level'] == self::MSG_WARNING)
 			{
 				$class = 'scorerender-warning';
-				$mesg = __('WARNING: %s', TEXTDOMAIN);
+				$mesg = __('WARNING: %s', SR_TEXTDOMAIN);
 			}
 			elseif ($sr_adm_msgs[$m]['level'] == self::MSG_FATAL)
 			{
 				$class = 'scorerender-error';
-				$mesg = __('ERROR: %s', TEXTDOMAIN);
+				$mesg = __('ERROR: %s', SR_TEXTDOMAIN);
 			}
 
 			if ( is_wp_error ($result) )
@@ -225,7 +225,7 @@ private function update_options () /* {{{ */
 	}
 	else
 		echo '<div id="message" class="updated fade"><p><strong>' .
-			__('Options saved.', TEXTDOMAIN) . "</strong></p></div>\n";
+			__('Options saved.', SR_TEXTDOMAIN) . "</strong></p></div>\n";
 } /* }}} */
 
 
@@ -309,22 +309,22 @@ private function admin_section_path () /* {{{ */
 {
 ?>
 
-<h3><?php _e('Path options', TEXTDOMAIN) ?></h3>
+<h3><?php _e('Path options', SR_TEXTDOMAIN) ?></h3>
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><label for="temp_dir"><?php _e('Temporary folder:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><label for="temp_dir"><?php _e('Temporary folder:', SR_TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[TEMP_DIR]" type="text" id="temp_dir" value="<?php echo SrNotationBase::$sr_opt['TEMP_DIR']; ?>" class="regular-text code" />
-<?php self::print_description ( __('All rendering will be performed inside this folder before copying to cache folder. System default will be used if left blank.', TEXTDOMAIN) ) ?>
+<?php self::print_description ( __('All rendering will be performed inside this folder before copying to cache folder. System default will be used if left blank.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><label for="cache_dir"><?php _e('Cache folder:', TEXTDOMAIN) ?></label></th>
+<th scope="row"><label for="cache_dir"><?php _e('Cache folder:', SR_TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[CACHE_DIR]" type="text" id="cache_dir" value="<?php echo SrNotationBase::$sr_opt['CACHE_DIR']; ?>" class="regular-text code" />
-<?php self::print_description ( __('Stores rendered image and MIDI for faster access. WordPress default upload directory will be used if left blank. Need NOT be web accessible.', TEXTDOMAIN) ) ?>
+<?php self::print_description ( __('Stores rendered image and MIDI for faster access. WordPress default upload directory will be used if left blank. Need NOT be web accessible.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -343,14 +343,14 @@ private function admin_section_prog () /* {{{ */
 {
 ?>
 
-<h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
+<h3><?php _e('Program and file locations', SR_TEXTDOMAIN) ?></h3>
 
-<p><?php printf ( __("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", TEXTDOMAIN), SrNotationBase::$imagick_check['min_version'] ) ?></p>
+<p><?php printf ( __("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", SR_TEXTDOMAIN), SrNotationBase::$imagick_check['min_version'] ) ?></p>
 
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><label for="convert_bin"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></label></th>
+<th scope="row"><label for="convert_bin"><?php printf (__('Location of %s binary:', SR_TEXTDOMAIN), '<code>convert</code>') ?></label></th>
 <td><input name="ScoreRender[CONVERT_BIN]" type="text" id="convert_bin" value="<?php echo SrNotationBase::$sr_opt['CONVERT_BIN']; ?>" class="regular-text code" /></td>
 </tr>
 
@@ -372,33 +372,33 @@ private function admin_section_prog () /* {{{ */
 private function admin_section_image () /* {{{ */
 {
 ?>
-<h3><?php _e('Image options', TEXTDOMAIN) ?></h3>
+<h3><?php _e('Image options', SR_TEXTDOMAIN) ?></h3>
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><?php _e('Max image width:', TEXTDOMAIN) ?></th>
-<td><?php printf(__('%s pixels', TEXTDOMAIN), '<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="' . SrNotationBase::$sr_opt['IMAGE_MAX_WIDTH'] . '" class="small-text" />'); ?><br />
-<?php self::print_description ( __('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', TEXTDOMAIN) ) ?>
+<th scope="row"><?php _e('Max image width:', SR_TEXTDOMAIN) ?></th>
+<td><?php printf(__('%s pixels', SR_TEXTDOMAIN), '<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="' . SrNotationBase::$sr_opt['IMAGE_MAX_WIDTH'] . '" class="small-text" />'); ?><br />
+<?php self::print_description ( __('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('Note color:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('Note color:', SR_TEXTDOMAIN) ?></th>
 <td>
 <label for="note_color">
 <input type="text" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo SrNotationBase::$sr_opt['NOTE_COLOR'] ?>" class="small-text color {hash:true}" style="width:6em" />
-<em><?php _e('(Click to select color)', TEXTDOMAIN) ?></em>
+<em><?php _e('(Click to select color)', SR_TEXTDOMAIN) ?></em>
 </label><br />
 <?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.') ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('IE Hack:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('IE Hack:', SR_TEXTDOMAIN) ?></th>
 <td>
 <label for="use_ie6_png_alpha_fix"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', SrNotationBase::$sr_opt['USE_IE6_PNG_ALPHA_FIX']); ?> />
-<?php _e('Enable fake translucent image in IE6', TEXTDOMAIN) ?></label><br />
-<?php self::print_description ( sprintf ( __('Enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6.x . This option only affects images rendered by ScoreRender, and only when user is using IE5/6 browser. <strong>If any WordPress plugin with such functionality is used on the same site, please turn this option OFF.</strong>', TEXTDOMAIN), 'http://www.twinhelix.com/css/iepngfix/' ) ) ?></div>
+<?php _e('Enable fake translucent image in IE6', SR_TEXTDOMAIN) ?></label><br />
+<?php self::print_description ( sprintf ( __('Enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6.x . This option only affects images rendered by ScoreRender, and only when user is using IE5/6 browser. <strong>If any WordPress plugin with such functionality is used on the same site, please turn this option OFF.</strong>', SR_TEXTDOMAIN), 'http://www.twinhelix.com/css/iepngfix/' ) ) ?></div>
 </td>
 </tr>
 
@@ -417,53 +417,53 @@ private function admin_section_image () /* {{{ */
 private function admin_section_content () /* {{{ */
 {
 ?>
-<h3><?php _e('Content options', TEXTDOMAIN) ?></h3>
+<h3><?php _e('Content options', SR_TEXTDOMAIN) ?></h3>
 <table class="form-table">
 
 <tr valign="top">
-<th scope="row"><?php _e('Enable clipboard:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('Enable clipboard:', SR_TEXTDOMAIN) ?></th>
 <td><label for="show_input"><input type="checkbox" name="ScoreRender[ENABLE_CLIPBOARD]" id="show_input" value="1" <?php checked('1', SrNotationBase::$sr_opt['ENABLE_CLIPBOARD']); ?> />
-<?php _e('Copy music source content to clipboard when image is clicked', TEXTDOMAIN); ?></label><br />
-<?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.', TEXTDOMAIN) ) ?>
+<?php _e('Copy music source content to clipboard when image is clicked', SR_TEXTDOMAIN); ?></label><br />
+<?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('MIDI generation:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('MIDI generation:', SR_TEXTDOMAIN) ?></th>
 <td><label for="produce_midi"><input type="checkbox" name="ScoreRender[PRODUCE_MIDI]" id="produce_midi" value="1" <?php checked('1', SrNotationBase::$sr_opt['PRODUCE_MIDI']); ?> />
-<?php _e('Also attempt to generate MIDI and provide download link when generating image', TEXTDOMAIN); ?></label><br />
+<?php _e('Also attempt to generate MIDI and provide download link when generating image', SR_TEXTDOMAIN); ?></label><br />
 <?php self::print_description ( __('Note that different notations have different ways to generate MIDI. For example, ABC notation requires <code>abc2midi</code> program, while Lilypond, PMW and Mup have built-in support yet triggered in different ways.') ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('When rendering failed:', TEXTDOMAIN); ?></th>
+<th scope="row"><?php _e('When rendering failed:', SR_TEXTDOMAIN); ?></th>
 <td>
-<fieldset><legend class="hidden screen-reader-text"><?php _e('When rendering failed:', TEXTDOMAIN); ?></legend>
-<label for="on_err_show_message"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(ON_ERR_SHOW_MESSAGE, SrNotationBase::$sr_opt['ERROR_HANDLING']); ?> />
-<?php _e('Show error message', TEXTDOMAIN) ?></label><br />
-<label for="on_err_show_fragment"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_fragment" value="2" <?php checked(ON_ERR_SHOW_FRAGMENT, SrNotationBase::$sr_opt['ERROR_HANDLING']); ?> />
-<?php _e('Show original, unmodified music fragment', TEXTDOMAIN) ?></label><br />
-<label for="on_err_show_nothing"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(ON_ERR_SHOW_NOTHING, SrNotationBase::$sr_opt['ERROR_HANDLING']); ?> />
-<?php _e('Show nothing', TEXTDOMAIN) ?></label>
+<fieldset><legend class="hidden screen-reader-text"><?php _e('When rendering failed:', SR_TEXTDOMAIN); ?></legend>
+<label for="on_err_show_message"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_message" value="1" <?php checked(SrNotationBase::ON_ERR_SHOW_MESSAGE, SrNotationBase::$sr_opt['ERROR_HANDLING']); ?> />
+<?php _e('Show error message', SR_TEXTDOMAIN) ?></label><br />
+<label for="on_err_show_fragment"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_fragment" value="2" <?php checked(SrNotationBase::ON_ERR_SHOW_FRAGMENT, SrNotationBase::$sr_opt['ERROR_HANDLING']); ?> />
+<?php _e('Show original, unmodified music fragment', SR_TEXTDOMAIN) ?></label><br />
+<label for="on_err_show_nothing"><input type="radio" name="ScoreRender[ERROR_HANDLING]" id="on_err_show_nothing" value="3" <?php checked(SrNotationBase::ON_ERR_SHOW_NOTHING, SrNotationBase::$sr_opt['ERROR_HANDLING']); ?> />
+<?php _e('Show nothing', SR_TEXTDOMAIN) ?></label>
 </fieldset>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('Comment rendering:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('Comment rendering:', SR_TEXTDOMAIN) ?></th>
 <td>
 <label for="comment_enabled"><input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', SrNotationBase::$sr_opt['COMMENT_ENABLED']); ?> />
-<?php _e('Enable rendering for comments', TEXTDOMAIN) ?></label><br />
-<?php self::print_description ( __('Only turn on if commenters are trusted', TEXTDOMAIN) ) ?>
+<?php _e('Enable rendering for comments', SR_TEXTDOMAIN) ?></label><br />
+<?php self::print_description ( __('Only turn on if commenters are trusted', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
 <tr valign="top">
-<th scope="row"><?php _e('Maximum number of fragment per comment:', TEXTDOMAIN) ?></th>
+<th scope="row"><?php _e('Maximum number of fragment per comment:', SR_TEXTDOMAIN) ?></th>
 <td>
 <label for="fragment_per_comment"><input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo SrNotationBase::$sr_opt['FRAGMENT_PER_COMMENT']; ?>" <?php echo (1 != SrNotationBase::$sr_opt['COMMENT_ENABLED']) ? 'class="small-text disabled" disabled="disabled"' : 'class="small-text"'; ?> /></label>
-<?php _e('(0 means unlimited)', TEXTDOMAIN) ?><br /><?php self::print_description ( sprintf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', TEXTDOMAIN), __('Enable rendering for comments', TEXTDOMAIN) ) ) ?>
+<?php _e('(0 means unlimited)', SR_TEXTDOMAIN) ?><br /><?php self::print_description ( sprintf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', SR_TEXTDOMAIN), __('Enable rendering for comments', SR_TEXTDOMAIN) ) ) ?>
 </td>
 </tr>
 
@@ -484,7 +484,7 @@ private function admin_section_content () /* {{{ */
 private function admin_section_caching () /* {{{ */
 {
 ?>
-	<h3><?php _e('Caching', TEXTDOMAIN) ?></h3>
+	<h3><?php _e('Caching', SR_TEXTDOMAIN) ?></h3>
 <?php
 	$result = $this->get_cache_stat();
 
@@ -492,32 +492,32 @@ private function admin_section_caching () /* {{{ */
 		echo "<font color='red'>" . $result->get_error_message() . "</font><br />";
 	else
 	{
-		$imgpart  = sprintf ( __ngettext ( __("%d image" , TEXTDOMAIN),
-		                                   __("%d images", TEXTDOMAIN),
+		$imgpart  = sprintf ( __ngettext ( __("%d image" , SR_TEXTDOMAIN),
+		                                   __("%d images", SR_TEXTDOMAIN),
 		                                   $result['img'] ),
 		                      $result['img'] );
-		$midipart = sprintf ( __ngettext ( __("%d midi file" , TEXTDOMAIN),
-		                                   __("%d midi files", TEXTDOMAIN),
+		$midipart = sprintf ( __ngettext ( __("%d midi file" , SR_TEXTDOMAIN),
+		                                   __("%d midi files", SR_TEXTDOMAIN),
 					 					  $result['midi'] ),
 		                      $result['midi'] );
 
 		if     ( ( 0 === $result['midi'] ) && ( 0 === $result['img'] ) )
-			_e("Cache directory is empty.\n", TEXTDOMAIN);
+			_e("Cache directory is empty.\n", SR_TEXTDOMAIN);
 		elseif     ( 0 === $result['midi'] )
-			printf ( __("Cache directory contains %s.\n", TEXTDOMAIN), $imgpart );
+			printf ( __("Cache directory contains %s.\n", SR_TEXTDOMAIN), $imgpart );
 		elseif ( 0 === $result['img'] )
-			printf ( __("Cache directory contains %s.\n", TEXTDOMAIN), $midipart );
+			printf ( __("Cache directory contains %s.\n", SR_TEXTDOMAIN), $midipart );
 		else
-			printf ( __("Cache directory contains %s and %s.\n", TEXTDOMAIN), $imgpart, $midipart );
+			printf ( __("Cache directory contains %s and %s.\n", SR_TEXTDOMAIN), $imgpart, $midipart );
 	}
 
 	$dir = scorerender_get_cache_location();
 	if ( is_writable ($dir) && is_readable ($dir) ) :
 ?>
-	<input type="submit" name="clear_cache" class="button-secondary" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
+	<input type="submit" name="clear_cache" class="button-secondary" value="<?php _e('Clear Cache &raquo;', SR_TEXTDOMAIN) ?>" />
 <?php else : ?>
-	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', TEXTDOMAIN) ?>" />
-	<br /><font color="red"><?php printf (__('Cache folder %s can&#8217;t be cleared because folder permission is incorrect. It must be both readable and writable by web server.', TEXTDOMAIN), $dir) ?></font>
+	<input type="submit" name="clear_cache" class="button-secondary" disabled="disabled" value="<?php _e('Clear Cache &raquo;', SR_TEXTDOMAIN) ?>" />
+	<br /><font color="red"><?php printf (__('Cache folder %s can&#8217;t be cleared because folder permission is incorrect. It must be both readable and writable by web server.', SR_TEXTDOMAIN), $dir) ?></font>
 <?php endif;
 } /* }}} */
 
@@ -553,7 +553,7 @@ public function admin_page () /* {{{ */
 		if ( is_wp_error ( $retval ) )
 		{
 			printf ( "<div id='%s' class='error scorerender-error'><p><strong>" .
-				__('ERROR: Cache removal failed, error message is: &#8216;%s&#8217;', TEXTDOMAIN) .
+				__('ERROR: Cache removal failed, error message is: &#8216;%s&#8217;', SR_TEXTDOMAIN) .
 				"</strong></p></div>\n",
 				$retval->get_error_code(), $retval->get_error_message() );
 		}
@@ -567,22 +567,22 @@ public function admin_page () /* {{{ */
 ?>
 <div class="wrap">
 	<?php if ( function_exists ('screen_icon') ) screen_icon(); ?>
-	<h2><?php _e('ScoreRender options', TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/misc/info-icon.png'); ?>" width="32" height="32" class="sr-help-icon" /></a></h2>
+	<h2><?php _e('ScoreRender options', SR_TEXTDOMAIN) ?> <a href="javascript:" title="<?php _e('Click to show help') ?>" onclick="jQuery('#sr-help-1').slideToggle('fast');"><img src="<?php echo plugins_url ('scorerender/misc/info-icon.png'); ?>" width="32" height="32" class="sr-help-icon" /></a></h2>
 
 	<form method="post" action="" id="scorerender-conf">
 	<?php wp_nonce_field ('scorerender-update-options') ?>
 
 	<div id="sr-help-1" class="hidden">
-		<p><?php _e('Each music fragment must be enclosed by a pair of shortcodes, in the following format:', TEXTDOMAIN) ?></p>
+		<p><?php _e('Each music fragment must be enclosed by a pair of shortcodes, in the following format:', SR_TEXTDOMAIN) ?></p>
 		<blockquote><code>[score lang="<em>xxxx</em>"]&hellip;&hellip;[/score]</code></blockquote>
-		<p><?php _e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name):', TEXTDOMAIN) ?></p>
+		<p><?php _e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name):', SR_TEXTDOMAIN) ?></p>
 		<ul>
 <?php	foreach (SrNotationBase::$notations as $tag => $notation_data)
 		printf ("<li><a target='_blank' href='%s'>%s</a> (<code>%s</code>)</li>\n",
 				$notation_data['url'], $notation_data['name'], $tag);
 ?>
 		</ul>
-		<p><?php printf (__('For example, to add a score fragment in ABC notation, use %s. For compatibility the shorthand %s is also supported but might be discontinued later. Click on the links to read more about each notation, including examples and documentation about the notation.', TEXTDOMAIN),
+		<p><?php printf (__('For example, to add a score fragment in ABC notation, use %s. For compatibility the shorthand %s is also supported but might be discontinued later. Click on the links to read more about each notation, including examples and documentation about the notation.', SR_TEXTDOMAIN),
 				'<code style="white-space: nowrap">[score lang="abc"]&hellip;&hellip;[/score]</code>',
 				'<code style="white-space: nowrap">[<em>xxxx</em>]&hellip;&hellip;[/<em>xxxx</em>]</code>'); ?></p>
 	</div>
@@ -604,7 +604,7 @@ public function admin_page () /* {{{ */
 	$this->admin_section_caching();
 ?>
 	<p class="submit">
-	<input type="submit" name="Submit" class="button-primary" value="<?php _e('Update Options &raquo;', TEXTDOMAIN) ?>" />
+	<input type="submit" name="Submit" class="button-primary" value="<?php _e('Update Options &raquo;', SR_TEXTDOMAIN) ?>" />
 	</p>
 
 	</form>
@@ -639,7 +639,7 @@ public function settings_link ($links, $file) /* {{{ */
  */
 public function register_admin_page () /* {{{ */
 {
-	$plugin_page = add_options_page (__('ScoreRender options', TEXTDOMAIN), 'ScoreRender',
+	$plugin_page = add_options_page (__('ScoreRender options', SR_TEXTDOMAIN), 'ScoreRender',
 			'manage_options', 'scorerender', array (&$this, 'admin_page'));
 	add_action('admin_head-' . $plugin_page, array (&$this, 'admin_head'));
 	// not using print_scripts hooks, not sanitized until WP 2.8
@@ -653,7 +653,7 @@ public function register_admin_page () /* {{{ */
 public function turn_off_balance_tags()
 {
 	echo '<div id="balancetag-warning" class="error"><p>' .
-		sprintf (__('<strong>OPTION CONFLICT</strong>: The &#8216;correct invalidly nested XHTML automatically&#8217; option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', TEXTDOMAIN), "options-writing.php") .
+		sprintf (__('<strong>OPTION CONFLICT</strong>: The &#8216;correct invalidly nested XHTML automatically&#8217; option conflicts with ScoreRender plugin, because it will mangle certain Lilypond and Mup fragments. The option is available in <a href="%s">Writing option page</a>.', SR_TEXTDOMAIN), "options-writing.php") .
 		"</p></div>";
 }
 

@@ -113,7 +113,7 @@ protected function conversion_step1 () /* {{{ */
 {
 	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	/*
 	 * Mup requires a magic file before it is usable.
@@ -129,7 +129,7 @@ protected function conversion_step1 () /* {{{ */
 
 	if ( false === @file_put_contents ( $magic_file, $this->reg_key, LOCK_EX ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	/* mup forces this kind of crap */
 	putenv ( "HOME=" . getcwd() );
@@ -164,7 +164,7 @@ protected function get_midi () /* {{{ */
 {
 	if ( false === ( $temp_midifile = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	$cmd = sprintf ('"%s" -m "%s" "%s"',
 			$this->mainprog, $temp_midifile, $this->input_file);
@@ -217,7 +217,7 @@ public static function define_admin_messages ($adm_msgs)
 {
 	$adm_msgs['mup_bin_problem'] = array (
 		'level' => MSG_WARNING,
-		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), self::$notation_data['name'])
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 }
 
@@ -233,8 +233,8 @@ public static function program_setting_entry ($output) /* {{{ */
 
 	$output .= parent::program_setting_entry (
 		'', 'MUP_REG_KEY',
-		sprintf (__('%s registration key:', TEXTDOMAIN), '<code>mup</code>'),
-		sprintf (__('Leave it empty if you have not <a href="%s">registered</a> Mup.', TEXTDOMAIN),
+		sprintf (__('%s registration key:', SR_TEXTDOMAIN), '<code>mup</code>'),
+		sprintf (__('Leave it empty if you have not <a href="%s">registered</a> Mup.', SR_TEXTDOMAIN),
 			'http://www.arkkra.com/doc/faq.html#payment')
 	);
 	return $output;

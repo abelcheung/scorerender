@@ -65,11 +65,11 @@ protected function conversion_step1 () /* {{{ */
 {
 	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	if ( false === ( $this->midi_file = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	/*
 	 * Unlike Mup, PMW doesn't allow generating MIDI alone; getting MIDI file
@@ -136,7 +136,7 @@ public static function define_admin_messages ($adm_msgs)
 {
 	$adm_msgs['pmw_bin_problem'] = array (
 		'level' => MSG_WARNING,
-		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), self::$notation_data['name'])
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 }
 

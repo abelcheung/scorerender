@@ -52,7 +52,7 @@ protected static $notation_data = array ( /* {{{ */
 public function set_img_width ($width)
 {
 	parent::set_img_width ($width);
-	$this->img_max_width /= 120;
+	// $this->img_max_width /= 120;
 }
 
 /**
@@ -60,12 +60,16 @@ public function set_img_width ($width)
  */
 public function get_music_fragment () /* {{{ */
 {
+	/* abcm2ps doesn't count leftmost bracket / brace towards staff width,
+	 * so leave about 0.2in as left margin
+	 */
+	$width = $this->img_max_width - 15;
+
 	$header = <<<EOT
 %abc
-%%staffwidth {$this->img_max_width}in
+%%staffwidth {$width}pt
 %%stretchlast no
-%%leftmargin 0.2in
-%abc2mtex: yes
+%%leftmargin 15pt
 EOT;
 
 	return normalize_linebreak ($header . "\n" . $this->input);
@@ -78,7 +82,7 @@ protected function conversion_step1 () /* {{{ */
 {
 	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	$cmd = sprintf ('"%s" -O "%s" "%s"',
 			$this->mainprog, $intermediate_image, $this->input_file);
@@ -102,7 +106,7 @@ protected function get_midi () /* {{{ */
 {
 	if ( false === ( $temp_midifile = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	$cmd = sprintf ('"%s" "%s" -v -o "%s"',
 			$this->midiprog,
@@ -138,11 +142,11 @@ public static function define_admin_messages ($adm_msgs) /* {{{ */
 {
 	$adm_msgs['abcm2ps_bin_problem'] = array (
 		'level' => MSG_WARNING,
-		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', TEXTDOMAIN), self::$notation_data['name'])
+		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 	$adm_msgs['abc2midi_bin_problem'] = array (
 		'level' => MSG_WARNING,
-		'content' => sprintf (__('MIDI generation for %s notation may not work, because dependent program failed checking.', TEXTDOMAIN), self::$notation_data['name'])
+		'content' => sprintf (__('MIDI generation for %s notation may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 } /* }}} */
 

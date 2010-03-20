@@ -41,7 +41,7 @@ protected function conversion_step1 () /* {{{ */
 {
 	if ( false === ( $intermediate_image = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
-				__('Temporary file creation failure', TEXTDOMAIN) );
+				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
 	/*
 	 * Staff height (px) = zoom*40-1; under this zoom ratio,
@@ -58,14 +58,14 @@ protected function conversion_step1 () /* {{{ */
 
 	if ( ! @copy ($url, $intermediate_image) )
 		return new WP_Error ( 'sr-guido-server-problem',
-			__('Failed to retrieve image from GUIDO notation server', TEXTDOMAIN) );
+			__('Failed to retrieve image from GUIDO notation server', SR_TEXTDOMAIN) );
 
 	// half-assed verification that retrieved content is really GIF,
 	// not HTML login form, for example.
 	$im = @imagecreatefromgif ($intermediate_image);
 	if ( !$im )
 		return new WP_Error ( 'sr-guido-server-problem',
-			__('Failed to retrieve image from GUIDO notation server', TEXTDOMAIN) );
+			__('Failed to retrieve image from GUIDO notation server', SR_TEXTDOMAIN) );
 	else
 	{
 		imagedestroy ($im);

@@ -23,38 +23,20 @@ Author URI: http://me.abelcheung.org/
  *
  * This number must be incremented every time when option has been changed, removed or added.
  */
-define ('DATABASE_VERSION', 19);
+define ('SR_DATABASE_VERSION', 19);
 
 /**
  * Translation text domain
  */
-define ('TEXTDOMAIN', 'scorerender');
-
-/**
- * Regular expression for cached images
- */
-define ('REGEX_CACHE_IMAGE', '/^sr-(\w+)-([0-9A-Fa-f]{32})\.png$/');
-define ('REGEX_CACHE_MIDI' , '/^sr-(\w+)-([0-9A-Fa-f]{32})\.mid$/');
+define ('SR_TEXTDOMAIN', 'scorerender');
 
 /**
  * Debugging purpose
  */
 define ('SR_DEBUG', FALSE);
 
-/*
- * How error is handled when rendering failed
- */
-define ('ON_ERR_SHOW_MESSAGE' , '1');
-define ('ON_ERR_SHOW_FRAGMENT', '2');
-define ('ON_ERR_SHOW_NOTHING' , '3');
 
-define ('TYPES_AND_VALUES', 0);
-define ('TYPES_ONLY'      , 1);
-define ('VALUES_ONLY'     , 2);
-
-/*
- * Global Variables
- */
+// Global Variables
 
 /**
  * Utility functions used by ScoreRender
@@ -85,7 +67,7 @@ require_once('notation/pmw.php');
  * @uses sys_get_temp_dir() For getting default temp directory
  * @uses search_path() For searching default programs in system PATH
  */
-function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ */
+function scorerender_get_def_settings ($return_type = SrNotationBase::TYPES_AND_VALUES) /* {{{ */
 {
 	$retval = array();
 	static $default_settings = array();
@@ -94,7 +76,7 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ *
 	{
 		$default_settings = array
 		(
-			'DB_VERSION'             => array ('type' => 'none', 'value' => DATABASE_VERSION),
+			'DB_VERSION'             => array ('type' => 'none', 'value' => SR_DATABASE_VERSION),
 			'TEMP_DIR'               => array ('type' => 'path', 'value' => ''),
 			'CACHE_DIR'              => array ('type' => 'path', 'value' => ''),
 
@@ -104,7 +86,7 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ *
 
 			'ENABLE_CLIPBOARD'       => array ('type' => 'bool', 'value' => false),
 			'COMMENT_ENABLED'        => array ('type' => 'bool', 'value' => false),
-			'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => ON_ERR_SHOW_MESSAGE),
+			'ERROR_HANDLING'         => array ('type' => 'enum', 'value' => SrNotationBase::ON_ERR_SHOW_MESSAGE),
 			'FRAGMENT_PER_COMMENT'   => array ('type' =>  'int', 'value' => 1),
 			'PRODUCE_MIDI'           => array ('type' => 'bool', 'value' => false),
 
@@ -122,17 +104,17 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ *
 
 	switch ($return_type)
 	{
-	  case TYPES_ONLY:
+	  case SrNotationBase::TYPES_ONLY:
 		foreach ($default_settings as $key => $val)
 			$retval += array ($key => $val['type']);
 		return $retval;
 
-	  case VALUES_ONLY:
+	  case SrNotationBase::VALUES_ONLY:
 		foreach ($default_settings as $key => $val)
 			$retval += array ($key => $val['value']);
 		return $retval;
 
-	  case TYPES_AND_VALUES:
+	  case SrNotationBase::TYPES_AND_VALUES:
 		return $default_settings;
 	}
 } /* }}} */
@@ -150,9 +132,9 @@ function scorerender_get_def_settings ($return_type = TYPES_AND_VALUES) /* {{{ *
 function scorerender_init_textdomain () /* {{{ */
 {
 	// load_textdomain() already does file existance checking
-	load_plugin_textdomain (TEXTDOMAIN, PLUGINDIR.'/'.plugin_basename (dirname (__FILE__)));
-	load_plugin_textdomain (TEXTDOMAIN);
-	load_plugin_textdomain (TEXTDOMAIN, ABSPATH . LANGDIR);
+	load_plugin_textdomain (SR_TEXTDOMAIN, PLUGINDIR.'/'.plugin_basename (dirname (__FILE__)));
+	load_plugin_textdomain (SR_TEXTDOMAIN);
+	load_plugin_textdomain (SR_TEXTDOMAIN, ABSPATH . LANGDIR);
 } /* }}} */
 
 
@@ -163,7 +145,7 @@ function scorerender_init_textdomain () /* {{{ */
  */
 function scorerender_populate_options () /* {{{ */
 {
-	$defaults = scorerender_get_def_settings(VALUES_ONLY);
+	$defaults = scorerender_get_def_settings(SrNotationBase::VALUES_ONLY);
 
 	// safe guard
 	if (empty ($defaults)) return;
@@ -175,14 +157,14 @@ function scorerender_populate_options () /* {{{ */
 		// remove current settings not present in newest schema, then merge default values
 		SrNotationBase::$sr_opt = array_intersect_key (SrNotationBase::$sr_opt, $defaults);
 		SrNotationBase::$sr_opt = array_merge ($defaults, SrNotationBase::$sr_opt);
-		SrNotationBase::$sr_opt['DB_VERSION'] = DATABASE_VERSION;
+		SrNotationBase::$sr_opt['DB_VERSION'] = SR_DATABASE_VERSION;
 	}
 } /* }}} */
 
 /**
  * Retrieve ScoreRender options from database.
  *
- * If the {@link DATABASE_VERSION} constant contained inside MySQL database is
+ * If the {@link SR_DATABASE_VERSION} constant contained inside MySQL database is
  * small than that of PHP file (most likely occur when plugin is
  * JUST upgraded), then it also merges old config with new default
  * config and update the options in database.
@@ -197,7 +179,7 @@ function scorerender_get_options () /* {{{ */
 	if (!is_array (SrNotationBase::$sr_opt))
 		SrNotationBase::$sr_opt = array();
 	elseif (array_key_exists ('DB_VERSION', SrNotationBase::$sr_opt) &&
-		(SrNotationBase::$sr_opt['DB_VERSION'] >= DATABASE_VERSION) )
+		(SrNotationBase::$sr_opt['DB_VERSION'] >= SR_DATABASE_VERSION) )
 	{
 		transform_paths (SrNotationBase::$sr_opt, FALSE);
 		return;
@@ -261,10 +243,10 @@ function scorerender_return_img_error ( $render, $attr, $wperror ) /* {{{ */
 {
 	switch ( SrNotationBase::$sr_opt['ERROR_HANDLING'] )
 	{
-	  case ON_ERR_SHOW_NOTHING:
+	  case SrNotationBase::ON_ERR_SHOW_NOTHING:
 		return '';
 
-	  case ON_ERR_SHOW_FRAGMENT:
+	  case SrNotationBase::ON_ERR_SHOW_FRAGMENT:
 		return "&#91;score lang='{$attr['lang']}'&#93;" .
 			htmlentities ( $render->get_raw_input() ) .
 			"&#91;/score&#93;";
@@ -278,7 +260,7 @@ function scorerender_return_img_error ( $render, $attr, $wperror ) /* {{{ */
 		elseif ( is_string ($wperror) )
 			$mesg = $wperror;
 		else
-			$mesg = __('Unknown error', TEXTDOMAIN);
+			$mesg = __('Unknown error', SR_TEXTDOMAIN);
 
 		return "<div class='scorerender-error'><pre>" .
 			htmlentities ( $render->format_error_msg ($mesg) ) . "</pre></div>";
@@ -312,7 +294,7 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 	$content = "[score lang=\"{$lang}\"]\n" .
 		preg_replace ( "/[\r\n]+/s", "\n", $render->get_raw_input() ) . "\n[/score]";
 
-	$id = preg_replace ( REGEX_CACHE_IMAGE, 'sr-$2', $render->final_image);
+	$id = preg_replace ( SrNotationBase::REGEX_CACHE_IMAGE, 'sr-$2', $render->final_image);
 
 	// Convert some more chars to avoid various problems
 	//
@@ -329,7 +311,7 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 	list ( $width, $height, $type, $htmlattr ) =
 		getimagesize ( scorerender_get_cache_location() .'/'. $render->final_image );
 
-	$title = sprintf ( __('Music fragment in "%s" notation', TEXTDOMAIN), $lang );
+	$title = sprintf ( __('Music fragment in "%s" notation', SR_TEXTDOMAIN), $lang );
 
 	$turn_on_clipboard = ( !is_null ($clipboard) ) ? $clipboard : SrNotationBase::$sr_opt['ENABLE_CLIPBOARD'];
 
@@ -347,11 +329,11 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 
 		$html .= sprintf ("<div id='%s-message' style='position:absolute; width:%spx; height:%spx; display:none; background:inherit; text-align:center;'>%s</div>",
 				$id, ($width >= 300) ? $width : '300', $height,
-				__('Music code copied to clipboard', TEXTDOMAIN) );
+				__('Music code copied to clipboard', SR_TEXTDOMAIN) );
 
 		// Note that all images with clipboard use 'scorerender-clip' class
 		$html .= sprintf ("<img class='scorerender-image scorerender-clip' %s title='%s' alt='%s' src='%s' id='%s' />",
-				$htmlattr, __('Click on image to copy music code to clipboard', TEXTDOMAIN),
+				$htmlattr, __('Click on image to copy music code to clipboard', SR_TEXTDOMAIN),
 				$title, $imgurl, $id );
 
 		$html .= "</div>";
@@ -439,7 +421,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 
 	if ( ! array_key_exists ( $lang, SrNotationBase::$notations ) )
 		return SrNotationBase::format_error_msg ( sprintf (
-			__('unknown notation language "%s"', TEXTDOMAIN), $lang ) );
+			__('unknown notation language "%s"', SR_TEXTDOMAIN), $lang ) );
 
 	// initialize notation class
 	if ( class_exists ( SrNotationBase::$notations[$lang]['classname'] ) )
@@ -447,7 +429,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 
 	// in case something is very wrong... (notation data incorrect, instance creation failure)
 	if ( empty ($render) )
-		return SrNotationBase::format_error_msg ( __('class initialization failure', TEXTDOMAIN) );
+		return SrNotationBase::format_error_msg ( __('class initialization failure', SR_TEXTDOMAIN) );
 
 	$img_progs = array();
 	$midi_progs   = array();
@@ -480,7 +462,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	if ( !SR_DEBUG ) $render->cleanup();
 
 	if ( !extension_loaded ('gd') )
-		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host', TEXTDOMAIN) );
+		return SrNotationBase::format_error_msg ( __('PHP GD extension is not installed or enabled on this host', SR_TEXTDOMAIN) );
 
 	if ( is_wp_error ($result) )
 		return scorerender_return_img_error ( $render, $attr, $result );
@@ -506,7 +488,7 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "") 
 		$attr['lang'] = $code;
 
 	return SrNotationBase::format_error_msg (
-			sprintf (__("'%s' notation is not supported on this blog", TEXTDOMAIN),
+			sprintf (__("'%s' notation is not supported on this blog", SR_TEXTDOMAIN),
 			$attr['lang']) );
 } /* }}} */
 
