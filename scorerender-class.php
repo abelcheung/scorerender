@@ -27,6 +27,17 @@
 abstract class SrNotationBase
 {
 
+public static $imagick_check = array (
+	'test_arg'    => array ('-version'),
+	'test_output' => '/^Version: ImageMagick ([\d.-]+)/',
+	'min_version' => '6.3.5-7',
+);
+
+/**
+ * Stores all current ScoreRender settings.
+ */
+public static $sr_opt = array ();
+
 /**
  * @var string $input The raw music fragment to be rendered.
  */
@@ -89,12 +100,6 @@ public $final_midi = null;
  * fragment content
  */
 protected $input_file = null;
-
-public static $imagick_check = array (
-	'test_arg'    => array ('-version'),
-	'test_output' => '/^Version: ImageMagick ([\d.-]+)/',
-	'min_version' => '6.3.5-7',
-);
 
 /**
  * Sets music fragment content
@@ -526,8 +531,6 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 
 final protected function perform_checks() /* {{{ */
 {
-	global $sr_options;
-
 	// Check for code validity or security issues
 	if ( method_exists ($this, 'is_valid_input') && !$this->is_valid_input() )
 		return new WP_Error ( 'sr-content-invalid',
@@ -563,7 +566,7 @@ final protected function perform_checks() /* {{{ */
 				__('Temporary directory not writable', TEXTDOMAIN) );
 
 	// Check notation rendering apps
-	$result = $this->is_notation_usable (null, $sr_options);
+	$result = $this->is_notation_usable (null, self::$sr_opt);
 	if ( is_wp_error ($result) || !$result )
 		return new WP_Error ( 'sr-render-apps-unusable',
 				__('Rendering application is unusable', TEXTDOMAIN), $result );
@@ -664,8 +667,6 @@ final public function cleanup ()
  */
 final public function render() /* {{{ */
 {
-	global $sr_options;
-
 	$hash = md5 (preg_replace ('/\s/', '', $this->input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
 			"sr-" . $this->get_notation_name() . "-$hash.png";
@@ -771,7 +772,6 @@ final public function render() /* {{{ */
  */
 protected static function program_setting_entry ($bin_name, $setting_name, $title = '', $desc = '') /* {{{ */
 {
-	global $sr_options;
 	$id = strtolower ($setting_name);
 
 	$output = "<tr valign='top'>\n"
@@ -779,7 +779,7 @@ protected static function program_setting_entry ($bin_name, $setting_name, $titl
 		. ( empty ($title) ? sprintf (__('Location of %s binary:', TEXTDOMAIN), '<code>'.$bin_name.'</code>') : $title )
 		. "</label></th>\n"
 		. "<td><input name='ScoreRender[{$setting_name}]' type='text' id='{$id}' "
-		. "value='{$sr_options[$setting_name]}' class='regular-text code' />"
+		. "value='" . self::$sr_opt[$setting_name] . "' class='regular-text code' />"
 		. ( empty ($desc) ? '' : ScoreRenderAdmin::print_description ($desc, false) )
 		. "</td>\n</tr>\n";
 

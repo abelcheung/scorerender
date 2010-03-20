@@ -57,12 +57,6 @@ define ('VALUES_ONLY'     , 2);
  */
 
 /**
- * Stores all current ScoreRender settings.
- * @global array $sr_options
- */
-$sr_options = array ();
-
-/**
  * Array of supported music notation syntax and relevant attributes.
  *
  * Array keys are names of the music notations, in lower case.
@@ -183,21 +177,19 @@ function scorerender_init_textdomain () /* {{{ */
  */
 function scorerender_populate_options () /* {{{ */
 {
-	global $sr_options;
-
 	$defaults = scorerender_get_def_settings(VALUES_ONLY);
 
 	// safe guard
 	if (empty ($defaults)) return;
 
-	if (empty ($sr_options))
-		$sr_options = $defaults;
+	if (empty (SrNotationBase::$sr_opt))
+		SrNotationBase::$sr_opt = $defaults;
 	else
 	{
 		// remove current settings not present in newest schema, then merge default values
-		$sr_options = array_intersect_key ($sr_options, $defaults);
-		$sr_options = array_merge ($defaults, $sr_options);
-		$sr_options['DB_VERSION'] = DATABASE_VERSION;
+		SrNotationBase::$sr_opt = array_intersect_key (SrNotationBase::$sr_opt, $defaults);
+		SrNotationBase::$sr_opt = array_merge ($defaults, SrNotationBase::$sr_opt);
+		SrNotationBase::$sr_opt['DB_VERSION'] = DATABASE_VERSION;
 	}
 } /* }}} */
 
@@ -214,38 +206,36 @@ function scorerender_populate_options () /* {{{ */
  */
 function scorerender_get_options () /* {{{ */
 {
-	global $sr_options;
+	SrNotationBase::$sr_opt = get_option ('scorerender_options');
 
-	$sr_options = get_option ('scorerender_options');
-
-	if (!is_array ($sr_options))
-		$sr_options = array();
-	elseif (array_key_exists ('DB_VERSION', $sr_options) &&
-		($sr_options['DB_VERSION'] >= DATABASE_VERSION) )
+	if (!is_array (SrNotationBase::$sr_opt))
+		SrNotationBase::$sr_opt = array();
+	elseif (array_key_exists ('DB_VERSION', SrNotationBase::$sr_opt) &&
+		(SrNotationBase::$sr_opt['DB_VERSION'] >= DATABASE_VERSION) )
 	{
-		transform_paths ($sr_options, FALSE);
+		transform_paths (SrNotationBase::$sr_opt, FALSE);
 		return;
 	}
 
 	// Special handling for certain versions
-	if ( $sr_options['DB_VERSION'] < 10 )
-		if ( $sr_options['LILYPOND_COMMENT_ENABLED'] ||
-		     $sr_options['MUP_COMMENT_ENABLED']      ||
-		     $sr_options['ABC_COMMENT_ENABLED']      ||
-		     $sr_options['GUIDO_COMMENT_ENABLED'] )
+	if ( SrNotationBase::$sr_opt['DB_VERSION'] < 10 )
+		if ( SrNotationBase::$sr_opt['LILYPOND_COMMENT_ENABLED'] ||
+		     SrNotationBase::$sr_opt['MUP_COMMENT_ENABLED']      ||
+		     SrNotationBase::$sr_opt['ABC_COMMENT_ENABLED']      ||
+		     SrNotationBase::$sr_opt['GUIDO_COMMENT_ENABLED'] )
 		{
-			$sr_options['COMMENT_ENABLED'] = true;
+			SrNotationBase::$sr_opt['COMMENT_ENABLED'] = true;
 		}
-	if ( $sr_options['DB_VERSION'] < 16 )
-		if ( $sr_options['INVERT_IMAGE'] ) $sr_options['NOTE_COLOR'] = '#FFFFFF';
-	if ( $sr_options['DB_VERSION'] < 19 )
-		$sr_options['ENABLE_CLIPBOARD'] = $sr_options['SHOW_SOURCE'];
+	if ( SrNotationBase::$sr_opt['DB_VERSION'] < 16 )
+		if ( SrNotationBase::$sr_opt['INVERT_IMAGE'] ) SrNotationBase::$sr_opt['NOTE_COLOR'] = '#FFFFFF';
+	if ( SrNotationBase::$sr_opt['DB_VERSION'] < 19 )
+		SrNotationBase::$sr_opt['ENABLE_CLIPBOARD'] = SrNotationBase::$sr_opt['SHOW_SOURCE'];
 
 	scorerender_populate_options ();
 
-	transform_paths ($sr_options, TRUE);
-	update_option ('scorerender_options', $sr_options);
-	transform_paths ($sr_options, FALSE);
+	transform_paths (SrNotationBase::$sr_opt, TRUE);
+	update_option ('scorerender_options', SrNotationBase::$sr_opt);
+	transform_paths (SrNotationBase::$sr_opt, FALSE);
 } /* }}} */
 
 
@@ -260,10 +250,8 @@ function scorerender_get_options () /* {{{ */
  */
 function scorerender_get_cache_location () /* {{{ */
 {
-	global $sr_options;
-
-	if ( !empty ($sr_options['CACHE_DIR']) )
-		return $sr_options['CACHE_DIR'];
+	if ( !empty (SrNotationBase::$sr_opt['CACHE_DIR']) )
+		return SrNotationBase::$sr_opt['CACHE_DIR'];
 	else
 	{
 		$data = wp_upload_dir ();
@@ -285,9 +273,7 @@ function scorerender_get_cache_location () /* {{{ */
  */
 function scorerender_return_img_error ( $render, $attr, $wperror ) /* {{{ */
 {
-	global $sr_options;
-
-	switch ( $sr_options['ERROR_HANDLING'] )
+	switch ( SrNotationBase::$sr_opt['ERROR_HANDLING'] )
 	{
 	  case ON_ERR_SHOW_NOTHING:
 		return '';
@@ -326,7 +312,6 @@ function scorerender_return_img_error ( $render, $attr, $wperror ) /* {{{ */
  */
 function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 {
-	global $sr_options;
 	static $count = 0;
 	$count++;
 
@@ -334,7 +319,7 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 
 	$args = array ( 'img' => $render->final_image );
 	$args['color'] = preg_replace ( '/^#/', '',
-	   !is_null ($color) ? $color : $sr_options['NOTE_COLOR']	);
+	   !is_null ($color) ? $color : SrNotationBase::$sr_opt['NOTE_COLOR']	);
 
 	$imgurl = add_query_arg ( $args, plugins_url ('scorerender/misc/tint-image.php') );
 
@@ -360,7 +345,7 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 
 	$title = sprintf ( __('Music fragment in "%s" notation', TEXTDOMAIN), $lang );
 
-	$turn_on_clipboard = ( !is_null ($clipboard) ) ? $clipboard : $sr_options['ENABLE_CLIPBOARD'];
+	$turn_on_clipboard = ( !is_null ($clipboard) ) ? $clipboard : SrNotationBase::$sr_opt['ENABLE_CLIPBOARD'];
 
 	if ( $turn_on_clipboard )
 	{
@@ -391,7 +376,7 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
 				$htmlattr, $title, $title, $imgurl, $id );
 	}
 
-	$turn_on_midi = ( !is_null ($midi) ) ? $midi : $sr_options['PRODUCE_MIDI'];
+	$turn_on_midi = ( !is_null ($midi) ) ? $midi : SrNotationBase::$sr_opt['PRODUCE_MIDI'];
 	if ( $turn_on_midi )
 	{
 		if ( !is_null ($render->final_midi) )
@@ -440,7 +425,7 @@ function scorerender_return_img_ok ( $render, $attr, $result ) /* {{{ */
  */
 function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {{{ */
 {
-	global $notations, $sr_options;
+	global $notations;
 
 	// short circuit for empty content
 	$content = trim ( html_entity_decode ($content) );
@@ -487,21 +472,21 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 		switch ( $progdata['type'] )
 		{
 		  case 'prog':
-			$img_progs[$setting_name] = $sr_options[$setting_name];
+			$img_progs[$setting_name]  = SrNotationBase::$sr_opt[$setting_name];
 			break;
 		  case 'midiprog':
-			$midi_progs[$setting_name]   = $sr_options[$setting_name];
+			$midi_progs[$setting_name] = SrNotationBase::$sr_opt[$setting_name];
 			break;
 		}
 	}
 	$render->set_img_progs        ($img_progs);
 	$render->set_midi_progs       ($midi_progs);
-	$render->set_imagemagick_path ($sr_options['CONVERT_BIN']);
-	$render->set_temp_dir         ($sr_options['TEMP_DIR']);
-	$render->set_img_width        ($sr_options['IMAGE_MAX_WIDTH']);
+	$render->set_imagemagick_path (SrNotationBase::$sr_opt['CONVERT_BIN']);
+	$render->set_temp_dir         (SrNotationBase::$sr_opt['TEMP_DIR']);
+	$render->set_img_width        (SrNotationBase::$sr_opt['IMAGE_MAX_WIDTH']);
 	$render->set_cache_dir        (scorerender_get_cache_location());
 
-	do_action ('sr_set_class_variable', $sr_options);
+	do_action ('sr_set_class_variable', SrNotationBase::$sr_opt);
 
 	$render->set_music_fragment ($content);
 
@@ -562,12 +547,12 @@ function scorerender_shortcode_unsupported ($attr, $content = null, $code = "") 
  */
 function scorerender_parse_shortcode ($content, $content_type, $callback) /* {{{ */
 {
-	global $sr_options, $post, $notations, $shortcode_tags, $wp_version;
+	global $post, $notations, $shortcode_tags, $wp_version;
 
 	// only handles page, post and comment for now
 	if ( !in_array ( $content_type, array ( 'post', 'comment' ) ) ) return $content;
 
-	if ( ( 'comment' == $content_type ) && !$sr_options['COMMENT_ENABLED']) return $content;
+	if ( ( 'comment' == $content_type ) && !SrNotationBase::$sr_opt['COMMENT_ENABLED']) return $content;
 
 	if ( 'post' == $content_type )
 	{
@@ -588,7 +573,7 @@ function scorerender_parse_shortcode ($content, $content_type, $callback) /* {{{
 			if ( 'prog' !== $progdata['type'] ) continue;
 
 			// unfilled program name = disable support, thus use stub handler
-			if (empty ($sr_options[$setting_name])) {
+			if (empty (SrNotationBase::$sr_opt[$setting_name])) {
 				add_shortcode ($notation_name, 'scorerender_shortcode_unsupported');
 				continue 2;
 			}
@@ -596,7 +581,8 @@ function scorerender_parse_shortcode ($content, $content_type, $callback) /* {{{
 		add_shortcode ($notation_name, $callback);
 	}
 
-	$limit = ($sr_options['FRAGMENT_PER_COMMENT'] <= 0) ? -1 : (int)$sr_options['FRAGMENT_PER_COMMENT'];
+	$limit = (SrNotationBase::$sr_opt['FRAGMENT_PER_COMMENT'] <= 0) ?
+		-1 : (int)SrNotationBase::$sr_opt['FRAGMENT_PER_COMMENT'];
 
 	// shortcode API in WP < 2.8 is not good enough
 	if ( 'comment' == $content_type )
@@ -667,7 +653,7 @@ else
 	global $wp_version;
 
 	// IE6 PNG translucency filter
-	if ($sr_options['USE_IE6_PNG_ALPHA_FIX'])
+	if (SrNotationBase::$sr_opt['USE_IE6_PNG_ALPHA_FIX'])
 		add_action ('wp_head', 'scorerender_add_ie6_style');
 
 	if ( version_compare ( $wp_version, '2.8', '>=' ) )
