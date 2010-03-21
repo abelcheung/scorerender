@@ -1,5 +1,8 @@
 2010-03-22  Abel Cheung
 
+	* Make life a bit harder for script kiddies.
+	* All include files are renamed to .inc file extension.
+	* Guard against folder listing and direct access to inc files.
 	* wp-scorerender.php:
 	- Include files are renamed.
 	- Die more gracefully upon direct execution.
