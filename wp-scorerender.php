@@ -8,6 +8,8 @@ Version: 0.3.50
 Author URI: http://me.abelcheung.org/
 */
 
+if ( basename ($_SERVER['PHP_SELF']) === basename (__FILE__) ) header ('x', true, 403);
+
 /**
  * ScoreRender documentation
  * @package ScoreRender
@@ -41,23 +43,23 @@ define ('SR_DEBUG', FALSE);
 /**
  * Utility functions used by ScoreRender
  */
-require_once('scorerender-utils.php');
+require_once('scorerender-utils.inc');
 
 /**
  * Main ScoreRender class
  */
-require_once('scorerender-class.php');
+require_once('scorerender-class.inc');
 
 /**
  * Shortcode API replacement
  */
-require_once('scorerender-shortcode.php');
+require_once('scorerender-shortcode.inc');
 
-require_once('notation/abc.php');
-require_once('notation/guido.php');
-require_once('notation/lilypond.php');
-require_once('notation/mup.php');
-require_once('notation/pmw.php');
+require_once('notation/abc.inc');
+require_once('notation/guido.inc');
+require_once('notation/lilypond.inc');
+require_once('notation/mup.inc');
+require_once('notation/pmw.inc');
 
 /**
  * Default options used for first-time install. Also contains the type of value,
@@ -613,7 +615,7 @@ scorerender_get_options ();
 add_action ('init', 'scorerender_init_textdomain');
 
 if (defined ('WP_ADMIN'))
-	include_once ('scorerender-admin.php');
+	include_once ('scorerender-admin.inc');
 else
 {
 	global $wp_version;

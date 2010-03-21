@@ -1,3 +1,9 @@
+2010-03-22  Abel Cheung
+
+	* wp-scorerender.php:
+	- Include files are renamed.
+	- Die more gracefully upon direct execution.
+
 2010-03-20  Abel Cheung
 
 	* scorerender-class.php, scorerender-admin.php:
