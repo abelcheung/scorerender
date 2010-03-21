@@ -1,0 +1,4 @@
+<FilesMatch "(\.inc|^(readme\.txt|ChangeLog))$">
+	Order allow,deny
+	Deny from all
+</FilesMatch>
