@@ -59,6 +59,7 @@ if (!function_exists ('array_intersect_key')) /* {{{ */
 	}
 } /* }}} */
 
+
 /**
  * Convenience function: Check if OS is Windows
  *
@@ -88,6 +89,7 @@ function get_path_presentation ($path, $is_internal) /* {{{ */
 	// TODO: Check how CJK chars are handled in paths
 	return preg_replace ('#\\\\+#', '/', $path);
 } /* }}} */
+
 
 /**
  * Create temporary directory
@@ -191,6 +193,7 @@ function search_prog ($binary_name, $extra_win_paths = array(), $extra_unix_path
 	return false;
 } /* }}} */
 
+
 /**
  * Transform all path related options in ScoreRender settings
  *
@@ -216,29 +219,6 @@ function transform_paths (&$setting, $is_internal) /* {{{ */
 
 } /* }}} */
 
-
-/**
- * Check if a file is MIDI audio
- *
- * Since file info checking functionality is only available on PHP 5.3,
- * it can't be used here.
- *
- * @since 0.3.50
- * @param string $file File to be checked
- * @return bool True if file conforms to MIDI format, False otherwise
- */
-function is_midi_file ($file) /* {{{ */
-{
-	// too small
-	if ( filesize ($file) <= 18 ) return false;
-	$data = substr ( file_get_contents ($file), 0, 18 );
-
-	$array = unpack ('a4head/Nhdrlen/nformat/ntracks/ntempo/a4hdrtrk', $data);
-
-	return ( ( $array['head'  ] == "MThd" ) &&
-	         ( $array['hdrlen'] == 6      ) &&
-	         ( $array['hdrtrk'] == "MTrk" ) );
-} /* }}} */
 
 /**
  * Convert linebreak to appropriate one depending on OS

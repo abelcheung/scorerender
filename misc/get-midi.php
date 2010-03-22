@@ -18,6 +18,30 @@
 
 include_once ('scorerender-ext-scripts.inc');
 
+/**
+ * Check if a file is MIDI audio
+ *
+ * Since file info checking functionality is only available on PHP 5.3,
+ * it can't be used here.
+ *
+ * @since 0.3.50
+ * @param string $file File to be checked
+ * @return bool True if file conforms to MIDI format, False otherwise
+ */
+function is_midi_file ($file) /* {{{ */
+{
+	// too small
+	if ( filesize ($file) <= 18 ) return false;
+	$data = substr ( file_get_contents ($file), 0, 18 );
+
+	$array = unpack ('a4head/Nhdrlen/nformat/ntracks/ntempo/a4hdrtrk', $data);
+
+	return ( ( $array['head'  ] == "MThd" ) &&
+	         ( $array['hdrlen'] == 6      ) &&
+	         ( $array['hdrtrk'] == "MTrk" ) );
+} /* }}} */
+
+
 check_param ( array(
 	'file' => '/^sr-\w+-[0-9A-Fa-f]{32}\.mid$/',
 ) );
@@ -47,6 +71,9 @@ else
 }
 $fullpath = $dir . '/' . $file;
 check_file_existance ($fullpath);
+
+if ( !is_midi_file ($fullpath) )
+	exit_and_dump_error ($file . " is not a MIDI file");
 
 // short circuit for better caching
 // TODO: check etag too

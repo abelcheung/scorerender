@@ -8,6 +8,7 @@
 	- (is_notation_usable) Don't treat missing program name as failure.
 	* scorerender-utils.inc:
 	- (is_absolute_path) Removed.
+	- (is_midi_file) Moved to misc/get-midi.php, only useful there.
 	
 2010-03-22  Abel Cheung
 
