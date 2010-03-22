@@ -18,34 +18,15 @@ class abcRender extends ScoreRender
 private $width;
 
 /**
- * Set maximum width of generated images
- *
- * @param integer $width Maximum width of images (in pixel)
- * @since 0.2.50
- */
-public function set_img_width ($width)
-{
-	parent::set_img_width ($width);
-
-	// Seems abcm2ps is using something like 120 dpi,
-	// with 72DPI the notes and letters are very thin :(
-	$this->width = $this->img_max_width / 120;
-}
-
-/**
  * Refer to {@link ScoreRender::get_music_fragment() parent method} for more detail.
  */
 public function get_music_fragment ()
 {
 	$header = <<<EOT
-%abc
-%%staffwidth {$this->width}in
 %%stretchlast no
-%%leftmargin 0.2in
-%abc2mtex: yes
 EOT;
 	// input must not contain any empty line
-	return $header . "\n" . preg_replace ('/^$/m', '%', $this->_input);
+	return $header . "\n" . $this->_input;
 }
 
 /**
@@ -53,9 +34,8 @@ EOT;
  */
 protected function conversion_step1 ($input_file, $intermediate_image)
 {
-	$cmd = sprintf ('"%s" "%s" -O "%s"',
-			$this->mainprog,
-			$input_file, $intermediate_image);
+	$cmd = sprintf ('"%s" -m 1in -w %d -s 1 "%s" -O "%s"',
+			$this->mainprog, $this->img_max_width, $input_file, $intermediate_image);
 	$retval = $this->_exec($cmd);
 
 	return ($result['return_val'] == 0);
@@ -66,7 +46,7 @@ protected function conversion_step1 ($input_file, $intermediate_image)
  */
 protected function conversion_step2 ($intermediate_image, $final_image)
 {
-	return parent::conversion_step2 ($intermediate_image, $final_image, TRUE, '-density 96');
+	return parent::conversion_step2 ($intermediate_image, $final_image, TRUE);
 }
 
 /**
