@@ -3,7 +3,7 @@
  * Implements rendering of Mup notation in ScoreRender.
  * @package ScoreRender
  * @version 0.3.50
- * @author Abel Cheung <abelcheung at gmail dot com>
+ * @author Abel Cheung
  * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
  * @license http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU AGPL v3
 */
