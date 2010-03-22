@@ -411,7 +411,7 @@ function scorerender_admin_section_prog ()
 	<fieldset class="options">
 		<h3><?php _e('Program and file locations', TEXTDOMAIN) ?></h3>
 		<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform form-table">
-		<caption><?php _e('ImageMagick 6.x <code>convert</code> must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
+		<caption><?php _e('GhostScript and ImageMagick &ge; 6.3.5-7 (specifically the <code>convert</code> program) must be present and working. For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program.', TEXTDOMAIN); ?></caption>
 		<tr valign="top">
 			<th scope="row"><?php printf (__('Location of %s binary:', TEXTDOMAIN), '<code>convert</code>') ?></th>
 			<td>
