@@ -9,6 +9,9 @@
 	* scorerender-utils.inc:
 	- (is_absolute_path) Removed.
 	- (is_midi_file) Moved to misc/get-midi.php, only useful there.
+	* wp-scorerender.php:
+	- (scorerender_get_options) Avoid potential problem when updating from
+	  ancient version.
 	
 2010-03-22  Abel Cheung
 

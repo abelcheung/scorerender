@@ -196,10 +196,18 @@ function scorerender_get_options () /* {{{ */
 		{
 			SrNotationBase::$sr_opt['COMMENT_ENABLED'] = true;
 		}
+
 	if ( SrNotationBase::$sr_opt['DB_VERSION'] < 16 )
-		if ( SrNotationBase::$sr_opt['INVERT_IMAGE'] ) SrNotationBase::$sr_opt['NOTE_COLOR'] = '#FFFFFF';
+	{
+		if ( array_key_exists ( 'INVERT_IMAGE', SrNotationBase::$sr_opt ) && SrNotationBase::$sr_opt['INVERT_IMAGE'] )
+			SrNotationBase::$sr_opt['NOTE_COLOR'] = '#FFFFFF';
+	}
+
 	if ( SrNotationBase::$sr_opt['DB_VERSION'] < 19 )
-		SrNotationBase::$sr_opt['ENABLE_CLIPBOARD'] = SrNotationBase::$sr_opt['SHOW_SOURCE'];
+	{
+		if ( array_key_exists ( 'SHOW_SOURCE', SrNotationBase::$sr_opt ) )
+			SrNotationBase::$sr_opt['ENABLE_CLIPBOARD'] = SrNotationBase::$sr_opt['SHOW_SOURCE'];
+	}
 
 	scorerender_populate_options ();
 
