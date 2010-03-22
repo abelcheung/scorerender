@@ -160,7 +160,7 @@ protected function conversion_step2 ($intermediate_image)
 /**
  * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
  */
-protected function get_midi () /* {{{ */
+protected function get_midi ( $attr ) /* {{{ */
 {
 	if ( false === ( $temp_midifile = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',

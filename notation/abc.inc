@@ -81,15 +81,25 @@ protected function conversion_step2 ($intermediate_image)
 /**
  * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
  */
-protected function get_midi () /* {{{ */
+protected function get_midi ( $attr ) /* {{{ */
 {
 	if ( false === ( $temp_midifile = tempnam ( getcwd(), '' ) ) )
 		return new WP_Error ( 'sr-temp-file-create-fail',
 				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
-	$cmd = sprintf ('"%s" "%s" -v -o "%s"',
-			$this->midiprog,
-			$this->input_file, $temp_midifile);
+	/* While abcm2ps accepts a string as tempo (Q:) for score printing,
+	 * abc2midi expects it to be a beat-per-minute number, and fall back
+	 * to 120 bpm if not found. However specifying a number there affects
+	 * abcm2ps score printing in turn. In such case, better use command
+	 * line for specifying tempo.
+	 */
+	if ( is_numeric ($attr['tempo']) && $attr['tempo'] > 0 )
+		$tempo = ' -Q ' . $attr['tempo'];
+	else
+		$tempo = '';
+
+	$cmd = sprintf ('"%s" "%s" %s -v -o "%s"',
+			$this->midiprog, $this->input_file, $tempo, $temp_midifile);
 	$retval = $this->_exec($cmd);
 
 	return ( 0 === $retval ) ? $temp_midifile : $retval;

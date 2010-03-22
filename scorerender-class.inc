@@ -449,10 +449,11 @@ protected function conversion_step2 ($intermediate_image, $ps_has_alpha = false,
  * @uses _exec()
  * @uses $midiprog
  * @uses $input_file
+ * @param array $attr Array of shortcode attributes
  * @return string|int MIDI file name if successfully generated, otherwise
  * return error status of the command executed
  */
-abstract protected function get_midi ();
+abstract protected function get_midi ( $attr );
 
 /**
  * Check if certain functions are disabled
@@ -688,11 +689,12 @@ final public function cleanup ()
  *
  * @todo render image in background, especially for lilypond, which can take
  * minutes or even hours to finish rendering
+ * @param array $attr Array of shortcode attributes
  * @return boolean|WP_Error WP_Error upon image rendering error, FALSE if
  * non-critical error occurred (such as midi generation error), TRUE if all ok
  * @final
  */
-final public function render() /* {{{ */
+final public function render ( $attr ) /* {{{ */
 {
 	$hash = md5 (preg_replace ('/\s/', '', $this->input));
 	$final_image = $this->cache_dir. DIRECTORY_SEPARATOR .
@@ -769,7 +771,7 @@ final public function render() /* {{{ */
 	// Then generate midi
 	if ( is_null ( $this->final_midi ) && method_exists ($this, 'get_midi') )
 	{
-		$result = $this->get_midi();
+		$result = $this->get_midi ( $attr );
 
 		if ( is_string ($result) )
 		{

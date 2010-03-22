@@ -404,14 +404,16 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 		'lang'      => null,
 		'clipboard' => null,
 		'midi'      => null,
+		'tempo'     => null,	/* abc2midi only */
 	);
 
-	// transform shortcode attributes to boolean values whenever appropriate
+	// transform shortcode attributes to boolean/numerical values whenever appropriate
 	if ( !empty ($attr) )
 		foreach ( $attr as $key => $value )
 		{
 			if     ( 'false' === $attr[$key] ) $attr[$key] = false;
 			elseif ( 'true'  === $attr[$key] ) $attr[$key] = true;
+			if ( is_numeric ($attr[$key]) ) $attr[$key] = floatval ($attr[$key]);
 		}
 
 	// prevents construct like [mup lang="abc"]
@@ -458,8 +460,7 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 
 	$render->set_music_fragment ($content);
 
-	$result = $render->render();
-	// $result2 = $render->get_midi();
+	$result = $render->render ( $attr );
 
 	if ( !SR_DEBUG ) $render->cleanup();
 

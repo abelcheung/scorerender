@@ -135,7 +135,7 @@ public static function define_setting_value ($settings) {}
 /**
  * @ignore
  */
-protected function get_midi() {}
+protected function get_midi( $attr ) {}
 
 /**
  * Refer to {@link SrNotationInterface::register_notation_data() interface method}

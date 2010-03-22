@@ -117,7 +117,7 @@ protected function conversion_step2 ($intermediate_image)
 /**
  * Refer to {@link SrNotationBase::get_midi() parent method} for more detail.
  */
-protected function get_midi () /* {{{ */
+protected function get_midi ( $attr ) /* {{{ */
 {
 	/* Once correct \midi block is inserted, lilypond UNCONDITIONALLY generate MIDI
 	 * file regardless of settings or command line options or whatever. Therefore
