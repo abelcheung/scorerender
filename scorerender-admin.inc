@@ -239,6 +239,7 @@ public function admin_head()
 ?>
 <style type="text/css">
 	.sr-help-icon {vertical-align:middle;border:none;}
+	span.stressed {font-weight:bold;}
 </style>
 <?php
 }
@@ -248,22 +249,25 @@ public function admin_head()
  * Handle different ways of printing setting description in
  * various WP versions.
  *
+ * @param string $mesg Original message
+ * @param array $extraclass Array of CSS style class names to be added
+ * @return string Message enclosed in span tags with appropriate CSS style
  * @since 0.3.50
  */
-public static function print_description ($mesg, $echo = true)
+public static function print_description ($mesg, $extraclass = null)
 {
 	global $wp_version;
 
-	if ( version_compare ( $wp_version, '2.7', '>=' ) )
-	{
-		if ( version_compare ( $wp_version, '2.8', '<' ) )
-			$mesg = '<span class="setting-description">' . $mesg . "</span>\n";
-		else
-			$mesg = '<span class="description">' . $mesg . "</span>\n";
-	}
+	foreach ( (array)$extraclass as $key => $value )
+		if ( is_string ($value) ) $class[] = $value;
 
-	if ($echo) echo $mesg;
-	else return $mesg;
+	if ( version_compare ( $wp_version, '2.7', '>=' ) )
+		$class[] = version_compare ( $wp_version, '2.8', '<' ) ? 'setting-description' : 'description';
+
+	if ( empty ($class) )
+		return $mesg;
+	else
+		return '<span class="' . implode (' ', $class) . '">' . $mesg . "</span>\n";
 }
 
 
@@ -316,7 +320,7 @@ private function admin_section_path () /* {{{ */
 <th scope="row"><label for="temp_dir"><?php _e('Temporary folder:', SR_TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[TEMP_DIR]" type="text" id="temp_dir" value="<?php echo SrNotationBase::$sr_opt['TEMP_DIR']; ?>" class="regular-text code" />
-<?php self::print_description ( __('All rendering will be performed inside this folder before copying to cache folder. System default will be used if left blank.', SR_TEXTDOMAIN) ) ?>
+<?php echo self::print_description ( __('All rendering will be performed inside this folder before copying to cache folder. System default will be used if left blank.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -324,7 +328,7 @@ private function admin_section_path () /* {{{ */
 <th scope="row"><label for="cache_dir"><?php _e('Cache folder:', SR_TEXTDOMAIN) ?></label></th>
 <td>
 <input name="ScoreRender[CACHE_DIR]" type="text" id="cache_dir" value="<?php echo SrNotationBase::$sr_opt['CACHE_DIR']; ?>" class="regular-text code" />
-<?php self::print_description ( __('Stores rendered image and MIDI for faster access. WordPress default upload directory will be used if left blank. Need NOT be web accessible.', SR_TEXTDOMAIN) ) ?>
+<?php echo self::print_description ( __('Stores rendered image and MIDI for faster access. WordPress default upload directory will be used if left blank. Need NOT be web accessible.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -345,7 +349,7 @@ private function admin_section_prog () /* {{{ */
 
 <h3><?php _e('Program and file locations', SR_TEXTDOMAIN) ?></h3>
 
-<p><?php printf ( __("The only <strong>MANDATORY</strong> requirement is ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", SR_TEXTDOMAIN), SrNotationBase::$imagick_check['min_version'] ) ?></p>
+<p><?php printf ( __("The only <strong>MANDATORY</strong> requirements are GhostScript and ImageMagick &ge; %s (specifically, the <code>convert</code> program). For each kind of notation, leaving corresponding program location empty means disabling that notation support automatically, except GUIDO which does not use any program (therefore can't be disabled).", SR_TEXTDOMAIN), SrNotationBase::$imagick_check['min_version'] ) ?></p>
 
 <table class="form-table">
 
@@ -378,7 +382,7 @@ private function admin_section_image () /* {{{ */
 <tr valign="top">
 <th scope="row"><?php _e('Max image width:', SR_TEXTDOMAIN) ?></th>
 <td><?php printf(__('%s pixels', SR_TEXTDOMAIN), '<input type="text" name="ScoreRender[IMAGE_MAX_WIDTH]" id="image_max_width" value="' . SrNotationBase::$sr_opt['IMAGE_MAX_WIDTH'] . '" class="small-text" />'); ?><br />
-<?php self::print_description ( __('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', SR_TEXTDOMAIN) ) ?>
+<?php echo self::print_description ( __('Note that this value is just an approximation, please allow for &#x00B1;10% difference. Some programs like lilypond would not use the full image width if passage is not long enough.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -389,7 +393,7 @@ private function admin_section_image () /* {{{ */
 <input type="text" id="note_color" name="ScoreRender[NOTE_COLOR]" value="<?php echo SrNotationBase::$sr_opt['NOTE_COLOR'] ?>" class="small-text color {hash:true}" style="width:6em" />
 <em><?php _e('(Click to select color)', SR_TEXTDOMAIN) ?></em>
 </label><br />
-<?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.') ) ?>
+<?php echo self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.') ) ?>
 </td>
 </tr>
 
@@ -398,7 +402,8 @@ private function admin_section_image () /* {{{ */
 <td>
 <label for="use_ie6_png_alpha_fix"><input type="checkbox" name="ScoreRender[USE_IE6_PNG_ALPHA_FIX]" id="use_ie6_png_alpha_fix" value="1" <?php checked('1', SrNotationBase::$sr_opt['USE_IE6_PNG_ALPHA_FIX']); ?> />
 <?php _e('Enable fake translucent image in IE6', SR_TEXTDOMAIN) ?></label><br />
-<?php self::print_description ( sprintf ( __('Enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6.x . This option only affects images rendered by ScoreRender, and only when user is using IE5/6 browser. <strong>If any WordPress plugin with such functionality is used on the same site, please turn this option OFF.</strong>', SR_TEXTDOMAIN), 'http://www.twinhelix.com/css/iepngfix/' ) ) ?></div>
+<?php echo self::print_description ( sprintf ( __('Enables <a href="%s">emulation of translucency in PNG images</a> in IE 5.5/6.x . This option only affects images rendered by ScoreRender, and only when user is using IE5/6 browser.', SR_TEXTDOMAIN), 'http://www.twinhelix.com/css/iepngfix/' ) ) ?>
+<?php echo self::print_description ( __(' If any WordPress plugin with such functionality is used on the same site, please turn this option OFF.', SR_TEXTDOMAIN), array('stressed') ) ?>
 </td>
 </tr>
 
@@ -424,7 +429,7 @@ private function admin_section_content () /* {{{ */
 <th scope="row"><?php _e('Enable clipboard:', SR_TEXTDOMAIN) ?></th>
 <td><label for="show_input"><input type="checkbox" name="ScoreRender[ENABLE_CLIPBOARD]" id="show_input" value="1" <?php checked('1', SrNotationBase::$sr_opt['ENABLE_CLIPBOARD']); ?> />
 <?php _e('Copy music source content to clipboard when image is clicked', SR_TEXTDOMAIN); ?></label><br />
-<?php self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.', SR_TEXTDOMAIN) ) ?>
+<?php echo self::print_description ( __('This feature can be toggled in each music fragment. Please refer to help for detail.', SR_TEXTDOMAIN) ) ?>
 </td>
 </tr>
 
@@ -432,7 +437,7 @@ private function admin_section_content () /* {{{ */
 <th scope="row"><?php _e('MIDI generation:', SR_TEXTDOMAIN) ?></th>
 <td><label for="produce_midi"><input type="checkbox" name="ScoreRender[PRODUCE_MIDI]" id="produce_midi" value="1" <?php checked('1', SrNotationBase::$sr_opt['PRODUCE_MIDI']); ?> />
 <?php _e('Also attempt to generate MIDI and provide download link when generating image', SR_TEXTDOMAIN); ?></label><br />
-<?php self::print_description ( __('Note that different notations have different ways to generate MIDI. For example, ABC notation requires <code>abc2midi</code> program, while Lilypond, PMW and Mup have built-in support yet triggered in different ways.') ) ?>
+<?php echo self::print_description ( __('Note that different notations have different ways to generate MIDI. For example, ABC notation requires <code>abc2midi</code> program, while Lilypond, PMW and Mup have built-in support yet triggered in different ways.') ) ?>
 </td>
 </tr>
 
@@ -455,7 +460,7 @@ private function admin_section_content () /* {{{ */
 <td>
 <label for="comment_enabled"><input type="checkbox" name="ScoreRender[COMMENT_ENABLED]" id="comment_enabled" value="1" <?php checked('1', SrNotationBase::$sr_opt['COMMENT_ENABLED']); ?> />
 <?php _e('Enable rendering for comments', SR_TEXTDOMAIN) ?></label><br />
-<?php self::print_description ( __('Only turn on if commenters are trusted', SR_TEXTDOMAIN) ) ?>
+<?php echo self::print_description ( __('Only turn on if commenters are trusted', SR_TEXTDOMAIN), array('stressed') ) ?>
 </td>
 </tr>
 
@@ -463,7 +468,7 @@ private function admin_section_content () /* {{{ */
 <th scope="row"><?php _e('Maximum number of fragment per comment:', SR_TEXTDOMAIN) ?></th>
 <td>
 <label for="fragment_per_comment"><input type="text" name="ScoreRender[FRAGMENT_PER_COMMENT]" id="fragment_per_comment" value="<?php echo SrNotationBase::$sr_opt['FRAGMENT_PER_COMMENT']; ?>" <?php echo (1 != SrNotationBase::$sr_opt['COMMENT_ENABLED']) ? 'class="small-text disabled" disabled="disabled"' : 'class="small-text"'; ?> /></label>
-<?php _e('(0 means unlimited)', SR_TEXTDOMAIN) ?><br /><?php self::print_description ( sprintf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', SR_TEXTDOMAIN), __('Enable rendering for comments', SR_TEXTDOMAIN) ) ) ?>
+<?php _e('(0 means unlimited)', SR_TEXTDOMAIN) ?><br /><?php echo self::print_description ( sprintf (__('If you don&#8217;t want comment rendering, turn off &#8216;<i>%s</i>&#8217; checkbox above instead. This option does not affect posts and pages.', SR_TEXTDOMAIN), __('Enable rendering for comments', SR_TEXTDOMAIN) ) ) ?>
 </td>
 </tr>
 

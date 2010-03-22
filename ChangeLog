@@ -12,6 +12,9 @@
 	* wp-scorerender.php:
 	- (scorerender_get_options) Avoid potential problem when updating from
 	  ancient version.
+	* scorerender-admin.inc:
+	- (print_description) All messages are returned, not echoed directly.
+	  Add CSS class parameter. Stress important setting messages.
 	
 2010-03-22  Abel Cheung
 

@@ -808,8 +808,8 @@ protected static function program_setting_entry ($bin_name, $setting_name, $titl
 		. ( empty ($title) ? sprintf (__('Location of %s binary:', SR_TEXTDOMAIN), '<code>'.$bin_name.'</code>') : $title )
 		. "</label></th>\n"
 		. "<td><input name='ScoreRender[{$setting_name}]' type='text' id='{$id}' "
-		. "value='" . self::$sr_opt[$setting_name] . "' class='regular-text code' />"
-		. ( empty ($desc) ? '' : ScoreRenderAdmin::print_description ($desc, false) )
+		. "value='" . self::$sr_opt[$setting_name] . "' class='regular-text code' /> "
+		. ( empty ($desc) ? '' : ScoreRenderAdmin::print_description ($desc) )
 		. "</td>\n</tr>\n";
 
 	return $output;
