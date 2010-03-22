@@ -6,6 +6,8 @@
 	- Support 'tempo=' attribute during midi generation.
 	* scorerender-class.inc:
 	- (is_notation_usable) Don't treat missing program name as failure.
+	* scorerender-utils.inc:
+	- (is_absolute_path) Removed.
 	
 2010-03-22  Abel Cheung
 

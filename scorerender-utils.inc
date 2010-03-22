@@ -90,20 +90,6 @@ function get_path_presentation ($path, $is_internal) /* {{{ */
 } /* }}} */
 
 /**
- * Convenience function: Check if a path is aboslute path
- *
- * @since 0.3
- * @uses is_windows()
- * @return boolean True if path is absolute, false otherwise.
- */
-function is_absolute_path ($path) /* {{{ */
-{
-	// FIXME: How about network shares on Windows?
-	return ( (!is_windows() && (substr ($path, 0, 1) == '/')) ||
-	         ( is_windows() && preg_match ('/^[A-Za-z]:/', $path) ) );
-} /* }}} */
-
-/**
  * Create temporary directory
  *
  * Inspired from PHP tempnam documentation comment
