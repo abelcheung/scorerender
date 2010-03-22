@@ -3,7 +3,7 @@
 /**
  * ScoreRender documentation
  * @package ScoreRender
- * @version 0.3.3
+ * @version 0.3.4
  * @author Abel Cheung
  * @copyright Copyright (C) 2006 Chris Lamb
  * @copyright Copyright (C) 2007, 2008, 2009, 2010 Abel Cheung
