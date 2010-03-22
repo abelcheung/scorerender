@@ -216,7 +216,7 @@ public function is_notation_usable ($errmsgs = null, $opt) /* {{{ */
 public static function define_admin_messages ($adm_msgs)
 {
 	$adm_msgs['mup_bin_problem'] = array (
-		'level' => MSG_WARNING,
+		'level' => ScoreRenderAdmin::MSG_WARNING,
 		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 }

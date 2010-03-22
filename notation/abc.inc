@@ -130,11 +130,11 @@ public function is_notation_usable ($errmsgs = null, $opt) /* {{{ */
 public static function define_admin_messages ($adm_msgs) /* {{{ */
 {
 	$adm_msgs['abcm2ps_bin_problem'] = array (
-		'level' => MSG_WARNING,
+		'level' => ScoreRenderAdmin::MSG_WARNING,
 		'content' => sprintf (__('%s notation support may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 	$adm_msgs['abc2midi_bin_problem'] = array (
-		'level' => MSG_WARNING,
+		'level' => ScoreRenderAdmin::MSG_WARNING,
 		'content' => sprintf (__('MIDI generation for %s notation may not work, because dependent program failed checking.', SR_TEXTDOMAIN), self::$notation_data['name'])
 	);
 } /* }}} */
