@@ -3,7 +3,7 @@ Contributors: abelcheung
 Tags: music, music notation, music typesetting, score, abc, mup, lilypond, guido, pmw
 Requires at least: 2.2
 Tested up to: 2.9.2
-Stable tag: 0.3.3
+Stable tag: 0.3.4
 
 Renders inline sheet music fragments in excerpts, posts, pages and comments.
 
@@ -98,7 +98,9 @@ Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for
 
 = 0.3.4 =
 
-* Image fetched from Guido notation server will not look blurred now.
+* Guido images would not look blurred now.
+* Better resizing for Guido and ABC notation images.
+* ZeroClipboard updated to newest version, containing bug fixes.
 
 = 0.3.3 =
 
@@ -116,6 +118,7 @@ Please visit [ScoreRender official site](http://scorerender.abelcheung.org/) for
 
 * CHG: Update ZeroClipboard to 1.0.6 which contains some bug fixes.
 * BUG: Image fetched from Guido notation server will not look blurred now.
+* BUG: More precise resizing and zooming for ABC image, so image width is more in line with setting.
 
 = 0.3.3 =
 
