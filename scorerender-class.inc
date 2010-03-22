@@ -873,12 +873,12 @@ protected function is_notation_usable ($errmsgs = null, $opt, $notation_prog_dat
 	{
 		if ( 'prog' !== $progdata['type'] ) continue;
 
-		// FIXME: for notations using only one program, empty setting means notation
+		// TODO: for notations using only one program, empty setting means notation
 		// is disabled, thus shouldn't output error; while for notations in multiple
 		// programs, incomplete setting means error
 		if ( empty ($opt[$setting_name]) )
 		{
-			$ok = false;
+			$ok = true;
 			break;
 		}
 

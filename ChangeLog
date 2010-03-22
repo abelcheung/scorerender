@@ -4,7 +4,9 @@
 	- (render, get_midi) Pass shortcode attributes as function argument.
 	* wp-scorerender.php (scorerender_shortcode_handler), notation/abc.inc (get_midi):
 	- Support 'tempo=' attribute during midi generation.
-
+	* scorerender-class.inc:
+	- (is_notation_usable) Don't treat missing program name as failure.
+	
 2010-03-22  Abel Cheung
 
 	* Make life a bit harder for script kiddies.
