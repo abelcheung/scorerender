@@ -43,33 +43,12 @@ protected static $notation_data = array ( /* {{{ */
 ); /* }}} */
 
 /**
- * Refer to {@link SrNotationBase::set_img_width() parent method}
- * for more detail.
- *
- * Seems abcm2ps is using something like 120 dpi,
- * with 72DPI the notes and letters are very thin :(
- */
-public function set_img_width ($width)
-{
-	parent::set_img_width ($width);
-	// $this->img_max_width /= 120;
-}
-
-/**
  * Refer to {@link SrNotationInterface::get_music_fragment() interface method} for more detail.
  */
 public function get_music_fragment () /* {{{ */
 {
-	/* abcm2ps doesn't count leftmost bracket / brace towards staff width,
-	 * so leave about 0.2in as left margin
-	 */
-	$width = $this->img_max_width - 15;
-
 	$header = <<<EOT
-%abc
-%%staffwidth {$width}pt
 %%stretchlast no
-%%leftmargin 15pt
 EOT;
 
 	return normalize_linebreak ($header . "\n" . $this->input);
@@ -84,8 +63,8 @@ protected function conversion_step1 () /* {{{ */
 		return new WP_Error ( 'sr-temp-file-create-fail',
 				__('Temporary file creation failure', SR_TEXTDOMAIN) );
 
-	$cmd = sprintf ('"%s" -O "%s" "%s"',
-			$this->mainprog, $intermediate_image, $this->input_file);
+	$cmd = sprintf ('"%s" -m 1in -w %d -s 1 -O "%s" "%s"',
+			$this->mainprog, $this->img_max_width, $intermediate_image, $this->input_file);
 	$retval = $this->_exec($cmd);
 
 	return ( 0 === $retval ) ? $intermediate_image : $retval;
@@ -96,7 +75,7 @@ protected function conversion_step1 () /* {{{ */
  */
 protected function conversion_step2 ($intermediate_image)
 {
-	return parent::conversion_step2 ($intermediate_image, TRUE, '-density 96');
+	return parent::conversion_step2 ($intermediate_image, TRUE);
 }
 
 /**

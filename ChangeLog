@@ -6,6 +6,9 @@
 	* wp-scorerender.php:
 	- Include files are renamed.
 	- Die more gracefully upon direct execution.
+	* notation/abc.inc:
+	- Fine tuning of zoom ratio, margin and width so image width wouldn't
+	  deviate too much from setting.
 
 2010-03-20  Abel Cheung
 
