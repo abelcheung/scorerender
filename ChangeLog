@@ -1,3 +1,9 @@
+2010-04-04  Abel Cheung
+
+	* notation/mup.inc:
+	- (get_music_fragment) Add left/right margin to avoid a portion of right
+	side being 'chopped off'.
+
 2010-03-23  Abel Cheung
 
 	* scorerender-class.inc, notation/*.inc:

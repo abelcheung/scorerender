@@ -61,7 +61,8 @@ function __construct ()
 public function set_img_width ($width)
 {
 	parent::set_img_width ($width);
-	$this->img_max_width /= 72;
+	// 72 DPI, and add one inch of margin
+	$this->img_max_width = $this->img_max_width / 72 + 1;
 }
 
 /**
@@ -90,12 +91,12 @@ protected function is_valid_input () /* {{{ */
 public function get_music_fragment () /* {{{ */
 {
 	$header = <<<EOD
-//!Mup-Arkkra-5.0
+//!Mup-Arkkra
 score
-leftmargin = 0
-rightmargin = 0
-topmargin = 0
-bottommargin = 0
+leftmargin = 0.5
+rightmargin = 0.5
+topmargin = 0.5
+bottommargin = 0.5
 pagewidth = {$this->img_max_width}
 label = ""
 EOD;
