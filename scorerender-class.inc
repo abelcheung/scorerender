@@ -557,6 +557,17 @@ public function is_prog_usable ($regexes, $prog, $args = array(), $minver = "", 
 } /* }}} */
 
 
+/**
+ * Execute prerequisite checks before rendering.
+ *
+ * @since 0.3.50
+ * @uses $imagick
+ * @uses $imagick_ver
+ * @uses $cache_dir
+ * @uses $temp_dir
+ * @uses SrNotationBase::is_prog_usable()
+ * @return WP_Error|bool TRUE if all checks passed, WP_Error otherwise
+ */
 final protected function perform_checks() /* {{{ */
 {
 	// Check for code validity or security issues
@@ -603,6 +614,16 @@ final protected function perform_checks() /* {{{ */
 } /* }}} */
 
 
+/**
+ * Create temporary file for storing music code content.
+ *
+ * @since 0.3.50
+ * @uses $temp_dir
+ * @uses $input_file
+ * @uses create_temp_dir()
+ * @uses SrNotationBase::get_music_fragment()
+ * @return WP_Error|bool TRUE if all checks passed, WP_Error otherwise
+ */
 final protected function create_input_file () /* {{{ */
 {
 	if ( false === ($temp_folder = create_temp_dir ($this->temp_dir, 'sr-')) )
