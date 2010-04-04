@@ -3,6 +3,9 @@
 	* notation/mup.inc:
 	- (get_music_fragment) Add left/right margin to avoid a portion of right
 	side being 'chopped off'.
+	* wp-scorerender.php:
+	- (scorerender_shortcode_handler) Also treats "yes"/"no" as boolean value in
+	shortcode attribute.
 
 2010-03-23  Abel Cheung
 

@@ -419,8 +419,8 @@ function scorerender_shortcode_handler ($attr, $content = null, $code = "") /* {
 	if ( !empty ($attr) )
 		foreach ( $attr as $key => $value )
 		{
-			if     ( 'false' === $attr[$key] ) $attr[$key] = false;
-			elseif ( 'true'  === $attr[$key] ) $attr[$key] = true;
+			if     ( ( 'false' === $attr[$key] ) || ( 'no'  === $attr[$key] ) ) $attr[$key] = false;
+			elseif ( ( 'true'  === $attr[$key] ) || ( 'yes' === $attr[$key] ) ) $attr[$key] = true;
 			if ( is_numeric ($attr[$key]) ) $attr[$key] = floatval ($attr[$key]);
 		}
 
