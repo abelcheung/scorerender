@@ -580,16 +580,47 @@ public function admin_page () /* {{{ */
 	<div id="sr-help-1" class="hidden">
 		<p><?php _e('Each music fragment must be enclosed by a pair of shortcodes, in the following format:', SR_TEXTDOMAIN) ?></p>
 		<blockquote><code>[score lang="<em>xxxx</em>"]&hellip;&hellip;[/score]</code></blockquote>
-		<p><?php _e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name):', SR_TEXTDOMAIN) ?></p>
-		<ul>
-<?php	foreach (SrNotationBase::$notations as $tag => $notation_data)
-		printf ("<li><a target='_blank' href='%s'>%s</a> (<code>%s</code>)</li>\n",
+		<p><?php
+		_e('<em>xxxx</em> represents the tag name used for certain notation. The following notations are supported by ScoreRender (along with their tag name): ', SR_TEXTDOMAIN);
+		foreach (SrNotationBase::$notations as $tag => $notation_data)
+		{
+			$lines[] = sprintf ("<a target='_blank' href='%s'>%s</a> (<code>%s</code>)",
 				$notation_data['url'], $notation_data['name'], $tag);
-?>
-		</ul>
+		}
+		print join ( __(', '), $lines );
+		?></p>
 		<p><?php printf (__('For example, to add a score fragment in ABC notation, use %s. For compatibility the shorthand %s is also supported but might be discontinued later. Click on the links to read more about each notation, including examples and documentation about the notation.', SR_TEXTDOMAIN),
 				'<code style="white-space: nowrap">[score lang="abc"]&hellip;&hellip;[/score]</code>',
 				'<code style="white-space: nowrap">[<em>xxxx</em>]&hellip;&hellip;[/<em>xxxx</em>]</code>'); ?></p>
+		<p><?php _e('There are a few other attributes beside <code>lang=</code>, controlling how music image content is presented:', SR_TEXTDOMAIN) ?></p>
+		<table class="widefat" cellspacing="0">
+		<thead>
+		<tr class="thead"><?php
+		$a[] = __('Attribute name'    , SR_TEXTDOMAIN);
+		$a[] = __('Accepted parameter', SR_TEXTDOMAIN);
+		$a[] = __('Example'           , SR_TEXTDOMAIN);
+		foreach ($a as $b) echo '<th>' . $b . '</th>';
+		?></tr>
+		</thead>
+		<tbody>
+<?php
+		$rows = array (
+			array ('<code>color</code>', __('Hex color code', SR_TEXTDOMAIN), '<code>color="#A4B5FF"</code>'),
+			array ('<code>clipboard</code>', __('Whether flash clipboard shall be overlayed onto image', SR_TEXTDOMAIN), '<code>clipboard="no"</code>'),
+			array ('<code>midi</code>', __('Whether midi download link shall be provided', SR_TEXTDOMAIN), '<code>midi="yes"</code>'),
+			array ('<code>tempo</code>', __('Indicate tempo for ABC notation (in quaver per minute, only used for <code>abc2midi</code>)', SR_TEXTDOMAIN), '<code>tempo="84"</code>'),
+		);
+		$out = '';
+		foreach ($rows as $row) {
+			$out .= '<tr>';
+			foreach ($row as $cell)
+				$out .= '<td>' . $cell . '</td>';
+			$out .= "</tr>\n";
+		}
+		print $out;
+?>
+		</tbody>
+		</table>
 	</div>
 
 <?php
