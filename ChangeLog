@@ -1,3 +1,11 @@
+2011-06-26  Abel Cheung
+
+	* scorerender-admin.inc:
+	- (admin_page) Reflect current settings in help description.
+	* wp-scorerender.php:
+	- (scorerender_shortcode_handler) Also treats "yes"/"no" as boolean value in
+	shortcode attribute.
+
 2010-04-04  Abel Cheung
 
 	* notation/mup.inc:
