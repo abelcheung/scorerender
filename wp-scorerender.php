@@ -615,6 +615,7 @@ remove_filter ('comment_text', 'force_balance_tags', 25);
  */
 
 // Register all notations and their initial data
+SrNotationBase::$notations = array();
 SrNotationBase::$notations = apply_filters ( 'scorerender_register_notations', SrNotationBase::$notations );
 
 // retrieve plugin options first

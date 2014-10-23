@@ -359,7 +359,7 @@ private function admin_section_prog () /* {{{ */
 </tr>
 
 <?php
-	$output = apply_filters ('scorerender_prog_and_file_loc', $output);
+	$output = apply_filters ('scorerender_prog_and_file_loc', isset($output)? $output : '');
 	echo $output;
 ?>
 
@@ -497,14 +497,22 @@ private function admin_section_caching () /* {{{ */
 		echo "<font color='red'>" . $result->get_error_message() . "</font><br />";
 	else
 	{
-		$imgpart  = sprintf ( __ngettext ( __("%d image" , SR_TEXTDOMAIN),
-		                                   __("%d images", SR_TEXTDOMAIN),
-		                                   $result['img'] ),
-		                      $result['img'] );
-		$midipart = sprintf ( __ngettext ( __("%d midi file" , SR_TEXTDOMAIN),
-		                                   __("%d midi files", SR_TEXTDOMAIN),
-					 					  $result['midi'] ),
-		                      $result['midi'] );
+		global $wp_version;
+		if( version_compare( $wp_version, '2.8', '>=' ) ) {
+			$imgpart  = sprintf ( _n ( __("%d image" , SR_TEXTDOMAIN),
+			                           __("%d images", SR_TEXTDOMAIN), $result['img'] ),
+			                      $result['img'] );
+			$midipart = sprintf ( _n ( __("%d midi file" , SR_TEXTDOMAIN),
+			                           __("%d midi files", SR_TEXTDOMAIN), $result['midi'] ),
+			                      $result['midi'] );
+		} else {
+			$imgpart  = sprintf ( __ngettext ( __("%d image" , SR_TEXTDOMAIN),
+			                                   __("%d images", SR_TEXTDOMAIN), $result['img'] ),
+			                      $result['img'] );
+			$midipart = sprintf ( __ngettext ( __("%d midi file" , SR_TEXTDOMAIN),
+			                                   __("%d midi files", SR_TEXTDOMAIN), $result['midi'] ),
+			                                   $result['midi'] );
+		}
 
 		if     ( ( 0 === $result['midi'] ) && ( 0 === $result['img'] ) )
 			_e("Cache directory is empty.\n", SR_TEXTDOMAIN);

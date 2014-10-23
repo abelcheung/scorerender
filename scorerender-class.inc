@@ -980,7 +980,7 @@ interface SrNotationInterface /* {{{ */
 	 *
 	 * @since 0.3.50
 	 */
-	static function define_setting_type ($settings);
+	static function define_setting_type (&$settings);
 
 	/**
 	 * Define values for variables used for notation, usually program paths
@@ -989,7 +989,7 @@ interface SrNotationInterface /* {{{ */
 	 *
 	 * @since 0.3.50
 	 */
-	static function define_setting_value ($settings);
+	static function define_setting_value (&$settings);
 
 	/**
 	 * Register notation and its data necessary for ScoreRender processing

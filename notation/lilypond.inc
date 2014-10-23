@@ -198,7 +198,7 @@ public static function program_setting_entry ($output)
  * Refer to {@link SrNotationInterface::define_setting_type() interface method}
  * for more detail.
  */
-public static function define_setting_type ($settings)
+public static function define_setting_type (&$settings)
 {
 	foreach (self::$notation_data['progs'] as $setting_name => $progdata )
 		$settings[$setting_name] = $progdata;
@@ -208,7 +208,7 @@ public static function define_setting_type ($settings)
  * Refer to {@link SrNotationInterface::define_setting_value() interface method}
  * for more detail.
  */
-public static function define_setting_value ($settings) /* {{{ */
+public static function define_setting_value (&$settings) /* {{{ */
 {
 	foreach ( self::$notation_data['progs'] as $setting_name => $progdata )
 	{

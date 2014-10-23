@@ -125,12 +125,12 @@ public static function program_setting_entry ($output) {}
 /**
  * @ignore
  */
-public static function define_setting_type ($settings) {}
+public static function define_setting_type (&$settings) {}
 
 /**
  * @ignore
  */
-public static function define_setting_value ($settings) {}
+public static function define_setting_value (&$settings) {}
 
 /**
  * @ignore
