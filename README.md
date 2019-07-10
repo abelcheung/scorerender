@@ -12,7 +12,7 @@ Plugin is not updated since 2011. I'm not a WordPress user anymore, and neither 
 
 ## License
 
-It used to be in [Affero General Public License](https://en.wikipedia.org/wiki/Affero_General_Public_License) v3 (see readme.txt); but later realized the license being too restrictive. Therefore I declare this project is now using [MIT license](https://opensource.org/licenses/MIT) (note that I'm the sole author after rewrite), so that others investigating this project can be at ease. Multiple components inside were in LGPL license.
+It used to be in [Affero General Public License](https://en.wikipedia.org/wiki/Affero_General_Public_License) v3 (see readme.txt); but later realized the license being too restrictive. Therefore I declare this project is now using [MIT license](https://opensource.org/licenses/MIT) (as of 2019); note that I'm the sole author after rewrite, so that others investigating this project can be at ease. Multiple components inside were in LGPL license.
 
 ## Diagram
 
