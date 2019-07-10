@@ -8,7 +8,7 @@ Plugin is not updated since 2011. I'm not a WordPress user anymore, and neither 
 - Even the music notation programs and auxiliary utilities ([ImageMagick](https://imagemagick.org/index.php), used for image post processing) see lots of change over the years. They may not be usable without substantial change in code.
 - There is a [known vulnerability against clipboard component](https://wpvulndb.com/vulnerabilities/6755). It is adviced to replace or remove it altogether if one is keen on checking this project out.
 
-[Older readme is available](readme.txt), which is in text format parseable by wordpress plugin database.
+[Older readme is available](readme.txt), which is in text format parseable by wordpress plugin database. [Previous project website](https://web.archive.org/web/20160817125602/http://scorerender.abelcheung.org/) is available from Internet Archive.
 
 ## License
 
